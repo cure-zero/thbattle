@@ -29,7 +29,7 @@ class HeterodoxyHandler(EventHandler):
             tgt = act.target
             if not tgt.has_skill(Heterodoxy): return act
 
-            g = Game.getgame()
+            g = self.game
             for a in reversed(g.action_stack):
                 if isinstance(a, HeterodoxyAction):
                     break
@@ -47,7 +47,7 @@ class HeterodoxyHandler(EventHandler):
 
 class HeterodoxyAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         card = self.associated_card.associated_cards[0]
         src = self.source
         victim = self.target
@@ -63,7 +63,7 @@ class HeterodoxyAction(UserAction):
         # XXX: Use card owned by other
         lc = LaunchCard(victim, tgts, card)
 
-        g = Game.getgame()
+        g = self.game
         g.process_action(lc)
 
         return True
@@ -152,7 +152,7 @@ class SummonHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, PlayerDeath):
-            g = Game.getgame()
+            g = self.game
             p = getattr(g, 'current_player', None)
 
             if not p: return act
@@ -170,10 +170,10 @@ class SummonKOFAction(UserAction):
     def apply_action(self):
         # WHOLE BUNCH OF MEGA HACK
         old = self.target
-        g = Game.getgame()
+        g = self.game
         old_life, maxlife_delta = old.life, old.maxlife - old.__class__.maxlife
 
-        ActionStage.force_break()
+        ActionStage.force_break(g)
 
         assert g.current_player is old
         tgt = KOFCharacterSwitchHandler.switch(old)
@@ -231,7 +231,7 @@ class SummonKOFHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
-            g = Game.getgame()
+            g = self.game
             src, tgt = act.source, act.target
             p = g.get_opponent(tgt)
 

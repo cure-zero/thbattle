@@ -73,7 +73,9 @@ class Autoupdate(object):
             local,
             recursive,
             public('119.29.29.29'),
+            public('223.5.5.5'),
             public('114.114.114.114'),
+            public('1.1.1.1'),
             public('8.8.8.8'),
         ]]
 

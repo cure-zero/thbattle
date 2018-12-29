@@ -16,7 +16,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class TeachTargetReforgeAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
         c = user_choose_cards(self, tgt, ('cards', 'showncards', 'equips'))
         c = c[0] if c else random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
@@ -44,7 +44,7 @@ class TeachTargetEffect(GenericAction):
     def apply_action(self):
         tgt = self.target
         c = self.card
-        g = Game.getgame()
+        g = self.game
         tgt.reveal(c)
         migrate_cards([c], tgt.cards, unwrap=True)
 
@@ -70,7 +70,7 @@ class TeachAction(UserAction):
         src, tgt = self.source, self.target
         cl = VirtualCard.unwrap([self.associated_card])
         assert len(cl) == 1
-        g = Game.getgame()
+        g = self.game
         ttags(src)['teach_used'] = True
         g.process_action(Reforge(src, src, cl[0]))
         cl = user_choose_cards(self, src, ('cards', 'showncards', 'equips'))
@@ -110,7 +110,7 @@ class KeineGuard(Skill):
 class KeineGuardAwake(UserAction):
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(MaxLifeChange(tgt, tgt, -1))
         tgt.skills.remove(KeineGuard)
         tgt.skills.append(Devour)
@@ -123,7 +123,7 @@ class KeineGuardHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, PrepareStage):
             tgt = act.target
-            g = Game.getgame()
+            g = self.game
 
             cond = True and tgt.has_skill(KeineGuard)
             cond = cond and (tgt.life <= min([p.life for p in g.players if not p.dead]))
@@ -151,7 +151,7 @@ class DevourAction(UserAction):
     def apply_action(self):
         src, tgt = self.source, self.target
         c = self.card
-        g = Game.getgame()
+        g = self.game
         ttags(tgt)['keine_devour'] = {
             'effect': self.effect,
             'life': tgt.life,
@@ -171,7 +171,7 @@ class DevourEffect(GenericAction):
     def apply_action(self):
         tgt = self.target
         params = self.params
-        g = Game.getgame()
+        g = self.game
         if params['effect'] == 'life':
             to = params['life']
             if to > tgt.life:
@@ -196,7 +196,7 @@ class DevourHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, ActionStage):
-            g = Game.getgame()
+            g = self.game
             tgt = act.target
             for p in g.players:
                 if p.dead or not p.has_skill(Devour):
@@ -218,7 +218,7 @@ class DevourHandler(EventHandler):
             if not t:
                 return act
 
-            g = Game.getgame()
+            g = self.game
             g.process_action(DevourEffect(t['source'], tgt, t))
 
         return act

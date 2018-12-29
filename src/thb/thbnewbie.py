@@ -47,7 +47,7 @@ class DeathHandler(EventHandler):
         if not isinstance(act, PlayerDeath): return act
         tgt = act.target
 
-        g = Game.getgame()
+        g = self.game
         pl = g.players
 
         g.winners = [pl[1]] if tgt is pl[0] else [pl[0]]
@@ -74,7 +74,7 @@ class CirnoAI(object):
         trans = self.trans
         p = ilet.actor
 
-        g = Game.getgame()
+        g = self.game
         g.pause(1.2)
 
         if trans.name == 'ActionStageAction':
@@ -133,7 +133,7 @@ class DrawShownCards(DrawCards):
         self.amount = amount
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         target = self.target
 
         cards = g.deck.getcards(self.amount)
@@ -159,7 +159,7 @@ class THBattleNewbieBootstrap(GenericAction):
         self.items = items
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
 
         from thb.characters.meirin import Meirin
         from thb.characters.cirno import Cirno
@@ -167,7 +167,7 @@ class THBattleNewbieBootstrap(GenericAction):
 
         # ----- Init -----
         from thb.cards import Deck
-        g.deck = Deck()
+        g.deck = Deck(g)
         g.ehclasses = []
 
         cirno, meirin = g.players
@@ -607,7 +607,7 @@ class THBattleNewbie(Game):
         ehclasses = list(action_eventhandlers) + g.game_ehs.values()
         ehclasses += g.ehclasses
         ehclasses.remove(ShuffleHandler)  # disable shuffling
-        g.set_event_handlers(EventHandler.make_list(ehclasses))
+        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def set_character(g, p, cls):
         new, old_cls = mixin_character(p, cls)
@@ -627,11 +627,11 @@ class THBattleNewbie(Game):
         from .characters.baseclasses import Character
         assert isinstance(p, Character)
 
-        p.cards = CardList(p, 'cards')            # Cards in hand
+        p.cards      = CardList(p, 'cards')       # Cards in hand
         p.showncards = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
-        p.equips = CardList(p, 'equips')          # Equipments
-        p.fatetell = CardList(p, 'fatetell')      # Cards in the Fatetell Zone
-        p.special = CardList(p, 'special')        # used on special purpose
+        p.equips     = CardList(p, 'equips')      # Equipments
+        p.fatetell   = CardList(p, 'fatetell')    # Cards in the Fatetell Zone
+        p.special    = CardList(p, 'special')     # used on special purpose
         p.showncardlists = [p.showncards, p.fatetell]
         p.tags = defaultdict(int)
 

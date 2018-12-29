@@ -11,7 +11,7 @@ from thb.actions import Damage, ForEach, UserAction
 # -- code --
 class MassiveDamageEffect(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         g.process_action(Damage(self.source, self.target, 99))
         return True
 

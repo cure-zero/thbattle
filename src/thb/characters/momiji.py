@@ -50,7 +50,7 @@ class DisarmHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
-            g = Game.getgame()
+            g = self.game
             src, tgt = act.source, act.target
             if not (src and src.has_skill(Disarm)): return act
             if tgt.dead: return act
@@ -78,7 +78,7 @@ class DisarmHandler(EventHandler):
 
         elif evt_type == 'action_after' and isinstance(act, FinalizeStage):
             tgt = act.target
-            g = Game.getgame()
+            g = self.game
             g.process_action(DisarmReturningAction(tgt, tgt))
 
         return act
@@ -98,7 +98,7 @@ class SentryAction(AskForCard):
         self.victim = target
 
     def process_card(self, c):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.victim
         c = SentryAttack.wrap([c], src)
         return g.process_action(LaunchCard(src, [tgt], c))
@@ -109,7 +109,7 @@ class SentryHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, ActionStage):
-            g = Game.getgame()
+            g = self.game
             for p in g.players:
                 if p.dead: continue
                 if not p.has_skill(Sentry): continue
@@ -191,7 +191,7 @@ class SolidShieldHandler(EventHandler):
             if not (c.is_card(AttackCard) or 'instant_spellcard' in c.category):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             for p in g.players.rotate_to(src):
                 if p is src:
                     continue

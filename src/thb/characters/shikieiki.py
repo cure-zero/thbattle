@@ -31,7 +31,7 @@ class TrialAction(UseCard):
             source, target, ft, card
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         c = self.card
         ft = self.ft
         g.players.exclude(self.source).reveal(c)
@@ -61,7 +61,7 @@ class TrialHandler(EventHandler):
 
         if cards:
             c = cards[0]
-            Game.getgame().process_action(TrialAction(p, act.target, act, c))
+            self.game.process_action(TrialAction(p, act.target, act, c))
 
         return act
 
@@ -103,7 +103,7 @@ class MajestyHandler(EventHandler):
         if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
             return act
 
-        Game.getgame().process_action(MajestyAction(tgt, src))
+        self.game.process_action(MajestyAction(tgt, src))
 
         return act
 

@@ -71,7 +71,7 @@ class DebugHandler(EventHandler):
         return arg
 
     def add(self):
-        g = Game.getgame()
+        g = self.game
         for p in g.players:
             if not isinstance(p, Character): continue
             if not p.has_skill(DebugUseCard):

@@ -136,7 +136,7 @@ def main():
     parser = argparse.ArgumentParser(sys.argv[0])
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', type=int, default=7001)
-    parser.add_argument('--redis-url', default='redis://localhost:6379')
+    parser.add_argument('--chat', default='tcp://localhost:6969')
     parser.add_argument('--member-service', default='localhost')
     parser.add_argument('--discuz-cookiepre', default='VfKd_')
     parser.add_argument('--discuz-authkey', default='Proton rocks')
@@ -145,9 +145,6 @@ def main():
 
     import options as opmod
     opmod.options = options
-
-    import db.session
-    db.session.init(options.db)
 
     interconnect = Interconnect.spawn('forum', options.redis_url)
 

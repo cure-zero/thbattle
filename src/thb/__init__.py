@@ -25,7 +25,7 @@ for g in l:
 
 del l, g, OrderedDict
 
-modes_maoyu = {
+modes_kedama = {
     'THBattleNewbie',
     'THBattleKOF',
 }

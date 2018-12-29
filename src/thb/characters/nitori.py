@@ -17,7 +17,7 @@ class DismantleAction(UserAction):
         src, tgt = self.source, self.target
         ttags(src)['dismantle'] = True
 
-        g = Game.getgame()
+        g = self.game
         c = user_input([src], ChoosePeerCardInputlet(self, tgt, ('equips', )))
         c = c or random_choose_card([tgt.equips])
         if not c: return False

@@ -20,7 +20,7 @@ class BorrowAction(UserAction):
     def apply_action(self):
         src = self.source
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
 
         c = user_input([src], ChoosePeerCardInputlet(self, tgt, ('cards', 'showncards', 'equips')))
         c = c or random_choose_card([tgt.cards, tgt.showncards])

@@ -16,7 +16,7 @@ from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 # -- code --
 class KanakoFaithCheers(UserAction):
     def apply_action(self):
-        return Game.getgame().process_action(DrawCards(self.target, 1))
+        return self.game.process_action(DrawCards(self.target, 1))
 
 
 class KanakoFaithAttack(TreatAs, VirtualCard):
@@ -30,7 +30,7 @@ class KanakoFaithDuel(TreatAs, VirtualCard):
 class KanakoFaithCounteract(UserAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(KanakoFaithCounteractPart1(src, tgt))
         g.process_action(KanakoFaithCounteractPart2(src, tgt))
         return True
@@ -40,7 +40,7 @@ class KanakoFaithCounteractPart1(UserAction):
 
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
 
         catnames = ('cards', 'showncards', 'equips')
         cats = [getattr(tgt, i) for i in catnames]
@@ -59,7 +59,7 @@ class KanakoFaithCounteractPart1(UserAction):
 class KanakoFaithCounteractPart2(UserAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
 
         choice = user_input([tgt], ChooseOptionInputlet(self, ('duel', 'attack')))
 
@@ -80,7 +80,7 @@ class KanakoFaithEffect(UserAction):
 
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
 
         has_card = src.cards or src.showncards or src.equips
 
@@ -123,7 +123,7 @@ class VirtueAction(UserAction):
 
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(DrawCards(tgt, 2))
 
         cl = user_choose_cards(self, tgt, ('cards', 'showncards', 'equips'))
@@ -158,7 +158,7 @@ class VirtueHandler(EventHandler):
             if not tgt.has_skill(Virtue):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             pl = [p for p in g.players if not p.dead and p is not tgt]
             pl = pl and user_choose_players(self, tgt, pl)
             if not pl:
@@ -195,7 +195,7 @@ class KanakoFaithKOFHandler(EventHandler):
             if not tgt.has_skill(KanakoFaithKOF):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             op = g.get_opponent(tgt)
 
             if tgt.life > op.life or ttags(tgt)['kanako_faith_kof']:
@@ -205,7 +205,7 @@ class KanakoFaithKOFHandler(EventHandler):
 
         elif evt_type == 'action_apply' and isinstance(act, Damage):
             src, tgt = act.source, act.target
-            g = Game.getgame()
+            g = self.game
 
             if src and src.has_skill(KanakoFaithKOF) and tgt is g.get_opponent(src):
                 ttags(src)['kanako_faith_kof'] = True

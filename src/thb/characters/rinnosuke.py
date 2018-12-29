@@ -18,7 +18,7 @@ class Psychopath(Skill):
 
 class NetoruAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src = self.source
         src.tags['netoru_tag'] = src.tags['turn_count']
         tgt = self.target
@@ -63,7 +63,7 @@ class PsychopathHandler(EventHandler):
             if _from is not None and _from.type == 'equips' and not is_bh:
                 src = _from.owner
                 if src.has_skill(Psychopath) and not src.dead:
-                    g = Game.getgame()
+                    g = self.game
                     g.process_action(PsychopathDrawCards(src, len(cards)*2))
 
         return args

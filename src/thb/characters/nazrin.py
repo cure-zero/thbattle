@@ -43,7 +43,7 @@ class TreasureHuntHandler(EventHandler):
         if evt_type == 'action_before' and isinstance(act, FatetellStage):
             tgt = act.target
             if not tgt.has_skill(TreasureHunt): return act
-            g = Game.getgame()
+            g = self.game
             while True:
                 if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                     return act

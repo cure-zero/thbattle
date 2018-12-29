@@ -23,7 +23,7 @@ class BaseAttack(UserAction):
         self.damage = damage
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         source, target = self.source, self.target
         rst = g.process_action(LaunchGraze(target))
         self1, rst = g.emit_event('attack_aftergraze', (self, not rst))
@@ -45,7 +45,7 @@ class Attack(BaseAttack, BasicAction):
 
 class InevitableAttack(Attack):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         dmg = Damage(self.source, self.target, amount=self.damage)
         g.process_action(dmg)
         return True
@@ -167,7 +167,7 @@ class UseAttack(AskForCard):
         AskForCard.__init__(self, target, target, cards.AttackCard)
 
     def process_card(self, card):
-        g = Game.getgame()
+        g = self.game
         return g.process_action(UseCard(self.target, card))
 
     def ask_for_action_verify(self, p, cl, tl):
@@ -184,7 +184,7 @@ class UseGraze(BaseUseGraze):
     card_usage = 'use'
 
     def process_card(self, card):
-        g = Game.getgame()
+        g = self.game
         return g.process_action(UseCard(self.target, card))
 
     def ask_for_action_verify(self, p, cl, tl):
@@ -195,7 +195,7 @@ class LaunchGraze(BaseUseGraze):
     card_usage = 'launch'
 
     def process_card(self, card):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
         return g.process_action(LaunchCard(tgt, [tgt], card, GrazeAction))
 
@@ -212,7 +212,7 @@ class AskForHeal(AskForCard):
         AskForCard.__init__(self, source, target, cards.HealCard)
 
     def process_card(self, card):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
         return g.process_action(LaunchCard(tgt, [src], card, card.associated_action or Heal))
 
@@ -246,7 +246,7 @@ class WineRevive(GenericAction):
     def apply_action(self):
         self.act.amount -= 1
         tgt = self.target
-        Game.getgame().process_action(SoberUp(tgt, tgt))
+        self.game.process_action(SoberUp(tgt, tgt))
         return True
 
 
@@ -267,7 +267,7 @@ class WineHandler(EventHandler):
             if act.card.is_card(AttackCard):
                 src = act.source
                 if src.tags['wine']:
-                    Game.getgame().process_action(SoberUp(src, src))
+                    self.game.process_action(SoberUp(src, src))
                     act.card_action.in_wine = True
 
             return arg
@@ -275,14 +275,14 @@ class WineHandler(EventHandler):
         elif evt_type == 'action_apply' and isinstance(act, PlayerTurn):
             src = act.target
             if src.tags['wine']:
-                Game.getgame().process_action(SoberUp(src, src))
+                self.game.process_action(SoberUp(src, src))
 
         elif evt_type == 'action_before' and isinstance(act, Damage):
             if act.cancelled: return act
             if act.amount < 1: return act
             tgt = act.target
             if act.amount >= tgt.life and tgt.tags['wine']:
-                g = Game.getgame()
+                g = self.game
                 g.process_action(WineRevive(act))
 
         return act
@@ -299,7 +299,7 @@ class ExinwanEffect(GenericAction):
     card_usage = 'drop'
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
         if tgt.dead:
             return False
@@ -382,6 +382,6 @@ class ExinwanHandler(EventHandler):
                 if tgt:
                     act = ExinwanEffect(tgt, tgt)
                     act.associated_card = c
-                    Game.getgame().process_action(act)
+                    self.game.process_action(act)
 
         return arg

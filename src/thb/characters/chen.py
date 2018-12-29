@@ -91,7 +91,7 @@ class ShikigamiAction(UserAction):
         tgt = self.target
         src = self.source
 
-        g = Game.getgame()
+        g = self.game
 
         if tgt.life < tgt.maxlife and user_input(
             [tgt], ChooseOptionInputlet(self, (False, True))
@@ -130,7 +130,7 @@ class ShikigamiHandler(EventHandler):
             tgt = src.tags.get('shikigami_target')
             if not tgt or tgt.dead: return arg
 
-            g = Game.getgame()
+            g = self.game
             if g.current_player is not src: return arg
 
             origin = src if 'shikigami_tag' in src.tags else tgt

@@ -238,7 +238,7 @@ def player_turn_effect(self, act):
         )
     self.turn_frame.position = (port.x - 6, port.y - 4)
     self.prompt_raw('--------------------\n')
-    for _p in Game.getgame().players:
+    for _p in act.game.players:
         update_tags(self, _p)
 
 
@@ -250,7 +250,7 @@ def player_death_update(self, act):
 def player_turn_after_update(self, act):
     global input_snd_enabled
     player_death_update(self, act)
-    if act.target is Game.getgame().me:
+    if act.target is act.game.me:
         input_snd_enabled = True
 
 

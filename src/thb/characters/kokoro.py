@@ -16,7 +16,7 @@ class BaseHopeMaskAction(UserAction):
 
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
         n = 1 + tgt.maxlife - tgt.life
         cards = g.deck.getcards(n)
 
@@ -59,7 +59,7 @@ class BaseHopeMaskHandler(EventHandler):
             if not tgt.has_skill(self.skill): return act
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
-            Game.getgame().process_action(self.action(tgt, tgt))
+            self.game.process_action(self.action(tgt, tgt))
 
         return act
 
@@ -91,7 +91,7 @@ class BaseDarkNohAction(UserAction):
 
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
 
         src.tags['darknoh_tag'] = src.tags['turn_count']
         sk = self.associated_card

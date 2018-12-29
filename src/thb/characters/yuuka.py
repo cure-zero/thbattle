@@ -22,7 +22,7 @@ class ReversedScales(TreatAs, Skill):
         if not cl or len(cl) != 1:
             return False
 
-        if Game.getgame().current_player is self.player:
+        if self.game.current_player is self.player:
             return False
 
         return cl[0].resides_in.type in ('cards', 'showncards')
@@ -46,7 +46,7 @@ class SadistKOFDrawCards(DrawCards):
 
 class SadistKOFDamageAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
         return g.process_action(Damage(src, tgt, 1))
 
@@ -58,7 +58,7 @@ class SadistKOFHandler(EventHandler):
     def handle(self, evt_type, arg):
         if evt_type == 'action_after' and isinstance(arg, PlayerDeath):
             tgt = arg.target
-            g = Game.getgame()
+            g = self.game
             op = g.get_opponent(tgt)
             if arg.source is op and op.has_skill(SadistKOF):
                 g.process_action(SadistKOFDrawCards(op, 2))
@@ -68,7 +68,7 @@ class SadistKOFHandler(EventHandler):
             old, new = arg
             if not old: return arg
 
-            g = Game.getgame()
+            g = self.game
             op = g.get_opponent(new)
 
             if op.has_skill(SadistKOF) and op.tags['sadist_kof_fire']:
@@ -119,7 +119,7 @@ class ReversedScalesHandler(EventHandler):
         if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
             return act
 
-        g = Game.getgame()
+        g = self.game
         g.process_action(ReversedScalesAction(tgt, act))
 
         return act
@@ -131,7 +131,7 @@ class SadistAction(UserAction):
         self.target = target
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
         tgt.tags['sadist_target'] = False
         g.process_action(Damage(src, tgt, 1))
@@ -158,7 +158,7 @@ class SadistHandler(EventHandler):
 
             pl = user_choose_players(self, src, candidates)
             if pl:
-                Game.getgame().process_action(SadistAction(src, pl[0]))
+                self.game.process_action(SadistAction(src, pl[0]))
 
         elif evt_type == 'action_before' and isinstance(act, Damage):
             src = act.source

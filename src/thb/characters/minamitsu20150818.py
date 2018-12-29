@@ -56,7 +56,7 @@ class ShipwreckEffect(GenericAction):
         self.cards = cards
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
         cards = self.cards
 
@@ -76,7 +76,7 @@ class ShipwreckDropCardStage(DropCardStage):
         tgt, victim = self.target, self.victim
         if tgt.dead: return False
 
-        g = Game.getgame()
+        g = self.game
 
         sel = ShipwreckChooseCard(tgt, victim)
         g.process_action(sel)
@@ -90,7 +90,7 @@ class ShipwreckDropCardStage(DropCardStage):
             g.process_action(ShipwreckBrokenScoop(tgt, victim))
             return True
 
-        g = Game.getgame()
+        g = self.game
         cards = user_choose_cards(self, tgt, ('cards', 'showncards'))
         if not cards:
             from itertools import chain
@@ -111,7 +111,7 @@ class ShipwreckHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, DropCardStage):
-            g = Game.getgame()
+            g = self.game
             tgt = act.target
             if not tgt.has_skill(Shipwreck):
                 return act

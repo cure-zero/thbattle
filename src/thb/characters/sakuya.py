@@ -61,7 +61,8 @@ class LunaDialHandler(EventHandler):
             if not src.has_skill(LunaDial):
                 return act
 
-            PlayerTurn.get_current(src).pending_stages.insert(0, LunaDialActionStage)
+            g = self.game
+            PlayerTurn.get_current(g, src).pending_stages.insert(0, LunaDialActionStage)
 
         return act
 

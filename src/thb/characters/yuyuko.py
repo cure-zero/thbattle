@@ -30,7 +30,7 @@ class GuidedDeathEffect(GenericAction):
         self.target_list = target_list
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
 
         for p in self.target_list:
             g.process_action(GuidedDeathLifeLost(p, p))
@@ -43,7 +43,7 @@ class GuidedDeathHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, FinalizeStage):
-            g = Game.getgame()
+            g = self.game
 
             src = act.target
             if not (src.has_skill(GuidedDeath) and not src.dead):
@@ -67,7 +67,7 @@ class SoulDrain(Skill):
 class SoulDrainEffect(GenericAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(DrawCards(src, 1))
 
         assert tgt.life <= 0
@@ -92,7 +92,7 @@ class SoulDrainHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, TryRevive):
-            g = Game.getgame()
+            g = self.game
             tgt = act.target
 
             for p in g.players:
@@ -117,7 +117,7 @@ class PerfectCherryBlossomHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
-            g = Game.getgame()
+            g = self.game
             for pcb in reversed(g.action_stack):
                 if isinstance(pcb, PerfectCherryBlossomAction):
                     break
@@ -136,7 +136,7 @@ class PerfectCherryBlossomHandler(EventHandler):
 
 class PerfectCherryBlossomExtractAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src = self.source
         g.process_action(MaxLifeChange(src, src, 1))
         g.process_action(Heal(src, src, 1))
@@ -152,8 +152,8 @@ class PerfectCherryBlossomExtractAction(UserAction):
 class PerfectCherryBlossomAction(UserAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        if tgt.dead: return True
-        g = Game.getgame()
+        if tgt.dead:self.game
+        g = self.game
         ttags(src)['perfect_cherry_blossom'] = True
         g.process_action(LifeLost(src, tgt, 1))
         if not tgt.dead:

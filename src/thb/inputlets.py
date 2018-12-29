@@ -52,7 +52,7 @@ class ActionInputlet(Inputlet):
         # ]
 
         actor = self.actor
-        g = Game.getgame()
+        g = self.game
         categories = self.categories
         categories = [getattr(actor, i) for i in categories] if categories else None
         candidates = self.candidates
@@ -97,7 +97,7 @@ class ActionInputlet(Inputlet):
             return None
 
     def data(self):
-        g = Game.getgame()
+        g = self.game
         actor_skills = self.actor.skills
         sid_list = [actor_skills.index(s) for s in self.skills]
         cid_list = [c.sync_id for c in self.cards]
@@ -159,7 +159,7 @@ class ChoosePeerCardInputlet(Inputlet):
             check(sum(len(c) for c in categories))  # no cards at all
 
             cid = data
-            g = Game.getgame()
+            g = self.game
 
             check(isinstance(cid, int))
 
@@ -360,7 +360,7 @@ class HopeMaskInputlet(Inputlet):
         self.acquire = acquire
 
     def post_process(self, actor, rst):
-        g = Game.getgame()
+        g = self.game
         putback, acquire = rst
         g.players.exclude(actor).reveal(acquire)
 

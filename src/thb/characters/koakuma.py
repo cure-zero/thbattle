@@ -13,7 +13,7 @@ from thb.characters.baseclasses import Character, register_character_to
 # -- code --
 class FindAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         cards = self.associated_card.associated_cards
         n = len(cards)
         # card will be dropped at LaunchCard
@@ -29,7 +29,7 @@ class FindAction(UserAction):
             if ttags(p)['find']:
                 return False
 
-            g = Game.getgame()
+            g = self.game
             cards = self.associated_card.associated_cards
             if not 0 < len(cards) <= len([i for i in g.players if not i.dead]):
                 return False

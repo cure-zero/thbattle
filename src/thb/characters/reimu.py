@@ -109,12 +109,12 @@ class TributeHandler(EventHandler):
         return arg
 
     def manage_tribute(self):
+        g = self.game
         cond = any([
             isinstance(p, Character) and p.has_skill(TributeTarget)
-            for p in Game.getgame().players
+            for p in g.players
         ])
 
-        g = Game.getgame()
         if cond:
             for p in g.players:
                 if not isinstance(p, Character): continue
@@ -154,7 +154,7 @@ class ReimuExterminateAction(AskForCard):
         self.cause = cause  # for ui
 
     def process_card(self, c):
-        g = Game.getgame()
+        g = self.game
         return g.process_action(ReimuExterminateLaunchCard(self.source, self.victim, c, self.cause))
 
 
@@ -166,7 +166,7 @@ class ReimuExterminateHandler(EventHandler):
         if evt_type == 'action_apply' and isinstance(act, Damage):
             if not act.source: return act
             src, tgt = act.source, act.target
-            g = Game.getgame()
+            g = self.game
             if src is not g.current_player: return act
             if src is tgt: return act
             ttags(src)['did_damage'] = True
@@ -174,7 +174,7 @@ class ReimuExterminateHandler(EventHandler):
         elif evt_type == 'action_after' and isinstance(act, Damage):
             if not act.source: return act
             src, tgt = act.source, act.target
-            g = Game.getgame()
+            g = self.game
             cur = g.current_player
             if not cur: return act
             if not tgt.has_skill(ReimuExterminate): return act
@@ -190,7 +190,7 @@ class ReimuExterminateHandler(EventHandler):
             if tgt.dead:
                 return act
 
-            g = Game.getgame()
+            g = self.game
             for actor in g.players.rotate_to(g.current_player):
                 if tgt is actor:
                     continue
@@ -212,7 +212,7 @@ class ReimuClear(Skill):
 class ReimuClearAction(UserAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(DrawCards(src, 1))
         g.process_action(DrawCards(tgt, 1))
         if g.current_player is src:
@@ -248,7 +248,7 @@ class ReimuClearHandler(EventHandler):
             if src.dead or tgt.dead: return act
 
             if user_input([src], ChooseOptionInputlet(self, (False, True))):
-                g = Game.getgame()
+                g = self.game
                 g.process_action(ReimuClearAction(src, tgt))
 
         return act

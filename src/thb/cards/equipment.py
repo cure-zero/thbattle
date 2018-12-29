@@ -19,11 +19,10 @@ from utils import CheckFailed, check, classmix
 # -- code --
 class WearEquipmentAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         card = self.associated_card
         tgt = self.target
         equips = tgt.equips
-        g = Game.getgame()
 
         _s, _t, _c, rst = g.emit_event('wear_equipment', (self, tgt, card, 'default'))
         assert _s is self
@@ -63,7 +62,7 @@ class WeaponReforgeHandler(EventHandler):
 
             if user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 tgt.tags['vitality'] -= 1
-                g = Game.getgame()
+                g = self.game
                 g.process_action(ReforgeWeapon(tgt, tgt, c))
                 act.cancelled = True
 
@@ -133,7 +132,7 @@ class OpticalCloakHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             if g.process_action(OpticalCloak(tgt, tgt)):
                 act.card = OpticalCloakSkill(tgt)
 
@@ -165,7 +164,7 @@ class MomijiShieldHandler(EventHandler):
         tgt = act.target
         if not tgt.has_skill(MomijiShieldSkill): return act
         if not act.associated_card.color == Card.BLACK: return act
-        g = Game.getgame()
+        g = self.game
         g.process_action(MomijiShield(act))
 
         return act
@@ -254,7 +253,7 @@ class Roukanken(GenericAction):
 
         act.__class__ = classmix(RoukankenMixin, act.__class__)
         act.roukanken_disabled_skills = skills
-        return Game.getgame().process_action(act)
+        return self.game.process_action(act)
 
 
 @register_eh
@@ -298,7 +297,7 @@ class NenshaPhone(GenericAction):
         tgt = self.target
 
         cards = list(tgt.cards)[:2]
-        g = Game.getgame()
+        g = self.game
         g.players.exclude(tgt).reveal(cards)
         migrate_cards(cards, tgt.showncards)
 
@@ -320,7 +319,7 @@ class NenshaPhoneHandler(EventHandler):
         if not tgt.cards: return act
         if not src.has_skill(NenshaPhoneSkill): return act
         if not user_input([src], ChooseOptionInputlet(self, (False, True))): return act
-        g = Game.getgame()
+        g = self.game
         g.process_action(NenshaPhone(src, tgt))
         return act
 
@@ -423,7 +422,7 @@ class RepentanceStickSkill(WeaponSkill):
 class RepentanceStick(GenericAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
 
         catnames = ('cards', 'showncards', 'equips', 'fatetell')
         cats = [getattr(tgt, i) for i in catnames]
@@ -458,7 +457,7 @@ class RepentanceStickHandler(EventHandler):
             if act.cancelled: return act
             src, tgt = act.source, act.target
             if src and src.has_skill(RepentanceStickSkill):
-                g = Game.getgame()
+                g = self.game
                 pa = g.action_stack[-1]
                 if not isinstance(pa, basic.BaseAttack): return act
                 if not (tgt.cards or tgt.showncards or tgt.equips or tgt.fatetell):
@@ -489,14 +488,14 @@ class IbukiGourdHandler(EventHandler):
             if not src: return act
             if not src.has_skill(IbukiGourdSkill): return act
 
-            g = Game.getgame()
+            g = self.game
             ttags(src)['ibukigourd_did_damage'] = True
 
         elif evt_type == 'action_apply' and isinstance(act, FinalizeStage):
             tgt = act.target
             if not tgt.has_skill(IbukiGourdSkill): return act
 
-            g = Game.getgame()
+            g = self.game
             if ttags(tgt)['ibukigourd_did_damage']: return act
 
             g.process_action(basic.Wine(tgt, tgt))
@@ -512,7 +511,7 @@ class IbukiGourdHandler(EventHandler):
                 return arg
 
             tgt = to.owner
-            g = Game.getgame()
+            g = self.game
             g.process_action(basic.Wine(tgt, tgt))
 
             return arg
@@ -522,7 +521,7 @@ class IbukiGourdHandler(EventHandler):
 
 class HouraiJewelAttack(basic.BaseAttack, spellcard.InstantSpellCardAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         g.process_action(Damage(self.source, self.target))
         return True
 
@@ -574,11 +573,11 @@ class UmbrellaHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):
             if not act.target.has_skill(UmbrellaSkill): return act
-            g = Game.getgame()
+            g = self.game
             pact = g.action_stack[-1]
 
             if isinstance(pact, spellcard.SpellCardAction):
-                Game.getgame().process_action(UmbrellaEffect(pact, act))
+                self.game.process_action(UmbrellaEffect(pact, act))
 
         return act
 
@@ -603,7 +602,7 @@ class MaidenCostumeAction(FatetellAction):
         act = self.act
         src = self.source
 
-        g = Game.getgame()
+        g = self.game
         if ft.succeeded:
             # rej = spellcard.LaunchReject(src, act, SaigyouBranchSkill(src))
             g.process_action(LaunchCard(
@@ -630,7 +629,7 @@ class MaidenCostumeHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            Game.getgame().process_action(MaidenCostumeAction(tgt, act))
+            self.game.process_action(MaidenCostumeAction(tgt, act))
 
         return act
 
@@ -650,7 +649,7 @@ class Hakurouken(GenericAction):
         tgt = self.target
 
         cards = user_choose_cards(self, tgt, ('cards', 'showncards'))
-        g = Game.getgame()
+        g = self.game
         if cards:
             self.peer_action = 'drop'
             g.process_action(DropCards(src, tgt, cards))
@@ -685,7 +684,7 @@ class HakuroukenHandler(EventHandler):
             if not user_input([src], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            Game.getgame().process_action(Hakurouken(src, act.target))
+            self.game.process_action(Hakurouken(src, act.target))
 
         return act
 
@@ -693,7 +692,7 @@ class HakuroukenHandler(EventHandler):
 class AyaRoundfan(GenericAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
 
         equip = user_input([src], ChoosePeerCardInputlet(self, tgt, ['equips']))
         equip = equip or random_choose_card([tgt.equips])
@@ -748,13 +747,12 @@ class AyaRoundfanHandler(EventHandler):
             src, tgt = act.source, act.target
             if not (src and src.has_skill(AyaRoundfanSkill) and tgt.equips): return act
 
-            g = Game.getgame()
+            g = self.game
             pa = g.action_stack[-1]
             if not isinstance(pa, basic.BaseAttack): return act
 
             cards = user_choose_cards(self, src, ('cards', 'showncards'))
             if not cards: return act
-            g = Game.getgame()
             g.process_action(DropCards(src, src, cards))
             g.process_action(AyaRoundfan(src, tgt))
 
@@ -796,7 +794,7 @@ class LaevateinHandler(EventHandler):
             if not src or not src.has_skill(LaevateinSkill):
                 return arg
 
-            g = Game.getgame()
+            g = self.game
             cards = user_choose_cards(self, src, ('cards', 'showncards', 'equips'))
             if not cards:
                 return arg
@@ -848,7 +846,7 @@ class DeathSickleHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):
             from .basic import Attack
-            g = Game.getgame()
+            g = self.game
             pact = g.action_stack[-1]
             if not isinstance(pact, Attack): return act
             src = act.source
@@ -885,7 +883,7 @@ class KeystoneHandler(EventHandler):
         if evt_type == 'action_before' and isinstance(act, spellcard.Sinsack):
             tgt = act.target
             if tgt.has_skill(KeystoneSkill):
-                Game.getgame().process_action(Keystone(act))
+                self.game.process_action(Keystone(act))
 
         return act
 
@@ -941,7 +939,7 @@ class YinYangOrbHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             g.process_action(YinYangOrb(act))
 
         return act
@@ -969,7 +967,7 @@ class SuwakoHatHandler(EventHandler):
         if evt_type == 'action_before' and isinstance(act, DropCardStage):
             tgt = act.target
             if tgt.has_skill(SuwakoHatSkill):
-                Game.getgame().process_action(SuwakoHatEffect(tgt, act))
+                self.game.process_action(SuwakoHatEffect(tgt, act))
 
         return act
 
@@ -993,7 +991,7 @@ class YoumuPhantomHandler(EventHandler):
 
         from .definition import YoumuPhantomCard
 
-        g = Game.getgame()
+        g = self.game
 
         if _from is not None and _from.type == 'equips' and not is_bh:
             for c in cards:
@@ -1038,7 +1036,7 @@ class IceWingHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, self._effect_cls):
             if act.target.has_skill(IceWingSkill):
-                Game.getgame().process_action(IceWing(act))
+                self.game.process_action(IceWing(act))
 
         return act
 
@@ -1114,7 +1112,7 @@ class SinsackHatAction(FatetellAction):
         if not ft.succeeded:
             return False
 
-        g = Game.getgame()
+        g = self.game
         tgt, c = self.target, self.hat_card
         g.process_action(spellcard.SinsackDamage(None, tgt, amount=2))
         migrate_cards([c], tgt.cards, unwrap=True)
@@ -1132,7 +1130,7 @@ class SinsackHatHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, FatetellStage):
             tgt = act.target
-            g = Game.getgame()
+            g = self.game
             from .definition import SinsackHatCard
             for c in list(tgt.equips):
                 if not c.is_card(SinsackHatCard):

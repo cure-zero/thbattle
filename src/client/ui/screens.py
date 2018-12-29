@@ -102,11 +102,11 @@ def show_message(screen, chat_box, msg_key, is_err):
         'invalid_credential': u'认证失败！',
 
         # --- lobby
-        'cant_join_game':   u'无法加入游戏',
-        'no_such_user':     u'没有这个玩家',
-        'maoyu_limitation': u'您现在是毛玉（试玩玩家），不能这样做。\n毛玉只能玩练习模式和KOF模式。',
-        'not_invited':      u'这是个邀请制房间，只能通过邀请进入。',
-        'banned':           u'你已经被强制请离，不能重复进入',
+        'cant_join_game':    u'无法加入游戏',
+        'no_such_user':      u'没有这个玩家',
+        'kedama_limitation': u'您现在是毛玉（试玩玩家），不能这样做。\n毛玉只能玩练习模式和KOF模式。',
+        'not_invited':       u'这是个邀请制房间，只能通过邀请进入。',
+        'banned':            u'你已经被强制请离，不能重复进入',
 
         # --- other
         'use_item_success': u'成功使用物品',
@@ -917,11 +917,11 @@ class LobbyScreen(Screen):
 
         def on_message(self, _type, *args):
             lookup = {
-                'hang':       u'|c0000ffff游戏大厅|r',
-                'ingame':     u'|G游戏中|r',
-                'inroomwait': u'|R在房间中|r',
-                'ready':      u'|c9f5f9fff准备状态|r',
-                'observing':  u'|LB观战中|r',
+                'lobby': u'|c0000ffff游戏大厅|r',
+                'game':  u'|G游戏中|r',
+                'room':  u'|R在房间中|r',
+                'ready': u'|c9f5f9fff准备状态|r',
+                'ob':    u'|LB观战中|r',
             }
             if _type == 'current_users':
                 users = args[0]
@@ -935,7 +935,7 @@ class LobbyScreen(Screen):
                 rst = []
 
                 if n_users > 130:
-                    users = [u for u in users if u['state'] != 'ingame']
+                    users = [u for u in users if u['state'] != 'game']
                     rst.append(u'%s 个|G游戏中|r的玩家' % (n_users - len(users)))
                     rst.append(u'')
 
@@ -986,7 +986,8 @@ class LobbyScreen(Screen):
             )
 
         def on_message(self, _type, *args):
-            if _type == 'your_account':
+            return
+            if _type == 'you':  # XXX
                 acc = Executive.gamemgr.account
                 ta = self.textarea
                 ta.text = u'\u200b'
@@ -1165,7 +1166,7 @@ class GameScreen(Screen):
         def on_message(self, _type, *args):
             if _type == 'current_users':
                 ul = args[0]
-                ul = [Account.parse(u['account']) for u in ul if u['state'] in ('hang', 'observing')]
+                ul = [Account.parse(u['account']) for u in ul if u['state'] in ('lobby', 'ob')]
 
                 for i, u in enumerate(ul):
                     y, x = divmod(i, 5)
@@ -1421,7 +1422,7 @@ class GameScreen(Screen):
                 )
             )
 
-        elif _type == 'end_game':
+        elif _type == 'game_ended':
             self.remove_control(self.gameui)
             self.add_control(self.panel)
             g = args[0]
@@ -1677,7 +1678,7 @@ class ReplayScreen(Screen):
         ServerSelectScreen().switch()
 
     def on_message(self, _type, *args):
-        if _type in ('client_game_finished', 'end_game'):
+        if _type in ('client_game_finished', 'game_ended'):
             g = args[0]
             ServerSelectScreen().switch()
             if _type == 'client_game_finished':

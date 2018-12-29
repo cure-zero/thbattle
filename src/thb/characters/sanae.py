@@ -20,7 +20,7 @@ class MiracleHeal(Heal):
 class MiracleAction(UserAction):
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(DrawCards(tgt, 1))
 
         ttags(tgt)['miracle_times'] += 1
@@ -104,7 +104,7 @@ class SanaeFaithAction(UserAction):
     def apply_action(self):
         src = self.source
         tl = self.target_list
-        g = Game.getgame()
+        g = self.game
 
         for p in tl:
             g.process_action(SanaeFaithCollectCardAction(src, p))
@@ -170,7 +170,7 @@ class SanaeFaithKOFHandler(EventHandler):
             if _from is not None and _from.owner is to.owner:
                 return arg
 
-            g = Game.getgame()
+            g = self.game
             a, b = g.players
 
             if not a.has_skill(SanaeFaithKOF):
@@ -182,7 +182,7 @@ class SanaeFaithKOFHandler(EventHandler):
             if b is not to.owner:
                 return arg
 
-            turn = PlayerTurn.get_current()
+            turn = PlayerTurn.get_current(g)
             if not turn:
                 return arg
 
@@ -190,7 +190,7 @@ class SanaeFaithKOFHandler(EventHandler):
             if stage.target is not b or not isinstance(stage, ActionStage):
                 return arg
 
-            g = Game.getgame()
+            g = self.game
 
             g.process_action(SanaeFaithKOFDrawCards(a, 1))
 
@@ -210,7 +210,7 @@ class GodDescendantEffect(UserAction):
         self.card        = card
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt, tl = self.source, self.target, self.target_list
         g.process_action(Reforge(src, tgt, self.card))
         assert tgt in tl
@@ -226,7 +226,7 @@ class GodDescendantAction(AskForCard):
         self.target_list = target_list
 
     def process_card(self, c):
-        g = Game.getgame()
+        g = self.game
         return g.process_action(GodDescendantEffect(self.source, self.target, self.target_list, c))
 
 
@@ -240,7 +240,7 @@ class GodDescendantHandler(EventHandler):
             if 'group_effect' not in act.card.category:
                 return arg
 
-            g = Game.getgame()
+            g = self.game
             for tgt in tl:
                 if not tgt.has_skill(GodDescendant):
                     continue

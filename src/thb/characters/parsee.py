@@ -43,7 +43,7 @@ class EnvyHandler(EventHandler):
         if evt_type != 'action_before': return act
         if not isinstance(act, DropCards): return act
 
-        g = Game.getgame()
+        g = self.game
         pact = g.action_stack[-1]
         if not isinstance(pact, Demolition): return act
         if not pact.source.has_skill(Envy): return act

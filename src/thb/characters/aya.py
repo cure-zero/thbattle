@@ -18,7 +18,7 @@ class UltimateSpeed(Skill):
 
 class UltimateSpeedAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         return g.process_action(DrawCards(self.target, 1))
 
 
@@ -38,7 +38,7 @@ class UltimateSpeedHandler(EventHandler):
             if src.tags['aya_count'] < 2:
                 return arg
 
-            g = Game.getgame()
+            g = self.game
             if g.current_player is not src:
                 return arg
 
@@ -52,7 +52,7 @@ class UltimateSpeedHandler(EventHandler):
 
         elif evt_type == 'choose_target':
             lca, _ = arg
-            g = Game.getgame()
+            g = self.game
 
             if not is_card(lca.card):
                 return arg

@@ -53,7 +53,7 @@ class CriticalStrikeHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            Game.getgame().process_action(CriticalStrikeAction(tgt, tgt))
+            self.game.process_action(CriticalStrikeAction(tgt, tgt))
 
             act.amount = max(0, act.amount - 1)
 
@@ -69,7 +69,7 @@ class CriticalStrikeHandler(EventHandler):
                 act.damage += 1
 
         elif evt_type == 'action_before' and isinstance(act, Damage):
-            g = Game.getgame()
+            g = self.game
             pact = g.action_stack[-1]
             if not isinstance(pact, BaseDuel):
                 return act
@@ -115,7 +115,7 @@ class CriticalStrikeHandler(EventHandler):
     def in_critical_strike(self, p):
         return (
             ttags(p)['flan_cs'] and
-            Game.getgame().current_player is p and
+            self.game.current_player is p and
             p.has_skill(CriticalStrike)
         )
 
@@ -145,7 +145,7 @@ class ExterminateHandler(EventHandler):
         if evt_type == 'choose_target':
             act, tl = arg
             src = act.source
-            g = Game.getgame()
+            g = self.game
 
             if not src.has_skill(Exterminate):
                 return arg
@@ -168,7 +168,7 @@ class ExterminateFadeHandler(EventHandler):
         if ((evt_type == 'action_after' and isinstance(arg, PlayerTurn)) or
             (evt_type == 'action_apply' and isinstance(arg, PlayerDeath) and arg.target.has_skill(Exterminate))):  # noqa
 
-            g = Game.getgame()
+            g = self.game()
             for p in g.players:
                 if p.tags.pop('exterminate', ''):
                     p.reenable_skill('exterminate')

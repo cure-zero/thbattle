@@ -37,7 +37,7 @@ class DeathHandler(EventHandler):
         if not isinstance(act, PlayerDeath): return act
         tgt = act.target
 
-        g = Game.getgame()
+        g = self.game
 
         if tgt.remaining[0] <= 0:
             pl = g.players[:]
@@ -72,7 +72,7 @@ class KOFCharacterSwitchHandler(EventHandler):
 
     @classmethod
     def do_switch_dead(cls):
-        g = Game.getgame()
+        g = self.game
 
         for p in [p for p in g.players if p.dead and p.choices]:
             new = cls.switch(p)
@@ -81,7 +81,7 @@ class KOFCharacterSwitchHandler(EventHandler):
 
     @staticmethod
     def switch(p):
-        g = Game.getgame()
+        g = self.game
         mapping = {p: p.choices}
 
         with InputTransaction('ChooseGirl', [p], mapping=mapping) as trans:
@@ -107,13 +107,13 @@ class THBattleKOFBootstrap(GenericAction):
         self.items = items
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
 
         from . import cards
 
         g.pick_history = []
 
-        g.deck = cards.Deck(cards.kof_card_definition)
+        g.deck = cards.Deck(g, cards.kof_card_definition)
         g.ehclasses = []
         g.current_player = None
 
@@ -159,8 +159,8 @@ class THBattleKOFBootstrap(GenericAction):
                 p.reveal(c)
                 del c.chosen
 
-        list_shuffle(chosen[A], A)
-        list_shuffle(chosen[B], B)
+        list_shuffle(g, chosen[A], A)
+        list_shuffle(g, chosen[B], B)
 
         with InputTransaction('ChooseGirl', g.players, mapping=chosen) as trans:
             ilet = ChooseGirlInputlet(g, chosen)
@@ -227,7 +227,7 @@ class THBattleKOF(Game):
     def update_event_handlers(g):
         ehclasses = list(action_eventhandlers) + g.game_ehs.values()
         ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(ehclasses))
+        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def next_character(g, p, choice):
         g.players.reveal(choice)

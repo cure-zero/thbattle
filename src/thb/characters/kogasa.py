@@ -35,7 +35,7 @@ class SurpriseAction(UserAction):
         src.tags['surprise_tag'] = src.tags['turn_count']
         assert card
 
-        g = Game.getgame()
+        g = self.game
         g.players.reveal(card.associated_cards)
         migrate_cards([card], tgt.showncards, unwrap=True)
 
@@ -91,7 +91,7 @@ class JollyHandler(EventHandler):
 
             if not tgt.has_skill(Jolly): return act
 
-            g = Game.getgame()
+            g = self.game
             pl = user_choose_players(self, tgt, [p for p in g.players if not p.dead])
             if not pl: pl = [tgt]
 

@@ -46,7 +46,7 @@ class DeathHandler(EventHandler):
         if evt_type != 'action_apply': return act
         if not isinstance(act, PlayerDeath): return act
 
-        g = Game.getgame()
+        g = self.game
         tgt = act.target
 
         tgt = act.target
@@ -67,9 +67,9 @@ class DeathHandler(EventHandler):
 
 class HeritageAction(UserAction):
     def apply_action(self):
-        src, tgt = self.source, self.target
+        g, src, tgt = self.game, self.source, self.target
         lists = [tgt.cards, tgt.showncards, tgt.equips]
-        with MigrateCardsTransaction(self) as trans:
+        with MigrateCardsTransaction(g, self) as trans:
             for cl in lists:
                 if not cl: continue
                 cl = list(cl)
@@ -88,7 +88,7 @@ class HeritageHandler(EventHandler):
         if evt_type != 'action_before': return act
         if not isinstance(act, DeadDropCards): return act
 
-        g = Game.getgame()
+        g = self.game
         tgt = act.target
         for f in g.forces:
             if tgt in f:
@@ -119,7 +119,7 @@ class ExtraCardHandler(EventHandler):
         if not isinstance(act, DrawCardStage):
             return act
 
-        g = Game.getgame()
+        g = self.game
         if g.draw_extra_card:
             act.amount += 1
 
@@ -140,14 +140,14 @@ class THBattle2v2Bootstrap(GenericAction):
         self.items = items
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         params = self.params
 
         from thb.cards import Deck
 
         g.stats = []
 
-        g.deck = Deck()
+        g.deck = Deck(g)
         g.ehclasses = []
 
         if params['random_force']:
@@ -304,7 +304,7 @@ class THBattle2v2(Game):
     def update_event_handlers(g):
         ehclasses = list(action_eventhandlers) + g.game_ehs.values()
         ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(ehclasses))
+        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def decorate(g, p):
         from .cards import CardList

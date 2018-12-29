@@ -21,7 +21,7 @@ class DarknessAction(UserAction):
     def apply_action(self):
         attacker, victim = self.target_list
         src = self.source
-        g = Game.getgame()
+        g = self.game
         tags = self.source.tags
         tags['darkness_tag'] = tags['turn_count']
 
@@ -82,7 +82,7 @@ class DarknessKOF(Skill):
 class DarknessKOFAction(UserAction):
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
         tgt.tags['darkness_kof_tag'] = max(g.turn_count, 1)
         return True
 
@@ -98,7 +98,7 @@ class DarknessKOFHandler(EventHandler):
         if evt_type == 'character_debut':
             old, new = arg
             if new.has_skill(DarknessKOF):
-                g = Game.getgame()
+                g = self.game
                 g.process_action(DarknessKOFAction(new, new))
 
         elif evt_type == 'action_shootdown' and isinstance(arg, LaunchCard):
@@ -106,7 +106,7 @@ class DarknessKOFHandler(EventHandler):
             if not src:
                 return arg
 
-            g = Game.getgame()
+            g = self.game
             opp = g.get_opponent(arg.source)
             if opp.tags['darkness_kof_tag'] < g.turn_count:
                 return arg
@@ -145,7 +145,7 @@ class CheatingHandler(EventHandler):
         if evt_type == 'action_after' and isinstance(act, PlayerTurn):
             tgt = act.target
             if tgt.has_skill(Cheating) and not tgt.dead:
-                g = Game.getgame()
+                g = self.game
                 g.process_action(CheatingDrawCards(tgt, 1))
         return act
 

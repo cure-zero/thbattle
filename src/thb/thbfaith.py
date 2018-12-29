@@ -36,7 +36,7 @@ class DeathHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
-            g = Game.getgame()
+            g = self.game
 
             tgt = act.target
             force = tgt.force
@@ -47,7 +47,7 @@ class DeathHandler(EventHandler):
                 g.game_end()
 
         elif evt_type == 'action_after' and isinstance(act, PlayerDeath):
-            g = Game.getgame()
+            g = self.game
 
             tgt = act.target
             pool = tgt.force.pool
@@ -76,7 +76,7 @@ class DeathHandler(EventHandler):
 class RedrawCards(DistributeCards):
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
 
         with MigrateCardsTransaction(self) as trans:
             g.players.reveal(list(tgt.cards))
@@ -102,13 +102,13 @@ class THBattleFaithBootstrap(GenericAction):
         self.items = items
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         params = self.params
 
         from thb.cards import Deck
 
         g.picks = []
-        g.deck = Deck()
+        g.deck = Deck(g)
 
         g.ehclasses = list(action_eventhandlers) + g.game_ehs.values()
 
@@ -225,7 +225,7 @@ class THBattleFaith(Game):
     def update_event_handlers(g):
         ehclasses = list(action_eventhandlers) + g.game_ehs.values()
         ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(ehclasses))
+        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def switch_character(g, p, choice):
         choice.akari = False

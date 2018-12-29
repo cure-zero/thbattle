@@ -24,7 +24,7 @@ class DestructionImpulseAction(GenericAction):
     def apply_action(self):
         src = self.source
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
 
         g.process_action(LifeLost(src, src))
         g.process_action(Damage(src, tgt))
@@ -42,14 +42,14 @@ class DestructionImpulseHandler(EventHandler):
             if not src: return act
             if not src.has_skill(DestructionImpulse): return act
 
-            g = Game.getgame()
+            g = self.game
             ttags(src)['destruction_tag'] = True
 
         elif evt_type == 'action_after' and isinstance(act, PlayerTurn):
             tgt = act.target
             if not tgt.has_skill(DestructionImpulse): return act
 
-            g = Game.getgame()
+            g = self.game
             if ttags(tgt)['destruction_tag']: return act
 
             dist = LaunchCard.calc_distance(tgt, DestructionImpulse(tgt))
@@ -93,7 +93,7 @@ class FourOfAKindAction(GenericAction):
         self.target = target_act.target
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src = self.source
         self.target_act.cancelled = True
         g.process_action(MaxLifeChange(src, src, -1))
@@ -120,11 +120,11 @@ class FourOfAKindHandler(EventHandler):
             tgt = act.target
             if tgt.has_skill(FourOfAKind) and act.amount <= tgt.life:
                 if user_input([tgt], ChooseOptionInputlet(self, (False, True))):
-                    g = Game.getgame()
+                    g = self.game
                     g.process_action(FourOfAKindAction(tgt, act))
 
             if src and src.has_skill(FourOfAKind):
-                g = Game.getgame()
+                g = self.game
 
                 for a in reversed(g.action_stack):
                     if isinstance(a, LaunchCard):

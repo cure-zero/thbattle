@@ -26,7 +26,7 @@ class Demolition(InstantSpellCardAction):
     # 城管执法
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
 
         catnames = ('cards', 'showncards', 'equips', 'fatetell')
@@ -75,7 +75,7 @@ class RejectHandler(EventHandler):
             if act.non_responsive:
                 return act
 
-            g = Game.getgame()
+            g = self.game
 
             has_reject = False
             while g.SERVER_SIDE:
@@ -158,8 +158,9 @@ class SealingArray(DelayedSpellCardAction, FatetellAction):
         self.fatetell_cond = lambda card: card.suit != Card.HEART
 
     def fatetell_action(self, ft):
+        g = self.game
         if ft.succeeded:
-            turn = PlayerTurn.get_current(self.target)
+            turn = PlayerTurn.get_current(g, self.target)
             try:
                 turn.pending_stages.remove(ActionStage)
             except Exception:
@@ -170,7 +171,7 @@ class SealingArray(DelayedSpellCardAction, FatetellAction):
         return False
 
     def fatetell_postprocess(self):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
         g.process_action(DropCards(None, tgt, [self.associated_card]))
 
@@ -179,7 +180,7 @@ class NazrinRod(InstantSpellCardAction):
     # 纳兹琳的探宝棒
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         g.process_action(DrawCards(self.target, amount=2))
         return True
 
@@ -200,14 +201,14 @@ class Sinsack(DelayedSpellCardAction, FatetellAction):
 
     def fatetell_action(self, ft):
         if ft.succeeded:
-            g = Game.getgame()
+            g = self.game
             g.process_action(SinsackDamage(None, self.target, amount=3))
             return True
 
         return False
 
     def fatetell_postprocess(self):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
         if not self.cancelled and self.succeeded:
             g.process_action(DropCards(None, tgt, [self.associated_card]))
@@ -258,7 +259,7 @@ class BaseDuel(UserAction):
         self.target = target
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         source = self.source
         target = self.target
 
@@ -286,7 +287,7 @@ class Duel(BaseDuel, InstantSpellCardAction):
 class MapCannonEffect(InstantSpellCardAction):
     # 地图炮
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         source, target = self.source, self.target
         graze_action = basic.UseGraze(target)
         if not g.process_action(graze_action):
@@ -306,7 +307,7 @@ class MapCannon(ForEach):
 
 class DemonParadeEffect(InstantSpellCardAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         source, target = self.source, self.target
         use_action = basic.UseAttack(target)
         if not g.process_action(use_action):
@@ -328,7 +329,7 @@ class FeastEffect(InstantSpellCardAction):
     # 宴会
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         if tgt.life < tgt.maxlife:
             g.process_action(basic.Heal(src, tgt))
         else:
@@ -383,7 +384,7 @@ class Harvest(ForEach):
 
     def prepare(self):
         tl = self.target_list
-        g = Game.getgame()
+        g = self.game
         cards = g.deck.getcards(len(tl))
         g.players.reveal(cards)
         detach_cards(cards)
@@ -393,7 +394,7 @@ class Harvest(ForEach):
         self.trans = trans
 
     def cleanup(self):
-        g = Game.getgame()
+        g = self.game
         self.trans.end()
         g.emit_event('harvest_finish', self)
         dropped = g.deck.droppedcards
@@ -410,7 +411,7 @@ class DollControl(InstantSpellCardAction):
 
         attacker, victim = tl
         cards = user_choose_cards(self, attacker, ['cards', 'showncards'])
-        g = Game.getgame()
+        g = self.game
 
         if cards:
             g.players.reveal(cards)
@@ -454,7 +455,7 @@ class DonationBoxEffect(InstantSpellCardAction):
     def apply_action(self):
         t = self.target
         src = self.source
-        g = Game.getgame()
+        g = self.game
 
         catnames = ('cards', 'showncards', 'equips')
         cats = [getattr(t, i) for i in catnames]
@@ -507,8 +508,9 @@ class FrozenFrog(DelayedSpellCardAction, FatetellAction):
         self.fatetell_cond = lambda c: c.suit != Card.SPADE
 
     def fatetell_action(self, ft):
+        g = self.game
         if ft.succeeded:
-            turn = PlayerTurn.get_current(self.target)
+            turn = PlayerTurn.get_current(g, self.target)
             try:
                 turn.pending_stages.remove(DrawCardStage)
             except Exception:
@@ -519,6 +521,6 @@ class FrozenFrog(DelayedSpellCardAction, FatetellAction):
         return False
 
     def fatetell_postprocess(self):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
         g.process_action(DropCards(None, tgt, [self.associated_card]))

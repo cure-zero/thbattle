@@ -10,7 +10,7 @@ import random
 # -- third party --
 # -- own --
 from game.autoenv import Game, sync_primitive
-from game.base import get_seed_for
+from game.base import get_seed_for, GameViralContext
 from utils import partition
 import settings
 
@@ -19,7 +19,7 @@ import settings
 log = logging.getLogger('thb.common')
 
 
-class CharChoice(object):
+class CharChoice(GameViralContext):
     chosen = False
     akari = False
 
@@ -43,7 +43,7 @@ class CharChoice(object):
 
         if akari:
             self.akari = True
-            if Game.getgame().CLIENT_SIDE:
+            if self.game.CLIENT_SIDE:
                 from thb import characters
                 self.char_cls = characters.akari.Akari
 
@@ -69,7 +69,7 @@ class PlayerIdentity(object):
         self._type = data[1]
 
     def is_type(self, t):
-        g = Game.getgame()
+        g = self.game
         pl = g.players
         return sync_primitive(self.type == t, pl)
 

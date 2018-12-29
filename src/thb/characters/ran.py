@@ -28,7 +28,7 @@ class ExtremeIntelligence(Skill):
 class ProphetAction(GenericAction):
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
         n = min(len([p for p in g.players if not p.dead]), 5)
         cards = g.deck.getcards(n)
 
@@ -60,7 +60,7 @@ class ProphetHandler(EventHandler):
             if not tgt.has_skill(Prophet): return act
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
-            Game.getgame().process_action(ProphetAction(tgt, tgt))
+            self.game
 
         return act
 
@@ -82,7 +82,7 @@ class ExtremeIntelligenceAction(GenericAction):
     def apply_action(self):
         p = self.source
         cards = self.cards
-        g = Game.getgame()
+        g = self.game
         g.process_action(DropCards(p, p, cards))
 
         act = self.action
@@ -118,7 +118,7 @@ class ExtremeIntelligenceHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, InstantSpellCardAction):
             if isinstance(act, Reject): return act
-            g = Game.getgame()
+            g = self.game
             target = g.current_player
 
             for p in g.players.exclude(target):
@@ -148,7 +148,7 @@ class ExtremeIntelligenceHandler(EventHandler):
                     g.process_action(nact)
 
         elif evt_type == 'game_begin':
-            g = Game.getgame()
+            g = self.game
             for p in g.players:
                 if isinstance(p, Ran):
                     p.tags['ran_ei'] = 0  # for ui
@@ -219,7 +219,7 @@ class NakedFoxHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):
-            g = Game.getgame()
+            g = self.game
             tgt = act.target
             if not tgt.has_skill(NakedFox): return act
             pact = g.action_stack[-1]

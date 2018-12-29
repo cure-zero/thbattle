@@ -27,7 +27,7 @@ class MasochistAction(UserAction):
         self.source, self.target, self.amount = target, target, n
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
         a = DrawCards(tgt, self.amount * 2)
         g.process_action(a)
@@ -74,7 +74,7 @@ class MasochistHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            Game.getgame().process_action(MasochistAction(tgt, act.amount))
+            self.game.process_action(MasochistAction(tgt, act.amount))
 
         return act
 
@@ -104,11 +104,11 @@ class ScarletPerceptionHandler(EventHandler):
         if evt_type == 'action_after' and isinstance(act, Fatetell):
             tgt = act.target
             if act.card.color != Card.RED: return act
-            g = Game.getgame()
+            g = self.game
             if not act.card.detached:
                 return act
 
-            g = Game.getgame()
+            g = self.game
             pl = [p for p in g.players if p.has_skill(ScarletPerception) and not p.dead]
             assert len(pl) <= 1
 

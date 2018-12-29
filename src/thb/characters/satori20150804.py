@@ -18,7 +18,7 @@ class MindReadEffect(UserAction):
         tgt = self.target
         assert tgt.cards
         c = random_choose_card([tgt.cards])
-        g = Game.getgame()
+        g = self.game
         g.players.reveal(c)
         tgt.tags['mind_hack_effect-%s' % g.turn_count] = True
         migrate_cards([c], tgt.showncards)
@@ -27,7 +27,7 @@ class MindReadEffect(UserAction):
 
 class MindReadAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
         ttags(src)['mind_read'] = True
         return g.process_action(MindReadEffect(src, tgt))
@@ -47,7 +47,7 @@ class MindReadHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_shootdown' and isinstance(act, LaunchCard):
             src = act.source
-            g = Game.getgame()
+            g = self.game
             if not src.tags['mind_hack_effect-%s' % g.turn_count]: return act
             if any(c for c in VirtualCard.unwrap([act.card]) if c.color == Card.BLACK and c in src.showncards):
                 raise MindReadLimit
@@ -85,7 +85,7 @@ class RosaHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
-            g = Game.getgame()
+            g = self.game
             pact = g.action_stack[-1]
             src, tgt = act.source, act.target
 
@@ -108,7 +108,7 @@ class RosaHandler(EventHandler):
             return
 
         if user_input([src], ChooseOptionInputlet(self, (False, True))):
-            g = Game.getgame()
+            g = self.game
             g.process_action(MindReadEffect(src, tgt))
 
 
@@ -126,7 +126,7 @@ class HeartfeltFancyAction(UserAction):
 
     def apply_action(self):
         src, tgt, cl = self.source, self.target, self.cards
-        g = Game.getgame()
+        g = self.game
 
         c = user_input([src], ChooseIndividualCardInputlet(self, cl)) or random_choose_card([cl])
         g.process_action(Reforge(src, tgt, c))
@@ -159,7 +159,7 @@ class HeartfeltFancyHandler(EventHandler):
             if not len(to) >= 2:
                 return arg
 
-            g = Game.getgame()
+            g = self.game
             for p in g.players:
                 if p.dead: continue
                 if not p.has_skill(HeartfeltFancy): continue

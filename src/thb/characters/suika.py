@@ -23,7 +23,7 @@ class HeavyDrinkerFailed(ActionShootdown):
 class HeavyDrinkerAction(UserAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         src.tags['suika_target'].append(tgt)
         if g.process_action(Pindian(src, tgt)):
             g.process_action(LaunchCard(src, [src], HeavyDrinkerWine(src), bypass_check=True))
@@ -102,7 +102,7 @@ class DrunkenDreamHandler(EventHandler):
             if not src.tags['wine']:
                 return act
 
-            g = Game.getgame()
+            g = self.game
             g.process_action(DrunkenDreamDrawCards(src, 1))
 
         return act

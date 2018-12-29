@@ -44,7 +44,7 @@ class JiongyanjianGrazeAction(UserAction):
 
     def apply_action(self):
         tgt, card = self.target, self.card
-        return Game.getgame().process_action(LaunchCard(tgt, [tgt], card))
+        return self.game.process_action(LaunchCard(tgt, [tgt], card))
 
 
 class JiongyanjianDamageAction(Damage):
@@ -53,7 +53,7 @@ class JiongyanjianDamageAction(Damage):
 
 class JiongyanjianMixin(object):
     def process_card(self, card):
-        g = Game.getgame()
+        g = self.game
         if not card.is_card(GrazeCard):
             tgt = self.target
             if not g.process_action(JiongyanjianGrazeAction(tgt, tgt, card)):
@@ -79,7 +79,7 @@ class JiongyanjianHandler(EventHandler):
             if not act.succeeded and tgt.has_skill(Jiongyanjian):
                 for c in tgt.equips:
                     if 'weapon' in c.category:
-                        g = Game.getgame()
+                        g = self.game
                         g.process_action(JiongyanjianDamageAction(tgt, src, 1))
                         break
 
@@ -104,7 +104,7 @@ class XianshizhanAction(UserAction):
 
     def apply_action(self):
         src, tgt, c = self.source, self.target, self.card
-        g = Game.getgame()
+        g = self.game
         g.process_action(Reforge(src, src, c))
         g.process_action(LaunchCard(src, [tgt], XianshizhanAttackCard(src), bypass_check=True))
         return True
@@ -117,7 +117,7 @@ class XianshizhanHandler(EventHandler):
         if evt_type == 'action_apply' and isinstance(act, FinalizeStage):
             tgt = act.target
             if tgt.has_skill(Xianshizhan):
-                g = Game.getgame()
+                g = self.game
                 pl = [p for p in g.players if not p.dead and p is not tgt]
                 _, rst = ask_for_action(self, [tgt], ('cards', 'showncards', 'equips'), pl)
                 if not rst:

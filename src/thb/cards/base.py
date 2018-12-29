@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
 from collections import deque
@@ -10,6 +10,7 @@ import logging
 # -- third party --
 # -- own --
 from game.autoenv import Game, GameError, GameObject, list_shuffle
+from game.base import GameViralContext
 
 
 # -- code --
@@ -155,7 +156,7 @@ class PhysicalCard(Card):
         return 84065234 + self.sync_id
 
 
-class VirtualCard(Card):
+class VirtualCard(Card, GameViralContext):
     sort_index = 0
     sync_id = 0
     usage = 'none'
@@ -287,8 +288,9 @@ class CardList(GameObject, deque):
 
 
 class Deck(GameObject):
-    def __init__(self, card_definition=None):
+    def __init__(self, g, card_definition=None):
         from thb.cards import definition
+        self.game = g
         card_definition = card_definition or definition.card_definition
 
         self.cards_record = {}
@@ -339,20 +341,23 @@ class Deck(GameObject):
 
     def register_card(self, card):
         assert not card.sync_id
-        sid = Game.getgame().get_synctag()
+        g = self.game
+        sid = g.get_synctag()
         card.sync_id = sid
         self.cards_record[sid] = card
         return sid
 
     def register_vcard(self, vc):
-        sid = Game.getgame().get_synctag()
+        g = self.game
+        sid = g.get_synctag()
         vc.sync_id = sid
         self.vcards_record[sid] = vc
         return sid
 
     def shuffle(self, cl):
         owner = cl.owner
-        list_shuffle(cl, owner)
+        g = self.game
+        list_shuffle(g, cl, owner)
 
         for c in cl:
             c.sync_id = 0

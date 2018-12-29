@@ -41,7 +41,7 @@ class EchoHandler(EventHandler):
             if not tgt.has_skill(Echo):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             pact = g.action_stack[-1]
             card = getattr(pact, 'associated_card', None)
             if not card:
@@ -95,7 +95,7 @@ class ResonanceAction(AskForCard):
         self.victim = victim
 
     def process_card(self, c):
-        g = Game.getgame()
+        g = self.game
         g.process_action(ResonanceLaunchCard(self.target, [self.victim], c, bypass_check=True))
         return True
 
@@ -117,7 +117,7 @@ class ResonanceHandler(EventHandler):
             if not src.has_skill(Resonance):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             pl = [p for p in g.players if not p.dead and p not in (src, tgt)]
 
             if not pl:

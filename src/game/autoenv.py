@@ -12,7 +12,7 @@ from game.base import InterruptActionFlow, NPC, get_seed_for, list_shuffle, sync
 
 
 # -- code --
-class Game(Greenlet, Game):
+class Game(Game):
     pass
 
 
@@ -21,11 +21,10 @@ def user_input(*a, **k):
 
 
 def init(place, custom=None):
-    global Game, user_input
     if custom:
-        locals.update(custom)
+        locals().update(custom)
     elif place == 'Server':
-        from server.core import Game as G, user_input as U
+        from server.base import Game as G, user_input as U
     elif place == 'Client':
         from client.core import Game as G, user_input as U  # noqa
     else:

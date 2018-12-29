@@ -27,7 +27,7 @@ class DilemmaDamageAction(UserAction):
         tgt = self.target
 
         cards = user_choose_cards(self, tgt, ('cards', 'showncards', 'equips'))
-        g = Game.getgame()
+        g = self.game
         if cards:
             self.peer_action = 'card'
             g.players.exclude(tgt).reveal(cards)
@@ -76,7 +76,7 @@ class DilemmaHandler(EventHandler):
         if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
             return act
 
-        g = Game.getgame()
+        g = self.game
         if isinstance(act, Damage):
             g.process_action(DilemmaDamageAction(tgt, src))
         else:  # Heal
@@ -90,7 +90,7 @@ class ImperishableNight(TreatAs, Skill):
     skill_category = ('character', 'passive')
 
     def check(self):
-        return Game.getgame().current_player is not self.player
+        return self.game.current_player is not self.player
 
 
 class ImperishableNightHandler(EventHandler):
@@ -101,7 +101,7 @@ class ImperishableNightHandler(EventHandler):
         if evt_type != 'action_after': return act
         if not isinstance(act, LaunchCard): return act
 
-        g = Game.getgame()
+        g = self.game
 
         card = act.card
         if not card: return act

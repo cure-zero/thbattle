@@ -47,7 +47,7 @@ class TianyiAction(UserAction):
         else:
             assert False, 'WTF?!'
 
-        g = Game.getgame()
+        g = self.game
         for p in lst:
             g.process_action(LaunchCard(src, [p], TianyiAttack(src), bypass_check=True))
 
@@ -59,7 +59,7 @@ class TianyiHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and hasattr(act, 'associated_card'):
-            g = Game.getgame()
+            g = self.game
             lc = g.action_stack[-1]
 
             for lc in reversed(g.action_stack):
@@ -103,7 +103,7 @@ class ElingHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
-            g = Game.getgame()
+            g = self.game
             if g.current_player is not act.target:
                 return act
 

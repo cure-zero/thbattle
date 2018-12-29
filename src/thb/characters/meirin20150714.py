@@ -17,7 +17,7 @@ class QiliaoAction(UserAction):
     def apply_action(self):
         tgt = self.target
         ttags(tgt)['qiliao'] = True
-        g = Game.getgame()
+        g = self.game
 
         cl = getattr(tgt, 'meirin_qiliao', None)
         if cl is None:
@@ -33,7 +33,7 @@ class QiliaoAction(UserAction):
 
     def is_valid(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
         cl = self.associated_card.associated_cards
         n = len([p for p in g.players if not p.dead]) / 2
         if not 0 < len(cl) <= n: return False
@@ -68,7 +68,7 @@ class QiliaoDropHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerTurn):
             actor = act.target
-            g = Game.getgame()
+            g = self.game
 
             for p in g.players:
                 if not p.has_skill(Qiliao): continue
@@ -96,7 +96,7 @@ class QiliaoRecoverAction(UserAction):
         src, tgt = self.source, self.target
         qi = src.meirin_qiliao
         assert qi
-        g = Game.getgame()
+        g = self.game
         tgt.reveal(list(qi))
         migrate_cards(qi, tgt.cards, unwrap=True)
         g.process_action(Heal(src, tgt, 1))
@@ -112,7 +112,7 @@ class QiliaoRecoverHandler(EventHandler):
             if not tgt.has_skill(Qiliao): return act
             qi = getattr(tgt, 'meirin_qiliao', None)
             if not qi: return act
-            g = Game.getgame()
+            g = self.game
             pl = user_choose_players(self, tgt, [p for p in g.players if not p.dead])
             if not pl: return act
             g.process_action(QiliaoRecoverAction(tgt, pl[0]))

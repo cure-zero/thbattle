@@ -50,7 +50,7 @@ class SpiritingAwayAction(UserAction):
 
 class SpiritingAwayReturningAction(GenericAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         for p in g.players:
             cl = getattr(p, 'yukari_dimension', None)
             cl and migrate_cards(cl, p.cards, unwrap=True)
@@ -81,7 +81,7 @@ class SpiritingAwayHandler(EventHandler):
             if not tgt.has_skill(SpiritingAway):
                 return arg
 
-            g = Game.getgame()
+            g = self.game
             g.process_action(SpiritingAwayReturningAction(tgt, tgt))
 
         return arg

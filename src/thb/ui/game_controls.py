@@ -1090,7 +1090,7 @@ class GameCharacterPortrait(Frame):
     def on_game_event(self, evt_type, arg):
         if evt_type == 'action_after' and isinstance(arg, actions.RevealIdentity):
             act = arg
-            g = Game.getgame()
+            g = self.game
             me = g.me
             if (act.target in (self.player, self.character)) and (me in act.to if isinstance(act.to, list) else me is act.to):
                 self.update_identity(self.character or self.player)

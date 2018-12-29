@@ -17,7 +17,7 @@ class AutumnWindEffect(GenericAction):
     def apply_action(self):
         src, tgt = self.source, self.target
 
-        g = Game.getgame()
+        g = self.game
 
         catnames = ('cards', 'showncards', 'equips')
         cats = [getattr(tgt, i) for i in catnames]
@@ -44,7 +44,7 @@ class AutumnWindAction(UserAction):
         self.target_list = target_list
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src = self.source
 
         for p in self.target_list:
@@ -66,7 +66,7 @@ class AutumnWindHandler(EventHandler):
             if not tgt.has_skill(AutumnWind):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
@@ -110,7 +110,7 @@ class DecayDrawCardHandler(EventHandler):
         if evt_type != 'card_migration':
             return arg
 
-        g = Game.getgame()
+        g = self.game
         me = getattr(g, 'current_player', None)
         if me is None: return arg
         if me.dead: return arg
@@ -161,7 +161,7 @@ class DecayDamageHandler(EventHandler):
             if not (tgt and tgt.has_skill(Decay)):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             if g.current_player is tgt: return act
             if not g.current_player: return act
             g.process_action(DecayAction(src, g.current_player))
@@ -172,7 +172,7 @@ class DecayDamageHandler(EventHandler):
             if not t['shizuha_decay']: return act
 
             t['shizuha_decay'] = False
-            g = Game.getgame()
+            g = self.game
             g.process_action(DecayEffect(tgt, tgt, act))
 
         return act

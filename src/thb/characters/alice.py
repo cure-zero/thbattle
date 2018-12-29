@@ -32,7 +32,7 @@ class LittleLegion(Skill):
 
 class LittleLegionAttackAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src = self.source
         pl = [p for p in g.players if not p.dead and p is not src]
         if not pl:
@@ -59,7 +59,7 @@ class LittleLegionCoverEffect(Heal):
 
 class LittleLegionCoverAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src = self.source
         pl = [p for p in g.players if not p.dead and p.life < p.maxlife]
         if not pl:
@@ -83,10 +83,10 @@ class LittleLegionHoldAction(UserAction):
     def apply_action(self):
         src = self.source
 
-        g = Game.getgame()
+        g = self.game
         g.process_action(DrawCards(src, 1))
 
-        turn = PlayerTurn.get_current(src)
+        turn = PlayerTurn.get_current(g, src)
         try:
             turn.pending_stages.remove(DropCardStage)
         except Exception:
@@ -97,7 +97,7 @@ class LittleLegionHoldAction(UserAction):
 
 class LittleLegionControlAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src = self.source
         pl = [p for p in g.players if not p.dead]
         attacker, victim = user_choose_players(self, src, pl) or (None, None)
@@ -128,7 +128,7 @@ class LittleLegionHandler(EventHandler):
             if c is None:
                 return act
 
-            g = Game.getgame()
+            g = self.game
 
             assert 'equipment' in c.category
             category = c.equipment_category
@@ -174,7 +174,7 @@ class DollBlastEffect(GenericAction):
         self.do_damage = do_damage
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
         g.process_action(DropCards(src, tgt, [self.card]))
         if self.do_damage:
@@ -190,7 +190,7 @@ class DollBlastAction(UserAction):
         self.cards  = cards
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         cl = self.cards
         track_ids = set([c.track_id for c in cl])
 
@@ -213,7 +213,7 @@ class DollBlastHandlerCommon(object):
         if not user_input([src], ChooseOptionInputlet(self, (False, True))):
             return
 
-        g = Game.getgame()
+        g = self.game
         g.process_action(DollBlastAction(src, tgt, cards))
 
 

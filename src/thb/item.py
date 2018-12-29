@@ -29,13 +29,12 @@ class ImperialChoice(GameItem):
     def description(self):
         return u'你可以选择%s出场。2v2模式不可用。' % self.char_cls.ui_meta.name
 
-    def should_usable_in_game(self, uid, mgr):
-        g = mgr.game
+    def should_usable(self, g, u, items):
         from thb.thb2v2 import THBattle2v2
         if isinstance(g, THBattle2v2):
             raise exceptions.IncorrectGameMode
 
-        for l in mgr.game_items.values():
+        for l in items.values():
             if self.sku in l:
                 raise exceptions.ChooseCharacterConflict
 
@@ -84,8 +83,7 @@ class ImperialIdentity(GameItem):
     def description(self):
         return u'你可以选择%s身份。身份场可用。' % self.disp_name
 
-    def should_usable_in_game(self, uid, mgr):
-        g = mgr.game
+    def should_usable(self, g, u, items):
         from thb.thbidentity import THBattleIdentity
         if not isinstance(g, THBattleIdentity):
             raise exceptions.IncorrectGameMode
@@ -96,13 +94,17 @@ class ImperialIdentity(GameItem):
             'accomplice': 2,
             'curtain': 1,
         }
-        if mgr.game_params['double_curtain']:
+        core = g.core
+        params = core.game.params_of(g)
+        if params['double_curtain']:
             threshold['curtain'] += 1
             threshold['attacker'] -= 1
 
         threshold[self.id] -= 1
 
-        for _uid, l in mgr.game_items.items():
+        items = core.item.items_of(g)
+        uid = core.auth.uid_of(u)
+        for _uid, l in items:
             for i in l:
                 i = GameItem.from_sku(i)
                 if not isinstance(i, self.__class__):
@@ -153,7 +155,7 @@ class European(GameItem):
     title = u'欧洲卡'
     description = u'Roll点保证第一。身份场不可用。'
 
-    def should_usable_in_game(self, uid, mgr):
+    def should_usable(self, g, u, items):
         from thb.thbidentity import THBattleIdentity
         if isinstance(mgr.game, THBattleIdentity):
             raise exceptions.IncorrectGameMode

@@ -12,6 +12,8 @@ from account import Account
 # -- code --
 log = logging.getLogger('game.items')
 
+# TODO: NOT USING
+
 
 @GameItem.register
 class Jiecao(GameItem):

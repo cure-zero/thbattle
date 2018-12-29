@@ -93,7 +93,7 @@ class AkiTributeHandler(EventHandler):
             return act, tl
 
         elif evt_type == 'harvest_finish':
-            g = Game.getgame()
+            g = self.game
             pl = [p for p in g.players if p.has_skill(AkiTribute) and not p.dead]
             assert len(pl) <= 1, 'Multiple AkiTributes!'
             if not pl: return act

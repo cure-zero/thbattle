@@ -32,7 +32,7 @@ class AshesAction(UserAction):
 
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(LifeLost(tgt, tgt))
         g.process_action(DrawCards(tgt))
         return True
@@ -44,7 +44,7 @@ class RebornAction(UserAction):
 
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(Heal(tgt, tgt))
         return True
 
@@ -60,7 +60,7 @@ class AshesHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            Game.getgame().process_action(AshesAction(tgt))
+            self.game.process_action(AshesAction(tgt))
 
         return act
 
@@ -76,7 +76,7 @@ class RebornHandler(EventHandler):
             if not tgt.has_skill(Reborn): return act
             cards = user_choose_cards(self, tgt, ('cards', 'showncards', 'equips'))
             if cards:
-                g = Game.getgame()
+                g = self.game
                 g.process_action(DropCards(tgt, tgt, cards))
                 g.process_action(RebornAction(tgt))
 

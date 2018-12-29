@@ -47,7 +47,7 @@ class KnowledgeHandler(EventHandler):
             if tgt.has_skill(Knowledge):
                 c = getattr(act, 'associated_card', None)
                 if c and c.suit == Card.SPADE and not c.is_card(RejectCard):
-                    Game.getgame().process_action(KnowledgeAction(act))
+                    self.game.process_action(KnowledgeAction(act))
 
         return act
 
@@ -65,7 +65,7 @@ class LibraryHandler(EventHandler):
                 return arg
 
             if 'instant_spellcard' in act.card.category:
-                Game.getgame().process_action(LibraryDrawCards(src, 1))
+                self.game.process_action(LibraryDrawCards(src, 1))
 
             return arg
 
@@ -75,7 +75,7 @@ class LibraryHandler(EventHandler):
         #     if arg.source is src: return arg
         #     if not src.has_skill(Library): return arg
 
-        #     Game.getgame().process_action(LibraryDrawCards(src, 1))
+        #     self.game.process_action(LibraryDrawCards(src, 1))
 
         #     return arg
 

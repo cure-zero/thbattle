@@ -20,8 +20,9 @@ class WindWalkLaunch(ActionStageLaunchCard):
 class WindWalkSkipAction(GenericAction):
     def apply_action(self):
         tgt = self.target
-        ActionStage.force_break()
-        turn = PlayerTurn.get_current(tgt)
+        g = self.game
+        ActionStage.force_break(g)
+        turn = PlayerTurn.get_current(g, tgt)
         try:
             turn.pending_stages.remove(DropCardStage)
             turn.pending_stages.remove(FinalizeStage)
@@ -35,7 +36,7 @@ class WindWalkAction(UserAction):
     card_usage = 'launch'
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
 
         while True:
@@ -102,7 +103,7 @@ class WindWalkHandler(EventHandler):
             src.tags['windwalk_last_targets'] = set()
 
         elif evt_type == 'action_shootdown' and isinstance(act, LaunchCard):
-            g = Game.getgame()
+            g = self.game
             if not isinstance(g.action_stack[-1], WindWalkAction):
                 return act
 
@@ -187,7 +188,7 @@ class DominanceHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            Game.getgame().process_action(DominanceAction(tgt))
+            self.game.process_action(DominanceAction(tgt))
 
         return act
 

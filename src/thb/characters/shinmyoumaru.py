@@ -32,7 +32,7 @@ class MiracleMalletAction(UseCard):
             source, target, ft, card
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         c = self.card
         ft = self.ft
         src = self.source
@@ -61,7 +61,7 @@ class MiracleMalletHandler(EventHandler):
 
         if cards:
             c = cards[0]
-            Game.getgame().process_action(MiracleMalletAction(p, act.target, act, c))
+            self.game.process_action(MiracleMalletAction(p, act.target, act, c))
 
         return act
 
@@ -86,7 +86,7 @@ class VengeOfTsukumogamiAction(FatetellAction):
 
     def fatetell_action(self, ft):
         if ft.succeeded:
-            Game.getgame().process_action(Damage(self.source, self.target))
+            self.game.process_action(Damage(self.source, self.target))
 
         return True
 
@@ -122,7 +122,7 @@ class VengeOfTsukumogamiHandler(EventHandler):
                 if not user_input([p], ChooseOptionInputlet(self, (False, True))):
                     break
 
-                Game.getgame().process_action(VengeOfTsukumogamiAction(p, tgt, c))
+                self.game.process_action(VengeOfTsukumogamiAction(p, tgt, c))
 
         return True
 

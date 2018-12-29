@@ -36,7 +36,7 @@ class LuckHandler(EventHandler):
                 return arg
 
             if not (p.cards or p.showncards):
-                Game.getgame().process_action(LuckDrawCards(p, 2))
+                self.game.process_action(LuckDrawCards(p, 2))
 
         return arg
 

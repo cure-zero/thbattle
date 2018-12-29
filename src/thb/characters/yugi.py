@@ -38,7 +38,7 @@ class AssaultKOFHandler(EventHandler):
             if not new.has_skill(AssaultKOF):
                 return arg
 
-            g = Game.getgame()
+            g = self.game
             op = g.get_opponent(new)
             lc = LaunchCard(new, [op], AssaultAttack(new))
             if not lc.can_fire():
@@ -87,10 +87,10 @@ class FreakingPowerHandler(EventHandler):
             if not user_input([src], ChooseOptionInputlet(self, (False, True))):
                 return act
             tgt = act.target
-            Game.getgame().process_action(FreakingPowerAction(act))
+            self.game.process_action(FreakingPowerAction(act))
 
         elif evt_type == 'action_after' and isinstance(act, Damage):
-            g = Game.getgame()
+            g = self.game
 
             pact = g.action_stack[-1]
             if not marked(pact, 'freaking_power'):

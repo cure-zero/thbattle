@@ -42,7 +42,7 @@ class IdentityRevealHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
-            g = Game.getgame()
+            g = self.game
             tgt = act.target
 
             g.process_action(RevealIdentity(tgt, g.players))
@@ -56,7 +56,7 @@ class DeathHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
-            g = Game.getgame()
+            g = self.game
             T = Identity.TYPE
 
             tgt = act.target
@@ -110,7 +110,7 @@ class DeathHandler(EventHandler):
 
         elif evt_type == 'action_after' and isinstance(act, PlayerDeath):
             T = Identity.TYPE
-            g = Game.getgame()
+            g = self.game
             tgt = act.target
             src = act.source
 
@@ -139,7 +139,7 @@ class AssistedAttackAction(UserAction):
 
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         pl = [p for p in g.players if not p.dead and p is not src]
         p, rst = ask_for_action(self, pl, ('cards', 'showncards'), [], timeout=6)
         if not p:
@@ -190,7 +190,7 @@ class AssistedUseAction(UserAction):
 
     def apply_action(self):
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
 
         pl = BatchList([p for p in g.players if not p.dead])
         pl = pl.rotate_to(tgt)[1:]
@@ -227,7 +227,7 @@ class AssistedUseHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             g.process_action(AssistedUseAction(tgt, act))
 
         return act
@@ -261,7 +261,7 @@ class AssistedGrazeHandler(AssistedUseHandler):
 class AssistedHealAction(UserAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         g.process_action(Heal(src, tgt))
         g.process_action(LifeLost(src, src))
         return True
@@ -285,7 +285,7 @@ class AssistedHealHandler(EventHandler):
             if not user_input([p], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             g.process_action(AssistedHealAction(p, tgt))
 
         return act
@@ -307,7 +307,7 @@ class ExtraCardSlotHandler(EventHandler):
             if not tgt.has_skill(ExtraCardSlot):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             n = sum(i == Identity.TYPE.ACCOMPLICE for i in g.identities)
             n -= sum(p.dead and p.identity.type == Identity.TYPE.ACCOMPLICE for p in g.players)
             act.dropn = max(act.dropn - n, 0)
@@ -361,12 +361,12 @@ class THBattleIdentityBootstrap(GenericAction):
         self.items = items
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         params = self.params
 
         from thb.cards import Deck
 
-        g.deck = Deck()
+        g.deck = Deck(g)
         g.ehclasses = []
 
         # arrange identities -->
@@ -539,16 +539,16 @@ class THBattleIdentity(Game):
     def update_event_handlers(g):
         ehclasses = list(action_eventhandlers) + g.game_ehs.values()
         ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(ehclasses))
+        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
-    def decorate(self, p):
+    def decorate(g, p):
         from thb.cards import CardList
-        p.cards          = CardList(p, 'cards')        # Cards in hand
-        p.showncards     = CardList(p, 'showncards')   # Cards which are shown to the others, treated as 'Cards in hand'
-        p.equips         = CardList(p, 'equips')       # Equipments
-        p.fatetell       = CardList(p, 'fatetell')     # Cards in the Fatetell Zone
-        p.special        = CardList(p, 'special')      # used on special purpose
-        p.showncardlists = [p.showncards, p.fatetell]  # cardlists should shown to others
+        p.cards          = CardList(p, 'cards')       # Cards in hand
+        p.showncards     = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
+        p.equips         = CardList(p, 'equips')      # Equipments
+        p.fatetell       = CardList(p, 'fatetell')    # Cards in the Fatetell Zone
+        p.special        = CardList(p, 'special')     # used on special purpose
+        p.showncardlists = [p.showncards, p.fatetell]    # cardlists should shown to others
         p.tags           = defaultdict(int)
 
     def get_stats(g):

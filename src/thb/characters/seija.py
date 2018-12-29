@@ -43,7 +43,7 @@ class InciteAction(UserAction):
 
         tags['incite_tag'] = tags['turn_count']
 
-        g = Game.getgame()
+        g = self.game
         if g.process_action(Pindian(src, tgt)):
             g.process_action(LaunchCard(tgt, [victim], InciteAttack(tgt)))
 
@@ -117,7 +117,7 @@ class ReversalHandler(EventHandler):
 
             src = act.source
             tgt = act.target
-            g = Game.getgame()
+            g = self.game
 
             # if tgt is g.current_player: return act
             if not tgt.has_skill(Reversal):

@@ -22,7 +22,7 @@ class CirnoDropCards(GenericAction):
         src, tgt = self.source, self.target
         cards = self.cards
 
-        g = Game.getgame()
+        g = self.game
         g.players.reveal(cards)
         g.process_action(DropCards(src, tgt, cards))
         return True
@@ -36,7 +36,7 @@ class BakadesuAction(UserAction):
         ttags(src)['bakadesu'] = True
 
         cl = user_choose_cards(self, tgt, ('cards', 'showncards'))
-        g = Game.getgame()
+        g = self.game
         if cl:
             g.process_action(LaunchCard(tgt, [src], cl[0]))
         else:
@@ -94,7 +94,7 @@ class PerfectFreezeAction(UserAction):
         self.damage.cancelled = True
 
         src, tgt = self.source, self.target
-        g = Game.getgame()
+        g = self.game
         cl = user_choose_cards(self, tgt, ('cards', 'showncards', 'equips'))
         c = cl[0] if cl else random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
 
@@ -137,7 +137,7 @@ class PerfectFreezeHandler(EventHandler):
             if not (src and src.has_skill(PerfectFreeze)):
                 return act
 
-            g = Game.getgame()
+            g = self.game
             for lc in reversed(g.action_stack):
                 if isinstance(lc, LaunchCard):
                     break

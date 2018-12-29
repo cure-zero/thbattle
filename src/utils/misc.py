@@ -58,6 +58,8 @@ class ObjectDict(dict):
 
 
 class BatchList(list):
+    __slots__ = ()
+
     def __getattribute__(self, name):
         try:
             list_attr = list.__getattribute__(self, name)
@@ -218,7 +220,7 @@ class Framebuffer(object):
         from pyglet import gl
         try:
             gl.glDeleteFramebuffersEXT(1, self.fbo_id)
-        except:
+        except Exception:
             pass
 
     def blit_from_current_readbuffer(self, src_box, dst_box=None, mask=None, _filter=None):
@@ -231,107 +233,6 @@ class Framebuffer(object):
 
         args = tuple(src_box) + tuple(dst_box) + (mask, _filter)
         gl.glBlitFramebufferEXT(*args)
-
-
-def dilate(im, color):
-    import pyglet
-    w, h = im.width, im.height
-    _ori = bytearray(im.get_data('A', w))
-    _new = bytearray(_ori)
-
-    class accesser(object):
-        def __init__(self, arr):
-            self.arr = arr
-
-        def __getitem__(self, val):
-            x, y = val
-            if not (0 <= x < w and 0 <= y < h):
-                return 0
-            else:
-                return self.arr[y*w + x]
-
-        def __setitem__(self, loc, val):
-            x, y = loc
-            self.arr[y*w + x] = val
-
-    ori = accesser(_ori)
-    new = accesser(_new)
-
-    for x in xrange(w):
-        for y in xrange(h):
-            if any([
-                ori[x, y],
-                ori[x-1, y], ori[x+1, y], ori[x, y-1], ori[x, y+1],
-                ori[x-1, y-1], ori[x-1, y+1], ori[x+1, y-1], ori[x+1, y+1],
-            ]):
-                new[x, y] = True
-            else:
-                new[x, y] = False
-
-    color = ''.join([chr(i) for i in color]) + '\xff'
-    tr = ['\x00'*4, color]
-    new = ''.join([tr[i] for i in _new])
-    new = pyglet.image.ImageData(w, h, 'RGBA', new)
-    return new
-
-TRANS = {
-    124: 101,  # LOAD_FAST: LOAD_NAME,
-    125: 90,  # STORE_FAST: STORE_NAME,
-    126: 91,  # DELETE_FAST: DELETE_NAME,
-}
-
-
-def pinnable(*scopevars):
-    def _pinnable(f):
-        c = f.__code__
-
-        assert c.co_argcount == 0
-        assert len(c.co_freevars) == 0
-        assert len(c.co_cellvars) == 0
-
-        names = c.co_names
-        vnames = c.co_varnames
-
-        len_names = len(names)
-
-        bcode = [ord(i) for i in c.co_code]
-        nbcode = []
-        i = 0
-        n = len(bcode)
-        while i < n:
-            op = bcode[i]
-            nop = TRANS.get(op, op)
-            i += 1
-            if op >= 90:  # HAVE_ARGUMENT
-                if op in (124, 125, 126):  # (LOAD|STORE|DELETE)_FAST opcodes
-                    nbcode.append(nop)
-                    arg = bcode[i] + (bcode[i+1] << 8)
-                    arg += len_names
-                    nbcode.extend([arg & 255, (arg >> 8) & 255])
-                elif op == 116:  # LOAD_GLOBAL
-                    arg = bcode[i] + (bcode[i+1] << 8)
-                    gname = names[arg]
-                    if gname in scopevars:
-                        nbcode.append(101)  # LOAD_NAME
-                    else:
-                        nbcode.append(nop)
-                    nbcode.extend(bcode[i:i+2])
-                else:
-                    nbcode.append(nop)
-                    nbcode.extend(bcode[i:i+2])
-                i += 2
-            else:
-                nbcode.append(nop)
-
-        nbcode = ''.join(chr(i) for i in nbcode)
-        newco = type(c)(
-            0, 0, c.co_stacksize, c.co_flags & (~2),  # CO_NEWLOCALS
-            nbcode, c.co_consts, names + vnames,
-            tuple(), c.co_filename, '<pinnable %s>' % f.__name__,
-            c.co_firstlineno, c.co_lnotab
-        )
-        return newco
-    return _pinnable
 
 
 def remove_dups(s):
@@ -389,7 +290,7 @@ def gif_to_animation(giffile):
         framedata.append(im.convert('RGBA').tostring())
         try:
             im.seek(im.tell()+1)
-        except:
+        except Exception:
             break
 
     dur[0] = 100
@@ -410,37 +311,6 @@ def gif_to_animation(giffile):
     return anim
 
 
-class DisplayList(object):
-    compiled = False
-
-    def __init__(self):
-        from pyglet import gl
-        self._list_id = gl.glGenLists(1)
-
-    def __enter__(self):
-        self.compiled = True
-        from pyglet import gl
-        gl.glNewList(self._list_id, gl.GL_COMPILE)
-        return self
-
-    def __exit__(self, *exc_args):
-        from pyglet import gl
-        gl.glEndList()
-
-    def __call__(self):
-        if not self.compiled:
-            return Exception('Not compiled!')
-        from pyglet import gl
-        gl.glCallList(self._list_id)
-
-    def __del__(self):
-        from pyglet import gl
-        try:
-            gl.glDeleteLists(self._list_id, 1)
-        except:
-            pass
-
-
 def extendclass(clsname, bases, _dict):
     for cls in bases:
         for key, value in _dict.items():
@@ -459,10 +329,6 @@ def textsnap(text, font, l):
         return text
 
     return text[:i]
-
-
-def textwidth(text, font):
-    return sum([g.advance for g in font.get_glyphs(text)])
 
 
 def partition(pred, lst):
@@ -569,7 +435,7 @@ def swallow(f):
     def wrapper(*a, **k):
         try:
             return f(*a, **k)
-        except:
+        except Exception:
             pass
 
     return wrapper
@@ -638,13 +504,13 @@ class GenericPool(object):
             try:
                 item = container.get()
                 yield item
-            except:
+            except Exception:
                 item = self.factory()
                 raise
             finally:
                 try:
                     container.put_nowait(item)
-                except:
+                except Exception:
                     pass
 
         return manager()
@@ -717,6 +583,8 @@ def throttle(seconds):
                 state.running = True
                 gevent.spawn(after)
                 f(*a, **k)
+
+        wrapper.__name__ = f.__name__
 
         return wrapper
 
@@ -804,7 +672,7 @@ class BusinessException(Exception):
 class exceptions(object):
     def __getattr__(self, k):
         snake_case = '_'.join([
-            i.lower() for i in re.findall(r'[A-Z]+[a-z]+', k)
+            i.lower() for i in re.findall(r'[A-Z][a-z]+|[A-Z]+(?![a-z])', k)
         ])
 
         cls = type(k, (BusinessException,), {'snake_case': snake_case})

@@ -78,7 +78,7 @@ def get_characters(*cats):
 def mixin_character(player, char_cls):
     assert issubclass(char_cls, Character)
 
-    g = Game.getgame()
+    g = self.game
     player.index = g.get_playerid(player)
 
     old = None

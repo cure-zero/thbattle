@@ -21,7 +21,7 @@ class MijincihangzhanAttack(Attack):
 class MijincihangzhanDuelMixin(object):
     # 迷津慈航斩 弹幕战
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         source = self.source
         target = self.target
 
@@ -47,10 +47,10 @@ class NitoryuuWearEquipmentAction(UserAction):
         self.card = card
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         card = self.card
         tgt = self.target
-        g = Game.getgame()
+        g = self.game
 
         weapons = [e for e in tgt.equips if e.equipment_category == 'weapon']
         if len(weapons) > 1:
@@ -73,7 +73,7 @@ class NitoryuuWearEquipmentHandler(EventHandler):
         if 'equipment' not in c.category: return arg
         if c.equipment_category != 'weapon': return arg
 
-        g = Game.getgame()
+        g = self.game
         g.process_action(NitoryuuWearEquipmentAction(tgt, tgt, c))
         return we, tgt, c, 'handled'
 
@@ -125,7 +125,7 @@ class YoumuHandler(EventHandler):
             if rst: return arg
             if not isinstance(act, MijincihangzhanAttack): return arg
 
-            g = Game.getgame()
+            g = self.game
             return act, not g.process_action(LaunchGraze(act.target))
 
         return act

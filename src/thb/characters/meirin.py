@@ -56,7 +56,7 @@ class LoongPunchAction(GenericAction):
         self.type = _type
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
         c = user_input([src], ChoosePeerCardInputlet(self, tgt, ('cards', 'showncards')))
         c = c or random_choose_card([tgt.cards, tgt.showncards])
@@ -73,7 +73,7 @@ class LoongPunchHandler(EventHandler):
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, LaunchGraze):
             if not act.succeeded: return act
-            g = Game.getgame()
+            g = self.game
             pact = g.action_stack[-1]
             if not isinstance(pact, BaseAttack): return act
             self.do_effect(pact.source, pact.target, 'attack')
@@ -86,7 +86,7 @@ class LoongPunchHandler(EventHandler):
         if not (tgt.cards or tgt.showncards): return
         if not user_input([src], ChooseOptionInputlet(self, (False, True))): return
 
-        g = Game.getgame()
+        g = self.game
         g.process_action(LoongPunchAction(src, tgt, _type))
 
 
@@ -96,7 +96,7 @@ class RiverBehindAwake(GenericAction):
         assert tgt.has_skill(RiverBehind)
         tgt.skills.remove(RiverBehind)
         tgt.skills.append(Taichi)
-        g = Game.getgame()
+        g = self.game
         g.process_action(MaxLifeChange(tgt, tgt, -1))
         return True
 
@@ -108,7 +108,7 @@ class RiverBehindHandler(EventHandler):
         if evt_type == 'action_apply' and isinstance(act, PlayerTurn):
             tgt = act.target
             if not tgt.has_skill(RiverBehind): return act
-            g = Game.getgame()
+            g = self.game
             if tgt.life <= 2 and tgt.life <= min(p.life for p in g.players if not p.dead):
                 g.process_action(RiverBehindAwake(tgt, tgt))
         return act

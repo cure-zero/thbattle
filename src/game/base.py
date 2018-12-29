@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
-from collections import defaultdict, deque
-from contextlib import contextmanager
+from collections import defaultdict
 import logging
 import random
 
@@ -14,16 +13,12 @@ import gevent
 
 # -- own --
 from endpoint import EndpointDied
-from utils import Packet, exceptions, instantiate
+from utils import BatchList, exceptions, instantiate
+from utils.viral import ViralContext
 
 
 # -- code --
 log = logging.getLogger('Game')
-
-intern('action_shootdown')
-intern('action_before')
-intern('action_apply')
-intern('action_after')
 
 all_gameobjects = set()
 game_objects_hierarchy = set()
@@ -48,7 +43,7 @@ class GameObjectMeta(type):
             try:
                 rep_class = cls.rep_class(cls)
                 return lambda *a, **k: value.__get__(None, rep_class)
-            except:
+            except Exception:
                 pass
 
         return value
@@ -101,198 +96,17 @@ class InterruptActionFlow(GameException):
         self.unwind_to = unwind_to
 
 
-class ActionShootdown(BaseException):
-    __metaclass__ = GameObjectMeta
+class GameViralContext(ViralContext):
+    VIRAL_SEARCH = 'g', 'self'
 
-    def __nonzero__(self):
-        return False
+    def viral_import(self, g):
+        self.game = g
 
-
-class EventHandler(GameObject):
-    execute_before = ()
-    execute_after = ()
-    group = None
-    interested = None
-
-    def handle(self, evt_type, data):
-        raise GameError('Override handle function to implement EventHandler logics!')
-
-    def get_interested(self):
-        interested = self.interested
-        assert isinstance(interested, (list, tuple)), "Should specify interested events! %r" % self.__class__
-        return list(interested)
-
-    @staticmethod
-    def make_list(eh_classes, fold_group=True):
-        table = {}
-        eh_classes = set(eh_classes)
-        groups = defaultdict(list)
-
-        for cls in eh_classes:
-            assert not issubclass(cls, EventHandlerGroup), 'Should not pass group in make_list, %r' % cls
-            grp = cls.group if fold_group else None
-            if grp is not None:
-                groups[grp].append(cls)
-                cls = grp
-
-            table[cls.__name__] = cls()
-
-        for grp, lst in groups.iteritems():
-            eh = table[grp.__name__]
-            eh.set_handlers(EventHandler.make_list(lst, fold_group=False))
-
-        allnames = frozenset(table)
-
-        for eh in table.itervalues():
-            eh.execute_before = set(eh.execute_before) & allnames  # make it instance var
-            eh.execute_after = set(eh.execute_after) & allnames
-
-        for clsname, eh in table.iteritems():
-            for before in eh.execute_before:
-                table[before].execute_after.add(clsname)
-
-            for after in eh.execute_after:
-                table[after].execute_before.add(clsname)
-
-        l = table.values()
-        l.sort(key=lambda v: v.__class__.__name__)  # must sync between server and client
-
-        toposorted = []
-        while l:
-            deferred = []
-            commit = []
-            for eh in l:
-                if not eh.execute_after:
-                    for b in eh.execute_before:
-                        table[b].execute_after.remove(eh.__class__.__name__)
-                    commit.append(eh)
-                else:
-                    deferred.append(eh)
-
-            if not commit:
-                raise GameError("Can't resolve dependencies! Check for circular reference!")
-
-            toposorted.extend(commit)
-            l = deferred
-
-        return toposorted
-
-    @staticmethod
-    def _dump_eh_dependency_graph():
-        from game.autoenv import EventHandler
-        ehs = {i for i in all_gameobjects if issubclass(i, EventHandler)}
-        ehs.remove(EventHandler)
-        dependencies = set()
-        for eh in ehs:
-            for b in eh.execute_before:
-                dependencies.add((eh.__name__, b))
-
-            for a in eh.execute_after:
-                dependencies.add((a, eh.__name__))
-
-        with open('/dev/shm/eh_relations.dot', 'w') as f:
-            f.write('digraph {\nrankdir=LR;\n')
-            f.write('\n'.join([
-                '%s -> %s;' % (a, b)
-                for a, b in dependencies
-            ]))
-            f.write('}')
+    def viral_export(self):
+        return self.game
 
 
-class EventHandlerGroup(EventHandler):
-    handlers = ()
-
-    def set_handlers(self, handlers):
-        self.handlers = handlers[:]
-
-
-class Action(GameObject):
-    cancelled = False
-    done = False
-    invalid = False
-
-    def __new__(cls, *a, **k):
-        try:
-            g = Game.getgame()
-            actual_cls = g.action_types.get(cls, cls)
-        except:
-            g = None
-            actual_cls = cls
-
-        obj = GameObject.__new__(actual_cls, *a, **k)
-
-        if g:
-            for hook in reversed(g._action_hooks):
-                obj = hook(obj)
-
-        return obj
-
-    @staticmethod
-    def rep_class(cls):
-        try:
-            g = Game.getgame()
-            return g.action_types.get(cls, cls)
-        except:
-            return cls
-
-    def __init__(self, source, target):
-        self.source = source
-        self.target = target
-
-    def action_shootdown_exception(self):
-        if not self.is_valid():
-            raise ActionShootdown(self)
-
-        _ = Game.getgame().emit_event('action_shootdown', self)
-        assert _ is self, "You can't replace action in 'action_shootdown' event!"
-
-    def action_shootdown(self):
-        try:
-            self.action_shootdown_exception()
-            return None
-
-        except ActionShootdown as e:
-            return e
-
-    def can_fire(self):
-        '''
-        Return true if the action can be fired.
-        '''
-        rst = self.action_shootdown()
-        return True if rst is None else rst
-
-    def apply_action(self):
-        raise GameError('Override apply_action to implement Action logics!')
-
-    def is_valid(self):
-        '''
-        Return True if this action is complete and ready to fire.
-        '''
-        return True
-
-    def __repr__(self):
-        return self.__class__.__name__
-
-
-class AbstractPlayer(GameObject):
-    index = None
-
-    def reveal(self, obj_list):
-        raise GameError('Abstract')
-
-    def __repr__(self):
-        return self.__class__.__name__
-
-
-class NPC(object):
-    __slots__ = ('name', 'input_handler')
-
-    def __init__(self, name, input_handler):
-        self.name = name
-        self.input_handler = input_handler
-
-
-class Game(GameObject):
+class Game(GameObject, GameViralContext):
     '''
     The Game class, all game mode derives from this.
     Provides fundamental behaviors.
@@ -310,17 +124,20 @@ class Game(GameObject):
     npc_players = []
 
     def __init__(self):
+        self.players = BatchList()
+        self.game = self
+
         self.event_handlers = []
         self.adhoc_ehs      = []
         self.ehs_cache      = {}
         self.action_stack   = []
         self.hybrid_stack   = []
-        self.action_types   = {}
         self.ended          = False
-        self._action_hooks  = []
         self.winners        = []
         self.turn_count     = 0
         self.event_observer = None
+
+        self._ = {}
 
     def set_event_handlers(self, ehs):
         self.event_handlers = ehs[:]
@@ -415,14 +232,9 @@ class Game(GameObject):
             assert eh is self.hybrid_stack.pop()
 
         if data is None:
-            log.debug('EventHandler %s returned None' % eh.__class__.__name__)
+            raise Exception('EventHandler %s returned None' % eh.__class__.__name__)
 
         return data
-
-    @staticmethod
-    def getgame():
-        from .autoenv import Game
-        return Game.getgame()
 
     def process_action(self, action):
         '''
@@ -512,15 +324,176 @@ class Game(GameObject):
     def get_synctag(self):
         raise GameError('Abstract')
 
-    @contextmanager
-    def action_hook(self, hook):
-        ''' Dark art, do not use '''
+
+class ActionShootdown(BaseException):
+    __metaclass__ = GameObjectMeta
+
+    def __nonzero__(self):
+        return False
+
+
+class EventHandler(GameObject):
+    execute_before = ()
+    execute_after = ()
+    group = None
+    interested = None
+
+    def __init__(self, g):
+        self.game = g
+
+    def handle(self, evt_type, data):
+        raise GameError('Override handle function to implement EventHandler logics!')
+
+    def get_interested(self):
+        interested = self.interested
+        assert isinstance(interested, (list, tuple)), "Should specify interested events! %r" % self.__class__
+        return list(interested)
+
+    @staticmethod
+    def make_list(g, eh_classes, fold_group=True):
+        table = {}
+        eh_classes = set(eh_classes)
+        groups = defaultdict(list)
+
+        for cls in eh_classes:
+            assert not issubclass(cls, EventHandlerGroup), 'Should not pass group in make_list, %r' % cls
+            grp = cls.group if fold_group else None
+            if grp is not None:
+                groups[grp].append(cls)
+                cls = grp
+
+            table[cls.__name__] = cls(g)
+
+        for grp, lst in groups.iteritems():
+            eh = table[grp.__name__]
+            eh.set_handlers(EventHandler.make_list(g, lst, fold_group=False))
+
+        allnames = frozenset(table)
+
+        for eh in table.itervalues():
+            eh.execute_before = set(eh.execute_before) & allnames  # make it instance var
+            eh.execute_after = set(eh.execute_after) & allnames
+
+        for clsname, eh in table.iteritems():
+            for before in eh.execute_before:
+                table[before].execute_after.add(clsname)
+
+            for after in eh.execute_after:
+                table[after].execute_before.add(clsname)
+
+        l = table.values()
+        l.sort(key=lambda v: v.__class__.__name__)  # must sync between server and client
+
+        toposorted = []
+        while l:
+            deferred = []
+            commit = []
+            for eh in l:
+                if not eh.execute_after:
+                    for b in eh.execute_before:
+                        table[b].execute_after.remove(eh.__class__.__name__)
+                    commit.append(eh)
+                else:
+                    deferred.append(eh)
+
+            if not commit:
+                raise GameError("Can't resolve dependencies! Check for circular reference!")
+
+            toposorted.extend(commit)
+            l = deferred
+
+        return toposorted
+
+    @staticmethod
+    def _dump_eh_dependency_graph():
+        from game.autoenv import EventHandler
+        ehs = {i for i in all_gameobjects if issubclass(i, EventHandler)}
+        ehs.remove(EventHandler)
+        dependencies = set()
+        for eh in ehs:
+            for b in eh.execute_before:
+                dependencies.add((eh.__name__, b))
+
+            for a in eh.execute_after:
+                dependencies.add((a, eh.__name__))
+
+        with open('/dev/shm/eh_relations.dot', 'w') as f:
+            f.write('digraph {\nrankdir=LR;\n')
+            f.write('\n'.join([
+                '%s -> %s;' % (a, b)
+                for a, b in dependencies
+            ]))
+            f.write('}')
+
+
+class EventHandlerGroup(EventHandler):
+    handlers = ()
+
+    def set_handlers(self, handlers):
+        self.handlers = handlers[:]
+
+
+class Action(GameObject, GameViralContext):
+    cancelled = False
+    done = False
+    invalid = False
+
+    def __init__(self, source, target):
+        raise Exception('Run!')
+        self.source = source
+        self.target = target
+
+    def action_shootdown_exception(self):
+        if not self.is_valid():
+            raise ActionShootdown(self)
+
+        _ = self.game.emit_event('action_shootdown', self)
+        assert _ is self, "You can't replace action in 'action_shootdown' event!"
+
+    def action_shootdown(self):
         try:
-            self._action_hooks.append(hook)
-            yield
-        finally:
-            expected_hook = self._action_hooks.pop()
-            assert expected_hook is hook
+            self.action_shootdown_exception()
+            return None
+
+        except ActionShootdown as e:
+            return e
+
+    def can_fire(self):
+        '''
+        Return true if the action can be fired.
+        '''
+        rst = self.action_shootdown()
+        return True if rst is None else rst
+
+    def apply_action(self):
+        raise GameError('Override apply_action to implement Action logics!')
+
+    def is_valid(self):
+        '''
+        Return True if this action is complete and ready to fire.
+        '''
+        return True
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+
+class AbstractPlayer(GameObject):
+    index = None
+
+    def reveal(self, obj_list):
+        raise GameError('Abstract')
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+
+class NPC(object):
+    __slots__ = ('name', 'input_handler')
+
+    def __init__(self, name, input_handler):
+        self.name = name
+        self.input_handler = input_handler
 
 
 class SyncPrimitive(GameObject):
@@ -553,18 +526,18 @@ def sync_primitive(val, to):
         return v.value
 
 
-def get_seed_for(p):
+def get_seed_for(g, p):
     from game.autoenv import Game
     if Game.SERVER_SIDE:
-        seed = Game.getgame().random.getrandbits(63)
+        seed = g.random.getrandbits(63)
     else:
         seed = 0L
 
     return sync_primitive(seed, p)
 
 
-def list_shuffle(lst, plain_to):
-    seed = get_seed_for(plain_to)
+def list_shuffle(g, lst, plain_to):
+    seed = get_seed_for(g, plain_to)
 
     if seed:  # cardlist owner & server
         shuffler = random.Random(seed)
@@ -632,7 +605,7 @@ class Inputlet(GameObject):
         return '<I:{}>'.format(self.tag())
 
 
-class InputTransaction(object):
+class InputTransaction(GameViralContext):
     def __init__(self, name, involved, **kwargs):
         self.name = name
         self.involved = involved[:]
@@ -642,8 +615,7 @@ class InputTransaction(object):
         return self.begin()
 
     def begin(self):
-        from game.autoenv import Game
-        g = Game.getgame()
+        g = self.game
         g.emit_event('user_input_transaction_begin', self)
         return self
 
@@ -652,49 +624,91 @@ class InputTransaction(object):
         return False
 
     def end(self):
-        from game.autoenv import Game
-        g = Game.getgame()
+        g = self.game
         g.emit_event('user_input_transaction_end', self)
 
     def notify(self, evt_name, arg):
         '''
         Event For UI
         '''
-        Game.getgame().emit_event('user_input_transaction_feedback', (self, evt_name, arg))
+        self.game.emit_event('user_input_transaction_feedback', (self, evt_name, arg))
 
     def __repr__(self):
         return '<T:{}>'.format(self.name)
 
 
-class Gamedata(object):
+class Packet(object):
+    __slots__ = ('serial', 'tag', 'data', 'consumed')
+
+    def __init__(self, serial, tag, data):
+        self.serial = serial
+        self.tag = tag
+        self.data = data
+        self.consumed = False
+
+    def __repr__(self):
+        return u'Packet[%s, %s, %s, %s]' % (self.serial, self.tag, self.data, '_X'[self.consumed])
+
+
+class GameData(object):
     @instantiate
     class NODATA(object):
         def __repr__(self):
             return 'NODATA'
 
-    def __init__(self, recording=False):
-        self.gdqueue = deque(maxlen=100000)
-        self.gdevent = Event()
-        self.gdempty = Event()
-        self.recording = recording
-        self.history = []
-        self._in_gexpect = False
-        self.gdempty.set()
+    def __init__(self):
+        self._send = []
+        self._send_serial = 0
+        self._recv = []
+        self._recv_serial = 0
+        self._seen = set()
+        self._pending_recv = []
+        self._has_data = Event()
+        self._live_serial = 0
+        self._dead = False
 
-    def feed(self, data):
-        p = Packet(data)
-        self.gdqueue.append(p)
-        self.gdevent.set()
-        self.gdempty.clear()
+        self._in_gexpect = False
+
+    def feed_recv(self, serial, tag, data):
+        d = self._recv
+        if not d or d[-1].serial < serial:
+            if tag in self._seen:
+                return
+
+            self._seen.add(tag)
+            p = Packet(serial, tag, data)
+            self._recv.append(p)
+            self._pending_recv.append(p)
+            self._has_data.set()
+        else:
+            log.error('Dropping game data with decreasing serial: %s, tag: %s', serial, tag)
+
+    def feed_send(self, tag, data):
+        serial = self._send_serial
+        self._send_serial += 1
+        p = Packet(serial, tag, data)
+        self._send.append(p)
+        return p
+
+    def get_sent(self):
+        return self._send
+
+    def set_live_serial(self, serial):
+        self._live_serial = serial
+
+    def is_live(self):
+        return self._recv_serial > self._live_serial
 
     def gexpect(self, tag, blocking=True):
+        if self._dead:
+            raise EndpointDied
+
         try:
             assert not self._in_gexpect, 'NOT REENTRANT'
             self._in_gexpect = True
             blocking and log.debug('GAME_EXPECT: %s', repr(tag))
-            l = self.gdqueue
-            e = self.gdevent
-            ee = self.gdempty
+            recv = self._pending_recv
+            e = self._has_data
             e.clear()
 
             glob = False
@@ -703,23 +717,26 @@ class Gamedata(object):
                 glob = True
 
             while True:
-                for i, packet in enumerate(l):
+                for i, packet in enumerate(recv):
                     if isinstance(packet, EndpointDied):
+                        del recv[i]
                         raise packet
 
-                    if packet[0] == tag or (glob and packet[0].startswith(tag)):
+                    if packet.tag == tag or (glob and packet.tag.startswith(tag)):
                         log.debug('GAME_READ: %s', repr(packet))
-                        del l[i]
-                        self.recording and self.history.append(packet)
-                        return packet
+                        del recv[i]
+                        self._recv_serial = packet.id
+                        packet.consumed = True
+                        return [packet.tag, packet.data]
 
                     else:
                         log.debug('GAME_DATA_MISS: %s', repr(packet))
                         log.debug('EXPECTS: %s, GAME: %s', tag, getcurrent())
 
-                ee.set()
                 if blocking:
                     e.wait(timeout=5)
+                    if self._dead:
+                        raise EndpointDied
                     e.clear()
                 else:
                     e.clear()
@@ -727,18 +744,22 @@ class Gamedata(object):
         finally:
             self._in_gexpect = False
 
-    def wait_empty(self):
-        self.gdempty.wait()
-
-    def gbreak(self):
-        # is it a hack?
-        # XXX: definitly, and why it's here?! can't remember
+    def die(self):
         # Explanation:
-        # Well, when sb. exit game in input state,
+        # When sb. exit game in input state,
         # the others must wait until his timeout exceeded.
-        # called by lobby.exit_game to break such condition.
-        self.gdqueue.append(EndpointDied())
-        self.gdevent.set()
+        # called this to break such condition.
+        self._dead = True
+        self._has_data.set()
+
+    def revive(self):
+        self._dead = False
+
+    def archive(self):
+        return {
+            'send': [(i.id, i.tag, i.data) for i in self._send],
+            'recv': [(i.id, i.tag, i.data) for i in self._recv],
+        }
 
 
 class GameItem(object):

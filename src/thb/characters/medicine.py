@@ -28,7 +28,7 @@ class CiguateraAction(UserAction):
     def apply_action(self):
         tgt = self.target
         src = self.source
-        g = Game.getgame()
+        g = self.game
         g.process_action(DropCards(src, src, self.cards))
         g.process_action(LifeLost(src, tgt, 1))
         g.process_action(Wine(src, tgt))
@@ -42,7 +42,7 @@ class CiguateraHandler(EventHandler):
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, FatetellStage):
-            g = Game.getgame()
+            g = self.game
             for p in g.players:
                 if p.dead:
                     continue
@@ -89,7 +89,7 @@ class MelancholyAction(GenericAction):
         src = self.source
         tgt = self.target
         draw = DrawCards(src, self.amount)
-        g = Game.getgame()
+        g = self.game
         g.process_action(draw)
         g.process_action(ShowCards(src, draw.cards))
         if [c for c in draw.cards if c.suit != Card.CLUB]:  # any non-club
@@ -120,11 +120,11 @@ class MelancholyHandler(EventHandler):
             if not user_input([tgt], ChooseOptionInputlet(self, (False, True))):
                 return act
 
-            Game.getgame().process_action(MelancholyAction(tgt, src, amount=1))
+            self.game.process_action(MelancholyAction(tgt, src, amount=1))
 
         elif evt_type == 'action_shootdown' and isinstance(act, (LaunchCard, UseCard)):
             src = act.source
-            g = Game.getgame()
+            g = self.game
             if src.tags.get('melancholy_tag') != g.turn_count:
                 return act
 

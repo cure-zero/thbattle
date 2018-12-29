@@ -20,7 +20,7 @@ class SupportAction(UserAction):
         l = src.tags.get('daiyousei_spnum', 0)
         n = len(cl)
         if l < 3 <= l + n:
-            g = Game.getgame()
+            g = self.game
             g.process_action(Heal(src, src))
         src.tags['daiyousei_spnum'] = l + n
         tgt.reveal(cl)
@@ -49,9 +49,10 @@ class Support(Skill):
 class SupportKOFAction(UserAction):
     def apply_action(self):
         tgt = self.target
+        g = self.game
         cl = tgt.support_cl = CardList(tgt, 'support')
 
-        with MigrateCardsTransaction(self) as trans:
+        with MigrateCardsTransaction(g, self) as trans:
             migrate_cards(tgt.cards, cl, unwrap=True, trans=trans)
             migrate_cards(tgt.showncards, cl, unwrap=True, trans=trans)
             migrate_cards(tgt.equips, cl, unwrap=True, trans=trans)
@@ -75,7 +76,7 @@ class SupportKOFHandler(EventHandler):
             if not old: return arg
             if not getattr(old, 'support_cl', None): return arg
 
-            g = Game.getgame()
+            g = self.game
             g.process_action(SupportKOFReturningAction(old, new))
 
         elif evt_type == 'action_apply' and isinstance(arg, PlayerDeath):
@@ -86,7 +87,7 @@ class SupportKOFHandler(EventHandler):
                 return arg
 
             if user_input([tgt], ChooseOptionInputlet(self, (False, True))):
-                g = Game.getgame()
+                g = self.game
                 g.process_action(SupportKOFAction(tgt, tgt))
 
         return arg

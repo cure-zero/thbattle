@@ -55,17 +55,14 @@ class Endpoint(object):
 
     @staticmethod
     def encode(p, format=FMT_PACKED):
-        def default(o):
-            return o.__data__() if hasattr(o, '__data__') else repr(o)
-
         if format == Endpoint.FMT_PACKED:
-            return msgpack.packb([Endpoint.FMT_PACKED, p], default=default, use_bin_type=True)
+            return msgpack.packb([Endpoint.FMT_PACKED, p], use_bin_type=True)
         elif format == Endpoint.FMT_BULK_COMPRESSED:
             assert isinstance(p, list)
-            data = msgpack.packb(p, default=default, use_bin_type=True)
+            data = msgpack.packb(p, use_bin_type=True)
             return msgpack.packb([Endpoint.FMT_BULK_COMPRESSED, zlib.compress(data)], use_bin_type=True)
         elif format == Endpoint.FMT_RAW_JSON:
-            return json.dumps(p, default=default)
+            return json.dumps(p)
         else:
             raise Exception('WTF?!')
 

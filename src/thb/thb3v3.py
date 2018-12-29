@@ -38,7 +38,7 @@ class DeathHandler(EventHandler):
         if evt_type != 'action_apply': return act
         if not isinstance(act, PlayerDeath): return act
 
-        g = Game.getgame()
+        g = self.game
 
         # see if game ended
         force1, force2 = g.forces
@@ -70,12 +70,12 @@ class THBattleBootstrap(GenericAction):
         self.items = items
 
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         params = self.params
 
         from thb.cards import Deck
 
-        g.deck = Deck()
+        g.deck = Deck(g)
         g.ehclasses = []
 
         if params['random_seat']:
@@ -205,7 +205,7 @@ class THBattle(Game):
     def update_event_handlers(g):
         ehclasses = list(action_eventhandlers) + g.game_ehs.values()
         ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(ehclasses))
+        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def decorate(g, p):
         from .cards import CardList

@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from options import options
 import sys
 import os
 
@@ -8,7 +7,7 @@ __metaclass__ = lambda _1, _2, _dict: _dict.pop('__module__', '..') and _dict
 
 
 # -- begin settings --
-VERSION = 'V269'
+VERSION = 'V270'
 
 CWD = os.getcwd()
 BASEDIR = os.path.dirname(os.path.realpath(__file__))
@@ -31,9 +30,6 @@ else:
     INTERPRETER_UPDATE_SERVER = None
 
 HALL_NOTICE_URL = 'http://www.thbattle.net/notice.txt'
-
-ACCOUNT_MODULE = '.freeplay' if options.freeplay else '.forum_integration'
-ACCOUNT_FORUMURL = 'http://www.thbattle.net'
 
 IS_PROTON = hasattr(os, 'uname') and ''.join(os.uname()).startswith('LinuxProton')
 
@@ -89,7 +85,7 @@ class ServerList:
             u'|DB服务器地址： %s|r'
         ) % repr(address)
 
-    if options.freeplay or IS_PROTON:
+    if IS_PROTON:
         class localhost:
             address = ('127.0.0.1', 9999)
             branch = 'HEAD'

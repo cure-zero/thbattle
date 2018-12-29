@@ -15,7 +15,7 @@ from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 # -- code --
 class RiversideAction(UserAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         src, tgt = self.source, self.target
         src.tags['riverside_tag'] = src.tags['turn_count']
         tgt.tags['riverside_target'] = g.turn_count
@@ -51,7 +51,7 @@ class RiversideHandler(EventHandler):
             if not src.has_skill(Riverside):
                 return arg
 
-            turn_count = Game.getgame().turn_count
+            turn_count = self.game.turn_count
             for p in dist:
                 if p.tags.get('riverside_target') == turn_count:
                     dist[p] -= 10000
@@ -73,7 +73,7 @@ class Riverside(Skill):
 
 class ReturningAwake(GenericAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         tgt = self.target
         tgt.skills.remove(Returning)
         tgt.skills.append(FerryFee)
@@ -89,7 +89,7 @@ class ReturningHandler(EventHandler):
         if evt_type == 'action_before' and isinstance(act, PlayerTurn):
             tgt = act.target
             if not tgt.has_skill(Returning): return act
-            g = Game.getgame()
+            g = self.game
             ncards = len(tgt.cards) + len(tgt.showncards)
             if tgt.life <= 2 and tgt.life < ncards:
                 g.process_action(ReturningAwake(tgt, tgt))
@@ -140,7 +140,7 @@ class FerryFeeHandler(EventHandler):
                 card = user_input([src], ChoosePeerCardInputlet(self, tgt, catnames))
                 card = card or random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
                 if not card: return act
-                g = Game.getgame()
+                g = self.game
                 g.process_action(FerryFeeEffect(src, tgt, card))
 
         return act

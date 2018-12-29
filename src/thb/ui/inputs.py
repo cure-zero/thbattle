@@ -106,7 +106,7 @@ class UISelectTarget(Control, InputHandler):
 
         view.selection_change += self._on_selection_change
 
-        g = Game.getgame()
+        g = self.game
         port = view.player2portrait(g.me)
         port.equipcard_area.clear_selection()
 
@@ -228,7 +228,7 @@ class UIDoRejectCardResponse(UIDoPassiveAction):
         target_act = ilet.initiator.target_act
         pact = thbactions.ForEach.get_actual_action(target_act)
 
-        g = Game.getgame()
+        g = self.game
 
         if pact:
             if g.me.tags['__reject_dontcare'] is pact:
@@ -280,7 +280,7 @@ class UIDoRejectCardResponse(UIDoPassiveAction):
         assert not ilet.candidates
 
         self.set_valid_waiter = ev = Event()
-        g = Game.getgame()
+        g = self.game
         gevent.spawn_later(0.1 + 0.2 * math.sqrt(g.players.index(g.me)), ev.set)
 
         self.set_text(u'自动结算好人卡…')
@@ -363,7 +363,7 @@ class UIBaseChooseGirl(Panel, InputHandler):
         self.pbar = None
         self.selecting = False
 
-        g = Game.getgame()
+        g = self.game
         choices = trans.mapping[g.me]
         n_choices = len(choices)
 
@@ -446,7 +446,7 @@ class UIChooseGirl(UIBaseChooseGirl):
         self.parent.prompt(u'|R%s|r正在选择……' % ilet.actor.account.username)
 
     def process_user_input(self, ilet):
-        assert ilet.actor is Game.getgame().me
+        assert ilet.actor is self.trans.game.me
         self.inputlet = ilet
         self.label.text = u'请你选择一名角色'
         self.label.color = (160, 251, 255, 255)
@@ -476,7 +476,7 @@ class UIBanGirl(UIBaseChooseGirl):
         self.parent.prompt(u'|R%s|r正在BAN……' % ilet.actor.account.username)
 
     def process_user_input(self, ilet):
-        assert ilet.actor is Game.getgame().me
+        assert ilet.actor is self.trans.game.me
         self.inputlet = ilet
         self.label.text = u'请你选择不能出场的角色'
         self.label.color = (160, 251, 255, 255)
@@ -691,7 +691,7 @@ class UIHarvestChoose(Panel, InputHandler):
         self.lbl.color = (255, 255, 160, 255)
 
     def process_user_input(self, ilet):
-        assert ilet.actor is Game.getgame().me
+        assert ilet.actor is self.trans.game.me
         self.inputlet = ilet
         self.lbl.text = u'请你选择一张卡牌'
         self.lbl.color = (160, 251, 255, 255)
@@ -867,7 +867,7 @@ class UICharacterSorter(Panel, InputHandler):
         )
 
     def process_user_input(self, ilet):
-        g = Game.getgame()
+        g = self.trans.game
         me = g.me
         choices = ilet.mapping[me]
         for i, c in enumerate(choices):

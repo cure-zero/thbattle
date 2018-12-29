@@ -16,8 +16,8 @@ class ReversedScales:
     name = u'逆鳞'
     description = u'每当你成为其他角色使用的单体符卡效果目标时，你可以将其视为|G弹幕战|r效果；你的回合外，你可以将一张手牌当做|G弹幕|r使用或打出。'
 
-    def clickable(game):
-        me = game.me
+    def clickable(g):
+        me = g.me
         if my_turn():
             return False
 
@@ -25,7 +25,7 @@ class ReversedScales:
             return False
 
         try:
-            act = game.action_stack[-1]
+            act = g.action_stack[-1]
             return act.cond([build_handcard(cards.AttackCard)])
         except:
             pass

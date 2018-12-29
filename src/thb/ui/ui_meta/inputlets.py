@@ -35,9 +35,7 @@ class ActionDisplayResult(Exception):
         self.pl_selected = pl_selected
 
 
-def walk_wrapped(cl, check_is_complete):
-    g = Game.getgame()
-
+def walk_wrapped(g, cl, check_is_complete):
     for c in cl:
         if not isinstance(c, thbcards.Skill):
             continue
@@ -61,17 +59,15 @@ def walk_wrapped(cl, check_is_complete):
             if not rst:
                 raise ActionDisplayResult(False, reason, False, [], [])
 
-        walk_wrapped(c.associated_cards, True)
+        walk_wrapped(g, c.associated_cards, True)
 
 
 def pasv_handle_card_selection(g, ilet, cards):
     if not ilet.categories:
         return [], ''
 
-    g = Game.getgame()
-
     if cards:
-        walk_wrapped(cards, True)
+        walk_wrapped(g, cards, True)
 
         from thb.cards import Skill
 
@@ -113,7 +109,7 @@ def actv_handle_card_selection(g, act, cards):
     if len(cards) != 1:
         raise ActionDisplayResult(False, u'请选择一张牌使用', False, [], [])
 
-    walk_wrapped(cards, False)
+    walk_wrapped(g, cards, False)
     card = cards[0]
 
     c = act.cond(cards)
@@ -189,7 +185,7 @@ def action_disp_func(f):
 class ActionInputlet:
     @action_disp_func
     def passive_action_disp(ilet, skills, rawcards, params, players):
-        g = Game.getgame()
+        g = ilet.initiator.game
 
         usage = getattr(ilet.initiator, 'card_usage', 'none')
 
@@ -212,7 +208,7 @@ class ActionInputlet:
         raise ActionDisplayResult(True, prompt_target or prompt_card, plsel, disables, players)
 
     def passive_action_recommend(ilet):
-        g = Game.getgame()
+        g = ilet.initiator.game
 
         if not ilet.categories: return
 
@@ -226,7 +222,7 @@ class ActionInputlet:
 
     @action_disp_func
     def active_action_disp(ilet, skills, rawcards, params, players):
-        g = Game.getgame()
+        g = ilet.initiator.game
 
         stage = ilet.initiator
 

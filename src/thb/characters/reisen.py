@@ -50,7 +50,7 @@ class LunaticHandler(EventHandler):
             tgt = act.target
             if tgt.dead or tgt.has_skill(Discarder): return act
 
-            g = Game.getgame()
+            g = self.game
             for lc in reversed(g.action_stack):
                 if isinstance(lc, LaunchCard):
                     break
@@ -82,7 +82,7 @@ class DiscarderHandler(EventHandler):
         if evt_type == 'action_shootdown' and isinstance(act, ActionStageLaunchCard):
             src = act.source
             if not src.has_skill(Discarder): return act
-            g = Game.getgame()
+            g = self.game
             if src is not g.current_player: return act
 
             self.card = c = act.card
@@ -126,7 +126,7 @@ class MahjongDrugHandler(EventHandler):
             if not card or not card.is_card(HealCard): return act
 
             if user_input([tgt], ChooseOptionInputlet(self, (False, True))):
-                Game.getgame().process_action(MahjongDrugAction(tgt, tgt))
+                self.game.process_action(MahjongDrugAction(tgt, tgt))
 
         return act
 

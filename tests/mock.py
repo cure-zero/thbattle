@@ -1,69 +1,124 @@
 # -*- coding: utf-8 -*-
+from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
+from collections import deque
 import logging
+import random
 import re
 
 # -- third party --
 from gevent.event import Event
+from gevent.queue import Queue
+import gevent
 
 # -- own --
-from endpoint import Endpoint
+from endpoint import Endpoint, EndpointDied
+from server.base import Player
+from server.core import Core
+from server.endpoint import Client
 from utils import hook
+
 
 # -- code --
 log = logging.getLogger('mock')
 
 
-class MockConnection(object):
-    def __init__(self, gdlist):
-        self.gdlist = gdlist
-        self.gdevent = Event()
-        self.gdevent.clear()
-        self.exhausted = False
-        self.gdhistory = []
+class MockEndpoint(object):
 
-    def gexpect(self, tag, blocking=False):
-        assert self.gdlist, 'GAME_DATA_EXHAUSTED!'
-        # log.info('GAME_EXPECT: %s', repr(tag))
+    def __init__(self):
+        self.send = []
+        self.recv = Queue(100)
 
-        log.info('GAME_EXPECT: %s', tag)
-        glob = False
-        if tag.endswith('*'):
-            glob = True
+    def raw_write(self, s):
+        self.send.append(Endpoint.decode(s))
 
-        missed = False
-        for i, d in enumerate(self.gdlist):
-            cond = d[0] == tag
-            cond = cond or glob and d[0].startswith(tag[:-1])
-            cond = cond or d[0].startswith('>') and re.match(d[0][1:] + '$', tag)
-            if cond:
-                log.info('GAME_READ: %s', repr(d))
-                del self.gdlist[i]
+    def write(self, p, format=Endpoint.FMT_PACKED):
+        Endpoint.encode(p, format)
+        self.send.append(p)
 
-                if not self.gdlist:
-                    log.info('Game data exhausted.')
+    def read(self):
+        if not self.recv:
+            return EndpointDied
 
-                return d
-            if not missed:
-                log.info('GAME_DATA_MISS: %s', repr(d))
-                missed = True
+        return self.recv.get()
 
-        assert False, 'GAME_DATA_MISS! EXPECTS "%s"' % tag
-
-    def gwrite(self, tag, data):
-        log.debug('GAME_WRITE: %s', repr([tag, data]))
-        encoded = Endpoint.encode(data)
-        self.gdhistory.append([tag, Endpoint.decode(encoded)])
-
-    def gclear(self):
-        assert self.exhausted
+    def close(self):
+        r = self.recv
+        self.recv = None
+        r.put(EndpointDied)
 
 
-def create_mock_player(gdlist):
-    conn = MockConnection(gdlist[:])
-    from server.core import Player
-    return Player(conn)
+class MockBackend(object):
+    MOCKED = {}
+
+    def __init__(self, core):
+        self.core = core
+
+    def query(self, q, **vars):
+        q = self._strip(q)
+        if q not in self.MOCKED:
+            raise Exception("Can't mock query %s" % q)
+
+        return self.MOCKED[q](vars)
+
+    def _strip(self, q):
+        q = q.strip()
+        q = re.sub(r'[\r\n]', q, '')
+        q = re.sub(r' +', q, ' ')
+        return q
+
+    def _reg(f, strip=_strip, MOCKED=MOCKED):
+        q = strip(None, f.__doc__)
+        MOCKED[q] = f
+        return f
+
+    @_reg
+    def gameId(self):
+        '''
+        query { gameId }
+        '''
+        return {'gameId': random.randint(0, 1000000)}
+
+
+class ServerWorld(object):
+    def __init__(self):
+        self.core = Core(disables=[
+            'archive', 'connect', 'stats', 'backend'
+        ])
+        self.core.backend = MockBackend(self.core)
+
+    def client(self):
+        ep = MockEndpoint()
+        core = self.core
+        cli = Client(core, ep)
+        gevent.spawn(cli.serve)
+        gevent.sleep(0.01)
+        return cli
+
+    def fullgame(self, cls=None, flags={}):
+        if not cls:
+            from thb.thb3v3 import THBattle as cls
+
+        base = random.randint(1, 1000000)
+        core = self.core
+        g = core.room.create_game(cls, 'Game-%s' % base, flags)
+
+        for i in xrange(g.n_persons):
+            u = self.client()
+            core.auth.set_auth(u, base + i, 'UID%d' % (base + i))
+            core.room.join_game(g, u, i)
+
+        core.game.setup_game(g)
+        return g
+
+    def start_game(self, g):
+        core = self.core
+        for u in core.room.users_of(g):
+            s = core.lobby.state_of(u)
+            s == 'room' and s.transit('ready')
+
+        gevent.sleep(0.01)
 
 
 def hook_game(g):

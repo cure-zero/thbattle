@@ -51,7 +51,7 @@ class SpearTheGungnirHandler(EventHandler):
                 return act
 
             if user_input([act.source], ChooseOptionInputlet(self, (False, True))):
-                Game.getgame().process_action(SpearTheGungnirAction(act))
+                self.game.process_action(SpearTheGungnirAction(act))
 
         return act
 
@@ -64,7 +64,7 @@ class VampireKiss(Skill):
 
 class VampireKissAction(GenericAction):
     def apply_action(self):
-        return Game.getgame().process_action(
+        return self.game.process_action(
             Heal(self.target, self.source)
         )
 
@@ -77,7 +77,7 @@ class VampireKissHandler(EventHandler):
             src, tgt = act.source, act.target
             if not (src and src.has_skill(VampireKiss)): return act
             if src.life >= src.maxlife: return act
-            g = Game.getgame()
+            g = self.game
             pact = g.action_stack[-1]
             if not isinstance(pact, Attack): return act
             card = pact.associated_card
@@ -140,7 +140,7 @@ class ScarletMistHandler(EventHandler):
             if not (src and src.tags['scarlet_mist'] == 'buff'): return act
             if src.life >= src.maxlife: return act
 
-            g = Game.getgame()
+            g = self.game
             pact = g.action_stack[-1]
             if not isinstance(pact, Attack): return act
             if not pact.associated_card: return act
@@ -151,7 +151,7 @@ class ScarletMistHandler(EventHandler):
             tgt = act.target
             if not tgt.has_skill(ScarletMist): return act
             if not tgt.tags['scarlet_mist']: return act
-            g = Game.getgame()
+            g = self.game
             g.process_action(ScarletMistEndAction(None, None))
 
         return act
@@ -161,7 +161,7 @@ class ScarletMistAction(UserAction):
     def apply_action(self):
         src, tl = self.source, self.target_list
         src.tags['scarlet_mist_used'] = True
-        g = Game.getgame()
+        g = self.game
         for p in g.players:
             p.tags['scarlet_mist'] = 'nerf'
         for p in tl:
@@ -176,7 +176,7 @@ class ScarletMistAction(UserAction):
 
 class ScarletMistEndAction(GenericAction):
     def apply_action(self):
-        g = Game.getgame()
+        g = self.game
         for p in g.players:
             p.tags['scarlet_mist'] = False
 

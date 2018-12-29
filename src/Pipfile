@@ -1,12 +1,9 @@
 [[source]]
-
 url = "https://pypi.org/simple"
 verify_ssl = true
 name = "pypi"
 
-
 [packages]
-
 pillow = "*"
 colorlog = "*"
 gevent = "*"
@@ -16,14 +13,12 @@ redis = "*"
 requests = "*"
 unidecode = "*"
 raven = "*"
-
+websocket-client = "*"
+arrow = "*"
 
 [dev-packages]
-
 ipython = "*"
-nose = "*"
-
+pytest = "*"
 
 [requires]
-
 python_version = "2.7"
