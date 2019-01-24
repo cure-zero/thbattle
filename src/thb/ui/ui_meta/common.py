@@ -99,23 +99,23 @@ def passive_is_action_valid(g, cl, target_list):
 
 def card_desc(c):
     if isinstance(c, (list, tuple)):
-        return u'、'.join([card_desc(i) for i in c])
+        return '、'.join([card_desc(i) for i in c])
 
     from thb.cards import Card, HiddenCard
-    if c.is_card(HiddenCard): return u'一张牌'
+    if c.is_card(HiddenCard): return '一张牌'
 
     if c.suit == Card.SPADE:
-        suit = u'|r♠'
+        suit = '|r♠'
     elif c.suit == Card.HEART:
-        suit = u'|r|cb03a11ff♥'
+        suit = '|r|cb03a11ff♥'
     elif c.suit == Card.CLUB:
-        suit = u'|r♣'
+        suit = '|r♣'
     elif c.suit == Card.DIAMOND:
-        suit = u'|r|cb03a11ff♦'
+        suit = '|r|cb03a11ff♦'
     elif c.suit == Card.NOTSET:
-        suit = u'|r '
+        suit = '|r '
     else:
-        suit = u'|r错误'
+        suit = '|r错误'
 
     num = ' A23456789_JQK'[c.number]
     if num == '_': num = '10'
@@ -145,7 +145,7 @@ def char_desc(ch):
         cls, obj = ch.__class__, ch
 
     rst = []
-    rst.append(u'|DB%s %s 体力：%s|r' % (m.title, m.name, cls.maxlife))
+    rst.append('|DB%s %s 体力：%s|r' % (m.title, m.name, cls.maxlife))
     skills = list(cls.skills)
     if hasattr(cls, 'boss_skills'):
         skills.extend(cls.boss_skills)
@@ -158,20 +158,20 @@ def char_desc(ch):
 
     for s in skills:
         sm = s.ui_meta
-        rst.append(u'|G%s|r：%s' % (sm.name, sm.description))
+        rst.append('|G%s|r：%s' % (sm.name, sm.description))
 
     notes = getattr(m, 'notes', '')
     if notes:
         rst.append(notes)
 
     tail = [
-        (u'画师',     getattr(m, 'illustrator', '')),
-        (u'CV',       getattr(m, 'cv', '')),
-        (u'人物设计', getattr(m, 'designer', '')),
+        ('画师',     getattr(m, 'illustrator', '')),
+        ('CV',       getattr(m, 'cv', '')),
+        ('人物设计', getattr(m, 'designer', '')),
     ]
 
-    tail = [u'%s：%s' % i for i in tail if i[1]]
+    tail = ['%s：%s' % i for i in tail if i[1]]
     if tail:
-        rst.append(u'|DB（%s）|r' % u'，'.join(tail))
+        rst.append('|DB（%s）|r' % '，'.join(tail))
 
-    return u'\n\n'.join(rst)
+    return '\n\n'.join(rst)

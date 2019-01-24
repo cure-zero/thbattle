@@ -51,12 +51,12 @@ TESTING_CHARACTERS = (
 
 
 class ServerNames:
-    forum     = u'论坛'
-    localhost = u'本机'
-    lake      = u'雾之湖'
-    forest    = u'魔法之森'
-    hakurei   = u'博丽神社'
-    aya       = u'文文专访'
+    forum     = '论坛'
+    localhost = '本机'
+    lake      = '雾之湖'
+    forest    = '魔法之森'
+    hakurei   = '博丽神社'
+    aya       = '文文专访'
 
 
 def _get_box(vlist):
@@ -78,11 +78,11 @@ class ServerList:
         ]
         box = _get_box(polygon)
         description = (
-            u'|R没什么香火钱 博丽神社|r\n\n'
-            u'冷清的神社，不过很欢迎大家去玩的，更欢迎随手塞一点香火钱！'
-            u'出手大方的话，说不定会欣赏到博丽神社历代传下来的10万元COS哦。\n\n'
-            u'|R|B注意：这是测试服务器，并不保证稳定、与正常服务器的同步！|r\n\n'
-            u'|DB服务器地址： %s|r'
+            '|R没什么香火钱 博丽神社|r\n\n'
+            '冷清的神社，不过很欢迎大家去玩的，更欢迎随手塞一点香火钱！'
+            '出手大方的话，说不定会欣赏到博丽神社历代传下来的10万元COS哦。\n\n'
+            '|R|B注意：这是测试服务器，并不保证稳定、与正常服务器的同步！|r\n\n'
+            '|DB服务器地址： %s|r'
         ) % repr(address)
 
     if IS_PROTON:
@@ -96,7 +96,7 @@ class ServerList:
             ]
             box = _get_box(polygon)
             description = (
-                u'|R你自己的本机服务器|r'
+                '|R你自己的本机服务器|r'
             )
 
     class lake:
@@ -108,10 +108,10 @@ class ServerList:
         ]
         box = _get_box(polygon)
         description = (
-            u'|R这里没有青蛙 雾之湖|r\n\n'
-            u'一个让人开心的地方。只是游客普遍反应，游玩结束后会感到自己的智商被拉低了一个档次。'
-            u'另外，请不要把青蛙带到这里来。这不是规定，只是一个建议。\n\n'
-            u'|DB服务器地址： %s|r'
+            '|R这里没有青蛙 雾之湖|r\n\n'
+            '一个让人开心的地方。只是游客普遍反应，游玩结束后会感到自己的智商被拉低了一个档次。'
+            '另外，请不要把青蛙带到这里来。这不是规定，只是一个建议。\n\n'
+            '|DB服务器地址： %s|r'
         ) % repr(address)
 
     class forest:
@@ -123,14 +123,14 @@ class ServerList:
         ]
         box = _get_box(polygon)
         description = (
-            u'|R光明牛奶指定销售地点 魔法之森|r\n\n'
-            u'森林里好玩的东西很多，比如被捉弄什么的。'
-            u'旁边有一个神奇的物品店，只是店主有点变态。\n\n'
-            u'|DB服务器地址： %s|r'
+            '|R光明牛奶指定销售地点 魔法之森|r\n\n'
+            '森林里好玩的东西很多，比如被捉弄什么的。'
+            '旁边有一个神奇的物品店，只是店主有点变态。\n\n'
+            '|DB服务器地址： %s|r'
         ) % repr(address)
 
 
-NOTICE = u'''
+NOTICE = '''
 |s2ff0000ff|W现在所有的房间内聊天都会记录日志，请文明游戏，并且不要在聊天中透露敏感信息。黑幕组会根据聊天日志对违规玩家做处罚。|r
 
 |B最近更新情况：|r

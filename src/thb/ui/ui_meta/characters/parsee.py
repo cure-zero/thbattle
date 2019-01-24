@@ -12,20 +12,20 @@ __metaclass__ = gen_metafunc(characters.parsee)
 
 class Parsee:
     # Character
-    name        = u'水桥帕露西'
-    title       = u'地壳下的嫉妒心'
-    illustrator = u'和茶'
-    cv          = u'小羽'
+    name        = '水桥帕露西'
+    title       = '地壳下的嫉妒心'
+    illustrator = '和茶'
+    cv          = '小羽'
 
-    port_image        = u'thb-portrait-parsee'
-    figure_image      = u'thb-figure-parsee'
-    miss_sound_effect = u'thb-cv-parsee_miss'
+    port_image        = 'thb-portrait-parsee'
+    figure_image      = 'thb-figure-parsee'
+    miss_sound_effect = 'thb-cv-parsee_miss'
 
 
 class Envy:
     # Skill
-    name = u'嫉妒'
-    description = u'你可以将一张黑色牌当|G城管执法|r使用；每当距离1的其他角色的方块牌被你使用的|G城管执法|r弃置而置入弃牌堆后，你可以获得之。'
+    name = '嫉妒'
+    description = '你可以将一张黑色牌当|G城管执法|r使用；每当距离1的其他角色的方块牌被你使用的|G城管执法|r弃置而置入弃牌堆后，你可以获得之。'
 
     def clickable(game):
         me = game.me
@@ -40,11 +40,11 @@ class Envy:
         assert skill.is_card(characters.parsee.Envy)
         cl = skill.associated_cards
         if len(cl) != 1:
-            return (False, u'请选择一张牌！')
+            return (False, '请选择一张牌！')
         else:
             c = cl[0]
             if c.suit not in (cards.Card.SPADE, cards.Card.CLUB):
-                return (False, u'请选择一张黑色的牌！')
+                return (False, '请选择一张黑色的牌！')
             return cards.DemolitionCard.ui_meta.is_action_valid(g, [skill], target_list)
 
     def effect_string(act):
@@ -52,7 +52,7 @@ class Envy:
         source = act.source
         card = act.card
         target = act.target
-        s = u'|G【%s】|r发动了嫉妒技能，将|G%s|r当作|G%s|r对|G【%s】|r使用。' % (
+        s = '|G【%s】|r发动了嫉妒技能，将|G%s|r当作|G%s|r对|G【%s】|r使用。' % (
             source.ui_meta.name,
             card.associated_cards[0].ui_meta.name,
             card.treat_as.ui_meta.name,
@@ -65,14 +65,14 @@ class Envy:
 
 
 class EnvyHandler:
-    choose_option_buttons = ((u'获得', True), (u'不获得', False))
+    choose_option_buttons = (('获得', True), ('不获得', False))
 
     def choose_option_prompt(act):
-        return u'你要获得【%s】吗？' % act.card.ui_meta.name
+        return '你要获得【%s】吗？' % act.card.ui_meta.name
 
 
 class EnvyRecycleAction:
     def effect_string(act):
-        return u'|G【%s】|r：“喂喂这么好的牌扔掉不觉得可惜么？不要嫉妒我。”' % (
+        return '|G【%s】|r：“喂喂这么好的牌扔掉不觉得可惜么？不要嫉妒我。”' % (
             act.source.ui_meta.name
         )

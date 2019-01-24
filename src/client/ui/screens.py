@@ -39,7 +39,7 @@ from utils.stats import stats
 
 
 # -- code --
-RE_AT = re.compile(ur'@([^@ ]+)')
+RE_AT = re.compile(r'@([^@ ]+)')
 log = logging.getLogger('UI_Screens')
 
 
@@ -48,31 +48,31 @@ def _handle_chat(_type, args):
         uname, msg = args[0]
         uname = uname.replace('|', '||')
         if uname in UserSettings.blocked_users:
-            msg = u'***此人消息已屏蔽***'
+            msg = '***此人消息已屏蔽***'
 
         if Executive.gamemgr.account.username in RE_AT.findall(msg):
             from utils.notify import notify, AT
 
-            notify(u'东方符斗祭 - 有人@您哦', u'%s: %s' % (uname, msg), level=AT)
+            notify('东方符斗祭 - 有人@您哦', '%s: %s' % (uname, msg), level=AT)
 
         style = '|cff0000ff' if _type == 'chat_msg' else '|c9f5f9fff'
-        return u'%s%s|r：%s\n' % (style, uname, msg)
+        return '%s%s|r：%s\n' % (style, uname, msg)
 
     elif _type == 'speaker_msg':
         node, uname, msg = args[0]
         if uname in UserSettings.blocked_users:
-            msg = u'***此人消息已屏蔽***'
+            msg = '***此人消息已屏蔽***'
 
         from utils.notify import notify, SPEAKER
-        notify(u'东方符斗祭 - 『文々。新闻』',
-               u'%s: %s' % (uname, msg), level=SPEAKER)
+        notify('东方符斗祭 - 『文々。新闻』',
+               '%s: %s' % (uname, msg), level=SPEAKER)
         node = node and '|G%s' % ServerNames.get(node, node)
         uname = uname.replace('|', '||')
-        return u'%s|ccc3299ff『文々。新闻』|cff0000ff%s|r： %s\n' % (node, uname, msg)
+        return '%s|ccc3299ff『文々。新闻』|cff0000ff%s|r： %s\n' % (node, uname, msg)
 
     elif _type == 'system_msg':
         _, msg = args[0]
-        return u'|B|R%s|r\n' % msg
+        return '|B|R%s|r\n' % msg
 
     else:
         return None
@@ -98,18 +98,18 @@ def handle_generic_message(screen, chat_box, _type, args):
 def show_message(screen, chat_box, msg_key, is_err):
     mapping = {
         # --- auth
-        'not_available':      u'您的帐号目前不可用，请联系管理员询问！',
-        'invalid_credential': u'认证失败！',
+        'not_available':      '您的帐号目前不可用，请联系管理员询问！',
+        'invalid_credential': '认证失败！',
 
         # --- lobby
-        'cant_join_game':    u'无法加入游戏',
-        'no_such_user':      u'没有这个玩家',
-        'kedama_limitation': u'您现在是毛玉（试玩玩家），不能这样做。\n毛玉只能玩练习模式和KOF模式。',
-        'not_invited':       u'这是个邀请制房间，只能通过邀请进入。',
-        'banned':            u'你已经被强制请离，不能重复进入',
+        'cant_join_game':    '无法加入游戏',
+        'no_such_user':      '没有这个玩家',
+        'kedama_limitation': '您现在是毛玉（试玩玩家），不能这样做。\n毛玉只能玩练习模式和KOF模式。',
+        'not_invited':       '这是个邀请制房间，只能通过邀请进入。',
+        'banned':            '你已经被强制请离，不能重复进入',
 
         # --- other
-        'use_item_success': u'成功使用物品',
+        'use_item_success': '成功使用物品',
     }
 
     if msg_key not in mapping:
@@ -122,7 +122,7 @@ def show_message(screen, chat_box, msg_key, is_err):
         ConfirmBox(msg, parent=screen, color=Colors.red)
     else:
         if chat_box:
-            chat_box.append(u'|R%s|r\n' % msg)
+            chat_box.append('|R%s|r\n' % msg)
         else:
             ConfirmBox(msg, parent=screen, color=Colors.green)
 
@@ -145,7 +145,7 @@ class ChatBox(Frame):
     def __init__(self, **k):
         Frame.__init__(
             self,
-            caption=u'系统/聊天信息',
+            caption='系统/聊天信息',
             bot_reserve=33, **k
         )
         self.box = TextArea(
@@ -155,8 +155,8 @@ class ChatBox(Frame):
             parent=self, x=6, y=6, width=self.width-12, height=22,
         )
         self.history_cursor = -1
-        self.last_input = u''
-        self.box.text = u'|R输入/?可以查看可用命令|r\n'
+        self.last_input = ''
+        self.box.text = '|R输入/?可以查看可用命令|r\n'
 
         self.set_capture('on_text')
 
@@ -197,17 +197,17 @@ class ChatBox(Frame):
 
         @self.inputbox.event
         def on_enter():
-            text = unicode(self.inputbox.text)
-            self.inputbox.text = u''
+            text = str(self.inputbox.text)
+            self.inputbox.text = ''
             if not text: return
 
             self.add_history(text)
-            if text.startswith(u'`') and len(text) > 1:
+            if text.startswith('`') and len(text) > 1:
                 text = text[1:]
                 if not text: return
                 stats({'event': 'speaker', 'attributes': {'length': len(text)}})
                 Executive.speaker(text)
-            elif text.startswith(u'/'):
+            elif text.startswith('/'):
                 from . import commands
                 cmdline = shlex.split(text[1:])
                 msg = commands.process_command(cmdline)
@@ -232,14 +232,14 @@ class ChatBox(Frame):
 
     def on_text(self, text):
         if text == '\r' and self.overlay.current_focus is not self.inputbox:
-            self.inputbox.text = u''
+            self.inputbox.text = ''
             self.inputbox.set_focus()
 
 
 class Screen(Overlay):
     def on_message(self, _type, *args):
         if _type == 'server_dropped':
-            c = ConfirmBox(u'已经与服务器断开链接，请重新启动游戏！', parent=Screen.cur_overlay)
+            c = ConfirmBox('已经与服务器断开链接，请重新启动游戏！', parent=Screen.cur_overlay)
             stats({'event': 'server_dropped'})
 
             @c.event
@@ -259,14 +259,14 @@ class Screen(Overlay):
             gtype = modes.get(gtype, None)
             gtype = gtype and gtype.ui_meta.name
 
-            invite_text = u'%s 邀请你一起玩 %s 模式' % (uname, gtype)
+            invite_text = '%s 邀请你一起玩 %s 模式' % (uname, gtype)
 
             from utils import notify
-            notify(u'东方符斗祭 - 邀请提醒', invite_text)
+            notify('东方符斗祭 - 邀请提醒', invite_text)
 
             box = ConfirmBox(
                 invite_text, timeout=20,
-                parent=self, buttons=((u'确定', True), (u'取消', False)), default=False
+                parent=self, buttons=(('确定', True), ('取消', False)), default=False
             )
 
             @box.event
@@ -290,7 +290,7 @@ class UpdateScreen(Screen):
     def update_message(self, msg, arg):
         ta = self.textarea
         if msg == 'error':
-            ta.append(u'|W更新出错：\n|R%s|r\n' % str(arg))
+            ta.append('|W更新出错：\n|R%s|r\n' % str(arg))
             return
 
         progress = self.format_progress(arg)
@@ -298,9 +298,9 @@ class UpdateScreen(Screen):
             return
 
         if msg == 'logic_progress':
-            ta.append(u'|W游戏更新：|LB%s|r\n' % progress)
+            ta.append('|W游戏更新：|LB%s|r\n' % progress)
         elif msg == 'interpreter_progress':
-            ta.append(u'|W解释器更新：|LB%s|r\n' % progress)
+            ta.append('|W解释器更新：|LB%s|r\n' % progress)
 
     def format_progress(self, stat):
         if not stat.total_objects:
@@ -309,7 +309,7 @@ class UpdateScreen(Screen):
         if stat.indexed_deltas:
             return ''
 
-        return u'{}% ({}/{}), {:.2f} KiB'.format(
+        return '{}% ({}/{}), {:.2f} KiB'.format(
             int(100.0 * stat.received_objects / stat.total_objects),
             stat.received_objects,
             stat.total_objects,
@@ -322,16 +322,16 @@ class UpdateScreen(Screen):
         self.draw_subcontrols()
 
     def on_switch(self):
-        self.textarea.append(u'|W正在更新……|r\n')
+        self.textarea.append('|W正在更新……|r\n')
 
         def do_update():
             rst = Executive.update(self.update_message)
             box = None
             if rst == 'update_disabled':
-                box = ConfirmBox(u'自动更新已经禁用', parent=self)
+                box = ConfirmBox('自动更新已经禁用', parent=self)
             elif rst == 'error':
                 stats({'event': 'update_error'})
-                box = ConfirmBox(u'更新过程出现错误，你可能不能正常游戏！', parent=self, color=Colors.red)
+                box = ConfirmBox('更新过程出现错误，你可能不能正常游戏！', parent=self, color=Colors.red)
 
             if box:
                 @box.event
@@ -353,7 +353,7 @@ class ReplayButton(ImageButton):
         @gevent.spawn
         def replay():
             from base.baseclasses import main_window
-            filename = get_open_file_name(main_window, u'打开Replay', [(u'THB Replay 文件', u'*.thbrep')])
+            filename = get_open_file_name(main_window, '打开Replay', [('THB Replay 文件', '*.thbrep')])
             if not filename:
                 self.state = ImageButton.NORMAL
                 return
@@ -362,20 +362,20 @@ class ReplayButton(ImageButton):
                 rep = Replay.loads(open(filename, 'rb').read())
             except Exception as e:
                 log.exception(e)
-                ConfirmBox(u'打开Replay失败！', u'Replay', parent=Overlay.cur_overlay)
+                ConfirmBox('打开Replay失败！', 'Replay', parent=Overlay.cur_overlay)
                 self.state = ImageButton.NORMAL
                 return
 
             if not Executive.is_version_present(rep.client_version):
                 ConfirmBox(
-                    u'Replay中的客户端版本在本地没有找到，请确认是否更新到最新的客户端！', u'Replay',
+                    'Replay中的客户端版本在本地没有找到，请确认是否更新到最新的客户端！', 'Replay',
                     parent=Overlay.cur_overlay,
                 )
                 self.state = ImageButton.NORMAL
                 return
 
             if not Executive.is_version_match(rep.client_version):
-                if confirm(u'你的游戏没有切换到相应的版本上，要切换吗？', u'Replay', ConfirmBox.Presets.OKCancel):
+                if confirm('你的游戏没有切换到相应的版本上，要切换吗？', 'Replay', ConfirmBox.Presets.OKCancel):
                     Executive.switch_version(rep.client_version)
                     import options as opmodule
                     if opmodule.mutex:
@@ -414,7 +414,7 @@ class ServerSelectScreen(Screen):
                 )
                 ta.append(text)
                 btn = Button(
-                    u'关闭',
+                    '关闭',
                     parent=self,
                     x=(w-120)//2, y=20,
                     width=120, height=40,
@@ -471,7 +471,7 @@ class ServerSelectScreen(Screen):
                 @gevent.spawn
                 def work():
                     if not options.no_update and not Executive.is_version_match(server['branch']):
-                        if confirm(u'你的游戏没有切换到最新版上，要切换吗？', u'自动更新', ConfirmBox.Presets.OKCancel):
+                        if confirm('你的游戏没有切换到最新版上，要切换吗？', '自动更新', ConfirmBox.Presets.OKCancel):
                             Executive.switch_version(server['branch'])
                             import os
                             import sys
@@ -481,7 +481,7 @@ class ServerSelectScreen(Screen):
                             os.execv(sys.executable, [sys.executable] + sys.argv)
                             assert False, 'WTF'
 
-                    lw2 = LoadingWindow(u'正在连接服务器', parent=self.parent)
+                    lw2 = LoadingWindow('正在连接服务器', parent=self.parent)
                     ui_message(Executive.connect_server(
                         server['address'], ui_message
                     ))
@@ -518,12 +518,12 @@ class ServerSelectScreen(Screen):
             self.highlight_layer.enable_click()
             log.error('Server connect failed.')
             stats({'event': 'server_connect_failed'})
-            ConfirmBox(u'服务器连接失败！', parent=self)
+            ConfirmBox('服务器连接失败！', parent=self)
 
         elif _type == 'version_mismatch':
             self.highlight_layer.enable_click()
             log.error('Version mismatch')
-            ConfirmBox(u'您的版本与服务器版本不符，无法进行游戏！', parent=self)
+            ConfirmBox('您的版本与服务器版本不符，无法进行游戏！', parent=self)
 
         else:
             Screen.on_message(self, _type, *args)
@@ -542,7 +542,7 @@ class LoginScreen(Screen):
     class LoginDialog(Frame):
         def __init__(self, *a, **k):
             Frame.__init__(
-                self, u'登陆', x=350, y=165,
+                self, '登陆', x=350, y=165,
                 width=325, height=184,
                 bot_reserve=50, *a, **k
             )
@@ -555,8 +555,8 @@ class LoginScreen(Screen):
                     *a, **k
                 )
 
-            Lbl(u'用户名：', 368 - 350, 286 - 165)
-            Lbl(u'密码：', 368 - 350, 250 - 165)
+            Lbl('用户名：', 368 - 350, 286 - 165)
+            Lbl('密码：', 368 - 350, 250 - 165)
 
             self.txt_username = TextBox(
                 parent=self, x=438-350, y=282-165, width=220, height=20,
@@ -567,15 +567,15 @@ class LoginScreen(Screen):
                 text=UserSettings.saved_passwd.decode('base64'),
             )
             self.chk_savepwd = CheckBox(
-                parent=self, x=438-350, y=56, caption=u'记住密码',
+                parent=self, x=438-350, y=56, caption='记住密码',
                 value=bool(self.txt_pwd.text),
             )
             self.btn_login = Button(
-                parent=self, caption=u'进入幻想乡',
+                parent=self, caption='进入幻想乡',
                 x=50, y=10, width=100, height=30
             )
             self.btn_reg = Button(
-                parent=self, caption=u'乡民登记',
+                parent=self, caption='乡民登记',
                 color=Colors.orange,
                 x=175, y=10, width=100, height=30
             )
@@ -610,19 +610,19 @@ class LoginScreen(Screen):
         self.bg_alpha = LinearInterp(0, 1.0, 1.5)
         self.dialog = LoginScreen.LoginDialog(parent=self)
         self.btn_try = try_game = Button(
-            parent=self, caption=u'试玩',
+            parent=self, caption='试玩',
             x=750, y=50, width=100, height=30, color=Colors.orange,
         )
 
         @try_game.event
         def on_click():
             text = (
-                u'试玩的玩家有以下限制：\n'
-                u'\n'
-                u'随机的id，不记录游戏数和节操\n'
-                u'固定的头像、自定义签名\n'
-                u'无法使用文文新闻和邀请功能\n'
-                u'无法断线重连'
+                '试玩的玩家有以下限制：\n'
+                '\n'
+                '随机的id，不记录游戏数和节操\n'
+                '固定的头像、自定义签名\n'
+                '无法使用文文新闻和邀请功能\n'
+                '无法断线重连'
             )
 
             confirm = ConfirmBox(text, buttons=ConfirmBox.Presets.OKCancel, parent=self)
@@ -659,7 +659,7 @@ class LoginScreen(Screen):
         self.draw_subcontrols()
 
     def start_login(self):
-        self.loading = LoadingWindow(u'正在验证用户', parent=self)
+        self.loading = LoadingWindow('正在验证用户', parent=self)
         self.btn_try.state = Button.DISABLED
         self.dialog.disable()
 
@@ -686,10 +686,10 @@ class LobbyScreen(Screen):
                 self.y = (self.overlay.height - h) // 2
 
                 self.btncreate = btncreate = Button(
-                    u'创建游戏', parent=self, x=440, y=75, width=90, height=40
+                    '创建游戏', parent=self, x=440, y=75, width=90, height=40
                 )
                 self.btncancel = btncancel = Button(
-                    u'取消', parent=self, x=440, y=25, width=90, height=40
+                    '取消', parent=self, x=440, y=25, width=90, height=40
                 )
                 btncreate.state = Button.DISABLED
 
@@ -699,7 +699,7 @@ class LobbyScreen(Screen):
                 uname = Executive.gamemgr.account.username
 
                 self.chk_invite_only = CheckBox(
-                    parent=self, x=423, y=397, caption=u'邀请制房间', value=False,
+                    parent=self, x=423, y=397, caption='邀请制房间', value=False,
                 )
 
                 f = pyglet.font.load('AncientPix', 9)
@@ -707,20 +707,20 @@ class LobbyScreen(Screen):
                 un1 = textsnap(uname, f, 140)
 
                 if un1 != uname:
-                    uname = textsnap(uname, f, 120) + u'…'
+                    uname = textsnap(uname, f, 120) + '…'
 
-                txtbox.text = uname + u'的游戏'
+                txtbox.text = uname + '的游戏'
 
                 self.labels = batch = pyglet.graphics.Batch()
                 Label(
-                    u'创建游戏房间', font_size=12, x=275, y=431,
+                    '创建游戏房间', font_size=12, x=275, y=431,
                     anchor_x='center', anchor_y='bottom',
                     color=Colors.green.heavy + (255, ),
                     shadow=(1, 207, 240, 156, 204),
                     batch=batch,
                 ),
                 Label(
-                    u'房间名称：', font_size=9, x=30, y=400,
+                    '房间名称：', font_size=9, x=30, y=400,
                     anchor_x='left', anchor_y='bottom',
                     color=Colors.green.heavy + (255, ),
                     shadow=(1, 207, 240, 156, 204),
@@ -785,13 +785,13 @@ class LobbyScreen(Screen):
                 self.y = (self.overlay.height - 340) // 2
 
                 self.btncancel = btncancel = Button(
-                    u'取消', parent=self, x=440, y=25, width=90, height=40
+                    '取消', parent=self, x=440, y=25, width=90, height=40
                 )
 
                 self.labels = pyglet.graphics.Batch()
 
                 Label(
-                    u'旁观游戏', font_size=12, x=275, y=306,
+                    '旁观游戏', font_size=12, x=275, y=306,
                     anchor_x='center', anchor_y='bottom',
                     color=Colors.green.heavy + (255, ),
                     shadow=(2, 207, 240, 156, 204),
@@ -831,28 +831,28 @@ class LobbyScreen(Screen):
                         def on_click(uid=acc.userid, un=acc.username):
                             stats({'event': 'observe'})
                             Executive.observe_user(uid)
-                            self.overlay.chat_box.append(u'|R已经向%s发送了旁观请求，请等待回应……|r\n' % un)
+                            self.overlay.chat_box.append('|R已经向%s发送了旁观请求，请等待回应……|r\n' % un)
                             self.delete()
 
         def __init__(self, p):
             Frame.__init__(
-                self, parent=p, caption=u'当前大厅内的游戏',
+                self, parent=p, caption='当前大厅内的游戏',
                 x=35, y=220, width=700, height=420,
                 bot_reserve=30, bg=L('c-bg_gamelist'),
             )
 
             gl = self.gamelist = ListView(parent=self, x=2, y=30, width=696, height=420-30-25)
             gl.set_columns([
-                (u'No.',      100),
-                (u'游戏名称', 200),
-                (u'游戏类型', 200),
-                (u'人数',     50),
-                (u'当前状态', 80),
+                ('No.',      100),
+                ('游戏名称', 200),
+                ('游戏类型', 200),
+                ('人数',     50),
+                ('当前状态', 80),
             ])
 
-            self.btn_create     = Button(parent=self, caption=u'创建游戏', x=690-270, y=6, width=70, height=20)
-            self.btn_quickstart = Button(parent=self, caption=u'快速加入', x=690-180, y=6, width=70, height=20)
-            self.btn_refresh    = Button(parent=self, caption=u'刷新列表', x=690-90,  y=6, width=70, height=20)
+            self.btn_create     = Button(parent=self, caption='创建游戏', x=690-270, y=6, width=70, height=20)
+            self.btn_quickstart = Button(parent=self, caption='快速加入', x=690-180, y=6, width=70, height=20)
+            self.btn_refresh    = Button(parent=self, caption='刷新列表', x=690-90,  y=6, width=70, height=20)
 
             @self.btn_create.event
             def on_click():
@@ -889,7 +889,7 @@ class LobbyScreen(Screen):
                         gname = gcls.ui_meta.name
                         n_persons = gcls.n_persons
                     else:
-                        gname = u'未知游戏类型'
+                        gname = '未知游戏类型'
                         n_persons = 0
 
                     li = glist.append([
@@ -897,7 +897,7 @@ class LobbyScreen(Screen):
                         gi['name'],
                         gname,
                         '%d/%d' % (gi['nplayers'], n_persons),
-                        [u'等待中', u'游戏中'][gi['started']],
+                        ['等待中', '游戏中'][gi['started']],
                     ], color=(0, 0, 0, 255) if gi['started'] else (0xef, 0x75, 0x45, 0xff))
                     li.game_id = gi['id']
                     li.gtype = gi['type']
@@ -907,7 +907,7 @@ class LobbyScreen(Screen):
         def __init__(self, parent):
             Frame.__init__(
                 self, parent=parent,
-                caption=u'当前在线玩家',
+                caption='当前在线玩家',
                 x=750, y=220, width=240, height=420,
                 bot_reserve=10,
             )
@@ -917,27 +917,27 @@ class LobbyScreen(Screen):
 
         def on_message(self, _type, *args):
             lookup = {
-                'lobby': u'|c0000ffff游戏大厅|r',
-                'game':  u'|G游戏中|r',
-                'room':  u'|R在房间中|r',
-                'ready': u'|c9f5f9fff准备状态|r',
-                'ob':    u'|LB观战中|r',
+                'lobby': '|c0000ffff游戏大厅|r',
+                'game':  '|G游戏中|r',
+                'room':  '|R在房间中|r',
+                'ready': '|c9f5f9fff准备状态|r',
+                'ob':    '|LB观战中|r',
             }
             if _type == 'current_users':
                 users = args[0]
                 box = self.box
-                box.text = u'\u200b'
+                box.text = '\u200b'
 
                 n_users = len(users)
 
-                self.caption = u'当前在线玩家：%d' % n_users
+                self.caption = '当前在线玩家：%d' % n_users
                 self.update()
                 rst = []
 
                 if n_users > 130:
                     users = [u for u in users if u['state'] != 'game']
-                    rst.append(u'%s 个|G游戏中|r的玩家' % (n_users - len(users)))
-                    rst.append(u'')
+                    rst.append('%s 个|G游戏中|r的玩家' % (n_users - len(users)))
+                    rst.append('')
 
                 for u in users:
                     u['account'] = Account.parse(u['account'])
@@ -947,7 +947,7 @@ class LobbyScreen(Screen):
                 for u in users:
                     acc = u['account']
                     username = acc.username.replace('|', '||')
-                    rst.append(u'%s([|c9100ffff%s|r], %s)' % (
+                    rst.append('%s([|c9100ffff%s|r], %s)' % (
                         username,
                         acc.userid,
                         lookup.get(u['state'], u['state']),
@@ -959,12 +959,12 @@ class LobbyScreen(Screen):
         def __init__(self, parent):
             Frame.__init__(
                 self, x=750, y=20, width=240, height=180,
-                caption=u'花果子念报', parent=parent,
+                caption='花果子念报', parent=parent,
             )
             ta = self.textarea = TextArea(
                 parent=self, x=2, y=10+2, width=240-4, height=180-24-2-10
             )
-            ta.text = u'正在获取最新新闻……'
+            ta.text = '正在获取最新新闻……'
 
             @gevent.spawn
             def update():
@@ -973,13 +973,13 @@ class LobbyScreen(Screen):
                 if resp.ok:
                     ta.text = resp.content.decode('utf-8')
                 else:
-                    ta.text = u'|R无法显示新闻！|r'
+                    ta.text = '|R无法显示新闻！|r'
 
     class StatusBox(Frame):
         def __init__(self, parent):
             Frame.__init__(
                 self, x=35, y=20, width=240, height=180,
-                caption=u'帐号信息', parent=parent,
+                caption='帐号信息', parent=parent,
             )
             self.textarea = TextArea(
                 parent=self, x=2, y=10+2, width=240-4, height=180-24-2-10
@@ -990,14 +990,14 @@ class LobbyScreen(Screen):
             if _type == 'you':  # XXX
                 acc = Executive.gamemgr.account
                 ta = self.textarea
-                ta.text = u'\u200b'
-                f = u'|c0000ffff%s：|r %s\n'
-                ta.append(f % (u'UID', acc.userid))
-                ta.append(f % (u'用户名', acc.username))
-                ta.append(f % (u'节操', acc.other['credits']))
-                ta.append(f % (u'游戏数', acc.other['games']))
-                ta.append(f % (u'逃跑数', acc.other['drops']))
-                ta.append(f % (u'称号', acc.other['title']))
+                ta.text = '\u200b'
+                f = '|c0000ffff%s：|r %s\n'
+                ta.append(f % ('UID', acc.userid))
+                ta.append(f % ('用户名', acc.username))
+                ta.append(f % ('节操', acc.other['credits']))
+                ta.append(f % ('游戏数', acc.other['games']))
+                ta.append(f % ('逃跑数', acc.other['drops']))
+                ta.append(f % ('称号', acc.other['title']))
 
     def __init__(self, *args, **kwargs):
         Screen.__init__(self, *args, **kwargs)
@@ -1006,7 +1006,7 @@ class LobbyScreen(Screen):
         self.gamelist = self.GameList(self)
 
         chat = self.chat_box = ChatBox(parent=self, x=35+255, y=20, width=700-255, height=180)
-        chat.text = u'您现在处于游戏大厅！\n'
+        chat.text = '您现在处于游戏大厅！\n'
         self.playerlist = LobbyScreen.OnlineUsers(parent=self)
         self.noticebox = LobbyScreen.NoticeBox(parent=self)
         self.statusbox = LobbyScreen.StatusBox(parent=self)
@@ -1016,7 +1016,7 @@ class LobbyScreen(Screen):
 
         b = Button(
             parent=self, x=564, y=650, width=80, height=35,
-            color=Colors.orange, caption=u'加入QQ群',
+            color=Colors.orange, caption='加入QQ群',
         )
 
         @b.event
@@ -1026,7 +1026,7 @@ class LobbyScreen(Screen):
 
         b = Button(
             parent=self, x=474, y=650, width=80, height=35,
-            color=Colors.orange, caption=u'购买实体卡',
+            color=Colors.orange, caption='购买实体卡',
         )
 
         del on_click
@@ -1038,7 +1038,7 @@ class LobbyScreen(Screen):
 
         b = Button(
             parent=self, x=750, y=650, width=80, height=35,
-            color=Colors.orange, caption=u'卡牌查看器',
+            color=Colors.orange, caption='卡牌查看器',
         )
         del on_click
 
@@ -1051,7 +1051,7 @@ class LobbyScreen(Screen):
 
         b = Button(
             parent=self, x=35, y=650, width=80, height=35,
-            color=Colors.orange, caption=u'切换服务器',
+            color=Colors.orange, caption='切换服务器',
         )
 
         @b.event
@@ -1071,7 +1071,7 @@ class LobbyScreen(Screen):
 
         elif _type == 'observe_refused':
             uname = args[0]
-            self.chat_box.append(u'|R%s 回绝了你的旁观请求|r\n' % uname)
+            self.chat_box.append('|R%s 回绝了你的旁观请求|r\n' % uname)
 
         else:
             Screen.on_message(self, _type, *args)
@@ -1088,7 +1088,7 @@ class LobbyScreen(Screen):
 
 class GameEventsBox(Frame):
     def __init__(self, parent, width, height, **k):
-        Frame.__init__(self, parent=parent, caption=u'游戏信息', bot_reserve=0, width=width, height=height, **k)
+        Frame.__init__(self, parent=parent, caption='游戏信息', bot_reserve=0, width=width, height=height, **k)
         self.box = TextArea(
             parent=self, x=2, y=2,
             width=width - 4, height=height - 24 - 2,
@@ -1098,7 +1098,7 @@ class GameEventsBox(Frame):
         self.box.append(v)
 
     def clear(self):
-        self.box.text = u'\u200b'
+        self.box.text = '\u200b'
 
 
 class UIEventHook(EventHandler):
@@ -1140,13 +1140,13 @@ class GameScreen(Screen):
             self.y = (self.overlay.height - 340) // 2
 
             self.btncancel = btncancel = Button(
-                u'关闭', parent=self, x=440, y=25, width=90, height=40
+                '关闭', parent=self, x=440, y=25, width=90, height=40
             )
 
             self.labels = pyglet.graphics.Batch()
 
             Label(
-                u'邀请游戏', font_size=12, x=275, y=306,
+                '邀请游戏', font_size=12, x=275, y=306,
                 anchor_x='center', anchor_y='bottom',
                 color=Colors.green.heavy + (255, ),
                 shadow=(2, 207, 240, 156, 204),
@@ -1182,7 +1182,7 @@ class GameScreen(Screen):
                     def on_click(s=s, uid=u.userid, un=u.username):
                         Executive.invite_user(uid)
                         stats({'event': 'invite'})
-                        self.overlay.chat_box.append(u'|R已经邀请了%s，请等待回应……|r\n' % un)
+                        self.overlay.chat_box.append('|R已经邀请了%s，请等待回应……|r\n' % un)
                         s.state = Button.DISABLED
 
     class RoomControlPanel(Control):
@@ -1223,11 +1223,11 @@ class GameScreen(Screen):
         def __init__(self, parent=None):
             Control.__init__(self, parent=parent, **r2d((0, 0, 820, 700)))
             self.btn_getready = Button(
-                parent=self, caption=u'准备', **r2d((360, 80, 100, 35))
+                parent=self, caption='准备', **r2d((360, 80, 100, 35))
             )
 
             self.btn_invite = Button(
-                parent=self, caption=u'邀请', **r2d((360, 40, 100, 35))
+                parent=self, caption='邀请', **r2d((360, 40, 100, 35))
             )
 
             self.game_params_panel = self.GameParamsPanel(self.parent.game.ui_meta.params_disp, parent=self)
@@ -1259,10 +1259,10 @@ class GameScreen(Screen):
         def update_ready_btn(self):
             if self.ready:
                 self.ready = True
-                self.btn_getready.caption = u'取消准备'
+                self.btn_getready.caption = '取消准备'
             else:
                 self.ready = False
-                self.btn_getready.caption = u'准备'
+                self.btn_getready.caption = '准备'
 
             self.btn_getready.state = Button.NORMAL
             self.btn_getready.update()
@@ -1275,7 +1275,7 @@ class GameScreen(Screen):
                 u1 = Account.parse(u1['account'])
                 u2 = Account.parse(u2['account'])
                 self.parent.chat_box.append(
-                    u'|B|R>> |c0000ffff%s|r希望|c0000ffff|B%s|r离开游戏，已有%d人请求\n' % (
+                    '|B|R>> |c0000ffff%s|r希望|c0000ffff|B%s|r离开游戏，已有%d人请求\n' % (
                         u1.username, u2.username, count
                     )
                 )
@@ -1292,7 +1292,7 @@ class GameScreen(Screen):
                 disp = self.parent.game.ui_meta.params_disp[k]
                 lookup = {v: s for s, v in disp['options']}
                 self.parent.chat_box.append(
-                    u'|B|R>> |c0000ffff%s|r已经将|c0000ffff%s|r设定为|c0000ffff%s|r，请重新准备。\n' % (
+                    '|B|R>> |c0000ffff%s|r已经将|c0000ffff%s|r设定为|c0000ffff%s|r，请重新准备。\n' % (
                         u.username, disp['desc'], lookup[v],
                     )
                 )
@@ -1328,18 +1328,18 @@ class GameScreen(Screen):
 
             for player in (orig_players - curr_players):
                 self.parent.chat_box.append(
-                    u'|B|R>> |r玩家|c0000ffff|B%s|r已离开游戏\n' % player
+                    '|B|R>> |r玩家|c0000ffff|B%s|r已离开游戏\n' % player
                 )
 
             for player in (curr_players - orig_players):
                 self.parent.chat_box.append(
-                    u'|B|R>> |r玩家|c0000ffff|B%s|r已进入游戏\n' % player
+                    '|B|R>> |r玩家|c0000ffff|B%s|r已进入游戏\n' % player
                 )
 
             if not self.ready and full and orig_players != curr_players:
                 if Executive.gamemgr.account.username in curr_players:
                     from utils import notify
-                    notify(u'东方符斗祭 - 满员提醒', u'房间已满员，请准备。')
+                    notify('东方符斗祭 - 满员提醒', '房间已满员，请准备。')
 
     def __init__(self, game, *args, **kwargs):
         Screen.__init__(self, *args, **kwargs)
@@ -1365,7 +1365,7 @@ class GameScreen(Screen):
         )
         self.panel = GameScreen.RoomControlPanel(parent=self)
         self.btn_exit = Button(
-            parent=self, caption=u'退出房间', zindex=1,
+            parent=self, caption='退出房间', zindex=1,
             **r2d((730, 660, 75, 25))
         )
         self.btn_no_invite = NoInviteButton(
@@ -1376,7 +1376,7 @@ class GameScreen(Screen):
 
         @self.btn_exit.event
         def on_click():
-            box = ConfirmBox(u'真的要离开吗？', buttons=ConfirmBox.Presets.OKCancel, parent=self)
+            box = ConfirmBox('真的要离开吗？', buttons=ConfirmBox.Presets.OKCancel, parent=self)
 
             @box.event
             def on_confirm(val):
@@ -1389,7 +1389,7 @@ class GameScreen(Screen):
 
         elif _type == 'game_started':
             from utils import notify
-            notify(u'东方符斗祭 - 游戏提醒', u'游戏已开始，请注意。')
+            notify('东方符斗祭 - 游戏提醒', '游戏已开始，请注意。')
             self.remove_control(self.panel)
             self.add_control(self.gameui)
             self.gameui.init()
@@ -1417,7 +1417,7 @@ class GameScreen(Screen):
             u1 = Account.parse(u1['account'])
             u2 = Account.parse(u2['account'])
             self.chat_box.append(
-                u'|B|R>> |c0000ffff%s|r希望|c0000ffff|B%s|r[|c9100ffff%d|r]离开游戏，已有%d人请求\n' % (
+                '|B|R>> |c0000ffff%s|r希望|c0000ffff|B%s|r[|c9100ffff%d|r]离开游戏，已有%d人请求\n' % (
                     u1.username, u2.username, u2.userid, count
                 )
             )
@@ -1427,7 +1427,7 @@ class GameScreen(Screen):
             self.add_control(self.panel)
             g = args[0]
 
-            box = ConfirmBox(u'要保存这场游戏的Replay吗？', buttons=ConfirmBox.Presets.OKCancel, parent=self)
+            box = ConfirmBox('要保存这场游戏的Replay吗？', buttons=ConfirmBox.Presets.OKCancel, parent=self)
 
             @box.event
             def on_confirm(v):
@@ -1436,7 +1436,7 @@ class GameScreen(Screen):
 
                 @gevent.spawn
                 def save():
-                    filename = get_save_file_name(None, u'保存Replay', [(u'THB Replay 文件', u'*.thbrep')])
+                    filename = get_save_file_name(None, '保存Replay', [('THB Replay 文件', '*.thbrep')])
                     if not filename.endswith('.thbrep'):
                         filename += '.thbrep'
 
@@ -1465,18 +1465,18 @@ class GameScreen(Screen):
 
         elif _type == 'game_crashed':
             ConfirmBox(
-                u'游戏逻辑已经崩溃，请退出房间！\n'
-                u'这是不正常的状态，你可以报告bug。\n'
-                u'游戏ID：%d' % self.game.gameid,
+                '游戏逻辑已经崩溃，请退出房间！\n'
+                '这是不正常的状态，你可以报告bug。\n'
+                '游戏ID：%d' % self.game.gameid,
                 parent=self
             )
 
         elif _type == 'observe_request':
             uid, uname = args[0]
             box = ConfirmBox(
-                u'玩家 %s 希望旁观你的游戏，是否允许？\n'
-                u'旁观玩家可以看到你的手牌。' % uname, timeout=20,
-                parent=self, buttons=((u'允许', True), (u'不允许', False)), default=False
+                '玩家 %s 希望旁观你的游戏，是否允许？\n'
+                '旁观玩家可以看到你的手牌。' % uname, timeout=20,
+                parent=self, buttons=(('允许', True), ('不允许', False)), default=False
             )
 
             @box.event
@@ -1486,13 +1486,13 @@ class GameScreen(Screen):
         elif _type == 'observer_enter':
             obuid, obname, uname = args[0]
             self.chat_box.append(
-                u'|B|R>> |r|c0000ffff%s|r[|c9100ffff%d|r]|r趴在了|c0000ffff%s|r身后\n' % (obname, obuid, uname)
+                '|B|R>> |r|c0000ffff%s|r[|c9100ffff%d|r]|r趴在了|c0000ffff%s|r身后\n' % (obname, obuid, uname)
             )
 
         elif _type == 'observer_leave':
             obuid, obname, uname = args[0]
             self.chat_box.append(
-                u'|B|R>> |r|c0000ffff%s|r飘走了\n' % obname
+                '|B|R>> |r|c0000ffff%s|r飘走了\n' % obname
             )
 
         # ----- begin items -----
@@ -1501,12 +1501,12 @@ class GameScreen(Screen):
             self.chat_box.append('Exchange:\n')
             for i in items:
                 self.chat_box.append(
-                    (u'ID={i[id]}/'
-                     u'Seller={i[seller]}/'
-                     u'Item={i[item_id]}/'
-                     u'SKU={i[item_sku]}/'
-                     u'Price={i[price]}'
-                     u'\n').format(i=i)
+                    ('ID={i[id]}/'
+                     'Seller={i[seller]}/'
+                     'Item={i[item_id]}/'
+                     'SKU={i[item_sku]}/'
+                     'Price={i[price]}'
+                     '\n').format(i=i)
                 )
             self.chat_box.append('-----')
 
@@ -1515,7 +1515,7 @@ class GameScreen(Screen):
             self.chat_box.append('Your backpack:\n')
             for i in items:
                 self.chat_box.append(
-                    (u'ID={i[id]}/SKU={i[sku]}\n').format(i=i)
+                    ('ID={i[id]}/SKU={i[sku]}\n').format(i=i)
                 )
             self.chat_box.append('-----\n')
 
@@ -1558,12 +1558,12 @@ class ReplayScreen(Screen):
 
     class ReplayPanel(Frame):
         def __init__(self, **k):
-            Frame.__init__(self, caption=u'Replay控制', **k)
+            Frame.__init__(self, caption='Replay控制', **k)
 
-            self.btn_start = Button(u'开始', parent=self, color=Colors.orange, x=15, y=65, width=80, height=24)
-            self.btn_pause = Button(u'暂停', parent=self, color=Colors.blue, x=15 + 80 + 15, y=65, width=80, height=24)
-            self.btn_brake = Button(u'减速', parent=self, x=15, y=25, width=80, height=24)
-            self.btn_accel = Button(u'加速', parent=self, x=15 + 80 + 15, y=25, width=80, height=24)
+            self.btn_start = Button('开始', parent=self, color=Colors.orange, x=15, y=65, width=80, height=24)
+            self.btn_pause = Button('暂停', parent=self, color=Colors.blue, x=15 + 80 + 15, y=65, width=80, height=24)
+            self.btn_brake = Button('减速', parent=self, x=15, y=25, width=80, height=24)
+            self.btn_accel = Button('加速', parent=self, x=15 + 80 + 15, y=25, width=80, height=24)
 
             self.delay = 2.0
             self.paused = False
@@ -1571,7 +1571,7 @@ class ReplayScreen(Screen):
             self.running.set()
 
             self.delay_lbl = self.add_label(
-                u'当前延迟：%s秒' % self.delay,
+                '当前延迟：%s秒' % self.delay,
                 x=15, y=105, font_size=9, color=(0, 0, 0, 255),
                 anchor_x='left', anchor_y='bottom',
             )
@@ -1588,22 +1588,22 @@ class ReplayScreen(Screen):
         def pause(self):
             if self.paused:
                 self.running.set()
-                self.btn_pause.caption = u'暂停'
+                self.btn_pause.caption = '暂停'
                 self.paused = False
             else:
                 self.running.clear()
-                self.btn_pause.caption = u'恢复'
+                self.btn_pause.caption = '恢复'
                 self.paused = True
 
             self.btn_pause.update()
 
         def brake(self):
             self.delay += 0.1
-            self.delay_lbl.text = u'当前延迟：%s秒' % self.delay
+            self.delay_lbl.text = '当前延迟：%s秒' % self.delay
 
         def accel(self):
             self.delay = max(self.delay - 0.1, 0.2)
-            self.delay_lbl.text = u'当前延迟：%s秒' % self.delay
+            self.delay_lbl.text = '当前延迟：%s秒' % self.delay
 
         def handle_delay(self, evt, _):
             gevent.sleep(self.delay)
@@ -1646,7 +1646,7 @@ class ReplayScreen(Screen):
         )  # add when game starts
 
         Button(
-            parent=self, caption=u'结束Replay', zindex=1,
+            parent=self, caption='结束Replay', zindex=1,
             **r2d((730, 660, 75, 25))
         ).event('on_click')(self.end_replay)
 

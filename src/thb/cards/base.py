@@ -118,11 +118,11 @@ class Card(GameObject):
         return self.resides_in is not None and self not in self.resides_in
 
     def __repr__(self):
-        return u"{name}({suit}, {num}{detached})".format(
+        return "{name}({suit}, {num}{detached})".format(
             name=self.__class__.__name__,
             suit=self.SUIT_REV.get(self.suit, self.suit),
             num=self.NUM_REV.get(self.number, self.number),
-            detached=u', detached' if self.detached else u''
+            detached=', detached' if self.detached else ''
         )
 
     def is_card(self, cls):

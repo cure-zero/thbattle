@@ -421,7 +421,7 @@ def init_gui():
     from options import options
     z = options.zoom
     main_window = pyglet.window.Window(
-        width=int(WINDOW_WIDTH * z), height=int(WINDOW_HEIGHT * z), caption=u'东方符斗祭',
+        width=int(WINDOW_WIDTH * z), height=int(WINDOW_HEIGHT * z), caption='东方符斗祭',
         config=config, visible=False
     )
     sched_queue = []

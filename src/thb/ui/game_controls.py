@@ -748,7 +748,7 @@ class GameCharacterPortrait(Frame):
         self.x, self.y = x, y
 
         self.charname_lbl = self.add_label(
-            u'', 7, self.height-30,
+            '', 7, self.height-30,
             width=16, multiline=True,
             font_size=9,
             anchor_x='left', anchor_y='top',
@@ -847,12 +847,12 @@ class GameCharacterPortrait(Frame):
         p = self.player
         if not p: return
 
-        nick = u"<%s>" % p.account.username
+        nick = "<%s>" % p.account.username
         if self.dropped:
             if self.fleed:
-                prefix = u'(逃跑)'
+                prefix = '(逃跑)'
             else:
-                prefix = u'(掉线)'
+                prefix = '(掉线)'
 
             nick = prefix + nick
 

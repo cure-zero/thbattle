@@ -13,16 +13,16 @@ __metaclass__ = gen_metafunc(thbnewbie)
 
 
 class THBattleNewbie:
-    name = u'琪露诺的完美THB教室'
+    name = '琪露诺的完美THB教室'
     logo = 'thb-modelogo-newbie'
     params_disp = {}
     description = (
-        u'|R游戏人数|r：1人+1NPC\n'
-        u'\n'
-        u'|G游戏目标|r：让琪露诺带你飞\n'
-        u'\n'
-        u'|G胜利条件|r：完整的完成教学，不掉线\n'
-        u'\n'
+        '|R游戏人数|r：1人+1NPC\n'
+        '\n'
+        '|G游戏目标|r：让琪露诺带你飞\n'
+        '\n'
+        '|G胜利条件|r：完整的完成教学，不掉线\n'
+        '\n'
     ).strip()
 
     def ui_class():
@@ -31,11 +31,11 @@ class THBattleNewbie:
 
     T = thbnewbie.Identity.TYPE
     identity_table = {
-        T.HIDDEN:  u'？',
+        T.HIDDEN:  '？',
     }
 
     identity_color = {
-        T.HIDDEN:  u'blue',
+        T.HIDDEN:  'blue',
     }
 
     IdentityType = T

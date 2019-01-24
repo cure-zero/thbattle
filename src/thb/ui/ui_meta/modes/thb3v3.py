@@ -13,24 +13,24 @@ __metaclass__ = gen_metafunc(thb3v3)
 
 
 class THBattle:
-    name = u'3v3模式'
+    name = '3v3模式'
     logo = 'thb-modelogo-3v3'
     description = (
-        u'|R游戏人数|r：6人\n'
-        u'\n'
-        u'阵营分为|!B博丽|r和|!O守矢|r，每个阵营3名玩家，交错入座。\n'
-        u'由ROLL点最高的人开始，按照顺时针1-2-2-1的方式选将。\n'
-        u'选将完成由ROLL点最高的玩家开始行动。\n'
-        u'ROLL点最高的玩家开局摸3张牌，其余玩家开局摸4张牌。\n'
-        u'\n'
-        u'|R胜利条件|r：击坠所有对方阵营玩家。'
+        '|R游戏人数|r：6人\n'
+        '\n'
+        '阵营分为|!B博丽|r和|!O守矢|r，每个阵营3名玩家，交错入座。\n'
+        '由ROLL点最高的人开始，按照顺时针1-2-2-1的方式选将。\n'
+        '选将完成由ROLL点最高的玩家开始行动。\n'
+        'ROLL点最高的玩家开局摸3张牌，其余玩家开局摸4张牌。\n'
+        '\n'
+        '|R胜利条件|r：击坠所有对方阵营玩家。'
     )
     params_disp = {
         'random_seat': {
-            'desc': u'随机座位阵营',
+            'desc': '随机座位阵营',
             'options': [
-                (u'固定', False),
-                (u'随机', True),
+                ('固定', False),
+                ('随机', True),
             ],
         },
     }
@@ -41,15 +41,15 @@ class THBattle:
 
     T = thb3v3.Identity.TYPE
     identity_table = {
-        T.HIDDEN: u'？',
-        T.HAKUREI: u'博丽',
-        T.MORIYA: u'守矢'
+        T.HIDDEN: '？',
+        T.HAKUREI: '博丽',
+        T.MORIYA: '守矢'
     }
 
     identity_color = {
-        T.HIDDEN: u'blue',
-        T.HAKUREI: u'blue',
-        T.MORIYA: u'orange'
+        T.HIDDEN: 'blue',
+        T.HAKUREI: 'blue',
+        T.MORIYA: 'orange'
     }
 
     IdentityType = T

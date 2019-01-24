@@ -113,7 +113,7 @@ class Room(object):
         return old
 
     # ----- Client Commands -----
-    @command(['lobby'], [basestring, unicode, dict])  # TODO dict is too coarse
+    @command(['lobby'], [basestring, str, dict])  # TODO dict is too coarse
     def _create(self, u, gametype, name, flags):
         core = self.core
         from thb import modes

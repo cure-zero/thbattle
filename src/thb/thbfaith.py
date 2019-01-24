@@ -234,7 +234,7 @@ class THBattleFaith(Game):
         cls = choice.char_cls
 
         g.picks.append(cls)
-        log.info(u'>> NewCharacter: %s %s', Identity.TYPE.rlookup(p.identity.type), cls.__name__)
+        log.info('>> NewCharacter: %s %s', Identity.TYPE.rlookup(p.identity.type), cls.__name__)
 
         # mix char class with player -->
         old = p

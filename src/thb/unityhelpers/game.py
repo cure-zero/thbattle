@@ -39,6 +39,6 @@ def modename2display(modename):
     from thb import modes
     gcls = modes.get(modename)
     if not gcls:
-        return u'未知模式'
+        return '未知模式'
     else:
         return gcls.ui_meta.name

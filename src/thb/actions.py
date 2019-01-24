@@ -1140,7 +1140,7 @@ class RevealIdentity(GenericAction):
             return ch is self.to
 
     def __repr__(self):
-        return u'Reveal(%s, %s)' % (self.target, self.to)
+        return 'Reveal(%s, %s)' % (self.target, self.to)
 
 
 class Pindian(UserAction):

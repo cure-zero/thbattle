@@ -173,7 +173,7 @@ class Game(GameObject, GameViralContext):
         except:
             winner = None
 
-        log.info(u'>> Winner: %s', winner)
+        log.info('>> Winner: %s', winner)
         gevent.sleep(2)
 
         raise GameEnded
@@ -197,7 +197,7 @@ class Game(GameObject, GameViralContext):
         data can be modified.
         '''
         random.random() < 0.01 and gevent.sleep(0.00001)  # prevent buggy logic code blocking scheduling
-        if isinstance(data, (list, tuple, str, unicode)):
+        if isinstance(data, (list, tuple, str, str)):
             s = data
         else:
             s = data.__class__.__name__
@@ -647,7 +647,7 @@ class Packet(object):
         self.consumed = False
 
     def __repr__(self):
-        return u'Packet[%s, %s, %s, %s]' % (self.serial, self.tag, self.data, '_X'[self.consumed])
+        return 'Packet[%s, %s, %s, %s]' % (self.serial, self.tag, self.data, '_X'[self.consumed])
 
 
 class GameData(object):
@@ -769,8 +769,8 @@ class GameItem(object):
     args = []
     usable = False
 
-    title = u'ITEM-TITLE'
-    description = u'ITEM-DESC'
+    title = 'ITEM-TITLE'
+    description = 'ITEM-DESC'
 
     def __init__(self, sku, *args):
         self.sku = sku

@@ -29,7 +29,7 @@ class AncientPixGlyphRenderer(GlyphRenderer):
         return glyph
 
     def render_char(self, text, type):
-        char = u'⑨' if self.font.password else text[0]
+        char = '⑨' if self.font.password else text[0]
         asc = ord(char)
         font = self.font
         suffix = ('BLOAT', 'SHADOWTHIN', 'SHADOWTHICK')[type]
@@ -39,9 +39,9 @@ class AncientPixGlyphRenderer(GlyphRenderer):
         else:
             suffix = '16' + suffix
 
-        if char in u'♠♥♣♦':
+        if char in '♠♥♣♦':
             # special case for suits
-            i = u'♠♥♣♦'.index(char)
+            i = '♠♥♣♦'.index(char)
             if font.size == 9:
                 h = 12
                 grid = L('c-suit12')
@@ -53,7 +53,7 @@ class AncientPixGlyphRenderer(GlyphRenderer):
             glyph.set_bearings(1, -2, h + 1)
             return glyph
 
-        elif char == u'\u200b':
+        elif char == '\u200b':
             glyph = font.create_glyph(
                 pyglet.image.ImageData(1, 1, 'RGBA', '\xFF'*4)
             )
@@ -86,7 +86,7 @@ class AncientPixGlyphRenderer(GlyphRenderer):
             try:
                 gbk = char.encode('gbk')
             except UnicodeEncodeError:
-                gbk = u'⑨'.encode('gbk')
+                gbk = '⑨'.encode('gbk')
             rol = (256 + ord(gbk[0]) - 0x81) & 0xff
             col = (256 + ord(gbk[1]) - 0x40) & 0xff
             loc = rol * self.gbk_cols + col

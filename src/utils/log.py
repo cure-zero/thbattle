@@ -49,9 +49,9 @@ class ServerLogFormatter(logging.Formatter):
             s.append('>>>>>>' + '-' * 74)
             s.append(self._format(rec))
             import traceback
-            s.append(u''.join(traceback.format_exception(*rec.exc_info)).strip())
+            s.append(''.join(traceback.format_exception(*rec.exc_info)).strip())
             s.append('<<<<<<' + '-' * 74)
-            return u'\n'.join(s)
+            return '\n'.join(s)
         else:
             return self._format(rec)
 
@@ -69,7 +69,7 @@ class ServerLogFormatter(logging.Formatter):
         else:
             msg = rec.msg
 
-        return u'[%s %s%s] %s' % (
+        return '[%s %s%s] %s' % (
             rec.levelname[0],
             time.strftime('%y%m%d %H:%M:%S'),
             gr_name.decode('utf-8'),

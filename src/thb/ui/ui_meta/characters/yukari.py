@@ -14,8 +14,8 @@ __metaclass__ = gen_metafunc(characters.yukari)
 
 class SpiritingAway:
     # Skill
-    name = u'神隐'
-    description = u'出牌阶段限两次，你可以将场上的一张牌暂时移出游戏。你可以观看以此法移出游戏的牌。'
+    name = '神隐'
+    description = '出牌阶段限两次，你可以将场上的一张牌暂时移出游戏。你可以观看以此法移出游戏的牌。'
 
     def clickable(game):
         me = game.me
@@ -32,28 +32,28 @@ class SpiritingAway:
         skill = cl[0]
         cl = skill.associated_cards
         if cl:
-            return (False, u'请不要选择牌')
+            return (False, '请不要选择牌')
 
         if not tl:
-            return (False, u'请选择一名玩家')
+            return (False, '请选择一名玩家')
 
         tgt = tl[0]
         catnames = ['cards', 'showncards', 'equips', 'fatetell']
         if not any(getattr(tgt, i) for i in catnames):
-            return (False, u'这货已经没有牌了')
+            return (False, '这货已经没有牌了')
 
-        return (True, u'发动【神隐】')
+        return (True, '发动【神隐】')
 
 
 class SpiritingAwayAction:
 
     def effect_string(act):
         words = (
-            u'17岁就是17岁，后面没有零几个月！',
-            u'叫紫妹就对了，紫妈算什么！',
+            '17岁就是17岁，后面没有零几个月！',
+            '叫紫妹就对了，紫妈算什么！',
         )
         # return u'|G【{source}】|r：“{word}”（|G{target}|r的{card}不见了）'.format(
-        return u'|G【{source}】|r：“{word}”（|G{target}|r的一张牌不见了）'.format(
+        return '|G【{source}】|r：“{word}”（|G{target}|r的一张牌不见了）'.format(
             source=act.source.ui_meta.name,
             target=act.target.ui_meta.name,
             word=random.choice(words),
@@ -69,11 +69,11 @@ class SpiritingAwayAction:
 
 class Yukari:
     # Character
-    name        = u'八云紫'
-    title       = u'永远17岁'
-    illustrator = u'Vivicat@幻想梦斗符'
-    cv          = u'VV'
+    name        = '八云紫'
+    title       = '永远17岁'
+    illustrator = 'Vivicat@幻想梦斗符'
+    cv          = 'VV'
 
-    port_image        = u'thb-portrait-yukari'
-    figure_image      = u'thb-figure-yukari'
-    miss_sound_effect = u'thb-cv-yukari_miss'
+    port_image        = 'thb-portrait-yukari'
+    figure_image      = 'thb-figure-yukari'
+    miss_sound_effect = 'thb-cv-yukari_miss'

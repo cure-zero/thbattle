@@ -238,7 +238,7 @@ class Button(AbstractButton):
         )
 
         pyglet.text.Label(
-            self.caption, u'AncientPix', 9,
+            self.caption, 'AncientPix', 9,
             color=color.text + (255,),
             x=(ax + self.width // 2), y=(ay + self.height // 2),
             anchor_x='center', anchor_y='center', batch=batch,
@@ -479,7 +479,7 @@ class Frame(Control):
             shadow = (2, ) + self.color.caption_shadow + (255,)
 
         self.caption_lbl = pyglet.text.Label(
-            u'', u'AncientPix', 9,
+            '', 'AncientPix', 9,
             color=self.color.caption + (255,),
             shadow=shadow,
             anchor_x='left', anchor_y='bottom',
@@ -916,14 +916,14 @@ class TextBox(Control):
 
             elif symbol == key.ENTER:
                 if self.DISABLE_NEWLINE: return
-                self.dispatch_event('on_text', u'\n')
+                self.dispatch_event('on_text', '\n')
                 return pyglet.event.EVENT_HANDLED
 
             elif symbol == key.V:
-                content = unicode(pyperclip.paste())
+                content = str(pyperclip.paste())
                 if self.DISABLE_NEWLINE:
-                    for le in (u'\r\n', u'\r', u'\n'):
-                        content = content.replace(le, u' ')
+                    for le in ('\r\n', '\r', '\n'):
+                        content = content.replace(le, ' ')
                 self.dispatch_event('on_text', content)
                 return pyglet.event.EVENT_HANDLED
 
@@ -932,7 +932,7 @@ class TextBox(Control):
                 end = self.layout.selection_end
                 if start != end:
                     pyperclip.copy(self.text[start:end])
-                    self.dispatch_event('on_text', u'')
+                    self.dispatch_event('on_text', '')
                 return pyglet.event.EVENT_HANDLED
 
     def on_text(self, text):
@@ -1018,16 +1018,16 @@ class PlayerPortrait(Frame):
             def on_click(btn=btn, cmd=command):
                 cmd()
 
-        btn(u'请离', lambda: [stats({'event': 'kick'}), self.userid and Executive.kick_user(self.userid)], 90, 55, 32, 20)
+        btn('请离', lambda: [stats({'event': 'kick'}), self.userid and Executive.kick_user(self.userid)], 90, 55, 32, 20)
 
     def update(self):
         acc = self.account
         if acc:
-            name = u'<' + acc.username + u'>'
-            if self.ready: name = u'(准备)' + name
+            name = '<' + acc.username + '>'
+            if self.ready: name = '(准备)' + name
             self.userid = acc.userid
         else:
-            name = u'空位置'
+            name = '空位置'
             self.userid = 0
 
         for l in self.accinfo_labels:
@@ -1100,10 +1100,10 @@ class PlayerPortrait(Frame):
             ))
 
         Lbl(acc.other['title'], 0)
-        Lbl(u'节操： %d' % acc.other['credits'], 1)
+        Lbl('节操： %d' % acc.other['credits'], 1)
         g, d = acc.other['games'], acc.other['drops']
         dr = int(100*d/g) if d else 0
-        Lbl(u'游戏数：%d(%d%%)' % (g, dr), 2)
+        Lbl('游戏数：%d(%d%%)' % (g, dr), 2)
 
         def B(loc, b):
             ft, f = imageurl2file(b['image'])
@@ -1178,12 +1178,12 @@ class PlayerPortrait(Frame):
 
 class TextArea(Control):
 
-    def __init__(self, font=u'AncientPix', font_size=9, default_attrib={}, *args, **kwargs):
+    def __init__(self, font='AncientPix', font_size=9, default_attrib={}, *args, **kwargs):
         Control.__init__(self, can_focus=True, *args, **kwargs)
 
         width, height = self.width, self.height
 
-        self.document = pyglet.text.document.FormattedDocument(u'')
+        self.document = pyglet.text.document.FormattedDocument('')
         self.default_attrib = dict(
             font_size=font_size,
             font_name=font,
@@ -1206,7 +1206,7 @@ class TextArea(Control):
         self.pos_table = []
         self.loc_table = []
 
-        self._text = u''
+        self._text = ''
 
         self.caret = pyglet.text.caret.Caret(self.layout)
 
@@ -1222,13 +1222,13 @@ class TextArea(Control):
         return self._text
 
     def _settext(self, text):
-        self._text = u''
+        self._text = ''
         self.pos_table = []
         self.loc_table = []
         self.caret.mark = None
         l = self.layout
         l.begin_update()
-        self.document.text = u''
+        self.document.text = ''
         self.append(text)
         # l.end_update()  # self.append(text) will call it
 
@@ -1252,7 +1252,7 @@ class TextArea(Control):
             attrib.update(self.default_attrib)
 
         def instext(s, tok):
-            tok = unicode(tok)
+            tok = str(tok)
             if s:
                 self.pos_table.append(pos + s.match.start())
             else:
@@ -1445,7 +1445,7 @@ class ListItem(object):
         n = len(p.columns)
         val = (val + n*[''])[:n]
         for i, v in enumerate(val):
-            self[i] = unicode(v)
+            self[i] = str(v)
         self._update_labels()
 
     def _get_data(self):
@@ -1700,7 +1700,7 @@ class SmallProgressBar(ProgressBar):
 
 
 class ButtonArray(Control):
-    def __init__(self, buttons=((u'确定', True), (u'取消', False)),
+    def __init__(self, buttons=(('确定', True), ('取消', False)),
                  color=Colors.green, delay=0, min_width=0, *a, **k):
         Control.__init__(self, *a, **k)
         self.buttons = bl = []
@@ -1805,12 +1805,12 @@ ConfirmButtons.register_event_type('on_confirm')
 
 class ConfirmBox(Dialog):
     class Presets:
-        OK       = ((u'确定', True), )
-        OKCancel = ((u'确定', True), (u'取消', False))
+        OK       = (('确定', True), )
+        OKCancel = (('确定', True), ('取消', False))
 
     _default_value = object()
 
-    def __init__(self, text=u'Yoo~', caption=u'信息',
+    def __init__(self, text='Yoo~', caption='信息',
                  buttons=Presets.OK, default=_default_value, *a, **k):
         Dialog.__init__(
             self, caption, width=300,
@@ -1855,7 +1855,7 @@ ConfirmBox.register_event_type('on_confirm')
 
 
 class LoadingWindow(Dialog):
-    def __init__(self, text=u'Yoo~', caption=u'请稍候...',
+    def __init__(self, text='Yoo~', caption='请稍候...',
                  *a, **k):
         Dialog.__init__(
             self, caption, width=300, bot_reserve=0, *a, **k
@@ -2078,11 +2078,11 @@ class VolumeTuner(Control):
         Control.__init__(self, width=32, height=32, zindex=99999, *a, **k)
         balloon = BalloonPrompt(self)
         balloon.set_balloon(
-            u'|DB调节音量的图标|r\n'
-            u'\n'
-            u'单击切换静音和有声音\n'
-            u'鼠标滚轮调整BGM音量大小\n'
-            u'按住Ctrl+鼠标滚轮调整效果音大小'
+            '|DB调节音量的图标|r\n'
+            '\n'
+            '单击切换静音和有声音\n'
+            '鼠标滚轮调整BGM音量大小\n'
+            '按住Ctrl+鼠标滚轮调整效果音大小'
         )
 
     def draw(self):
@@ -2135,8 +2135,8 @@ class VolumeTuner(Control):
 class OptionButton(Button):
     Conf = namedtuple('OptionButtonConfiguration', 'caption color value')
     DEFAULT_CONF = (
-        (u'关闭', Colors.blue, False),
-        (u'打开', Colors.orange, True),
+        ('关闭', Colors.blue, False),
+        ('打开', Colors.orange, True),
     )
     _DEFAULT = object()
 
@@ -2182,8 +2182,8 @@ class NoInviteButton(OptionButton):
     def __init__(self, *a, **k):
         from user_settings import UserSettings
         conf = (
-            (u'邀请已关闭', Colors.blue,   True),
-            (u'邀请已开启', Colors.orange, False),
+            ('邀请已关闭', Colors.blue,   True),
+            ('邀请已开启', Colors.orange, False),
         )
         OptionButton.__init__(self, conf=conf, value=UserSettings.no_invite, *a, **k)
         UserSettings.setting_change += self
@@ -2209,13 +2209,13 @@ class NoInviteButton(OptionButton):
 class CheckBox(Control):
     def __init__(self, value=False, *a, **k):
         conf = (
-            (u'', Colors.blue, False),
-            (u'', Colors.orange, True),
+            ('', Colors.blue, False),
+            ('', Colors.orange, True),
         )
         Control.__init__(self, width=28, height=22, *a, **k)
 
         self.label = label = pyglet.text.Label(
-            self.caption, u'AncientPix', 9,
+            self.caption, 'AncientPix', 9,
             color=(0, 0, 0, 255),
             x=24, y=2,
             anchor_x='left', anchor_y='bottom',

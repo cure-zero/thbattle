@@ -149,7 +149,7 @@ class THBattleBootstrap(GenericAction):
         # -------
         for p in g.players:
             log.info(
-                u'>> Player: %s:%s %s',
+                '>> Player: %s:%s %s',
                 p.__class__.__name__,
                 Identity.TYPE.rlookup(p.identity.type),
                 p.account.username,

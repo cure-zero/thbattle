@@ -11,7 +11,7 @@ from utils.misc import flatten
 # -- code --
 def _do_open_dlg(window, title, filters, extra):
     args = ['zenity', '--file-selection', '--title', title] + extra
-    args += flatten([('--file-filter', u'|'.join(i)) for i in filters])
+    args += flatten([('--file-filter', '|'.join(i)) for i in filters])
     handle = subprocess.Popen(args, stdout=subprocess.PIPE)
     return handle.stdout.read().strip()
 

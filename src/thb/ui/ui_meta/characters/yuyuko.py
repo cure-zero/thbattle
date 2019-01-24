@@ -26,7 +26,7 @@ class Yuyuko:
     figure_image      = 'thb-figure-yuyuko'
     miss_sound_effect = 'thb-cv-yuyuko_miss'
 
-    notes = u'|RKOF不平衡角色'
+    notes = '|RKOF不平衡角色'
 
 
 class GuidedDeath:

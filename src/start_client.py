@@ -56,8 +56,8 @@ def start_client():
             log.error('Multiple instances detected, exiting')
             ctypes.windll.user32.MessageBoxW(
                 0,
-                u'请遵守社区规范，素质游戏，不要开启多个游戏实例！',
-                u'东方符斗祭',
+                '请遵守社区规范，素质游戏，不要开启多个游戏实例！',
+                '东方符斗祭',
                 16,
             )
             sys.exit(0)
@@ -87,8 +87,8 @@ def start_client():
     if gl_info.get_renderer() == 'GDI Generic':
         ctypes.windll.user32.MessageBoxW(
             0,
-            u'你好像没有安装显卡驱动……？这样游戏是跑不起来的。快去安装！',
-            u'需要显卡驱动',
+            '你好像没有安装显卡驱动……？这样游戏是跑不起来的。快去安装！',
+            '需要显卡驱动',
             16,
         )
         sys.exit(0)
@@ -127,7 +127,7 @@ def start_client():
             import pdb
             pdb.post_mortem()
 
-        log.exception(u'UI线程崩溃，正在报告bug，请稍等下……')
+        log.exception('UI线程崩溃，正在报告bug，请稍等下……')
         from utils.stats import stats
         stats({'event': 'crash'})
 

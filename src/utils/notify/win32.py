@@ -66,6 +66,6 @@ def _notify(title, msg):  # noqa
         import atexit
         atexit.register(remove_icon)
 
-    data.szInfoTitle = unicode(title)[:63]
-    data.szInfo = unicode(msg)[:255]
+    data.szInfoTitle = str(title)[:63]
+    data.szInfo = str(msg)[:255]
     windll.shell32.Shell_NotifyIconW(NIM_MODIFY, byref(data))

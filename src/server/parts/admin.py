@@ -39,7 +39,7 @@ class Admin(object):
                 return ev
 
             f(self, ev)
-            c.write(['system_msg', [None, u'成功的执行了管理命令']])
+            c.write(['system_msg', [None, '成功的执行了管理命令']])
             return ev
 
         return wrapper
@@ -70,7 +70,7 @@ class Admin(object):
         def sysmsg():
             while True:
                 users = core.lobby.all_users()
-                users.write(['system_msg', [None, u'游戏已经更新，当前的游戏结束后将会被自动踢出，请更新后重新游戏']])
+                users.write(['system_msg', [None, '游戏已经更新，当前的游戏结束后将会被自动踢出，请更新后重新游戏']])
                 gevent.sleep(30)
 
         @gevent.spawn

@@ -65,7 +65,7 @@ class UserSettings(dict):
 
 UserSettings = UserSettings()
 
-UserSettings.add_setting('last_id', u'无名の罪袋')
+UserSettings.add_setting('last_id', '无名の罪袋')
 UserSettings.add_setting('saved_passwd', '')
 UserSettings.add_setting('notify_level', 1)
 UserSettings.add_setting('sound_notify', True)

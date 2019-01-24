@@ -18,7 +18,7 @@ __metaclass__ = gen_metafunc(cards)
 
 
 def equip_iav(g, cl, target_list):
-    return (True, u'配上好装备，不再掉节操！')
+    return (True, '配上好装备，不再掉节操！')
 
 
 def suppress_launch_card_effect_string(act):
@@ -28,20 +28,20 @@ def suppress_launch_card_effect_string(act):
 class WearEquipmentAction:
 
     def effect_string(act):
-        return u'|G【%s】|r装备了%s' % (
+        return '|G【%s】|r装备了%s' % (
             act.target.ui_meta.name,
             card_desc(act.associated_card),
         )
 
 
 class WeaponReforgeHandler:
-    choose_option_prompt = u'你希望重铸这张牌么？'
-    choose_option_buttons = ((u'重铸', True), (u'装备', False))
+    choose_option_prompt = '你希望重铸这张牌么？'
+    choose_option_buttons = (('重铸', True), ('装备', False))
 
 
 class ReforgeWeapon:
     def effect_string(act):
-        return u'|G【%s】|r重铸了%s' % (
+        return '|G【%s】|r重铸了%s' % (
             act.target.ui_meta.name,
             card_desc(act.card),
         )
@@ -49,13 +49,13 @@ class ReforgeWeapon:
 
 class OpticalCloakCard:
     # action_stage meta
-    name = u'光学迷彩'
+    name = '光学迷彩'
     image = 'thb-card-opticalcloak'
     image_small = 'thb-card-small-opticalcloak'
     description = (
-        u'|R光学迷彩|r\n\n'
-        u'装备后:当你需要使用或打出|G擦弹|r时，可以进行一次判定，若结果为红，视为你使用或打出了一张|G擦弹|r。\n\n'
-        u'|DB（画师：霏茶，CV：shourei小N）|r'
+        '|R光学迷彩|r\n\n'
+        '装备后:当你需要使用或打出|G擦弹|r时，可以进行一次判定，若结果为红，视为你使用或打出了一张|G擦弹|r。\n\n'
+        '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
     is_action_valid = equip_iav
@@ -64,7 +64,7 @@ class OpticalCloakCard:
 
 class OpticalCloakSkill:
     # Skill
-    name = u'光学迷彩'
+    name = '光学迷彩'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -77,34 +77,34 @@ class OpticalCloakSkill:
 
 class OpticalCloakHandler:
     # choose_option
-    choose_option_buttons = ((u'发动', True), (u'不发动', False))
-    choose_option_prompt = u'你要发动【光学迷彩】吗？'
+    choose_option_buttons = (('发动', True), ('不发动', False))
+    choose_option_prompt = '你要发动【光学迷彩】吗？'
 
 
 class OpticalCloak:
-    fatetell_display_name = u'光学迷彩'
+    fatetell_display_name = '光学迷彩'
 
     def effect_string_before(act):
-        return u'|G【%s】|r祭起了|G光学迷彩|r…' % (
+        return '|G【%s】|r祭起了|G光学迷彩|r…' % (
             act.target.ui_meta.name,
         )
 
     def effect_string(act):
         if act.succeeded:
-            return u'效果拔群！'
+            return '效果拔群！'
         else:
-            return u'但是被看穿了…'
+            return '但是被看穿了…'
 
 
 class MomijiShieldCard:
     # action_stage meta
-    name = u'天狗盾'
+    name = '天狗盾'
     image = 'thb-card-momijishield'
     image_small = 'thb-card-small-momijishield'
     description = (
-        u'|R天狗盾|r\n\n'
-        u'装备后：黑色|G弹幕|r对你无效。\n\n'
-        u'|DB（画师：霏茶）|r'
+        '|R天狗盾|r\n\n'
+        '装备后：黑色|G弹幕|r对你无效。\n\n'
+        '|DB（画师：霏茶）|r'
     )
 
     is_action_valid = equip_iav
@@ -113,32 +113,32 @@ class MomijiShieldCard:
 
 class MomijiShieldSkill:
     # Skill
-    name = u'天狗盾'
+    name = '天狗盾'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class MomijiShield:
     def effect_string(act):
-        return u'被|G天狗盾|r挡下了…'
+        return '被|G天狗盾|r挡下了…'
 
     def sound_effect(act):
         return 'thb-cv-card_momijishield'
 
 
 ufo_desc = (
-    u'|R%s|r\n\n'
-    u'UFO用来改变自己与其他角色之间的距离。\n'
-    u'|B|R>> |r红色UFO为进攻用，当你计算和其他角色的距离时,在原有的基础上减少相应距离。两名角色之间的距离至少为1。\n'
-    u'|B|R>> |r绿色UFO为防守用，当其他角色计算和你的距离时,在原有的基础上增加相应距离。\n'
-    u'|B|R>> |r你可以同时装备两种UFO\n\n'
-    u'|DB（画师：霏茶）|r'
+    '|R%s|r\n\n'
+    'UFO用来改变自己与其他角色之间的距离。\n'
+    '|B|R>> |r红色UFO为进攻用，当你计算和其他角色的距离时,在原有的基础上减少相应距离。两名角色之间的距离至少为1。\n'
+    '|B|R>> |r绿色UFO为防守用，当其他角色计算和你的距离时,在原有的基础上增加相应距离。\n'
+    '|B|R>> |r你可以同时装备两种UFO\n\n'
+    '|DB（画师：霏茶）|r'
 )
 
 
 class GreenUFOCard:
     # action_stage meta
-    name = u'绿色UFO'
+    name = '绿色UFO'
     image = 'thb-card-greenufo'
     image_small = 'thb-card-small-greenufo'
     description = ufo_desc % name
@@ -149,7 +149,7 @@ class GreenUFOCard:
 
 class GreenUFOSkill:
     # Skill
-    name = u'绿色UFO'
+    name = '绿色UFO'
     no_display = True
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
@@ -157,7 +157,7 @@ class GreenUFOSkill:
 
 class RedUFOCard:
     # action_stage meta
-    name = u'红色UFO'
+    name = '红色UFO'
     image = 'thb-card-redufo'
     image_small = 'thb-card-small-redufo'
     description = ufo_desc % name
@@ -168,7 +168,7 @@ class RedUFOCard:
 
 class RedUFOSkill:
     # Skill
-    name = u'红色UFO'
+    name = '红色UFO'
     no_display = True
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
@@ -176,17 +176,17 @@ class RedUFOSkill:
 
 class RoukankenCard:
     # action_stage meta
-    name = u'楼观剑'
+    name = '楼观剑'
     image = 'thb-card-roukanken'
     image_small = 'thb-card-small-roukanken'
     description = (
-        u'|R楼观剑|r\n'
-        u'\n'
-        u'攻击范围3，装备后：你使用的|G弹幕|r无视防具。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶）|r'
+        '|R楼观剑|r\n'
+        '\n'
+        '攻击范围3，装备后：你使用的|G弹幕|r无视防具。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -194,14 +194,14 @@ class RoukankenCard:
 
 class RoukankenSkill:
     # Skill
-    name = u'楼观剑'
+    name = '楼观剑'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class Roukanken:
     def effect_string_apply(act):
-        return u'没有什么防具是|G楼观剑|r斩不断的！'
+        return '没有什么防具是|G楼观剑|r斩不断的！'
 
     def sound_effect(act):
         return 'thb-cv-card_roukanken'
@@ -209,17 +209,17 @@ class Roukanken:
 
 class ElementalReactorCard:
     # action_stage meta
-    name = u'八卦炉'
+    name = '八卦炉'
     image = 'thb-card-reactor'
     image_small = 'thb-card-small-reactor'
     description = (
-        u'|R八卦炉|r\n'
-        u'\n'
-        u'攻击范围1，装备后：出牌阶段你使用|G弹幕|r时不消耗干劲。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶）|r'
+        '|R八卦炉|r\n'
+        '\n'
+        '攻击范围1，装备后：出牌阶段你使用|G弹幕|r时不消耗干劲。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶）|r'
     )
 
     is_action_valid = equip_iav
@@ -228,20 +228,20 @@ class ElementalReactorCard:
 
 class ElementalReactorSkill:
     # Skill
-    name = u'八卦炉'
+    name = '八卦炉'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class UmbrellaCard:
     # action_stage meta
-    name = u'阳伞'
+    name = '阳伞'
     image = 'thb-card-umbrella'
     image_small = 'thb-card-small-umbrella'
     description = (
-        u'|R阳伞|r\n\n'
-        u'装备后：符卡效果造成的伤害对你无效。\n\n'
-        u'|DB（画师：霏茶）|r'
+        '|R阳伞|r\n\n'
+        '装备后：符卡效果造成的伤害对你无效。\n\n'
+        '|DB（画师：霏茶）|r'
     )
 
     is_action_valid = equip_iav
@@ -250,7 +250,7 @@ class UmbrellaCard:
 
 class UmbrellaSkill:
     # Skill
-    name = u'紫的阳伞'
+    name = '紫的阳伞'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -262,11 +262,11 @@ class UmbrellaEffect:
         card = getattr(a, 'associated_card', None)
         if card and card.associated_action and isinstance(a, card.associated_action):
             # Some skills changes action
-            s = u'|G%s|r' % card.ui_meta.name
+            s = '|G%s|r' % card.ui_meta.name
         else:
-            s = u''
+            s = ''
 
-        return u'|G【%s】|r受到的%s效果被|G阳伞|r挡下了' % (
+        return '|G【%s】|r受到的%s效果被|G阳伞|r挡下了' % (
             dmg.target.ui_meta.name, s,
         )
 
@@ -276,17 +276,17 @@ class UmbrellaEffect:
 
 class GungnirCard:
     # action_stage meta
-    name = u'冈格尼尔'
+    name = '冈格尼尔'
     image = 'thb-card-gungnir'
     image_small = 'thb-card-small-gungnir'
     description = (
-        u'|R冈格尼尔|r\n'
-        u'\n'
-        u'攻击范围3，装备后：你可以将两张手牌当|G弹幕|r使用或打出。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶）|r'
+        '|R冈格尼尔|r\n'
+        '\n'
+        '攻击范围3，装备后：你可以将两张手牌当|G弹幕|r使用或打出。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶）|r'
     )
 
     is_action_valid = equip_iav
@@ -295,7 +295,7 @@ class GungnirCard:
 
 class GungnirSkill:
     # Skill
-    name = u'冈格尼尔'
+    name = '冈格尼尔'
 
     def clickable(g):
         try:
@@ -314,10 +314,10 @@ class GungnirSkill:
         assert skill.is_card(cards.GungnirSkill)
         acards = skill.associated_cards
         if len(acards) != 2:
-            return (False, u'请选择2张手牌！')
+            return (False, '请选择2张手牌！')
         elif any(c.resides_in not in (me.cards, me.showncards) for c in acards):
-            return (False, u'只能使用手牌发动！')
-        return (True, u'反正这条也看不到，偷个懒~~~')
+            return (False, '只能使用手牌发动！')
+        return (True, '反正这条也看不到，偷个懒~~~')
 
     def is_action_valid(g, cl, target_list, is_complete=is_complete):
         skill = cl[0]
@@ -332,7 +332,7 @@ class GungnirSkill:
         # for LaunchCard.effect_string
         source = act.source
         target = act.target
-        s = u'|G【%s】|r发动了|G冈格尼尔|r之枪，将两张牌当作|G弹幕|r对|G【%s】|r使用。' % (
+        s = '|G【%s】|r发动了|G冈格尼尔|r之枪，将两张牌当作|G弹幕|r对|G【%s】|r使用。' % (
             source.ui_meta.name,
             target.ui_meta.name,
         )
@@ -344,17 +344,17 @@ class GungnirSkill:
 
 class ScarletRhapsodyCard:
     # action_stage meta
-    name = u'绯想之剑'
+    name = '绯想之剑'
     image = 'thb-card-scarletrhapsodysword'
     image_small = 'thb-card-small-scarletrhapsodysword'
     description = (
-        u'|R绯想之剑|r\n'
-        u'\n'
-        u'攻击范围4，装备后：当你使用的|G弹幕|r是你的最后一张手牌时，你可以为此|G弹幕|r指定至多三名目标。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶，CV：VV）|r'
+        '|R绯想之剑|r\n'
+        '\n'
+        '攻击范围4，装备后：当你使用的|G弹幕|r是你的最后一张手牌时，你可以为此|G弹幕|r指定至多三名目标。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶，CV：VV）|r'
     )
 
     is_action_valid = equip_iav
@@ -363,7 +363,7 @@ class ScarletRhapsodyCard:
 
 class ScarletRhapsodySkill:
     # Skill
-    name = u'绯想之剑'
+    name = '绯想之剑'
 
     def clickable(game):
         me = game.me
@@ -381,24 +381,24 @@ class ScarletRhapsodySkill:
         skill = cl[0]
         assert skill.is_card(cards.ScarletRhapsodySkill)
         if not skill.check():
-            return (False, u'请选择你的最后一张【弹幕】！')
+            return (False, '请选择你的最后一张【弹幕】！')
         else:
             if not target_list:
-                return (False, u'请选择弹幕的目标（最多可以选择3名玩家）')
+                return (False, '请选择弹幕的目标（最多可以选择3名玩家）')
 
             if g.me in target_list:
-                return (True, u'您真的要自残么？！')
+                return (True, '您真的要自残么？！')
             else:
-                return (True, u'全人类的绯想天！')
+                return (True, '全人类的绯想天！')
 
     def effect_string(act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         tl = BatchList(act.target_list)
 
-        return u'全人类的绯想天，当然不能只打一个！于是|G【%s】|r选了|G【%s】|r一共%d个目标！' % (
+        return '全人类的绯想天，当然不能只打一个！于是|G【%s】|r选了|G【%s】|r一共%d个目标！' % (
             source.ui_meta.name,
-            u'】|r、|G【'.join(tl.ui_meta.name),
+            '】|r、|G【'.join(tl.ui_meta.name),
             len(tl),
         )
 
@@ -408,18 +408,18 @@ class ScarletRhapsodySkill:
 
 class RepentanceStickCard:
     # action_stage meta
-    name = u'悔悟棒'
+    name = '悔悟棒'
     image = 'thb-card-repentancestick'
     image_small = 'thb-card-small-repentancestick'
     description = (
-        u'|R悔悟棒|r\n'
-        u'\n'
-        u'攻击范围2，装备后：当你使用|G弹幕|r造成伤害时，你可以防止此伤害，改为依次弃置目标角色区域内的两张牌。\n'
-        u'|B|R>> |r 区域内的牌包括手牌，装备区的牌和判定区的牌\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶，CV：shourei小N）|r'
+        '|R悔悟棒|r\n'
+        '\n'
+        '攻击范围2，装备后：当你使用|G弹幕|r造成伤害时，你可以防止此伤害，改为依次弃置目标角色区域内的两张牌。\n'
+        '|B|R>> |r 区域内的牌包括手牌，装备区的牌和判定区的牌\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
     is_action_valid = equip_iav
@@ -428,21 +428,21 @@ class RepentanceStickCard:
 
 class RepentanceStickSkill:
     # Skill
-    name = u'悔悟棒'
+    name = '悔悟棒'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class RepentanceStickHandler:
     # choose_option
-    choose_option_buttons = ((u'发动', True), (u'不发动', False))
-    choose_option_prompt = u'你要发动【悔悟棒】吗？'
+    choose_option_buttons = (('发动', True), ('不发动', False))
+    choose_option_prompt = '你要发动【悔悟棒】吗？'
 
 
 class RepentanceStick:
     def effect_string_before(act):
         return (
-            u'|G【%s】|r用|G悔悟棒|r狠狠的敲了|G【%s】|r一通…'
+            '|G【%s】|r用|G悔悟棒|r狠狠的敲了|G【%s】|r一通…'
         ) % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
@@ -451,9 +451,9 @@ class RepentanceStick:
 
     def effect_string(act):
         cl = BatchList(act.cards)
-        return u'又抢过|G【%s】|r的|G%s|r扔了出去！' % (
+        return '又抢过|G【%s】|r的|G%s|r扔了出去！' % (
             act.target.ui_meta.name,
-            u'|r和|G'.join(cl.ui_meta.name)
+            '|r和|G'.join(cl.ui_meta.name)
         )
 
     def sound_effect(act):
@@ -462,39 +462,39 @@ class RepentanceStick:
 
 class IbukiGourdCard:
     # action_stage meta
-    name = u'伊吹瓢'
+    name = '伊吹瓢'
     image = 'thb-card-ibukigourd'
     image_small = 'thb-card-small-ibukigourd'
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
 
     description = (
-        u'|R伊吹瓢|r\n\n'
-        u'装备后：获得立即|B喝醉|r状态。并且，若你在出牌阶段没有造成过伤害，在回合结束阶段获得|B喝醉|r状态。\n\n'
-        u'|DB（画师：霏茶）|r'
+        '|R伊吹瓢|r\n\n'
+        '装备后：获得立即|B喝醉|r状态。并且，若你在出牌阶段没有造成过伤害，在回合结束阶段获得|B喝醉|r状态。\n\n'
+        '|DB（画师：霏茶）|r'
     )
 
 
 class IbukiGourdSkill:
     # Skill
-    name = u'伊吹瓢'
+    name = '伊吹瓢'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class HouraiJewelCard:
     # action_stage meta
-    name = u'蓬莱玉枝'
+    name = '蓬莱玉枝'
     image = 'thb-card-houraijewel'
     image_small = 'thb-card-small-houraijewel'
     description = (
-        u'|R蓬莱玉枝|r\n'
-        u'\n'
-        u'攻击范围1。装备后，你使用的|G弹幕|r时，可以将弹幕的效果转化成如下的符卡效果：造成1点伤害。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶）|r'
+        '|R蓬莱玉枝|r\n'
+        '\n'
+        '攻击范围1。装备后，你使用的|G弹幕|r时，可以将弹幕的效果转化成如下的符卡效果：造成1点伤害。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶）|r'
     )
 
     is_action_valid = equip_iav
@@ -503,21 +503,21 @@ class HouraiJewelCard:
 
 class HouraiJewelSkill:
     # Skill
-    name = u'蓬莱玉枝'
+    name = '蓬莱玉枝'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class HouraiJewelHandler:
     # choose_option
-    choose_option_buttons = ((u'发动', True), (u'不发动', False))
-    choose_option_prompt = u'你要发动【蓬莱玉枝】吗？'
+    choose_option_buttons = (('发动', True), ('不发动', False))
+    choose_option_prompt = '你要发动【蓬莱玉枝】吗？'
 
 
 class HouraiJewelAttack:
     def effect_string_apply(act):
         return (
-            u'|G【%s】|r发动了|G蓬莱玉枝|r，包裹着魔法核心的弹幕冲向了|G【%s】|r！'
+            '|G【%s】|r发动了|G蓬莱玉枝|r，包裹着魔法核心的弹幕冲向了|G【%s】|r！'
         ) % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
@@ -526,13 +526,13 @@ class HouraiJewelAttack:
 
 class MaidenCostumeCard:
     # action_stage meta
-    name = u'巫女服'
+    name = '巫女服'
     image = 'thb-card-maidencostume'
     image_small = 'thb-card-small-maidencostume'
     description = (
-        u'|R巫女服|r\n\n'
-        u'装备后：当你成为一张符卡的目标时，你可以进行一次判定：若判定牌点数为9到K，则视为你使用了一张|G好人卡|r。\n\n'
-        u'|DB（画师：霏茶，CV：VV）|r'
+        '|R巫女服|r\n\n'
+        '装备后：当你成为一张符卡的目标时，你可以进行一次判定：若判定牌点数为9到K，则视为你使用了一张|G好人卡|r。\n\n'
+        '|DB（画师：霏茶，CV：VV）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -540,7 +540,7 @@ class MaidenCostumeCard:
 
 class MaidenCostume:
     # Skill
-    name = u'巫女服'
+    name = '巫女服'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -550,16 +550,16 @@ class MaidenCostume:
 
 class MaidenCostumeHandler:
     # choose_option
-    choose_option_buttons = ((u'发动', True), (u'不发动', False))
-    choose_option_prompt = u'你要发动【巫女服】吗？'
+    choose_option_buttons = (('发动', True), ('不发动', False))
+    choose_option_prompt = '你要发动【巫女服】吗？'
 
 
 class MaidenCostumeAction:
-    fatetell_display_name = u'巫女服'
+    fatetell_display_name = '巫女服'
 
     def effect_string_before(act):
         return (
-            u'|G【%s】|r穿了|G巫女服|r，春度爆表，不怕符卡！'
+            '|G【%s】|r穿了|G巫女服|r，春度爆表，不怕符卡！'
         ) % (
             act.source.ui_meta.name,
         )
@@ -567,7 +567,7 @@ class MaidenCostumeAction:
     def effect_string(act):
         if not act.succeeded:
             return (
-                u'好像|G【%s】|r的春度还是不够用…'
+                '好像|G【%s】|r的春度还是不够用…'
             ) % (
                 act.source.ui_meta.name,
             )
@@ -575,18 +575,18 @@ class MaidenCostumeAction:
 
 class HakuroukenCard:
     # action_stage meta
-    name = u'白楼剑'
+    name = '白楼剑'
     image = 'thb-card-hakurouken'
     image_small = 'thb-card-small-hakurouken'
     description = (
-        u'|R白楼剑|r\n\n'
-        u'攻击范围2，装备后：当你使用的草花色|G弹幕|r指定一名目标角色后，你可以令其选择一项：\n'
-        u'|B|R>> |r弃置一张手牌\n'
-        u'|B|R>> |r令你摸一张牌\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶，CV：小羽）|r'
+        '|R白楼剑|r\n\n'
+        '攻击范围2，装备后：当你使用的草花色|G弹幕|r指定一名目标角色后，你可以令其选择一项：\n'
+        '|B|R>> |r弃置一张手牌\n'
+        '|B|R>> |r令你摸一张牌\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶，CV：小羽）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -594,7 +594,7 @@ class HakuroukenCard:
 
 class HakuroukenSkill:
     # Skill
-    name = u'白楼剑'
+    name = '白楼剑'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -603,13 +603,13 @@ class Hakurouken:
     # choose_card
     def choose_card_text(g, act, cards):
         if act.cond(cards):
-            return (True, u'弃置这张牌')
+            return (True, '弃置这张牌')
         else:
-            return (False, u'请弃掉一张牌（否则对方摸一张牌）')
+            return (False, '请弃掉一张牌（否则对方摸一张牌）')
 
     def effect_string_before(act):
         return (
-            u'|G【%s】|r祭起了|G白楼剑|r，试图斩断|G【%s】|r的迷惘！'
+            '|G【%s】|r祭起了|G白楼剑|r，试图斩断|G【%s】|r的迷惘！'
         ) % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
@@ -617,7 +617,7 @@ class Hakurouken:
 
     def effect_string(act):
         if act.peer_action == 'drop':
-            return u'|G【%s】|r弃置了一张牌。' % act.target.ui_meta.name
+            return '|G【%s】|r弃置了一张牌。' % act.target.ui_meta.name
         else:
             return None  # DrawCards has it's own prompt
 
@@ -627,23 +627,23 @@ class Hakurouken:
 
 class HakuroukenHandler:
     # choose_option
-    choose_option_buttons = ((u'发动', True), (u'不发动', False))
-    choose_option_prompt = u'你要发动【白楼剑】吗？'
+    choose_option_buttons = (('发动', True), ('不发动', False))
+    choose_option_prompt = '你要发动【白楼剑】吗？'
 
 
 class AyaRoundfanCard:
     # action_stage meta
-    name = u'团扇'
+    name = '团扇'
     image = 'thb-card-ayaroundfan'
     image_small = 'thb-card-small-ayaroundfan'
     description = (
-        u'|R团扇|r\n'
-        u'\n'
-        u'攻击距离5，装备后：当你使用的|G弹幕|r对目标角色造成伤害时，你可以弃置一张手牌，然后弃置其装备区里的一张牌。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶，CV：VV）|r'
+        '|R团扇|r\n'
+        '\n'
+        '攻击距离5，装备后：当你使用的|G弹幕|r对目标角色造成伤害时，你可以弃置一张手牌，然后弃置其装备区里的一张牌。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶，CV：VV）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -651,7 +651,7 @@ class AyaRoundfanCard:
 
 class AyaRoundfanSkill:
     # Skill
-    name = u'团扇'
+    name = '团扇'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -660,22 +660,22 @@ class AyaRoundfanHandler:
     # choose_card
     def choose_card_text(g, act, cards):
         if act.cond(cards):
-            return (True, u'这种妨碍拍摄的东西，统统脱掉！')
+            return (True, '这种妨碍拍摄的东西，统统脱掉！')
         else:
-            return (False, u'请弃掉一张手牌发动团扇（否则不发动）')
+            return (False, '请弃掉一张手牌发动团扇（否则不发动）')
 
 
 class AyaRoundfan:
     def effect_string_before(act):
         return (
-            u'|G【%s】|r觉得手中的|G团扇|r用起来好顺手，便加大力度试了试…'
+            '|G【%s】|r觉得手中的|G团扇|r用起来好顺手，便加大力度试了试…'
         ) % (
             act.source.ui_meta.name,
         )
 
     def effect_string(act):
         return (
-            u'于是|G【%s】|r的|G%s|r就飞了出去！'
+            '于是|G【%s】|r的|G%s|r就飞了出去！'
         ) % (
             act.target.ui_meta.name,
             act.card.ui_meta.name,
@@ -690,17 +690,17 @@ class AyaRoundfan:
 
 class NenshaPhoneCard:
     # action_stage meta
-    name = u'念写机'
+    name = '念写机'
     image = 'thb-card-nenshaphone'
     image_small = 'thb-card-small-nenshaphone'
     description = (
-        u'|R念写机|r\n'
-        u'\n'
-        u'攻击距离4，装备后：当你使用的|G弹幕|r对目标角色造成伤害后，可以将其两张手牌置入明牌区。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶）|r'
+        '|R念写机|r\n'
+        '\n'
+        '攻击距离4，装备后：当你使用的|G弹幕|r对目标角色造成伤害后，可以将其两张手牌置入明牌区。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶）|r'
 
     )
     is_action_valid = equip_iav
@@ -709,21 +709,21 @@ class NenshaPhoneCard:
 
 class NenshaPhoneSkill:
     # Skill
-    name = u'念写机'
+    name = '念写机'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class NenshaPhoneHandler:
     # choose_option
-    choose_option_buttons = ((u'发动', True), (u'不发动', False))
-    choose_option_prompt = u'你要发动【念写机】吗？'
+    choose_option_buttons = (('发动', True), ('不发动', False))
+    choose_option_prompt = '你要发动【念写机】吗？'
 
 
 class NenshaPhone:
     def effect_string(act):
         return (
-            u'|G【%s】|r表示，将|G【%s】|r推倒后拍摄胖次，是记者的自我修养中不可或缺的一部分。'
+            '|G【%s】|r表示，将|G【%s】|r推倒后拍摄胖次，是记者的自我修养中不可或缺的一部分。'
         ) % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
@@ -735,17 +735,17 @@ class NenshaPhone:
 
 class LaevateinCard:
     # action_stage meta
-    name = u'莱瓦汀'
+    name = '莱瓦汀'
     image = 'thb-card-laevatein'
     image_small = 'thb-card-small-laevatein'
     description = (
-        u'|R莱瓦汀|r\n'
-        u'\n'
-        u'攻击距离3，装备后：当你使用的|G弹幕|r被目标角色使用的|G擦弹|r抵消时，你可以弃置两张牌，令此|G弹幕|r依然生效。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶，CV：VV）|r'
+        '|R莱瓦汀|r\n'
+        '\n'
+        '攻击距离3，装备后：当你使用的|G弹幕|r被目标角色使用的|G擦弹|r抵消时，你可以弃置两张牌，令此|G弹幕|r依然生效。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶，CV：VV）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -753,7 +753,7 @@ class LaevateinCard:
 
 class LaevateinSkill:
     # Skill
-    name = u'莱瓦汀'
+    name = '莱瓦汀'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -762,14 +762,14 @@ class LaevateinHandler:
     # choose_card
     def choose_card_text(g, act, cards):
         if act.cond(cards):
-            return (True, u'灭世之炎岂能轻易闪过！')
+            return (True, '灭世之炎岂能轻易闪过！')
         else:
-            return (False, u'请弃掉两张牌发动莱瓦汀（否则不发动）')
+            return (False, '请弃掉两张牌发动莱瓦汀（否则不发动）')
 
 
 class Laevatein:
     def effect_string_before(act):
-        return u'|G莱瓦汀|r的灭世之炎岂能轻易闪过！'
+        return '|G莱瓦汀|r的灭世之炎岂能轻易闪过！'
 
     def sound_effect(act):
         return 'thb-cv-card_laevatein'
@@ -777,17 +777,17 @@ class Laevatein:
 
 class DeathSickleCard:
     # action_stage meta
-    name = u'死神之镰'
+    name = '死神之镰'
     image = 'thb-card-deathsickle'
     image_small = 'thb-card-small-deathsickle'
     description = (
-        u'|R死神之镰|r\n'
-        u'\n'
-        u'攻击范围2，装备后：当你使用的【弹幕】对目标角色造成伤害时，若其没有手牌，此伤害+1。\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶，CV：小羽）|r'
+        '|R死神之镰|r\n'
+        '\n'
+        '攻击范围2，装备后：当你使用的【弹幕】对目标角色造成伤害时，若其没有手牌，此伤害+1。\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶，CV：小羽）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -795,7 +795,7 @@ class DeathSickleCard:
 
 class DeathSickleSkill:
     # Skill
-    name = u'死神之镰'
+    name = '死神之镰'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -803,8 +803,8 @@ class DeathSickleSkill:
 class DeathSickle:
     def effect_string(act):
         return (
-            u'|G【%s】|r看到|G【%s】|r一副丧家犬的模样，'
-            u'手中的|G死神之镰|r不自觉地一狠…'
+            '|G【%s】|r看到|G【%s】|r一副丧家犬的模样，'
+            '手中的|G死神之镰|r不自觉地一狠…'
         ) % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
@@ -816,14 +816,14 @@ class DeathSickle:
 
 class KeystoneCard:
     # action_stage meta
-    name = u'要石'
+    name = '要石'
     image = 'thb-card-keystone'
     image_small = 'thb-card-small-keystone'
     description = (
-        u'|R要石|r\n\n'
-        u'特殊的绿色UFO装备，距离+1\n'
-        u'装备后跳过【罪袋】对你的结算。\n\n'
-        u'|DB（画师：霏茶，CV：shourei小N）|r'
+        '|R要石|r\n\n'
+        '特殊的绿色UFO装备，距离+1\n'
+        '装备后跳过【罪袋】对你的结算。\n\n'
+        '|DB（画师：霏茶，CV：shourei小N）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -831,14 +831,14 @@ class KeystoneCard:
 
 class KeystoneSkill:
     # Skill
-    name = u'要石'
+    name = '要石'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class Keystone:
     def effect_string(act):
-        return u'|G【%s】|r站在|G要石|r上，照着|G罪袋|r的脸一脚踹了下去！' % (
+        return '|G【%s】|r站在|G要石|r上，照着|G罪袋|r的脸一脚踹了下去！' % (
             act.target.ui_meta.name
         )
 
@@ -848,15 +848,15 @@ class Keystone:
 
 class WitchBroomCard:
     # action_stage meta
-    name = u'魔女扫把'
+    name = '魔女扫把'
     image = 'thb-card-witchbroom'
     image_small = 'thb-card-small-witchbroom'
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
     description = (
-        u'|R魔女扫把|r\n\n'
-        u'特殊的红色UFO装备，距离-2。\n\n'
-        u'|DB（画师：霏茶）|r'
+        '|R魔女扫把|r\n\n'
+        '特殊的红色UFO装备，距离-2。\n\n'
+        '|DB（画师：霏茶）|r'
     )
 
 
@@ -867,13 +867,13 @@ class WitchBroomSkill:
 
 class YinYangOrbCard:
     # action_stage meta
-    name = u'阴阳玉'
+    name = '阴阳玉'
     image = 'thb-card-yinyangorb'
     image_small = 'thb-card-small-yinyangorb'
     description = (
-        u'|R阴阳玉|r\n\n'
-        u'装备后：在你的判定牌生效前，你可以用装备区内的|G阴阳玉|r替换之。\n\n'
-        u'|DB（画师：霏茶）|r'
+        '|R阴阳玉|r\n\n'
+        '装备后：在你的判定牌生效前，你可以用装备区内的|G阴阳玉|r替换之。\n\n'
+        '|DB（画师：霏茶）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -881,20 +881,20 @@ class YinYangOrbCard:
 
 class YinYangOrbSkill:
     # Skill
-    name = u'阴阳玉'
+    name = '阴阳玉'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class YinYangOrbHandler:
     # choose_option
-    choose_option_buttons = ((u'替换', True), (u'不替换', False))
-    choose_option_prompt = u'你要使用【阴阳玉】替换当前的判定牌吗？'
+    choose_option_buttons = (('替换', True), ('不替换', False))
+    choose_option_prompt = '你要使用【阴阳玉】替换当前的判定牌吗？'
 
 
 class YinYangOrb:
     def effect_string(act):
-        return u'|G【%s】|r用|G%s|r替换了她的判定牌' % (
+        return '|G【%s】|r用|G%s|r替换了她的判定牌' % (
             act.target.ui_meta.name,
             card_desc(act.card),
         )
@@ -902,13 +902,13 @@ class YinYangOrb:
 
 class SuwakoHatCard:
     # action_stage meta
-    name = u'青蛙帽'
+    name = '青蛙帽'
     image = 'thb-card-suwakohat'
     image_small = 'thb-card-small-suwakohat'
     description = (
-        u'|R青蛙帽|r\n\n'
-        u'装备后：手牌上限+2\n\n'
-        u'|DB（画师：霏茶，CV：VV）|r'
+        '|R青蛙帽|r\n\n'
+        '装备后：手牌上限+2\n\n'
+        '|DB（画师：霏茶，CV：VV）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -916,7 +916,7 @@ class SuwakoHatCard:
 
 class SuwakoHatSkill:
     # Skill
-    name = u'青蛙帽'
+    name = '青蛙帽'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -928,13 +928,13 @@ class SuwakoHatEffect:
 
 class YoumuPhantomCard:
     # action_stage meta
-    name = u'半灵'
+    name = '半灵'
     image = 'thb-card-phantom'
     image_small = 'thb-card-small-phantom'
     description = (
-        u'|R半灵|r\n\n'
-        u'装备后：增加1点体力上限，当失去装备区里的【半灵】时，你回复1点体力。\n\n'
-        u'|DB（画师：霏茶，CV：小羽）|r'
+        '|R半灵|r\n\n'
+        '装备后：增加1点体力上限，当失去装备区里的【半灵】时，你回复1点体力。\n\n'
+        '|DB（画师：霏茶，CV：小羽）|r'
     )
 
     is_action_valid = equip_iav
@@ -943,7 +943,7 @@ class YoumuPhantomCard:
 
 class YoumuPhantomSkill:
     # Skill
-    name = u'半灵'
+    name = '半灵'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
@@ -955,14 +955,14 @@ class YoumuPhantomHeal:
 
 class IceWingCard:
     # action_stage meta
-    name = u'⑨的翅膀'
+    name = '⑨的翅膀'
     image = 'thb-card-icewing'
     image_small = 'thb-card-small-icewing'
     description = (
-        u'|R⑨的翅膀|r\n\n'
-        u'特殊的红色UFO装备，距离-1。\n\n'
-        u'装备后：|G封魔阵|r和|G冻青蛙|r对你无效。\n\n'
-        u'|DB（画师：霏茶，CV：VV）|r'
+        '|R⑨的翅膀|r\n\n'
+        '特殊的红色UFO装备，距离-1。\n\n'
+        '装备后：|G封魔阵|r和|G冻青蛙|r对你无效。\n\n'
+        '|DB（画师：霏茶，CV：VV）|r'
     )
 
     is_action_valid = equip_iav
@@ -971,14 +971,14 @@ class IceWingCard:
 
 class IceWingSkill:
     # Skill
-    name = u'⑨的翅膀'
+    name = '⑨的翅膀'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class IceWing:
     def effect_string(act):
-        return u'|G【%s】|r借着|G⑨的翅膀|r飞了出来，|G%s|r没起到什么作用' % (
+        return '|G【%s】|r借着|G⑨的翅膀|r飞了出来，|G%s|r没起到什么作用' % (
             act.target.ui_meta.name,
             act.action.associated_card.ui_meta.name,
         )
@@ -994,21 +994,21 @@ class IceWing:
 
 class GrimoireCard:
     # action_stage meta
-    name = u'魔导书'
+    name = '魔导书'
     image = 'thb-card-grimoire'
     image_small = 'thb-card-small-grimoire'
     description = (
-        u'|R魔导书|r\n'
-        u'\n'
-        u'攻击距离1，装备后，你可以消耗一点干劲并将一张牌按照以下规则使用：\n'
-        u'|B|R>> |r黑桃♠视为|G百鬼夜行|r\n'
-        u'|B|R>> |r红桃♥视为|G宴会|r\n'
-        u'|B|R>> |r梅花♣视为|G地图炮|r\n'
-        u'|B|R>> |r方片♦视为|G五谷丰登|r\n'
-        u'\n'
-        u'|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
-        u'\n'
-        u'|DB（画师：霏茶，CV：shourei小N）|r'
+        '|R魔导书|r\n'
+        '\n'
+        '攻击距离1，装备后，你可以消耗一点干劲并将一张牌按照以下规则使用：\n'
+        '|B|R>> |r黑桃♠视为|G百鬼夜行|r\n'
+        '|B|R>> |r红桃♥视为|G宴会|r\n'
+        '|B|R>> |r梅花♣视为|G地图炮|r\n'
+        '|B|R>> |r方片♦视为|G五谷丰登|r\n'
+        '\n'
+        '|R出牌阶段你可以消耗1点干劲重铸手牌中的武器|r\n'
+        '\n'
+        '|DB（画师：霏茶，CV：shourei小N）|r'
     )
     is_action_valid = equip_iav
     effect_string = suppress_launch_card_effect_string
@@ -1016,7 +1016,7 @@ class GrimoireCard:
 
 class GrimoireSkill:
     # Skill
-    name = u'魔导书'
+    name = '魔导书'
 
     def clickable(game):
         me = game.me
@@ -1046,18 +1046,18 @@ class GrimoireSkill:
         assert skill.is_card(cards.GrimoireSkill)
         acards = skill.associated_cards
         if not (len(acards)) == 1:
-            return (False, u'请选择一张牌')
+            return (False, '请选择一张牌')
         else:
             s = skill.lookup_tbl[acards[0].suit].ui_meta.name
-            return (True, u'发动【%s】' % s)
+            return (True, '发动【%s】' % s)
 
     def effect_string(act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         card = act.card
         return (
-            u'|G【%s】|r抓起一张牌放入|G魔导书|r' +
-            u'，念动咒语，发动了|G%s|r。'
+            '|G【%s】|r抓起一张牌放入|G魔导书|r' +
+            '，念动咒语，发动了|G%s|r。'
         ) % (
             source.ui_meta.name,
             card.lookup_tbl[card.associated_cards[0].suit].ui_meta.name
@@ -1068,39 +1068,39 @@ class GrimoireSkill:
 
 
 class SinsackHatAction:
-    fatetell_display_name = u'头套'
+    fatetell_display_name = '头套'
 
     def effect_string_before(act):
-        return u'看着戴着|G头套|r的|G【%s】|r，真正的的罪袋们都兴奋了起来！' % (
+        return '看着戴着|G头套|r的|G【%s】|r，真正的的罪袋们都兴奋了起来！' % (
             act.target.ui_meta.name,
         )
 
 
 class SinsackHat:
     # Skill
-    name = u'头套'
+    name = '头套'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
 
 class SinsackHatCard:
     # action_stage meta
-    name = u'头套'
+    name = '头套'
     image = 'thb-card-sinsackhat'
     image_small = 'thb-card-small-sinsackhat'
     description = (
-        u'|R罪袋的头套|r\n\n'
-        u'对距离2以内的一名角色使用\n'
-        u'装备|G罪袋的头套|r的角色需在判定阶段后进行一次判定，若为黑桃1-8，则目标角色受到2点伤害，并且将|G罪袋的头套|r收入手牌。\n'
-        u'|DB（画师：霏茶，CV：大白）|r'
+        '|R罪袋的头套|r\n\n'
+        '对距离2以内的一名角色使用\n'
+        '装备|G罪袋的头套|r的角色需在判定阶段后进行一次判定，若为黑桃1-8，则目标角色受到2点伤害，并且将|G罪袋的头套|r收入手牌。\n'
+        '|DB（画师：霏茶，CV：大白）|r'
     )
 
     def is_action_valid(g, cl, target_list):
         if not target_list:
-            return (False, u'请选择目标')
+            return (False, '请选择目标')
         t = target_list[0]
         if g.me is t:
-            return (True, u'真的要自己戴上吗？')
-        return (True, u'是这样的，这个不是胖次……不不，真的没有胖次')
+            return (True, '真的要自己戴上吗？')
+        return (True, '是这样的，这个不是胖次……不不，真的没有胖次')
 
     effect_string = suppress_launch_card_effect_string

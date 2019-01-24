@@ -23,11 +23,11 @@ class ImperialChoice(GameItem):
 
     @property
     def title(self):
-        return u'选将卡（%s）' % self.char_cls.ui_meta.name
+        return '选将卡（%s）' % self.char_cls.ui_meta.name
 
     @property
     def description(self):
-        return u'你可以选择%s出场。2v2模式不可用。' % self.char_cls.ui_meta.name
+        return '你可以选择%s出场。2v2模式不可用。' % self.char_cls.ui_meta.name
 
     def should_usable(self, g, u, items):
         from thb.thb2v2 import THBattle2v2
@@ -68,20 +68,20 @@ class ImperialIdentity(GameItem):
 
         self.id = id
         mapping = {
-            'attacker':   u'城管',
-            'boss':       u'BOSS',
-            'accomplice': u'道中',
-            'curtain':    u'黑幕',
+            'attacker':   '城管',
+            'boss':       'BOSS',
+            'accomplice': '道中',
+            'curtain':    '黑幕',
         }
         self.disp_name = mapping[id]
 
     @property
     def title(self):
-        return u'身份卡（%s）' % self.disp_name
+        return '身份卡（%s）' % self.disp_name
 
     @property
     def description(self):
-        return u'你可以选择%s身份。身份场可用。' % self.disp_name
+        return '你可以选择%s身份。身份场可用。' % self.disp_name
 
     def should_usable(self, g, u, items):
         from thb.thbidentity import THBattleIdentity
@@ -152,8 +152,8 @@ class European(GameItem):
     key = 'european'
     args = []
 
-    title = u'欧洲卡'
-    description = u'Roll点保证第一。身份场不可用。'
+    title = '欧洲卡'
+    description = 'Roll点保证第一。身份场不可用。'
 
     def should_usable(self, g, u, items):
         from thb.thbidentity import THBattleIdentity

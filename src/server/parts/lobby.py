@@ -99,7 +99,7 @@ class Lobby(object):
             old = self.users[uid]
 
         if uid in self.dropped_users:
-            log.info(u'%s[%s] rejoining dropped game' % (name, uid))
+            log.info('%s[%s] rejoining dropped game' % (name, uid))
             old = self.dropped_users.pop(uid)
 
             # XXX
@@ -116,14 +116,14 @@ class Lobby(object):
             self.users[uid] = u
             self.state_of(u).transit('lobby')
 
-        log.info(u'User %s joined, online user %d' % (name, len(self.users)))
+        log.info('User %s joined, online user %d' % (name, len(self.users)))
 
     def _user_leave(self, u):
         core = self.core
         uid = core.auth.uid_of(u)
         name = core.auth.name_of(u)
         self.users.pop(uid, 0)
-        log.info(u'User %s left, online user %d' % (name, len(self.users)))
+        log.info('User %s left, online user %d' % (name, len(self.users)))
 
     @throttle(3)
     def _notify_online_users(self, ul):

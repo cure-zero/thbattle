@@ -13,10 +13,10 @@ __metaclass__ = gen_metafunc(characters.chen)
 
 class FlyingSkanda:
     # Skill
-    name = u'飞翔韦驮天'
+    name = '飞翔韦驮天'
     description = (
-        u'出牌阶段限一次，你使用|G弹幕|r或单体符卡时，可以额外指定一个目标。\n'
-        u'|B|R>> |r在线版本中，不能以此法使用|G人形操控|r'
+        '出牌阶段限一次，你使用|G弹幕|r或单体符卡时，可以额外指定一个目标。\n'
+        '|B|R>> |r在线版本中，不能以此法使用|G人形操控|r'
     )
 
     def clickable(game):
@@ -34,7 +34,7 @@ class FlyingSkanda:
         skill = cl[0]
         acards = skill.associated_cards
         if len(acards) != 1:
-            return (False, u'请选择一张牌！')
+            return (False, '请选择一张牌！')
         c = acards[0]
 
         while True:
@@ -45,15 +45,15 @@ class FlyingSkanda:
             rst = (not rst) and issubclass(c.associated_action, cards.InstantSpellCardAction)
             if rst: break
 
-            return (False, u'请选择一张【弹幕】或者除【人形操控】与【好人卡】之外的非延时符卡！')
+            return (False, '请选择一张【弹幕】或者除【人形操控】与【好人卡】之外的非延时符卡！')
 
         if len(target_list) != 2:
-            return (False, u'请选择目标（2名玩家）')
+            return (False, '请选择目标（2名玩家）')
 
         if g.me is target_list[-1]:
-            return (False, u'不允许选择自己')
+            return (False, '不允许选择自己')
         else:
-            return (True, u'喵！')
+            return (True, '喵！')
 
     def effect_string(act):
         # for LaunchCard.ui_meta.effect_string
@@ -62,14 +62,14 @@ class FlyingSkanda:
         tl = BatchList(act.target_list)
 
         if card.is_card(cards.AttackCard):
-            s = u'弹幕掺了金坷垃，攻击范围一千八！'
+            s = '弹幕掺了金坷垃，攻击范围一千八！'
         else:
-            s = u'符卡掺了金坷垃，一张能顶两张用！'
+            s = '符卡掺了金坷垃，一张能顶两张用！'
 
-        return u'|G【%s】|r：“%s|G【%s】|r接招吧！”' % (
+        return '|G【%s】|r：“%s|G【%s】|r接招吧！”' % (
             source.ui_meta.name,
             s,
-            u'】|r、|G【'.join(tl.ui_meta.name),
+            '】|r、|G【'.join(tl.ui_meta.name),
         )
 
     def sound_effect(act):
@@ -78,10 +78,10 @@ class FlyingSkanda:
 
 class Shikigami:
     # Skill
-    name = u'式神'
+    name = '式神'
     description = (
-        u'|B限定技|r，出牌阶段，你可以令一名其他角色选择一项：|B|R>> |r摸两张牌，|B|R>> |r回复1点体力。\n'
-        u'直到下次你的回合开始时，你与其可以在出牌阶段对对方攻击范围内的角色使用|G弹幕|r。'
+        '|B限定技|r，出牌阶段，你可以令一名其他角色选择一项：|B|R>> |r摸两张牌，|B|R>> |r回复1点体力。\n'
+        '直到下次你的回合开始时，你与其可以在出牌阶段对对方攻击范围内的角色使用|G弹幕|r。'
     )
 
     def clickable(game):
@@ -99,29 +99,29 @@ class Shikigami:
         skill = cl[0]
         cl = skill.associated_cards
         if cl:
-            return (False, u'请不要选择牌')
+            return (False, '请不要选择牌')
 
         if not tl:
-            return (False, u'请选择一名玩家')
+            return (False, '请选择一名玩家')
         else:
-            return (True, u'发动【式神】')
+            return (True, '发动【式神】')
 
     def sound_effect(act):
         return 'thb-cv-chen_shikigami'
 
 
 class ShikigamiAction:
-    choose_option_buttons = ((u'摸2张牌', False), (u'回复1点体力', True))
-    choose_option_prompt = u'请为受到的【式神】选择效果'
+    choose_option_buttons = (('摸2张牌', False), ('回复1点体力', True))
+    choose_option_prompt = '请为受到的【式神】选择效果'
 
 
 class Chen:
     # Character
-    name        = u'橙'
-    title       = u'凶兆的黑喵'
-    illustrator = u'和茶'
-    cv          = u'shourei小N'
+    name        = '橙'
+    title       = '凶兆的黑喵'
+    illustrator = '和茶'
+    cv          = 'shourei小N'
 
-    port_image        = u'thb-portrait-chen'
-    figure_image      = u'thb-figure-chen'
-    miss_sound_effect = u'thb-cv-chen_miss'
+    port_image        = 'thb-portrait-chen'
+    figure_image      = 'thb-figure-chen'
+    miss_sound_effect = 'thb-cv-chen_miss'

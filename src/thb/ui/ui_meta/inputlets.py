@@ -48,13 +48,13 @@ def walk_wrapped(g, cl, check_is_complete):
 
             if not is_complete:
                 # skills that cannot combined with other skill
-                raise ActionDisplayResult(False, u'您不能这样出牌', False, [], [])
+                raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])
 
             try:
                 rst, reason = is_complete(g, [c])
             except:
                 log.exception('card.ui_meta.is_complete error')
-                raise ActionDisplayResult(False, u'[card.ui_meta.is_complete错误]', False, [], [])
+                raise ActionDisplayResult(False, '[card.ui_meta.is_complete错误]', False, [], [])
 
             if not rst:
                 raise ActionDisplayResult(False, reason, False, [], [])
@@ -72,7 +72,7 @@ def pasv_handle_card_selection(g, ilet, cards):
         from thb.cards import Skill
 
         if cards[0].is_card(Skill) and not thbactions.skill_check(cards[0]):
-            raise ActionDisplayResult(False, u'您不能这样出牌', False, [], [])
+            raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])
 
     c = ilet.initiator.cond(cards)
     c1, text = ilet.initiator.ui_meta.choose_card_text(g, ilet.initiator, cards)
@@ -97,7 +97,7 @@ def pasv_handle_player_selection(g, ilet, players):
         assert bool(logic_valid) == bool(ui_meta_valid), 'logic: %s, ui: %s' % (logic_valid, ui_meta_valid)
     except:
         log.exception('act.ui_meta.target error')
-        raise ActionDisplayResult(False, u'[act.ui_meta.target错误]', bool(ilet.candidates), disables, players)
+        raise ActionDisplayResult(False, '[act.ui_meta.target错误]', bool(ilet.candidates), disables, players)
 
     if not logic_valid:
         raise ActionDisplayResult(False, reason, True, disables, players)
@@ -107,7 +107,7 @@ def pasv_handle_player_selection(g, ilet, players):
 
 def actv_handle_card_selection(g, act, cards):
     if len(cards) != 1:
-        raise ActionDisplayResult(False, u'请选择一张牌使用', False, [], [])
+        raise ActionDisplayResult(False, '请选择一张牌使用', False, [], [])
 
     walk_wrapped(g, cards, False)
     card = cards[0]
@@ -153,13 +153,13 @@ def actv_handle_target_selection(g, stage, card, players):
         rst, reason = card.ui_meta.is_action_valid(g, [card], target_list)
     except Exception as e:
         log.exception('card.ui_meta.is_action_valid error')
-        raise ActionDisplayResult(False, u'[card.ui_meta.is_action_valid错误]', False, [], [])
+        raise ActionDisplayResult(False, '[card.ui_meta.is_action_valid错误]', False, [], [])
 
     if not rst:
         raise ActionDisplayResult(False, reason, plsel, disables, selected)
 
     if not tl_valid:  # honor result of game logic
-        raise ActionDisplayResult(False, u'您选择的目标不符合规则', plsel, disables, selected)
+        raise ActionDisplayResult(False, '您选择的目标不符合规则', plsel, disables, selected)
 
     return target_list, disables, reason
 
@@ -176,7 +176,7 @@ def action_disp_func(f):
         except Exception as e:
             # Arghhh
             log.exception(e)
-            return ActionDisplayResult(False, unicode(e), False, [], [])
+            return ActionDisplayResult(False, str(e), False, [], [])
 
     wrapper.__name__ = f.__name__
     return wrapper
@@ -191,7 +191,7 @@ class ActionInputlet:
 
         if skills:
             if any(not g.me.has_skill(s) for s in skills):
-                raise ActionDisplayResult(False, u'您不能这样出牌', False, [], [])
+                raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])
             cards = [thbactions.skill_wrap(g.me, skills, rawcards, params)]
             usage = cards[0].usage if usage == 'launch' else usage
         else:
@@ -233,7 +233,7 @@ class ActionInputlet:
 
         if skills:
             if any(not g.me.has_skill(s) for s in skills):
-                raise ActionDisplayResult(False, u'您不能这样出牌', False, [], [])
+                raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])
             cards = [thbactions.skill_wrap(g.me, skills, rawcards, params)]
             usage = cards[0].usage if usage == 'launch' else usage
         else:

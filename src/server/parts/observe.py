@@ -103,8 +103,8 @@ class Observe(object):
 
         if uid in self._bigbrothers:
             observee.write(['system_msg', [None,
-                u'管理员对你使用了强制观战，效果拔群。'
-                u'强制观战功能仅用来处理纠纷，如果涉及滥用，请向 Proton 投诉。'
+                '管理员对你使用了强制观战，效果拔群。'
+                '强制观战功能仅用来处理纠纷，如果涉及滥用，请向 Proton 投诉。'
             ]])
             self._observe_attach(ob, observee)
             return

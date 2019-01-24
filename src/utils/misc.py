@@ -617,7 +617,7 @@ class ArgTypeError(ArgValidationError):
         self.actual = actual
 
     def __unicode__(self):
-        return u'Arg %s should be "%s" type, "%s" found' % (
+        return 'Arg %s should be "%s" type, "%s" found' % (
             self.position,
             self.expected.__name__,
             self.actual.__name__,
@@ -635,7 +635,7 @@ class ArgCountError(ArgValidationError):
         self.actual = actual
 
     def __unicode__(self):
-        return u'Expecting %s args, %s found' % (
+        return 'Expecting %s args, %s found' % (
             self.expected,
             self.actual,
         )

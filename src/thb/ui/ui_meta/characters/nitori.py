@@ -16,8 +16,8 @@ __metaclass__ = gen_metafunc(characters.nitori)
 
 class Dismantle:
     # Skill
-    name = u'拆解'
-    description = u'出牌阶段限一次，你可以|B重铸|r一名其他角色装备区里的一张装备牌，然后该角色摸一张牌。'
+    name = '拆解'
+    description = '出牌阶段限一次，你可以|B重铸|r一名其他角色装备区里的一张装备牌，然后该角色摸一张牌。'
 
     def clickable(g):
         if ttags(g.me)['dismantle']:
@@ -27,12 +27,12 @@ class Dismantle:
 
     def is_action_valid(g, cl, tl):
         if cl[0].associated_cards:
-            return (False, u'请不要选择牌！')
+            return (False, '请不要选择牌！')
 
         if not len(tl):
-            return (False, u'请选择一名玩家')
+            return (False, '请选择一名玩家')
 
-        return (True, u'拆解！')
+        return (True, '拆解！')
 
     def sound_effect(act):
         return random.choice([
@@ -42,8 +42,8 @@ class Dismantle:
 
 
 class Craftsman:
-    name = u'匠心'
-    description = u'你可以将你的全部手牌（至少1张）当做任意的一张基本牌使用或打出。出牌阶段内使用时，一回合限一次。'
+    name = '匠心'
+    description = '你可以将你的全部手牌（至少1张）当做任意的一张基本牌使用或打出。出牌阶段内使用时，一回合限一次。'
 
     params_ui = 'UICraftsmanCardSelection'
 
@@ -65,9 +65,9 @@ class Craftsman:
         skill = cl[0]
         assert skill.is_card(characters.nitori.Craftsman)
         if set(skill.associated_cards) != set(g.me.cards) | set(g.me.showncards):
-            return (False, u'请选择所有的手牌（包括明牌）！')
+            return (False, '请选择所有的手牌（包括明牌）！')
 
-        return (True, u'到今天为止我还没有女朋友……')
+        return (True, '到今天为止我还没有女朋友……')
 
     def is_action_valid(g, cl, target_list, is_complete=is_complete):
         skill = cl[0]
@@ -81,7 +81,7 @@ class Craftsman:
     def effect_string(act):
         # for LaunchCard.effect_string
         source = act.source
-        s = u'|G【%s】|r发动了|G匠心|r。' % (
+        s = '|G【%s】|r发动了|G匠心|r。' % (
             source.ui_meta.name,
         )
         return s
@@ -109,13 +109,13 @@ class Craftsman:
 
 class Nitori:
     # Character
-    name        = u'河城荷取'
-    title       = u'水中的工程师'
-    illustrator = u'和茶'
-    cv          = u'简翎'
+    name        = '河城荷取'
+    title       = '水中的工程师'
+    illustrator = '和茶'
+    cv          = '简翎'
 
-    port_image        = u'thb-portrait-nitori'
-    figure_image      = u'thb-figure-nitori'
-    miss_sound_effect = u''
+    port_image        = 'thb-portrait-nitori'
+    figure_image      = 'thb-figure-nitori'
+    miss_sound_effect = ''
 
-    notes = u'|RKOF不平衡角色|r'
+    notes = '|RKOF不平衡角色|r'

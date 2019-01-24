@@ -141,7 +141,7 @@ class TeachTargetReforgeAction:
 
 class KeineGuard:
     # Skill
-    name = u'守护'
+    name = '守护'
     description = (
         '|B觉醒技|r，回合开始阶段，若你已受伤，且的体力值为全场最少或之一，你减少一点体力上限并获得技能|R噬史|r：\n'
         '每轮限一次。一名角色的出牌阶段开始时，你可以弃置一张基本牌，并根据其颜色发动相应效果：\n'
@@ -177,4 +177,4 @@ class Keine:
     figure_image      = 'thb-figure-keine'
     miss_sound_effect = 'thb-cv-keine_miss'
 
-    notes = u'|RKOF不平衡角色|r'
+    notes = '|RKOF不平衡角色|r'

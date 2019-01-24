@@ -14,8 +14,8 @@ __metaclass__ = gen_metafunc(characters.akari)
 
 class AkariSkill:
     # Skill
-    name = u'阿卡林'
-    description = u'消失在画面里的能力。在开局之前没有人知道这是谁。'
+    name = '阿卡林'
+    description = '消失在画面里的能力。在开局之前没有人知道这是谁。'
 
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
@@ -23,7 +23,7 @@ class AkariSkill:
 
 class Akari:
     # Character
-    name        = u'随机角色'
-    title       = u'会是谁呢'
+    name        = '随机角色'
+    title       = '会是谁呢'
 
-    port_image  = u'thb-portrait-akari'
+    port_image  = 'thb-portrait-akari'

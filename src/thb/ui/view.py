@@ -67,13 +67,13 @@ class ResultPanel(Panel):
             parent=self, x=30, y=30, width=550-30, height=340-60,
             font_size=12,
         )
-        ta.text = u''
+        ta.text = ''
         winners = g.winners
         for p in g.players:
-            s = u'|G%s|r(|R%s|r, |c0000ffff%s|r, %s)\n' % (
+            s = '|G%s|r(|R%s|r, |c0000ffff%s|r, %s)\n' % (
                 p.ui_meta.name, p.account.username.replace('|', '||'),
                 g.ui_meta.identity_table[p.identity.type],
-                u'|R胜利|r' if p in winners else u'失败'
+                '|R胜利|r' if p in winners else '失败'
             )
             ta.append(s)
 
@@ -83,7 +83,7 @@ class ResultPanel(Panel):
             self.pic = L('thb-lose')
 
         close = Button(
-            u'关闭', parent=self, x=440, y=25, width=90, height=40, zindex=10,
+            '关闭', parent=self, x=440, y=25, width=90, height=40, zindex=10,
         )
 
         @close.event
@@ -154,8 +154,8 @@ class THBattleUI(Control):
 
         self.btn_afk = OptionButton(
             parent=self, zindex=1, conf=(
-                (u'让⑨帮你玩', Colors.blue, False),
-                (u'⑨在帮你玩', Colors.orange, True),
+                ('让⑨帮你玩', Colors.blue, False),
+                ('⑨在帮你玩', Colors.orange, True),
             ), **r2d((30, 625, 75, 25))
         )
 
@@ -350,7 +350,7 @@ class THBattleUI(Control):
         Ray(x0, y0, x1, y1, parent=self, zindex=10)
 
     def prompt(self, s):
-        self.prompt_raw(u'|B|cff0000ff>> |r' + unicode(s) + u'\n')
+        self.prompt_raw('|B|cff0000ff>> |r' + str(s) + '\n')
 
     def prompt_raw(self, s):
         self.parent and self.parent.events_box.append(s)
@@ -510,8 +510,8 @@ class THBattleFaithUI(THBattleUI):
                 return
 
             self.remaining_indicator.text = (
-                u'|s1e5effbff|c315597ff博丽：%d 人|r\n'
-                u'|s1886666ff|W守矢：%d 人|r'
+                '|s1e5effbff|c315597ff博丽：%d 人|r\n'
+                '|s1886666ff|W守矢：%d 人|r'
             ) % (h, m)
 
 

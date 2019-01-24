@@ -72,7 +72,7 @@ class OPENFILENAME(Structure):
 
 
 def _do_open_dlg(func, window, title, filters, flags):
-    assert isinstance(title, unicode)
+    assert isinstance(title, str)
 
     buf = create_unicode_buffer(1024)
     ofn = OPENFILENAME()
@@ -86,11 +86,11 @@ def _do_open_dlg(func, window, title, filters, flags):
     if window:
         ofn.hwndOwner = window._hwnd
 
-    filters = flatten(filters) or [u'All files(*.*)', u'*.*']
-    assert all([isinstance(i, unicode) for i in filters])
+    filters = flatten(filters) or ['All files(*.*)', '*.*']
+    assert all([isinstance(i, str) for i in filters])
     assert len(filters) % 2 == 0
 
-    filters = u'\0'.join(filters) + u'\0\0'
+    filters = '\0'.join(filters) + '\0\0'
     ofn.lpstrFilter = c_wchar_p(filters)
 
     func(byref(ofn))

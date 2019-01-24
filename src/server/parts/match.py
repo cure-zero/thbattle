@@ -41,9 +41,9 @@ class Match(object):
 
         if flags.get('match'):
             core.interconnect.speaker(
-                u'文文', u'“%s”开始了！参与玩家：%s' % (
+                '文文', '“%s”开始了！参与玩家：%s' % (
                     self.game_name,
-                    u'，'.join(self.users.account.username)
+                    '，'.join(self.users.account.username)
                 )
             )
 
@@ -53,7 +53,7 @@ class Match(object):
         core = self.core
         if g.greenlet and core.game.flags_of(g).get('match'):
             core.interconnect.speaker(
-                u'文文', u'“%s”意外终止了，比赛结果作废！' % core.room.name_of(g)
+                '文文', '“%s”意外终止了，比赛结果作废！' % core.room.name_of(g)
             )
 
         return g
@@ -63,10 +63,10 @@ class Match(object):
         if core.game.flags_of(g).get('match'):
             if not g.suicide:
                 core.interconnect.speaker(
-                    u'文文',
-                    u'“%s”结束了！获胜玩家：%s' % (
+                    '文文',
+                    '“%s”结束了！获胜玩家：%s' % (
                         self.game_name,
-                        u'，'.join(BatchList(self.game.winners).account.username)
+                        '，'.join(BatchList(self.game.winners).account.username)
                     )
                 )
 
@@ -84,7 +84,7 @@ class Match(object):
         from thb import modes
         gamecls = modes[typ]
         if len(uids) != gamecls.n_persons:
-            c.write(['system_msg', [None, u'参赛人数不正确']])
+            c.write(['system_msg', [None, '参赛人数不正确']])
             return
 
         g = core.room.create_game(gamecls, name, {'match': True})
@@ -117,7 +117,7 @@ class Match(object):
 
         gevent.spawn(lambda: [
             gevent.sleep(1),
-            core.interconnect.speaker(u'文文', u'“%s”房间已经建立，请相关玩家就位！' % self.game_name),
+            core.interconnect.speaker('文文', '“%s”房间已经建立，请相关玩家就位！' % self.game_name),
         ])
 
         @gevent.spawn
@@ -139,7 +139,7 @@ class Match(object):
                         gevent.sleep(1)
                         core.room.join_game(g, u, None)
                     elif core.lobby.state_of(u) == 'game':
-                        gevent.spawn(u.write, ['system_msg', [None, u'你有比赛房间，请尽快结束游戏参与比赛']])
+                        gevent.spawn(u.write, ['system_msg', [None, '你有比赛房间，请尽快结束游戏参与比赛']])
 
                     gevent.sleep(0.1)
 

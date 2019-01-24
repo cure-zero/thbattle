@@ -22,7 +22,7 @@ class Kedama(object):
         _['room:join'].subscribe(self._room_join_limit, -5)
 
     # ----- Commands -----
-    @command(None, [basestring, unicode, dict])
+    @command(None, [basestring, str, dict])
     def _room_create_limit(self, c, gametype, name, flags):
         core = self.core
         from thb import modes_kedama

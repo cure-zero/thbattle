@@ -42,7 +42,7 @@ def argtypes(*types):
 
 def _format_all_commands():
     return '\n'.join([
-        u'/%s ' % cmdname + cmd.commandname
+        '/%s ' % cmdname + cmd.commandname
         for cmdname, cmd in registered_commands.items()
     ])
 
@@ -61,7 +61,7 @@ def process_command(arglist):
             break
 
         if not al and cmdname == '?':
-            prompt = u'\n'.join((cmd(None), cmd('?')))
+            prompt = '\n'.join((cmd(None), cmd('?')))
             break
 
         if len(al) != len(cmd.argtypes):
@@ -77,24 +77,24 @@ def process_command(arglist):
         prompt = cmd(*al)
         break
 
-    return u'|R%s|R\n' % prompt if prompt else None
+    return '|R%s|R\n' % prompt if prompt else None
 
 # -----------------------------------
 
 
-@command(u'设置提醒显示级别', u'off     禁用提醒\nbasic   启用基本提醒\nat      启用@提醒\nspeaker 为文文新闻显示提醒\nsound   启用声音提醒\nnosound 禁用声音提醒')
+@command('设置提醒显示级别', 'off     禁用提醒\nbasic   启用基本提醒\nat      启用@提醒\nspeaker 为文文新闻显示提醒\nsound   启用声音提醒\nnosound 禁用声音提醒')
 @argtypes(str)
-@argdesc(u'<off||basic||at||speaker||sound||nosound>')
+@argdesc('<off||basic||at||speaker||sound||nosound>')
 def notify(val):
     from user_settings import UserSettings as us
 
     if val == 'sound':
         us.sound_notify = True
-        return u'声音提醒已启用。'
+        return '声音提醒已启用。'
 
     if val == 'nosound':
         us.sound_notify = False
-        return u'声音提醒已禁用。'
+        return '声音提醒已禁用。'
 
     from utils.notify import NONE, BASIC, AT, SPEAKER
     try:
@@ -107,68 +107,68 @@ def notify(val):
 
     us.notify_level = level
 
-    return u'提醒级别已变更为%s。' % val
+    return '提醒级别已变更为%s。' % val
 
 
-@command(u'帮助', u'查看命令的帮助', cmd='?')
+@command('帮助', '查看命令的帮助', cmd='?')
 @argtypes(str)
-@argdesc(u'[<命令>]')
+@argdesc('[<命令>]')
 def help(cmdname):
     cmd = registered_commands.get(cmdname)
     if not cmd:
         return _format_all_commands()
     else:
         help = [cmd.commandname, cmd.commandhelp]
-        help.append(u'/%s ' % cmdname + u' '.join(cmd.argdesc))
-        return u'\n'.join(help)
+        help.append('/%s ' % cmdname + ' '.join(cmd.argdesc))
+        return '\n'.join(help)
 
 
-@command(u'踢出观战玩家', u'uid为观战玩家[]中的数字id')
+@command('踢出观战玩家', 'uid为观战玩家[]中的数字id')
 @argtypes(int)
-@argdesc(u'<uid>')
+@argdesc('<uid>')
 def kickob(uid):
     stats({'event': 'kick_ob'})
     Executive.kick_observer(uid)
 
     # reply by server message later
-    return u''
+    return ''
 
 
-@command(u'开启/关闭游戏邀请', u'on      开启邀请\noff     关闭邀请')
+@command('开启/关闭游戏邀请', 'on      开启邀请\noff     关闭邀请')
 @argtypes(str)
-@argdesc(u'<on||off>')
+@argdesc('<on||off>')
 def invite(onoff):
     from user_settings import UserSettings as us
     if onoff == 'on':
         us.no_invite = False
-        return u'邀请已开启，其他玩家可以邀请你一起游戏。'
+        return '邀请已开启，其他玩家可以邀请你一起游戏。'
     elif onoff == 'off':
         us.no_invite = True
-        return u'邀请已关闭，其他玩家邀请你时会自动拒绝，不会有提示。'
+        return '邀请已关闭，其他玩家邀请你时会自动拒绝，不会有提示。'
     else:
         return registered_commands['?']('invite')
 
 
-@command(u'观战', u'只能在大厅内使用，uid为右侧玩家列表中[]内的数字id')
+@command('观战', '只能在大厅内使用，uid为右侧玩家列表中[]内的数字id')
 @argtypes(int)
-@argdesc(u'<uid>')
+@argdesc('<uid>')
 def ob(uid):
     Executive.observe_user(uid)
-    return u'已经向[%d]发送了旁观请求，请等待回应……' % uid
+    return '已经向[%d]发送了旁观请求，请等待回应……' % uid
 
 
-@command(u'调试用', u'开发者使用的功能，玩家可以忽略')
+@command('调试用', '开发者使用的功能，玩家可以忽略')
 @argtypes(str, str)
-@argdesc(u'<key>', u'<val>')
+@argdesc('<key>', '<val>')
 def dbgval(key, val):
     from utils.misc import dbgvals
     dbgvals[key] = val
-    return u'Done'
+    return 'Done'
 
 
-@command(u'屏蔽用户', u'屏蔽该用户发言')
+@command('屏蔽用户', '屏蔽该用户发言')
 @argtypes(str)
-@argdesc(u'<用户名>')
+@argdesc('<用户名>')
 def block(user):
     from user_settings import UserSettings as us
     blocked_users = us.blocked_users
@@ -176,9 +176,9 @@ def block(user):
         blocked_users.append(user)
 
 
-@command(u'取消屏蔽用户', u'恢复被屏蔽的用户')
+@command('取消屏蔽用户', '恢复被屏蔽的用户')
 @argtypes(str)
-@argdesc(u'<用户名>')
+@argdesc('<用户名>')
 def unblock(user):
     from user_settings import UserSettings as us
     blocked_users = us.blocked_users
@@ -186,23 +186,23 @@ def unblock(user):
         blocked_users.remove(user)
 
 
-@command(u'使用物品', u'使用在游戏中的物品（比如选将卡、欧洲卡）')
+@command('使用物品', '使用在游戏中的物品（比如选将卡、欧洲卡）')
 @argtypes(str)
-@argdesc(u'物品名称')
+@argdesc('物品名称')
 def use(sku):
     from client.core.executive import Executive
     Executive.use_ingame_item(sku)
 
 
-@command(u'使用物品', u'使用可以在物品页面使用的物品')
+@command('使用物品', '使用可以在物品页面使用的物品')
 @argtypes(int)
-@argdesc(u'物品ID')
+@argdesc('物品ID')
 def item_use(id):
     from client.core.executive import Executive
     Executive.item_use(id)
 
 
-@command(u'列出背包内的物品', u'RT')
+@command('列出背包内的物品', 'RT')
 @argtypes()
 @argdesc()
 def item_backpack():
@@ -210,7 +210,7 @@ def item_backpack():
     Executive.item_backpack()
 
 
-@command(u'列出交易所内的物品', u'RT')
+@command('列出交易所内的物品', 'RT')
 @argtypes()
 @argdesc()
 def item_exchange():
@@ -218,9 +218,9 @@ def item_exchange():
     Executive.item_exchange()
 
 
-@command(u'抽奖', u'RT')
+@command('抽奖', 'RT')
 @argtypes(str)
-@argdesc(u'货币类型', 'jiecao|ppoint')
+@argdesc('货币类型', 'jiecao|ppoint')
 def item_lottery(currency):
     from client.core.executive import Executive
     Executive.item_lottery(currency)

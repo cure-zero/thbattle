@@ -489,7 +489,7 @@ def user_input_finish_effects(self, arg):
 
 
 def game_roll_prompt(self, pl):
-    self.prompt(u'Roll点顺序：')
+    self.prompt('Roll点顺序：')
     for p in pl:
         self.prompt(p.account.username)
     self.prompt_raw('--------------------\n')
@@ -544,7 +544,7 @@ class UIShowCardsEffect(Panel):
                 batch=lbls,
             )
 
-        lbl(u'%s展示的牌' % target.ui_meta.name, w//2, h-25)
+        lbl('%s展示的牌' % target.ui_meta.name, w//2, h-25)
 
         parent = self.parent
         self.x, self.y = (parent.width - w)//2, (parent.height - h)//2
@@ -560,7 +560,7 @@ class UIShowCardsEffect(Panel):
             cs = CardSprite(c, parent=self, x=30 + 95 * x, y=60 + 127 * y)
             cs.associated_card = c
 
-        btn = Button(parent=self, caption=u'看完了', x=w-122, y=15, width=100, height=30)
+        btn = Button(parent=self, caption='看完了', x=w-122, y=15, width=100, height=30)
 
         @btn.event
         def on_click(*a):

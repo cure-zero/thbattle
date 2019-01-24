@@ -14,8 +14,8 @@ __metaclass__ = gen_metafunc(cards)
 class MassiveDamageCard:
     # action_stage meta
     image = 'thb-card-question'
-    name = u'99 Damage'
+    name = '99 Damage'
     description = name
 
     def is_action_valid(g, cl, target_list):
-        return (True, u'Massive Damage')
+        return (True, 'Massive Damage')

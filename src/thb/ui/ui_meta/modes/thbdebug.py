@@ -14,7 +14,7 @@ __metaclass__ = gen_metafunc(thbdebug)
 
 class DebugUseCard:
     # Skill
-    name = u'转化'
+    name = '转化'
     params_ui = 'UIDebugUseCardSelection'
 
     @meta_property
@@ -29,7 +29,7 @@ class DebugUseCard:
     def tag_anim(c):
         return c.treat_as.ui_meta.tag_anim
 
-    description = u'DEBUG'
+    description = 'DEBUG'
 
     def clickable(game):
         return True
@@ -39,17 +39,17 @@ class DebugUseCard:
         try:
             skill.treat_as.ui_meta
         except:
-            return False, u'Dummy'
+            return False, 'Dummy'
 
         return skill.treat_as.ui_meta.is_action_valid(g, [skill], target_list)
 
     def is_complete(g, cl):
-        return True, u'XXX'
+        return True, 'XXX'
 
 
 class DebugDecMaxLife:
     # Skill
-    name = u'减上限'
+    name = '减上限'
 
     def clickable(g):
         return True
@@ -57,6 +57,6 @@ class DebugDecMaxLife:
     def is_action_valid(g, cl, target_list):
         acards = cl[0].associated_cards
         if len(acards):
-            return (False, u'请不要选择牌！')
+            return (False, '请不要选择牌！')
 
-        return (True, u'XXX')
+        return (True, 'XXX')

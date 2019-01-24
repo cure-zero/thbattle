@@ -13,8 +13,8 @@ __metaclass__ = gen_metafunc(characters.tenshi)
 
 class Masochist:
     # Skill
-    name = u'抖Ｍ'
-    description = u'每当你受到1点伤害后，你可以观看牌堆顶的两张牌，并将这些牌交给至少一名角色。'
+    name = '抖Ｍ'
+    description = '每当你受到1点伤害后，你可以观看牌堆顶的两张牌，并将这些牌交给至少一名角色。'
 
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
@@ -22,26 +22,26 @@ class Masochist:
 
 class MasochistHandler:
     # choose_option
-    choose_option_buttons = ((u'发动', True), (u'不发动', False))
-    choose_option_prompt = u'你要发动【抖Ｍ】吗？'
+    choose_option_buttons = (('发动', True), ('不发动', False))
+    choose_option_prompt = '你要发动【抖Ｍ】吗？'
 
 
 class MasochistAction:
     # choose_card
     def choose_card_text(g, act, cards):
         if act.cond(cards):
-            return (True, u'给你牌~')
+            return (True, '给你牌~')
         else:
-            return (False, u'请选择你要给出的牌（否则给自己）')
+            return (False, '请选择你要给出的牌（否则给自己）')
 
     def target(pl):
         if not pl:
-            return (False, u'请选择1名玩家')
+            return (False, '请选择1名玩家')
 
-        return (True, u'给你牌~')
+        return (True, '给你牌~')
 
     def effect_string_before(act):
-        return u'不过|G【%s】|r好像很享受的样子…' % (
+        return '不过|G【%s】|r好像很享受的样子…' % (
             act.target.ui_meta.name,
         )
 
@@ -51,8 +51,8 @@ class MasochistAction:
 
 class ScarletPerception:
     # Skill
-    name = u'绯想'
-    description = u'|B锁定技|r，距离1以内的角色的红色判定牌置入弃牌堆时，你获得之。'
+    name = '绯想'
+    description = '|B锁定技|r，距离1以内的角色的红色判定牌置入弃牌堆时，你获得之。'
 
     # 此处OL结算有bug，当红色判定被改判成另一张红色时，应该可以发动2次|G绯想|r，并获得2张红色判定牌。
     # 参考曹植相关FAQ:
@@ -65,7 +65,7 @@ class ScarletPerception:
 
 class ScarletPerceptionAction:
     def effect_string(act):
-        return u'|G【%s】|r获得了%s' % (
+        return '|G【%s】|r获得了%s' % (
             act.source.ui_meta.name,
             card_desc(act.card)
         )
@@ -76,11 +76,11 @@ class ScarletPerceptionAction:
 
 class Tenshi:
     # Character
-    name        = u'比那名居天子'
-    title       = u'有顶天的大M子'
-    illustrator = u'月见'
-    cv          = u'VV'
+    name        = '比那名居天子'
+    title       = '有顶天的大M子'
+    illustrator = '月见'
+    cv          = 'VV'
 
-    port_image        = u'thb-portrait-tenshi'
-    figure_image      = u'thb-figure-tenshi'
-    miss_sound_effect = u'thb-cv-tenshi_miss'
+    port_image        = 'thb-portrait-tenshi'
+    figure_image      = 'thb-figure-tenshi'
+    miss_sound_effect = 'thb-cv-tenshi_miss'

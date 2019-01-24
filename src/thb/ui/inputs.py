@@ -47,7 +47,7 @@ class InputHandler(object):
 
 
 class UIActionConfirmButtons(ConfirmButtons):
-    DEFAULT_BUTTONS = ((u'确定', True), (u'结束', False))
+    DEFAULT_BUTTONS = (('确定', True), ('结束', False))
 
     def __init__(self, buttons=DEFAULT_BUTTONS, delay=0.5, **k):
         self._valid = True
@@ -99,7 +99,7 @@ class UISelectTarget(Control, InputHandler):
         )
         self.progress_bar = BigProgressBar(parent=self, x=0, y=0, width=250)
         self.label = Label(
-            text=u"HEY SOMETHING'S WRONG", x=125, y=28, font_size=12,
+            text="HEY SOMETHING'S WRONG", x=125, y=28, font_size=12,
             color=(255, 255, 160, 255), shadow=(2, 0, 0, 0, 179),
             anchor_x='center', anchor_y='bottom',
         )
@@ -224,7 +224,7 @@ class UIDoRejectCardResponse(UIDoPassiveAction):
     def process_user_input(self, ilet):
         # Override
         view = self.view
-        buttons = ((u'确定', 'fire'), (u'结束', 'cancel'))
+        buttons = (('确定', 'fire'), ('结束', 'cancel'))
         target_act = ilet.initiator.target_act
         pact = thbactions.ForEach.get_actual_action(target_act)
 
@@ -236,7 +236,7 @@ class UIDoRejectCardResponse(UIDoPassiveAction):
                 end_transaction(self.trans)
                 return
 
-            buttons = ((u'确定', 'fire'), (u'结束', 'cancel'), (u'此次不再使用', 'dontcare'))
+            buttons = (('确定', 'fire'), ('结束', 'cancel'), ('此次不再使用', 'dontcare'))
 
         self.confirmbtn = UIActionConfirmButtons(
             parent=self, x=259, y=4, width=165, height=24, buttons=buttons,
@@ -244,7 +244,7 @@ class UIDoRejectCardResponse(UIDoPassiveAction):
 
         self.progress_bar = BigProgressBar(parent=self, x=0, y=0, width=250)
         self.label = Label(
-            text=u"HEY SOMETHING'S WRONG", x=125, y=28, font_size=12,
+            text="HEY SOMETHING'S WRONG", x=125, y=28, font_size=12,
             color=(255, 255, 160, 255), shadow=(2, 0, 0, 0, 179),
             anchor_x='center', anchor_y='bottom',
         )
@@ -283,7 +283,7 @@ class UIDoRejectCardResponse(UIDoPassiveAction):
         g = self.game
         gevent.spawn_later(0.1 + 0.2 * math.sqrt(g.players.index(g.me)), ev.set)
 
-        self.set_text(u'自动结算好人卡…')
+        self.set_text('自动结算好人卡…')
         if not RejectCard.ui_meta.has_reject_card(g.me):
             ilet.done()
             end_transaction(self.trans)
@@ -442,26 +442,26 @@ class UIChooseGirl(UIBaseChooseGirl):
 
     def process_user_input_start(self, ilet):
         self.label.color = (255, 255, 160, 255)
-        self.label.text = u'等待%s选择角色' % (ilet.actor.account.username)
-        self.parent.prompt(u'|R%s|r正在选择……' % ilet.actor.account.username)
+        self.label.text = '等待%s选择角色' % (ilet.actor.account.username)
+        self.parent.prompt('|R%s|r正在选择……' % ilet.actor.account.username)
 
     def process_user_input(self, ilet):
         assert ilet.actor is self.trans.game.me
         self.inputlet = ilet
-        self.label.text = u'请你选择一名角色'
+        self.label.text = '请你选择一名角色'
         self.label.color = (160, 251, 255, 255)
         self.begin_selection()
 
     def process_user_input_finish(self, ilet, rst):
         if not self.selecting:
-            self.label.text = u'等待其他玩家操作'
+            self.label.text = '等待其他玩家操作'
             self.label.color = (255, 255, 160, 255)
             self.inputlet = None
 
     def on_girl_chosen(self, arg):
         UIBaseChooseGirl.on_girl_chosen(self, arg)
         actor, choice = arg
-        choice and choice.char_cls and self.parent.prompt(u'|R%s|r选择了|G【%s】|r' % (
+        choice and choice.char_cls and self.parent.prompt('|R%s|r选择了|G【%s】|r' % (
             actor.account.username,
             choice.char_cls.ui_meta.name,
         ))
@@ -472,25 +472,25 @@ class UIBanGirl(UIBaseChooseGirl):
 
     def process_user_input_start(self, ilet):
         self.label.color = (255, 255, 160, 255)
-        self.label.text = u'等待%s选择不能出场的角色' % (ilet.actor.account.username)
-        self.parent.prompt(u'|R%s|r正在BAN……' % ilet.actor.account.username)
+        self.label.text = '等待%s选择不能出场的角色' % (ilet.actor.account.username)
+        self.parent.prompt('|R%s|r正在BAN……' % ilet.actor.account.username)
 
     def process_user_input(self, ilet):
         assert ilet.actor is self.trans.game.me
         self.inputlet = ilet
-        self.label.text = u'请你选择不能出场的角色'
+        self.label.text = '请你选择不能出场的角色'
         self.label.color = (160, 251, 255, 255)
         self.begin_selection()
 
     def process_user_input_finish(self, ilet, rst):
-        self.label.text = u'等待其他玩家操作'
+        self.label.text = '等待其他玩家操作'
         self.label.color = (255, 255, 160, 255)
         self.inputlet = None
 
     def on_girl_chosen(self, arg):
         UIBaseChooseGirl.on_girl_chosen(self, arg)
         actor, choice = arg
-        choice and choice.char_cls and self.parent.prompt(u'|R%s|rBAN掉了|G【%s】|r' % (
+        choice and choice.char_cls and self.parent.prompt('|R%s|rBAN掉了|G【%s】|r' % (
             actor.account.username,
             choice.char_cls.ui_meta.name,
         ))
@@ -562,8 +562,8 @@ class UIChooseOption(Control, InputHandler):
                 choose_option_buttons = choose_option_buttons(ilet.initiator)
 
         except AttributeError:
-            choose_option_buttons = ((u'确定', True), (u'结束', False))
-            choose_option_prompt = u'UIChooseOption: %s missing ui_meta' % (
+            choose_option_buttons = (('确定', True), ('结束', False))
+            choose_option_prompt = 'UIChooseOption: %s missing ui_meta' % (
                 ilet.initiator.__class__.__name__
             )
 
@@ -655,7 +655,7 @@ class UIHarvestChoose(Panel, InputHandler):
         h = 20 + 125 + 20 + 125 + 20 + 20
 
         self.lbl = Label(
-            text=u"等待其他玩家操作", x=w//2, y=300, font_size=12,
+            text="等待其他玩家操作", x=w//2, y=300, font_size=12,
             color=(255, 255, 160, 255), shadow=(2, 0, 0, 0, 230),
             anchor_x='center', anchor_y='bottom'
         )
@@ -687,17 +687,17 @@ class UIHarvestChoose(Panel, InputHandler):
         self.lbl.draw()
 
     def process_user_input_start(self, ilet):
-        self.lbl.text = u'等待%s选择卡牌' % (ilet.actor.ui_meta.name)
+        self.lbl.text = '等待%s选择卡牌' % (ilet.actor.ui_meta.name)
         self.lbl.color = (255, 255, 160, 255)
 
     def process_user_input(self, ilet):
         assert ilet.actor is self.trans.game.me
         self.inputlet = ilet
-        self.lbl.text = u'请你选择一张卡牌'
+        self.lbl.text = '请你选择一张卡牌'
         self.lbl.color = (160, 251, 255, 255)
 
     def process_user_input_finish(self, ilet, rst):
-        self.lbl.text = u'等待其他玩家操作'
+        self.lbl.text = '等待其他玩家操作'
         self.lbl.color = (255, 255, 160, 255)
         self.inputlet = None
 
@@ -810,9 +810,9 @@ class UIRanProphet(Panel, InputHandler):
                 batch=self.lbls,
             )
 
-        lbl(u'牌堆底', 50, 122)
-        lbl(u'牌堆顶', 50, 277)
-        lbl(u'请拖动调整牌的位置', w//2, h-25)
+        lbl('牌堆底', 50, 122)
+        lbl('牌堆顶', 50, 277)
+        lbl('请拖动调整牌的位置', w//2, h-25)
 
         parent = self.parent
         self.x, self.y = (parent.width - w)//2, (parent.height - h)//2
@@ -826,7 +826,7 @@ class UIRanProphet(Panel, InputHandler):
 
         rpc.init()
 
-        btn = Button(parent=self, caption=u'调整完成', x=w-120, y=15, width=100, height=30)
+        btn = Button(parent=self, caption='调整完成', x=w-120, y=15, width=100, height=30)
 
         @btn.event
         def on_click(*a):
@@ -884,7 +884,7 @@ class UICharacterSorter(Panel, InputHandler):
                 anchor_x='center', anchor_y='center', batch=self.lbls,
             )
 
-        lbl(u'请拖动调整角色的出场顺序', w//2, h-25)
+        lbl('请拖动调整角色的出场顺序', w//2, h-25)
 
         parent = self.parent
         self.x, self.y = (parent.width - w)//2, (parent.height - h)//2
@@ -902,7 +902,7 @@ class UICharacterSorter(Panel, InputHandler):
             )
         sorter.init()
 
-        btn = Button(parent=self, caption=u'调整完成', x=w-120, y=15, width=100, height=30)
+        btn = Button(parent=self, caption='调整完成', x=w-120, y=15, width=100, height=30)
 
         @btn.event
         def on_click(*a, **k):
@@ -949,9 +949,9 @@ class UIKokoroHomeMask(Panel, InputHandler):
                 batch=self.lbls,
             )
 
-        lbl(u'请拖动调整牌的位置', w // 2, h - 25)
-        lbl(u'牌堆顶', 50, 277)
-        lbl(u'展示并获得', 50, 122)
+        lbl('请拖动调整牌的位置', w // 2, h - 25)
+        lbl('牌堆顶', 50, 277)
+        lbl('展示并获得', 50, 122)
 
         parent = self.parent
         self.x, self.y = (parent.width - w)//2, (parent.height - h)//2
@@ -965,7 +965,7 @@ class UIKokoroHomeMask(Panel, InputHandler):
 
         ctrl.init()
 
-        btn = Button(parent=self, caption=u'完成', x=w-120, y=15, width=100, height=30)
+        btn = Button(parent=self, caption='完成', x=w-120, y=15, width=100, height=30)
 
         @btn.event
         def on_click(*a):
