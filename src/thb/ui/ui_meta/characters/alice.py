@@ -6,14 +6,15 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import G, card_desc, gen_metafunc, passive_clickable
+from thb.ui.ui_meta.common import G, card_desc, ui_meta_for, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.alice)
+ui_meta = ui_meta_for(characters.alice)
 
 
+@ui_meta
 class Alice:
     # Character
     name        = '爱丽丝'
@@ -26,6 +27,7 @@ class Alice:
     miss_sound_effect = 'thb-cv-alice_miss'
 
 
+@ui_meta
 class LittleLegion:
     # Skill
     name = '小小军势'
@@ -41,25 +43,27 @@ class LittleLegion:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class LittleLegionAttackCard:
     name = '小小军势'
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return '|G【%s】|r操起人偶，向|G【%s】|r进攻！' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-alice_legion_attack'
 
 
+@ui_meta
 class LittleLegionDollControlCard:
     name = '小小军势'
     custom_ray = True
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         controllee, victim = act.target_list
         return '|G【%s】|r操起人偶……呃不对，是|G【%s】|r，向|G【%s】|r进攻！' % (
@@ -68,48 +72,53 @@ class LittleLegionDollControlCard:
             victim.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-alice_legion_control'
 
 
+@ui_meta
 class LittleLegionAttackAction:
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '进攻：请选择1名玩家，视为使用弹幕')
 
         return (True, '就让你见识下人偶军团的厉害！')
 
 
+@ui_meta
 class LittleLegionCoverEffect:
-    def effect_string(act):
+    def effect_string(self, act):
         if act.succeeded:
             return '|G【%s】|r回复了%d点体力。' % (
                 act.target.ui_meta.name, act.amount
             )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-alice_legion_cover'
 
 
+@ui_meta
 class LittleLegionCoverAction:
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '掩护：请选择1名玩家，回复1点体力')
 
         return (True, '支援到了，重复，支援到了！')
 
 
+@ui_meta
 class LittleLegionHoldAction:
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-alice_legion_hold'
 
 
+@ui_meta
 class LittleLegionControlAction:
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '控场：请选择2名玩家，视为使用【人型操控】')
 
@@ -123,10 +132,11 @@ class LittleLegionControlAction:
             return rst, prompt
 
 
+@ui_meta
 class LittleLegionHandler:
 
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             c, = cards
             if c.equipment_category == 'weapon':
@@ -145,6 +155,7 @@ class LittleLegionHandler:
             return (False, '小小军势：重铸一张装备牌，发动相应效果（否则不发动）')
 
 
+@ui_meta
 class DollBlast:
     # Skill
     name = '人偶爆弹'
@@ -154,9 +165,10 @@ class DollBlast:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class DollBlastEffect:
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         if act.do_damage:
             return '|G【%s】|r拿走了|G【%s】|r的人偶（%s），然后，BOOM！|G【%s】|r就炸了！' % (
                 act.target.ui_meta.name,
@@ -174,15 +186,17 @@ class DollBlastEffect:
             )
 
 
+@ui_meta
 class DollBlastAction:
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice([
             'thb-cv-alice_dollblast_blast',
             'thb-cv-alice_dollblast_noblast',
         ])
 
 
+@ui_meta
 class DollBlastHandlerCommon:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))

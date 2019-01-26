@@ -5,12 +5,13 @@
 # -- own --
 from thb import actions, cards
 from thb.actions import ttags
-from thb.ui.ui_meta.common import G, gen_metafunc
+from thb.ui.ui_meta.common import G, ui_meta_for
 
 # -- code --
-__metaclass__ = gen_metafunc(cards)
+ui_meta = ui_meta_for(cards)
 
 
+@ui_meta
 class AttackCard:
     # action_stage meta
     image = 'thb-card-attack'
@@ -24,13 +25,13 @@ class AttackCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         if not target_list:
             return (False, '请选择弹幕的目标')
 
         return (True, '来一发！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         if not isinstance(act, actions.ActionStageLaunchCard):
             return 'thb-cv-card_attack1'
 
@@ -49,6 +50,7 @@ class AttackCard:
         ][ttags(current)['__attack_graze_count'] % 4 - 1]
 
 
+@ui_meta
 class GrazeCard:
     # action_stage meta
     name = '擦弹'
@@ -60,16 +62,16 @@ class GrazeCard:
         '|DB（画师：霏茶，CV：小羽）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (False, '你不能主动使用擦弹')
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r使用了|G%s|r。' % (
             act.source.ui_meta.name,
             act.card.ui_meta.name
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         if not isinstance(act, actions.LaunchCard):
             return 'thb-cv-card_graze1'
 
@@ -86,6 +88,7 @@ class GrazeCard:
         ][ttags(current)['__attack_graze_count'] % 4 - 1]
 
 
+@ui_meta
 class WineCard:
     # action_stage meta
     name = '酒'
@@ -99,25 +102,28 @@ class WineCard:
         '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         if g.me.tags.get('wine', False):
             return (True, '你已经醉了，还要再喝吗？')
         return (True, '青岛啤酒，神主也爱喝！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_wine'
 
 
+@ui_meta
 class Wine:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r喝醉了…' % act.target.ui_meta.name
 
 
+@ui_meta
 class WineRevive:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r醒酒了。' % act.target.ui_meta.name
 
 
+@ui_meta
 class ExinwanCard:
     # action_stage meta
     name = '恶心丸'
@@ -134,35 +140,37 @@ class ExinwanCard:
         '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (True, '哼，哼，哼哼……')
 
 
+@ui_meta
 class ExinwanEffect:
     # choose_card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '节操给你，离我远点！')
         else:
             return (False, '请选择两张牌（不选则受到一点无源伤害）')
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r被恶心到了！' % act.target.ui_meta.name
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_exinwan'
 
 
+@ui_meta
 class UseGraze:
     # choose_card meta
 
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '我闪！')
         else:
             return (False, '请打出一张【擦弹】…')
 
-    def effect_string(act):
+    def effect_string(self, act):
         if not act.succeeded: return None
         t = act.target
         return '|G【%s】|r打出了|G%s|r。' % (
@@ -171,25 +179,27 @@ class UseGraze:
         )
 
 
+@ui_meta
 class LaunchGraze:
     # choose_card meta
 
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '我闪！')
         else:
             return (False, '请使用一张【擦弹】抵消【弹幕】效果…')
 
 
+@ui_meta
 class UseAttack:
     # choose_card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '打架？来吧！')
         else:
             return (False, '请打出一张弹幕…')
 
-    def effect_string(act):
+    def effect_string(self, act):
         if not act.succeeded: return None
         t = act.target
         return '|G【%s】|r打出了|G%s|r。' % (
@@ -198,6 +208,7 @@ class UseAttack:
         )
 
 
+@ui_meta
 class HealCard:
     # action_stage meta
     image = 'thb-card-heal'
@@ -212,7 +223,7 @@ class HealCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         target = target_list[0]
 
         if target.life >= target.maxlife:
@@ -220,21 +231,23 @@ class HealCard:
         else:
             return (True, '来一口，精神焕发！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_heal'
 
 
+@ui_meta
 class AskForHeal:
     # choose_card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '神说，你不能在这里被击坠(对%s使用)' % act.source.ui_meta.name)
         else:
             return (False, '请选择一张【麻薯】(对%s使用)…' % act.source.ui_meta.name)
 
 
+@ui_meta
 class Heal:
-    def effect_string(act):
+    def effect_string(self, act):
         if act.succeeded:
             return '|G【%s】|r回复了%d点体力。' % (
                 act.target.ui_meta.name, act.amount

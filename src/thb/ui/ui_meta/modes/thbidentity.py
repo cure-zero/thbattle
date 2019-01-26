@@ -6,14 +6,15 @@ from __future__ import absolute_import
 # -- own --
 from thb import cards, thbidentity
 from thb.actions import ttags
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, my_turn, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 
 # -- code --
-__metaclass__ = gen_metafunc(thbidentity)
+ui_meta = ui_meta_for(thbidentity)
 
 
+@ui_meta
 class THBattleIdentity:
     name = '8人身份场'
     logo = 'thb-modelogo-8id'
@@ -58,7 +59,7 @@ class THBattleIdentity:
         },
     }
 
-    def ui_class():
+    def ui_class(self):
         from thb.ui.view import THBattleIdentityUI
         return THBattleIdentityUI
 
@@ -83,13 +84,14 @@ class THBattleIdentity:
     del T
 
 
+@ui_meta
 class AssistedAttack:
     # Skill
     name = '同仇'
     description = '当你需要使用或打出一张|G弹幕|r时，其他玩家可以代替你使用或打出一张|G弹幕|r'
 
-    def clickable(game):
-        me = game.me
+    def clickable(self, g):
+        me = g.me
         if not my_turn():
             return False
 
@@ -98,7 +100,7 @@ class AssistedAttack:
 
         return True
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         s = cl[0]
         cl = s.associated_cards
         if len(cl):
@@ -106,7 +108,7 @@ class AssistedAttack:
 
         return cards.AttackCard.ui_meta.is_action_valid(g, [s], tl)
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return (
             '|G【%s】|r发动了|G同仇|r，目标是|G【%s】|r。'
@@ -116,8 +118,9 @@ class AssistedAttack:
         )
 
 
+@ui_meta
 class AssistedUseAction:
-    def choose_option_prompt(act):
+    def choose_option_prompt(self, act):
         return '你要帮BOSS出【%s】吗？' % (
             act.their_afc_action.card_cls.ui_meta.name
         )
@@ -125,16 +128,18 @@ class AssistedUseAction:
     choose_option_buttons = (('帮BOSS', True), ('不关我事', False))
 
 
+@ui_meta
 class AssistedAttackAction:
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '帮BOSS对%s出弹幕' % act.target.ui_meta.name)
         else:
             return (False, '同仇：请选择一张弹幕（对%s出）' % act.target.ui_meta.name)
 
 
+@ui_meta
 class AssistedAttackCard:
-    def effect_string(act):
+    def effect_string(self, act):
         s = act.card
         c = s.associated_cards[0]
         return '|G【%s】|r响应了|G同仇|r，使用了|G%s|r' % (
@@ -143,11 +148,13 @@ class AssistedAttackCard:
         )
 
 
+@ui_meta
 class AssistedAttackHandler:
     choose_option_prompt = '你要发动【同仇】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
+@ui_meta
 class AssistedGraze:
     # Skill
     name = '协力'
@@ -156,23 +163,27 @@ class AssistedGraze:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class AssistedGrazeHandler:
     choose_option_prompt = '你要发动【协力】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
+@ui_meta
 class AssistedHealAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r发动了|G牺牲|r' % (
             act.source.ui_meta.name,
         )
 
 
+@ui_meta
 class AssistedHealHandler:
     choose_option_prompt = '你要发动【牺牲】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
+@ui_meta
 class AssistedHeal:
     # Skill
     name = '牺牲'
@@ -181,6 +192,7 @@ class AssistedHeal:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ExtraCardSlot:
     # Skill
     name = '应援'
@@ -189,14 +201,15 @@ class ExtraCardSlot:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ChooseBossSkillAction:
     choose_option_prompt = '请选择BOSS技：'
 
-    def choose_option_buttons(act):
+    def choose_option_buttons(self, act):
         l = act.boss_skills
         return [(i.ui_meta.name, i.__name__) for i in l]
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r选择了|G%s|r作为BOSS技' % (
             act.target.ui_meta.name,
             act.skill_chosen.ui_meta.name,

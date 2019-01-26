@@ -5,14 +5,15 @@
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.ui.ui_meta.common import gen_metafunc, my_turn, passive_clickable
+from thb.ui.ui_meta.common import ui_meta_for, my_turn, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.ran)
+ui_meta = ui_meta_for(characters.ran)
 
 
+@ui_meta
 class Prophet:
     # Skill
     name = '神算'
@@ -22,6 +23,7 @@ class Prophet:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ExtremeIntelligence:
     # Skill
     name = '极智'
@@ -31,12 +33,13 @@ class ExtremeIntelligence:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ExtremeIntelligenceKOF:
     # Skill
     name = '极智'
     description = '出牌阶段限一次，你可以将一张手牌当你本回合上一张使用过的非延时符卡使用。'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
 
         if not (my_turn() and (me.cards or me.showncards)):
@@ -50,7 +53,7 @@ class ExtremeIntelligenceKOF:
 
         return True
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         assert skill.is_card(characters.ran.ExtremeIntelligenceKOF)
 
@@ -63,7 +66,7 @@ class ExtremeIntelligenceKOF:
 
         return skill.treat_as.ui_meta.is_action_valid(g, [skill], target_list)
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         src, tl, card = act.source, act.target_list, act.card
         s = '|G【%s】|r发动了|G极智|r技能，将|G%s|r当作|G%s|r对%s使用。' % (
@@ -75,31 +78,34 @@ class ExtremeIntelligenceKOF:
         return s
 
 
+@ui_meta
 class ProphetHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【神算】吗？'
 
 
+@ui_meta
 class ProphetAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '众人正准备接招呢，|G【%s】|r却掐着指头算了起来…' % (
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-ran_prophet'
 
 
+@ui_meta
 class ExtremeIntelligenceAction:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '再来！')
         else:
             return (False, '弃置1张牌并发动【极智】')
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return (
             '|G【%s】|r刚松了一口气，却看见一张一模一样的符卡从|G【%s】|r的方向飞来！'
         ) % (
@@ -107,10 +113,11 @@ class ExtremeIntelligenceAction:
             act.source.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-ran_ei'
 
 
+@ui_meta
 class NakedFox:
     # Skill
     name = '素裸'
@@ -120,8 +127,9 @@ class NakedFox:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class NakedFoxAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         if act.dmgamount <= 1:
             s = '符卡飞到了|G【%s】|r毛茸茸的大尾巴里，然后……就没有然后了……'
         else:
@@ -130,6 +138,7 @@ class NakedFoxAction:
         return s % act.target.ui_meta.name
 
 
+@ui_meta
 class Ran:
     # Character
     name        = '八云蓝'
@@ -142,6 +151,7 @@ class Ran:
     miss_sound_effect = 'thb-cv-ran_miss'
 
 
+@ui_meta
 class RanKOF:
     # Character
     name        = '八云蓝'

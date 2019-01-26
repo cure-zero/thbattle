@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, passive_clickable, passive_is_action_valid
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.flandre)
+ui_meta = ui_meta_for(characters.flandre)
 
 
+@ui_meta
 class Flandre:
     # Character
     name        = '芙兰朵露'
@@ -22,6 +23,7 @@ class Flandre:
     miss_sound_effect = 'thb-cv-flandre_miss'
 
 
+@ui_meta
 class CriticalStrike:
     # Skill
     name = '狂咲'
@@ -35,27 +37,31 @@ class CriticalStrike:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class CriticalStrikeHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【狂咲】吗？'
 
 
+@ui_meta
 class CriticalStrikeLimit:
     target_independent = False
     shootdown_message = '你对这个角色使用过弹幕了'
 
 
+@ui_meta
 class CriticalStrikeAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r突然呵呵一笑，进入了黑化状态！' % (
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-flandre_cs'
 
 
+@ui_meta
 class Exterminate:
     # Skill
     name = '毁灭'
@@ -65,13 +71,14 @@ class Exterminate:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ExterminateAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r被|G【%s】|r玩坏了……' % (
             act.target.ui_meta.name,
             act.source.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return None
         return 'thb-cv-flandre_cs'

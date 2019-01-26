@@ -8,45 +8,49 @@ import random
 # -- own --
 from thb import actions, cards
 from thb.actions import ttags
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 from utils import BatchList
 
 
 # -- code --
-__metaclass__ = gen_metafunc(cards)
+ui_meta = ui_meta_for(cards)
 
 
-def equip_iav(g, cl, target_list):
+def equip_iav(self, g, cl, target_list):
     return (True, '配上好装备，不再掉节操！')
 
 
-def suppress_launch_card_effect_string(act):
+def suppress_launch_card_effect_string(self, act):
     return None
 
 
+@ui_meta
 class WearEquipmentAction:
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r装备了%s' % (
             act.target.ui_meta.name,
             card_desc(act.associated_card),
         )
 
 
+@ui_meta
 class WeaponReforgeHandler:
     choose_option_prompt = '你希望重铸这张牌么？'
     choose_option_buttons = (('重铸', True), ('装备', False))
 
 
+@ui_meta
 class ReforgeWeapon:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r重铸了%s' % (
             act.target.ui_meta.name,
             card_desc(act.card),
         )
 
 
+@ui_meta
 class OpticalCloakCard:
     # action_stage meta
     name = '光学迷彩'
@@ -62,40 +66,44 @@ class OpticalCloakCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class OpticalCloakSkill:
     # Skill
     name = '光学迷彩'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_opticalcloak'
 
-    def effect_string(act):
+    def effect_string(self, act):
         return cards.GrazeCard.ui_meta.effect_string(act)
 
 
+@ui_meta
 class OpticalCloakHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【光学迷彩】吗？'
 
 
+@ui_meta
 class OpticalCloak:
     fatetell_display_name = '光学迷彩'
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r祭起了|G光学迷彩|r…' % (
             act.target.ui_meta.name,
         )
 
-    def effect_string(act):
+    def effect_string(self, act):
         if act.succeeded:
             return '效果拔群！'
         else:
             return '但是被看穿了…'
 
 
+@ui_meta
 class MomijiShieldCard:
     # action_stage meta
     name = '天狗盾'
@@ -111,6 +119,7 @@ class MomijiShieldCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class MomijiShieldSkill:
     # Skill
     name = '天狗盾'
@@ -118,11 +127,12 @@ class MomijiShieldSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class MomijiShield:
-    def effect_string(act):
+    def effect_string(self, act):
         return '被|G天狗盾|r挡下了…'
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_momijishield'
 
 
@@ -136,6 +146,7 @@ ufo_desc = (
 )
 
 
+@ui_meta
 class GreenUFOCard:
     # action_stage meta
     name = '绿色UFO'
@@ -147,6 +158,7 @@ class GreenUFOCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class GreenUFOSkill:
     # Skill
     name = '绿色UFO'
@@ -155,6 +167,7 @@ class GreenUFOSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class RedUFOCard:
     # action_stage meta
     name = '红色UFO'
@@ -166,6 +179,7 @@ class RedUFOCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class RedUFOSkill:
     # Skill
     name = '红色UFO'
@@ -174,6 +188,7 @@ class RedUFOSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class RoukankenCard:
     # action_stage meta
     name = '楼观剑'
@@ -192,6 +207,7 @@ class RoukankenCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class RoukankenSkill:
     # Skill
     name = '楼观剑'
@@ -199,14 +215,16 @@ class RoukankenSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class Roukanken:
-    def effect_string_apply(act):
+    def effect_string_apply(self, act):
         return '没有什么防具是|G楼观剑|r斩不断的！'
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_roukanken'
 
 
+@ui_meta
 class ElementalReactorCard:
     # action_stage meta
     name = '八卦炉'
@@ -226,6 +244,7 @@ class ElementalReactorCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class ElementalReactorSkill:
     # Skill
     name = '八卦炉'
@@ -233,6 +252,7 @@ class ElementalReactorSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class UmbrellaCard:
     # action_stage meta
     name = '阳伞'
@@ -248,6 +268,7 @@ class UmbrellaCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class UmbrellaSkill:
     # Skill
     name = '紫的阳伞'
@@ -255,8 +276,9 @@ class UmbrellaSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class UmbrellaEffect:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         a = act.action
         dmg = act.damage_act
         card = getattr(a, 'associated_card', None)
@@ -270,10 +292,11 @@ class UmbrellaEffect:
             dmg.target.ui_meta.name, s,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_umbrella'
 
 
+@ui_meta
 class GungnirCard:
     # action_stage meta
     name = '冈格尼尔'
@@ -293,11 +316,12 @@ class GungnirCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class GungnirSkill:
     # Skill
     name = '冈格尼尔'
 
-    def clickable(g):
+    def clickable(self, g):
         try:
             act = g.hybrid_stack[-1]
             if act.cond([cards.GungnirSkill(g.me)]):
@@ -308,7 +332,7 @@ class GungnirSkill:
 
         return False
 
-    def is_complete(g, cl):
+    def is_complete(self, g, cl):
         skill = cl[0]
         me = g.me
         assert skill.is_card(cards.GungnirSkill)
@@ -319,7 +343,7 @@ class GungnirSkill:
             return (False, '只能使用手牌发动！')
         return (True, '反正这条也看不到，偷个懒~~~')
 
-    def is_action_valid(g, cl, target_list, is_complete=is_complete):
+    def is_action_valid(self, g, cl, target_list, is_complete=is_complete):
         skill = cl[0]
         assert skill.is_card(cards.GungnirSkill)
         rst, reason = is_complete(g, cl)
@@ -328,7 +352,7 @@ class GungnirSkill:
         else:
             return cards.AttackCard.ui_meta.is_action_valid(g, [skill], target_list)
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.effect_string
         source = act.source
         target = act.target
@@ -338,10 +362,11 @@ class GungnirSkill:
         )
         return s
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return cards.AttackCard.ui_meta.sound_effect(act)
 
 
+@ui_meta
 class ScarletRhapsodyCard:
     # action_stage meta
     name = '绯想之剑'
@@ -361,11 +386,12 @@ class ScarletRhapsodyCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class ScarletRhapsodySkill:
     # Skill
     name = '绯想之剑'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         try:
             act = game.action_stack[-1]
@@ -377,7 +403,7 @@ class ScarletRhapsodySkill:
 
         return False
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         assert skill.is_card(cards.ScarletRhapsodySkill)
         if not skill.check():
@@ -391,7 +417,7 @@ class ScarletRhapsodySkill:
             else:
                 return (True, '全人类的绯想天！')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         tl = BatchList(act.target_list)
@@ -402,10 +428,11 @@ class ScarletRhapsodySkill:
             len(tl),
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_srs'
 
 
+@ui_meta
 class RepentanceStickCard:
     # action_stage meta
     name = '悔悟棒'
@@ -426,6 +453,7 @@ class RepentanceStickCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class RepentanceStickSkill:
     # Skill
     name = '悔悟棒'
@@ -433,14 +461,16 @@ class RepentanceStickSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class RepentanceStickHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【悔悟棒】吗？'
 
 
+@ui_meta
 class RepentanceStick:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return (
             '|G【%s】|r用|G悔悟棒|r狠狠的敲了|G【%s】|r一通…'
         ) % (
@@ -449,17 +479,18 @@ class RepentanceStick:
 
         )
 
-    def effect_string(act):
+    def effect_string(self, act):
         cl = BatchList(act.cards)
         return '又抢过|G【%s】|r的|G%s|r扔了出去！' % (
             act.target.ui_meta.name,
             '|r和|G'.join(cl.ui_meta.name)
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_repentancestick'
 
 
+@ui_meta
 class IbukiGourdCard:
     # action_stage meta
     name = '伊吹瓢'
@@ -475,6 +506,7 @@ class IbukiGourdCard:
     )
 
 
+@ui_meta
 class IbukiGourdSkill:
     # Skill
     name = '伊吹瓢'
@@ -482,6 +514,7 @@ class IbukiGourdSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class HouraiJewelCard:
     # action_stage meta
     name = '蓬莱玉枝'
@@ -501,6 +534,7 @@ class HouraiJewelCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class HouraiJewelSkill:
     # Skill
     name = '蓬莱玉枝'
@@ -508,14 +542,16 @@ class HouraiJewelSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class HouraiJewelHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【蓬莱玉枝】吗？'
 
 
+@ui_meta
 class HouraiJewelAttack:
-    def effect_string_apply(act):
+    def effect_string_apply(self, act):
         return (
             '|G【%s】|r发动了|G蓬莱玉枝|r，包裹着魔法核心的弹幕冲向了|G【%s】|r！'
         ) % (
@@ -524,6 +560,7 @@ class HouraiJewelAttack:
         )
 
 
+@ui_meta
 class MaidenCostumeCard:
     # action_stage meta
     name = '巫女服'
@@ -538,33 +575,36 @@ class MaidenCostumeCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class MaidenCostume:
     # Skill
     name = '巫女服'
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_maidencostume'
 
 
+@ui_meta
 class MaidenCostumeHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【巫女服】吗？'
 
 
+@ui_meta
 class MaidenCostumeAction:
     fatetell_display_name = '巫女服'
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return (
             '|G【%s】|r穿了|G巫女服|r，春度爆表，不怕符卡！'
         ) % (
             act.source.ui_meta.name,
         )
 
-    def effect_string(act):
+    def effect_string(self, act):
         if not act.succeeded:
             return (
                 '好像|G【%s】|r的春度还是不够用…'
@@ -573,6 +613,7 @@ class MaidenCostumeAction:
             )
 
 
+@ui_meta
 class HakuroukenCard:
     # action_stage meta
     name = '白楼剑'
@@ -592,6 +633,7 @@ class HakuroukenCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class HakuroukenSkill:
     # Skill
     name = '白楼剑'
@@ -599,15 +641,16 @@ class HakuroukenSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class Hakurouken:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '弃置这张牌')
         else:
             return (False, '请弃掉一张牌（否则对方摸一张牌）')
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return (
             '|G【%s】|r祭起了|G白楼剑|r，试图斩断|G【%s】|r的迷惘！'
         ) % (
@@ -615,22 +658,24 @@ class Hakurouken:
             act.target.ui_meta.name,
         )
 
-    def effect_string(act):
+    def effect_string(self, act):
         if act.peer_action == 'drop':
             return '|G【%s】|r弃置了一张牌。' % act.target.ui_meta.name
         else:
             return None  # DrawCards has it's own prompt
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_hakurouken'
 
 
+@ui_meta
 class HakuroukenHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【白楼剑】吗？'
 
 
+@ui_meta
 class AyaRoundfanCard:
     # action_stage meta
     name = '团扇'
@@ -649,6 +694,7 @@ class AyaRoundfanCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class AyaRoundfanSkill:
     # Skill
     name = '团扇'
@@ -656,24 +702,26 @@ class AyaRoundfanSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class AyaRoundfanHandler:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '这种妨碍拍摄的东西，统统脱掉！')
         else:
             return (False, '请弃掉一张手牌发动团扇（否则不发动）')
 
 
+@ui_meta
 class AyaRoundfan:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return (
             '|G【%s】|r觉得手中的|G团扇|r用起来好顺手，便加大力度试了试…'
         ) % (
             act.source.ui_meta.name,
         )
 
-    def effect_string(act):
+    def effect_string(self, act):
         return (
             '于是|G【%s】|r的|G%s|r就飞了出去！'
         ) % (
@@ -681,13 +729,14 @@ class AyaRoundfan:
             act.card.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice([
             'thb-cv-card_roundfan1',
             'thb-cv-card_roundfan2',
         ])
 
 
+@ui_meta
 class NenshaPhoneCard:
     # action_stage meta
     name = '念写机'
@@ -707,6 +756,7 @@ class NenshaPhoneCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class NenshaPhoneSkill:
     # Skill
     name = '念写机'
@@ -714,14 +764,16 @@ class NenshaPhoneSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class NenshaPhoneHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【念写机】吗？'
 
 
+@ui_meta
 class NenshaPhone:
-    def effect_string(act):
+    def effect_string(self, act):
         return (
             '|G【%s】|r表示，将|G【%s】|r推倒后拍摄胖次，是记者的自我修养中不可或缺的一部分。'
         ) % (
@@ -729,10 +781,11 @@ class NenshaPhone:
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_nenshaphone'
 
 
+@ui_meta
 class LaevateinCard:
     # action_stage meta
     name = '莱瓦汀'
@@ -751,6 +804,7 @@ class LaevateinCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class LaevateinSkill:
     # Skill
     name = '莱瓦汀'
@@ -758,23 +812,26 @@ class LaevateinSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class LaevateinHandler:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '灭世之炎岂能轻易闪过！')
         else:
             return (False, '请弃掉两张牌发动莱瓦汀（否则不发动）')
 
 
+@ui_meta
 class Laevatein:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G莱瓦汀|r的灭世之炎岂能轻易闪过！'
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_laevatein'
 
 
+@ui_meta
 class DeathSickleCard:
     # action_stage meta
     name = '死神之镰'
@@ -793,6 +850,7 @@ class DeathSickleCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class DeathSickleSkill:
     # Skill
     name = '死神之镰'
@@ -800,8 +858,9 @@ class DeathSickleSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class DeathSickle:
-    def effect_string(act):
+    def effect_string(self, act):
         return (
             '|G【%s】|r看到|G【%s】|r一副丧家犬的模样，'
             '手中的|G死神之镰|r不自觉地一狠…'
@@ -810,10 +869,11 @@ class DeathSickle:
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_deathsickle'
 
 
+@ui_meta
 class KeystoneCard:
     # action_stage meta
     name = '要石'
@@ -829,6 +889,7 @@ class KeystoneCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class KeystoneSkill:
     # Skill
     name = '要石'
@@ -836,16 +897,18 @@ class KeystoneSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class Keystone:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r站在|G要石|r上，照着|G罪袋|r的脸一脚踹了下去！' % (
             act.target.ui_meta.name
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_keystone'
 
 
+@ui_meta
 class WitchBroomCard:
     # action_stage meta
     name = '魔女扫把'
@@ -860,11 +923,13 @@ class WitchBroomCard:
     )
 
 
+@ui_meta
 class WitchBroomSkill:
     # Skill
     no_display = True
 
 
+@ui_meta
 class YinYangOrbCard:
     # action_stage meta
     name = '阴阳玉'
@@ -879,6 +944,7 @@ class YinYangOrbCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class YinYangOrbSkill:
     # Skill
     name = '阴阳玉'
@@ -886,20 +952,23 @@ class YinYangOrbSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class YinYangOrbHandler:
     # choose_option
     choose_option_buttons = (('替换', True), ('不替换', False))
     choose_option_prompt = '你要使用【阴阳玉】替换当前的判定牌吗？'
 
 
+@ui_meta
 class YinYangOrb:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r用|G%s|r替换了她的判定牌' % (
             act.target.ui_meta.name,
             card_desc(act.card),
         )
 
 
+@ui_meta
 class SuwakoHatCard:
     # action_stage meta
     name = '青蛙帽'
@@ -914,6 +983,7 @@ class SuwakoHatCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class SuwakoHatSkill:
     # Skill
     name = '青蛙帽'
@@ -921,11 +991,13 @@ class SuwakoHatSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class SuwakoHatEffect:
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_suwakohat'
 
 
+@ui_meta
 class YoumuPhantomCard:
     # action_stage meta
     name = '半灵'
@@ -941,6 +1013,7 @@ class YoumuPhantomCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class YoumuPhantomSkill:
     # Skill
     name = '半灵'
@@ -948,11 +1021,13 @@ class YoumuPhantomSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class YoumuPhantomHeal:
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_phantom'
 
 
+@ui_meta
 class IceWingCard:
     # action_stage meta
     name = '⑨的翅膀'
@@ -969,6 +1044,7 @@ class IceWingCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class IceWingSkill:
     # Skill
     name = '⑨的翅膀'
@@ -976,14 +1052,15 @@ class IceWingSkill:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class IceWing:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r借着|G⑨的翅膀|r飞了出来，|G%s|r没起到什么作用' % (
             act.target.ui_meta.name,
             act.action.associated_card.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         tgt = act.target
         if ttags(tgt)['__icewing_se']:
             return None
@@ -992,6 +1069,7 @@ class IceWing:
         return 'thb-cv-card_icewing'
 
 
+@ui_meta
 class GrimoireCard:
     # action_stage meta
     name = '魔导书'
@@ -1014,11 +1092,12 @@ class GrimoireCard:
     effect_string = suppress_launch_card_effect_string
 
 
+@ui_meta
 class GrimoireSkill:
     # Skill
     name = '魔导书'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         t = me.tags
         if t['grimoire_tag'] >= t['turn_count']:
@@ -1041,7 +1120,7 @@ class GrimoireSkill:
 
         return False
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         assert skill.is_card(cards.GrimoireSkill)
         acards = skill.associated_cards
@@ -1051,7 +1130,7 @@ class GrimoireSkill:
             s = skill.lookup_tbl[acards[0].suit].ui_meta.name
             return (True, '发动【%s】' % s)
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         card = act.card
@@ -1063,19 +1142,21 @@ class GrimoireSkill:
             card.lookup_tbl[card.associated_cards[0].suit].ui_meta.name
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_grimoire'
 
 
+@ui_meta
 class SinsackHatAction:
     fatetell_display_name = '头套'
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '看着戴着|G头套|r的|G【%s】|r，真正的的罪袋们都兴奋了起来！' % (
             act.target.ui_meta.name,
         )
 
 
+@ui_meta
 class SinsackHat:
     # Skill
     name = '头套'
@@ -1083,6 +1164,7 @@ class SinsackHat:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class SinsackHatCard:
     # action_stage meta
     name = '头套'
@@ -1095,7 +1177,7 @@ class SinsackHatCard:
         '|DB（画师：霏茶，CV：大白）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         if not target_list:
             return (False, '请选择目标')
         t = target_list[0]

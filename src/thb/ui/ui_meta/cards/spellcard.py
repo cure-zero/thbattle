@@ -7,12 +7,13 @@ import itertools
 # -- third party --
 # -- own --
 from thb import cards
-from thb.ui.ui_meta.common import card_desc, gen_metafunc
+from thb.ui.ui_meta.common import card_desc, ui_meta_for
 
 # -- code --
-__metaclass__ = gen_metafunc(cards)
+ui_meta = ui_meta_for(cards)
 
 
+@ui_meta
 class DemolitionCard:
     # action_stage meta
     image = 'thb-card-demolition'
@@ -23,22 +24,23 @@ class DemolitionCard:
         '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         if not target_list:
             return (False, '请选择拆除目标')
 
-        target = target_list[0]
-        if not len(target.cards) + len(target.showncards) + len(target.equips) + len(target.fatetell):
+        tgt = target_list[0]
+        if not sum([len(l) for l in [tgt.cards, tgt.showncards, tgt.equips, tgt.fatetell]]):
             return (False, '这货已经没有牌了')
         else:
             return (True, '嗯，你的牌太多了')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_demolition'
 
 
+@ui_meta
 class Demolition:
-    def effect_string(act):
+    def effect_string(self, act):
         if not act.succeeded: return None
         return '|G【%s】|r卸掉了|G【%s】|r的%s。' % (
             act.source.ui_meta.name,
@@ -47,6 +49,7 @@ class Demolition:
         )
 
 
+@ui_meta
 class RejectCard:
     # action_stage meta
     name = '好人卡'
@@ -57,10 +60,10 @@ class RejectCard:
         '|DB（画师：霏茶，CV：VV）'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (False, '你不能主动出好人卡')
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r为|G【%s】|r受到的|G%s|r使用了|G%s|r。' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
@@ -68,10 +71,10 @@ class RejectCard:
             act.card.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_reject'
 
-    def has_reject_card(p):
+    def has_reject_card(self, p):
         from thb.cards import RejectCard
         if any([c.is_card(RejectCard) for c in itertools.chain(p.cards, p.showncards)]):
             return True
@@ -83,9 +86,10 @@ class RejectCard:
         return False
 
 
+@ui_meta
 class RejectHandler:
     # choose_card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         c = act.target_act.associated_card
         name = c.ui_meta.name
 
@@ -100,6 +104,7 @@ class RejectHandler:
             return (False, '请选择一张好人卡（%s)' % s)
 
 
+@ui_meta
 class SealingArrayCard:
     # action_stage meta
     name = '封魔阵'
@@ -113,7 +118,7 @@ class SealingArrayCard:
         '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         if len(target_list) != 1:
             return (False, '请选择封魔阵的目标')
         t = target_list[0]
@@ -122,12 +127,13 @@ class SealingArrayCard:
 
         return (True, '画个圈圈诅咒你！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_sealarray'
 
 
+@ui_meta
 class SealingArray:
-    def effect_string(act):
+    def effect_string(self, act):
         tgt = act.target
         if act.succeeded:
             return '|G【%s】|r被困在了封魔阵中' % tgt.ui_meta.name
@@ -135,6 +141,7 @@ class SealingArray:
             return '封魔阵没有布置完善，|G【%s】|r侥幸逃了出来' % tgt.ui_meta.name
 
 
+@ui_meta
 class FrozenFrogCard:
     # action_stage meta
     name = '冻青蛙'
@@ -148,7 +155,7 @@ class FrozenFrogCard:
         '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         if len(target_list) != 1:
             return (False, '请选择冻青蛙的目标')
         t = target_list[0]
@@ -157,12 +164,13 @@ class FrozenFrogCard:
 
         return (True, '伸手党什么的，冻住就好了！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_frozenfrog'
 
 
+@ui_meta
 class FrozenFrog:
-    def effect_string(act):
+    def effect_string(self, act):
         tgt = act.target
         if act.succeeded:
             return '|G【%s】|r被冻住了……' % tgt.ui_meta.name
@@ -170,6 +178,7 @@ class FrozenFrog:
             return '幻想乡今天大晴，|G【%s】|r没有被冻住~' % tgt.ui_meta.name
 
 
+@ui_meta
 class NazrinRodCard:
     # action_stage meta
     name = '寻龙尺'
@@ -181,13 +190,14 @@ class NazrinRodCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (True, '看看能找到什么好东西~')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_nazrinrod'
 
 
+@ui_meta
 class SinsackCard:
     # action_stage meta
     name = '罪袋'
@@ -203,25 +213,28 @@ class SinsackCard:
         '|DB（画师：霏茶，CV：VV/大白）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (True, '别来找我！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_sinsack'
 
 
+@ui_meta
 class Sinsack:
-    def effect_string(act):
+    def effect_string(self, act):
         tgt = act.target
         if act.succeeded:
             return '罪袋终于找到了机会，将|G【%s】|r推倒了…' % tgt.ui_meta.name
 
 
+@ui_meta
 class SinsackDamage:
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_sinsack_effect'
 
 
+@ui_meta
 class YukariDimensionCard:
     # action_stage meta
     image = 'thb-card-yukaridimension'
@@ -233,7 +246,7 @@ class YukariDimensionCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         if not target_list:
             return (False, '请选择目标')
 
@@ -243,12 +256,13 @@ class YukariDimensionCard:
         else:
             return (True, '请把胖次给我！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_dimension'
 
 
+@ui_meta
 class YukariDimension:
-    def effect_string(act):
+    def effect_string(self, act):
         src, tgt = act.source, act.target
         if act.succeeded:
             return '|G【%s】|r透过隙间拿走了|G【%s】|r的1张牌' % (
@@ -257,6 +271,7 @@ class YukariDimension:
             )
 
 
+@ui_meta
 class DuelCard:
     # action_stage meta
     image = 'thb-card-duel'
@@ -267,16 +282,17 @@ class DuelCard:
         '|DB（画师：霏茶，CV：小羽）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         if not target_list:
             return (False, '请选择弹幕战的目标')
 
         return (True, '来，战个痛快！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_duel'
 
 
+@ui_meta
 class MapCannonCard:
     image = 'thb-card-mapcannon'
     name = '地图炮'
@@ -287,13 +303,14 @@ class MapCannonCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (True, '一个都不能跑！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_mapcannon'
 
 
+@ui_meta
 class DemonParadeCard:
     image = 'thb-card-demonparade'
     name = '百鬼夜行'
@@ -304,13 +321,14 @@ class DemonParadeCard:
         '|DB（画师：霏茶，CV：小羽）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (True, '一只鬼，两只鬼，三只鬼……')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_demonparade'
 
 
+@ui_meta
 class FeastCard:
     # action_stage meta
     image = 'thb-card-feast'
@@ -322,10 +340,10 @@ class FeastCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (True, '开宴啦~~')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice([
             'thb-cv-card_feast1',
             'thb-cv-card_feast2',
@@ -333,6 +351,7 @@ class FeastCard:
         ])
 
 
+@ui_meta
 class HarvestCard:
     # action_stage meta
     image = 'thb-card-harvest'
@@ -344,15 +363,16 @@ class HarvestCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (True, '麻薯会有的，节操是没有的！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_harvest'
 
 
+@ui_meta
 class HarvestEffect:
-    def effect_string(act):
+    def effect_string(self, act):
         if not act.succeeded: return None
         tgt = act.target
         c = act.card
@@ -362,6 +382,7 @@ class HarvestEffect:
         )
 
 
+@ui_meta
 class DollControlCard:
     # action_stage meta
     name = '人形操控'
@@ -373,7 +394,7 @@ class DollControlCard:
     )
     custom_ray = True
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         n = len(tl)
         if n == 0:
             return (False, '请选择被控者')
@@ -394,24 +415,26 @@ class DollControlCard:
                 return (False, '被控者无法向目标出【弹幕】！')
             return (True, '乖，听话！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_dollcontrol'
 
 
+@ui_meta
 class DollControl:
     # choose card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '那好吧…')
         else:
             return (False, '请出【弹幕】（否则你的武器会被拿走）')
 
-    def ray(act):
+    def ray(self, act):
         src = act.source
         tl = act.target_list
         return [(src, tl[0]), (tl[0], tl[1])]
 
 
+@ui_meta
 class DonationBoxCard:
     # action_stage meta
     name = '赛钱箱'
@@ -423,7 +446,7 @@ class DonationBoxCard:
         '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         n = len(tl)
         if not n:
             return (False, '请选择1-2名玩家')
@@ -434,13 +457,14 @@ class DonationBoxCard:
 
         return (True, '纳奉！纳奉！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-card_donationbox'
 
 
+@ui_meta
 class DonationBoxEffect:
     # choose card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '这是抢劫啊！')
         else:

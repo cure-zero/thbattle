@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from thb import cards, characters
-from thb.ui.ui_meta.common import gen_metafunc, my_turn
+from thb.ui.ui_meta.common import ui_meta_for, my_turn
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.parsee)
+ui_meta = ui_meta_for(characters.parsee)
 
 
+@ui_meta
 class Parsee:
     # Character
     name        = '水桥帕露西'
@@ -22,20 +23,21 @@ class Parsee:
     miss_sound_effect = 'thb-cv-parsee_miss'
 
 
+@ui_meta
 class Envy:
     # Skill
     name = '嫉妒'
     description = '你可以将一张黑色牌当|G城管执法|r使用；每当距离1的其他角色的方块牌被你使用的|G城管执法|r弃置而置入弃牌堆后，你可以获得之。'
 
-    def clickable(game):
-        me = game.me
+    def clickable(self, g):
+        me = g.me
 
         if my_turn() and (me.cards or me.showncards or me.equips):
             return True
 
         return False
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         assert skill.is_card(characters.parsee.Envy)
         cl = skill.associated_cards
@@ -47,7 +49,7 @@ class Envy:
                 return (False, '请选择一张黑色的牌！')
             return cards.DemolitionCard.ui_meta.is_action_valid(g, [skill], target_list)
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         card = act.card
@@ -60,19 +62,21 @@ class Envy:
         )
         return s
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-parsee_envy'
 
 
+@ui_meta
 class EnvyHandler:
     choose_option_buttons = (('获得', True), ('不获得', False))
 
-    def choose_option_prompt(act):
+    def choose_option_prompt(self, act):
         return '你要获得【%s】吗？' % act.card.ui_meta.name
 
 
+@ui_meta
 class EnvyRecycleAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r：“喂喂这么好的牌扔掉不觉得可惜么？不要嫉妒我。”' % (
             act.source.ui_meta.name
         )

@@ -7,25 +7,26 @@ import random
 # -- own --
 from thb import actions, cards, characters
 from thb.actions import ttags
-from thb.ui.ui_meta.common import build_handcard, gen_metafunc, my_turn
+from thb.ui.ui_meta.common import build_handcard, ui_meta_for, my_turn
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.nitori)
+ui_meta = ui_meta_for(characters.nitori)
 
 
+@ui_meta
 class Dismantle:
     # Skill
     name = '拆解'
     description = '出牌阶段限一次，你可以|B重铸|r一名其他角色装备区里的一张装备牌，然后该角色摸一张牌。'
 
-    def clickable(g):
+    def clickable(self, g):
         if ttags(g.me)['dismantle']:
             return False
 
         return my_turn()
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         if cl[0].associated_cards:
             return (False, '请不要选择牌！')
 
@@ -34,20 +35,21 @@ class Dismantle:
 
         return (True, '拆解！')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice([
             'thb-cv-nitori_dismantle',
             'thb-cv-nitori_dismantle_other',
         ])
 
 
+@ui_meta
 class Craftsman:
     name = '匠心'
     description = '你可以将你的全部手牌（至少1张）当做任意的一张基本牌使用或打出。出牌阶段内使用时，一回合限一次。'
 
     params_ui = 'UICraftsmanCardSelection'
 
-    def clickable(g):
+    def clickable(self, g):
         try:
             me = g.me
             if not me.cards and not me.showncards:
@@ -61,7 +63,7 @@ class Craftsman:
         except (IndexError, AttributeError):
             return False
 
-    def is_complete(g, cl):
+    def is_complete(self, g, cl):
         skill = cl[0]
         assert skill.is_card(characters.nitori.Craftsman)
         if set(skill.associated_cards) != set(g.me.cards) | set(g.me.showncards):
@@ -69,7 +71,7 @@ class Craftsman:
 
         return (True, '到今天为止我还没有女朋友……')
 
-    def is_action_valid(g, cl, target_list, is_complete=is_complete):
+    def is_action_valid(self, g, cl, target_list, is_complete=is_complete):
         skill = cl[0]
         assert skill.is_card(characters.nitori.Craftsman)
         rst, reason = is_complete(g, cl)
@@ -78,7 +80,7 @@ class Craftsman:
         else:
             return skill.treat_as.ui_meta.is_action_valid(g, [skill], target_list)
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.effect_string
         source = act.source
         s = '|G【%s】|r发动了|G匠心|r。' % (
@@ -86,7 +88,7 @@ class Craftsman:
         )
         return s
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         g = act.game
         if isinstance(act, actions.LaunchCard):
             if act.card.is_card(cards.AttackCard):
@@ -107,6 +109,7 @@ class Craftsman:
         return l and 'thb-cv-nitori_craftsman%s' % random.choice(l)
 
 
+@ui_meta
 class Nitori:
     # Character
     name        = '河城荷取'

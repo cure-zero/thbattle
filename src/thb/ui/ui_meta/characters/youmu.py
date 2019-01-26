@@ -5,13 +5,14 @@ from __future__ import absolute_import
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, passive_clickable, passive_is_action_valid
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.youmu)
+ui_meta = ui_meta_for(characters.youmu)
 
 
+@ui_meta
 class Youmu:
     # Character
     name        = '魂魄妖梦'
@@ -24,6 +25,7 @@ class Youmu:
     miss_sound_effect = 'thb-cv-youmu_miss'
 
 
+@ui_meta
 class Mijincihangzhan:
     # Skill
     name = '迷津慈航斩'
@@ -33,19 +35,21 @@ class Mijincihangzhan:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class MijincihangzhanAttack:
-    def effect_string_apply(act):
+    def effect_string_apply(self, act):
         src = act.source
         return '|G【%s】|r在弹幕中注入了妖力，弹幕形成了一个巨大的光刃，怕是不能轻易地闪开的！' % (
             src.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-youmu_mjchz'
 
 
+@ui_meta
 class NitoryuuWearEquipmentAction:
-    def sound_effect(act):
+    def sound_effect(self, act):
         card = act.card
         tgt = act.target
         equips = tgt.equips
@@ -54,6 +58,7 @@ class NitoryuuWearEquipmentAction:
             return 'thb-cv-youmu_nitoryuu'
 
 
+@ui_meta
 class Nitoryuu:
     # Skill
     name = '二刀流'
@@ -64,7 +69,7 @@ class Nitoryuu:
     clickable = passive_clickable
     is_action_valid = passive_is_action_valid
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r弃置了自己的一把武器' % (
             act.target.ui_meta.name,
         )

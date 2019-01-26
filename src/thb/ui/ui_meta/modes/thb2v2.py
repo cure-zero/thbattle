@@ -7,13 +7,14 @@ from collections import OrderedDict
 # -- third party --
 # -- own --
 from thb import thb2v2
-from thb.ui.ui_meta.common import gen_metafunc
+from thb.ui.ui_meta.common import ui_meta_for
 
 
 # -- code --
-__metaclass__ = gen_metafunc(thb2v2)
+ui_meta = ui_meta_for(thb2v2)
 
 
+@ui_meta
 class THBattle2v2:
     name = '2v2模式'
     logo = 'thb-modelogo-2v2'
@@ -52,7 +53,7 @@ class THBattle2v2:
         }),
     ))
 
-    def ui_class():
+    def ui_class(self):
         from thb.ui.view import THBattle2v2UI
         return THBattle2v2UI
 
@@ -73,6 +74,7 @@ class THBattle2v2:
     del T
 
 
+@ui_meta
 class HeritageHandler:
     # choose_option
     choose_option_buttons = (('获取队友的所有牌', 'inherit'), ('摸两张牌', 'draw'))

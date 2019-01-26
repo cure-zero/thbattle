@@ -3,68 +3,40 @@
 from game.autoenv import Game
 G = Game.getgame
 
-from types import FunctionType
-from collections import OrderedDict
+import sys
 
-metadata = OrderedDict()
+UI_META = {}
 
 
-class UIMetaAccesser(object):
-    def __init__(self, obj, cls):
-        self.obj = obj
+class UIMetaAccessor(object):
+    def __init__(self, cls):
         self.cls = cls
+        self.mro = cls.mro()
 
     def __getattr__(self, name):
-        cls = self.cls
-        if hasattr(cls, '_is_mixedclass'):
-            l = list(cls.__bases__)
-        else:
-            l = [cls]
-
-        while l:
-            c = l.pop(0)
+        for cls in self.mro:
             try:
-                val = metadata[c][name]
-
-                if isinstance(val, FunctionType) and getattr(val, '_is_property', False):
-                    val = val(self.obj or self.cls)
-
+                val = getattr(UI_META[cls], name)
                 return val
-
-            except KeyError:
+            except AttributeError:
                 pass
-            b = c.__base__
-            if b is not object: l.append(b)
+
         raise AttributeError('%s.%s' % (self.cls.__name__, name))
 
 
-class UIMetaDescriptor(object):
-    def __get__(self, obj, cls):
-        return UIMetaAccesser(obj, cls)
-
-
-def gen_metafunc(_for):
-    def metafunc(clsname, bases, _dict):
-        meta_for = getattr(_for, clsname)
-        meta_for.ui_meta = UIMetaDescriptor()
-        if meta_for in metadata:
-            raise Exception('%s ui_meta redefinition!' % meta_for)
-
-        metadata[meta_for] = _dict
-
-        return _dict
-
-    return metafunc
-
-
-def meta_property(f):
-    f._is_property = True
-    return f
+def ui_meta_for(for_module):
+    def ui_meta(cls):
+        name = cls.__name__
+        if name in UI_META:
+            raise Exception('%s ui_meta redefinition!' % name)
+        for_cls = getattr(for_module, name)
+        for_cls.ui_meta = UIMetaAccessor(for_cls)
+        UI_META[for_cls] = cls()
+        return cls
+    return ui_meta
 
 
 # -----BEGIN COMMON FUNCTIONS-----
-
-
 def my_turn():
     g = G()
 
@@ -89,11 +61,11 @@ def limit1_skill_used(tag):
     return t[tag] >= t['turn_count']
 
 
-def passive_clickable(game):
+def passive_clickable(self, g):
     return False
 
 
-def passive_is_action_valid(g, cl, target_list):
+def passive_is_action_valid(self, g, cl, target_list):
     return (False, 'BUG!')
 
 
@@ -128,12 +100,6 @@ def build_handcard(cardcls, p=None):
     c = cardcls()
     c.move_to(cl)
     return c
-
-
-def current_initiator():
-    g = G()
-    trans, ilet = g._my_user_input
-    return ilet and ilet.initiator
 
 
 def char_desc(ch):

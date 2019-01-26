@@ -22,7 +22,8 @@ from thb.characters.baseclasses import mixin_character
 from thb.common import CharChoice, PlayerIdentity, build_choices
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from thb.item import ImperialIdentity
-from utils.misc import BatchList, Enum, classmix, first
+from utils.misc import BatchList, classmix, first
+from enum import IntEnum
 
 
 # -- code --
@@ -323,12 +324,12 @@ class ExtraCardSlot(Skill):
 
 class Identity(PlayerIdentity):
     # 城管 BOSS 道中 黑幕
-    class TYPE(Enum):
-        HIDDEN = 0
-        ATTACKER = 1
-        BOSS = 4
+    class TYPE(IntEnum):
+        HIDDEN     = 0
+        ATTACKER   = 1
+        BOSS       = 4
         ACCOMPLICE = 2
-        CURTAIN = 3
+        CURTAIN    = 3
 
 
 class ChooseBossSkillAction(GenericAction):

@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, passive_clickable, passive_is_action_valid
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.sp_flandre)
+ui_meta = ui_meta_for(characters.sp_flandre)
 
 
+@ui_meta
 class SpFlandre:
     # Character
     name        = 'SP芙兰朵露'
@@ -22,6 +23,7 @@ class SpFlandre:
     miss_sound_effect = 'thb-cv-spflandre_miss'
 
 
+@ui_meta
 class DestructionImpulse:
     # Skill
     name = '破坏冲动'
@@ -31,32 +33,35 @@ class DestructionImpulse:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class DestructionImpulseAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r：“|G【%s】|r来陪我玩好不好？”' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-spflandre_destructionimpulse'
 
 
+@ui_meta
 class DestructionImpulseHandler:
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if cards:
             return (False, '请不要选择牌！')
 
         return (True, '玩坏你哦')
 
     # choose_players
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '请选择1名距离最近的玩家，对其造成一点伤害')
 
         return (True, '玩坏你哦')
 
 
+@ui_meta
 class FourOfAKind:
     # Skill
     name = '四重存在'
@@ -66,17 +71,19 @@ class FourOfAKind:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class FourOfAKindHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【四重存在】吗？'
 
 
+@ui_meta
 class FourOfAKindAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r发动了|G四重存在|r，防止了此次伤害。' % (
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-spflandre_fourofakind'

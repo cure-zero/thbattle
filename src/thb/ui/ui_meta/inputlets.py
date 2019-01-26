@@ -8,13 +8,13 @@ import logging
 # -- own --
 from game.autoenv import Game
 from thb import actions as thbactions, cards as thbcards, inputlets
-from thb.ui.ui_meta.common import gen_metafunc
+from thb.ui.ui_meta.common import ui_meta_for
 
 # -- code --
 log = logging.getLogger('Inputlets UI Meta')
 
 # -----BEGIN INPUTLETS UI META-----
-__metaclass__ = gen_metafunc(inputlets)
+ui_meta = ui_meta_for(inputlets)
 
 
 class ActionDisplayResult(Exception):
@@ -151,7 +151,7 @@ def actv_handle_target_selection(g, stage, card, players):
 
     try:
         rst, reason = card.ui_meta.is_action_valid(g, [card], target_list)
-    except Exception as e:
+    except Exception:
         log.exception('card.ui_meta.is_action_valid error')
         raise ActionDisplayResult(False, '[card.ui_meta.is_action_valid错误]', False, [], [])
 
@@ -182,9 +182,10 @@ def action_disp_func(f):
     return wrapper
 
 
+@ui_meta
 class ActionInputlet:
     @action_disp_func
-    def passive_action_disp(ilet, skills, rawcards, params, players):
+    def passive_action_disp(self, ilet, skills, rawcards, params, players):
         g = ilet.initiator.game
 
         usage = getattr(ilet.initiator, 'card_usage', 'none')
@@ -207,7 +208,7 @@ class ActionInputlet:
 
         raise ActionDisplayResult(True, prompt_target or prompt_card, plsel, disables, players)
 
-    def passive_action_recommend(ilet):
+    def passive_action_recommend(self, ilet):
         g = ilet.initiator.game
 
         if not ilet.categories: return
@@ -221,7 +222,7 @@ class ActionInputlet:
             return c
 
     @action_disp_func
-    def active_action_disp(ilet, skills, rawcards, params, players):
+    def active_action_disp(self, ilet, skills, rawcards, params, players):
         g = ilet.initiator.game
 
         stage = ilet.initiator

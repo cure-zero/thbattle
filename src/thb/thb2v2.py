@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
 
 # -- stdlib --
 from collections import defaultdict
@@ -9,6 +8,7 @@ import random
 
 # -- third party --
 # -- own --
+from enum import IntEnum
 from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, get_seed_for
 from game.autoenv import user_input
 from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards, GenericAction
@@ -17,7 +17,7 @@ from thb.actions import action_eventhandlers, migrate_cards
 from thb.characters.baseclasses import mixin_character
 from thb.common import CharChoice, PlayerIdentity, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
-from utils.misc import BatchList, Enum, partition
+from utils.misc import BatchList, partition
 import settings
 
 
@@ -127,10 +127,10 @@ class ExtraCardHandler(EventHandler):
 
 
 class Identity(PlayerIdentity):
-    class TYPE(Enum):
-        HIDDEN = 0
+    class TYPE(IntEnum):
+        HIDDEN  = 0
         HAKUREI = 1
-        MORIYA = 2
+        MORIYA  = 2
 
 
 class THBattle2v2Bootstrap(GenericAction):

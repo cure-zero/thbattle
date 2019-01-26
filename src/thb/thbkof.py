@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
 
 # -- stdlib --
 from collections import defaultdict
@@ -8,6 +7,7 @@ import logging
 
 # -- third party --
 # -- own --
+from enum import IntEnum
 from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, list_shuffle
 from game.autoenv import user_input
 from thb.actions import DistributeCards, GenericAction, PlayerDeath, PlayerTurn, RevealIdentity
@@ -15,7 +15,7 @@ from thb.actions import action_eventhandlers
 from thb.characters.baseclasses import Character, mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
-from utils import Enum, first
+from utils import first
 
 
 # -- code --
@@ -94,10 +94,10 @@ class KOFCharacterSwitchHandler(EventHandler):
 
 
 class Identity(PlayerIdentity):
-    class TYPE(Enum):
-        HIDDEN = 0
+    class TYPE(IntEnum):
+        HIDDEN  = 0
         HAKUREI = 1
-        MORIYA = 2
+        MORIYA  = 2
 
 
 class THBattleKOFBootstrap(GenericAction):

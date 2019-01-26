@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.tenshi)
+ui_meta = ui_meta_for(characters.tenshi)
 
 
+@ui_meta
 class Masochist:
     # Skill
     name = '抖Ｍ'
@@ -20,35 +21,38 @@ class Masochist:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class MasochistHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【抖Ｍ】吗？'
 
 
+@ui_meta
 class MasochistAction:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '给你牌~')
         else:
             return (False, '请选择你要给出的牌（否则给自己）')
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '请选择1名玩家')
 
         return (True, '给你牌~')
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '不过|G【%s】|r好像很享受的样子…' % (
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-tenshi_masochist'
 
 
+@ui_meta
 class ScarletPerception:
     # Skill
     name = '绯想'
@@ -63,17 +67,19 @@ class ScarletPerception:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ScarletPerceptionAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r获得了%s' % (
             act.source.ui_meta.name,
             card_desc(act.card)
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-tenshi_sp'
 
 
+@ui_meta
 class Tenshi:
     # Character
     name        = '比那名居天子'

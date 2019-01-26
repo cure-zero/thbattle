@@ -5,13 +5,14 @@ from __future__ import absolute_import
 # -- third party --
 # -- own --
 from thb import thbnewbie
-from thb.ui.ui_meta.common import gen_metafunc
+from thb.ui.ui_meta.common import ui_meta_for
 
 
 # -- code --
-__metaclass__ = gen_metafunc(thbnewbie)
+ui_meta = ui_meta_for(thbnewbie)
 
 
+@ui_meta
 class THBattleNewbie:
     name = '琪露诺的完美THB教室'
     logo = 'thb-modelogo-newbie'
@@ -25,7 +26,7 @@ class THBattleNewbie:
         '\n'
     ).strip()
 
-    def ui_class():
+    def ui_class(self):
         from thb.ui.view import THBattleNewbieUI
         return THBattleNewbieUI
 

@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from thb import cards, characters
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, limit1_skill_used, my_turn
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, limit1_skill_used, my_turn
 from thb.ui.ui_meta.common import passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.kokoro)
+ui_meta = ui_meta_for(characters.kokoro)
 
 
+@ui_meta
 class Kokoro:
     # Character
     name        = '秦心'
@@ -23,6 +24,7 @@ class Kokoro:
     miss_sound_effect = 'thb-cv-kokoro_miss'
 
 
+@ui_meta
 class KokoroKOF:
     # Character
     name        = '秦心'
@@ -37,6 +39,7 @@ class KokoroKOF:
     notes = '|RKOF修正角色|r'
 
 
+@ui_meta
 class HopeMask:
     # Skill
     name = '希望之面'
@@ -46,6 +49,7 @@ class HopeMask:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class HopeMaskKOF:
     # Skill
     name = '希望之面'
@@ -55,17 +59,19 @@ class HopeMaskKOF:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class BaseHopeMaskHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【希望之面】吗？'
 
 
+@ui_meta
 class BaseHopeMaskAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r挑选面具中……' % (act.source.ui_meta.name)
 
-    def effect_string(act):
+    def effect_string(self, act):
         if not len(act.acquire):
             return None
 
@@ -73,24 +79,26 @@ class BaseHopeMaskAction:
             act.source.ui_meta.name, card_desc(act.acquire),
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-kokoro_hopemask'
 
 
+@ui_meta
 class BaseDarkNohAction:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '真坑！')
         else:
             return (False, '请弃置%d张手牌（不能包含获得的那一张）' % act.n)
 
 
+@ui_meta
 class BaseDarkNoh:
     # Skill
     name = '暗黑能乐'
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         cl = skill.associated_cards
         if len(cl) != 1 or cl[0].suit not in (cards.Card.SPADE, cards.Card.CLUB):
@@ -102,7 +110,7 @@ class BaseDarkNoh:
 
         return (True, '发动暗黑能乐')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         card = act.card
@@ -116,14 +124,15 @@ class BaseDarkNoh:
             )
         ]
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-kokoro_darknoh'
 
 
+@ui_meta
 class DarkNoh:
     description = '出牌阶段限一次，你可以将一张黑色牌置于体力值不小于你的其他角色的明牌区，然后其须弃置除获得的牌以外的手牌，直到手牌数与体力值相等。'
 
-    def clickable(g):
+    def clickable(self, g):
         me = g.me
         if limit1_skill_used('darknoh_tag'):
             return False
@@ -137,10 +146,11 @@ class DarkNoh:
         return False
 
 
+@ui_meta
 class DarkNohKOF:
     description = '|B限定技|r，出牌阶段，你可以将一张黑色牌置于体力值不小于你的其他角色的明牌区，然后其须弃置除获得的牌以外的手牌，直到手牌数与体力值相等。'
 
-    def clickable(g):
+    def clickable(self, g):
         me = g.me
         if me.tags['darknoh_tag'] > 0:
             return False

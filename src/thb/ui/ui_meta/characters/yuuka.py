@@ -4,19 +4,20 @@
 # -- third party --
 # -- own --
 from thb import cards, characters
-from thb.ui.ui_meta.common import build_handcard, gen_metafunc, my_turn, passive_clickable
+from thb.ui.ui_meta.common import build_handcard, ui_meta_for, my_turn, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.yuuka)
+ui_meta = ui_meta_for(characters.yuuka)
 
 
+@ui_meta
 class ReversedScales:
     # Skill
     name = '逆鳞'
     description = '每当你成为其他角色使用的单体符卡效果目标时，你可以将其视为|G弹幕战|r效果；你的回合外，你可以将一张手牌当做|G弹幕|r使用或打出。'
 
-    def clickable(g):
+    def clickable(self, g):
         me = g.me
         if my_turn():
             return False
@@ -32,7 +33,7 @@ class ReversedScales:
 
         return False
 
-    def is_complete(g, cl):
+    def is_complete(self, g, cl):
         skill = cl[0]
         acards = skill.associated_cards
         if len(acards) != 1:
@@ -40,7 +41,7 @@ class ReversedScales:
 
         return (True, '反正这条也看不到，偷个懒~~~')
 
-    def is_action_valid(g, cl, target_list, is_complete=is_complete):
+    def is_action_valid(self, g, cl, target_list, is_complete=is_complete):
         skill = cl[0]
         rst, reason = is_complete(g, cl)
         if not rst:
@@ -48,17 +49,18 @@ class ReversedScales:
         else:
             return cards.AttackCard.ui_meta.is_action_valid(g, [skill], target_list)
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return '|G【%s】|r用和善的眼神看了|G【%s】|r一眼。' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-yuuka_flowerqueen'
 
 
+@ui_meta
 class Sadist:
     # Skill
     name = '施虐'
@@ -68,6 +70,7 @@ class Sadist:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class SadistKOF:
     # Skill
     name = '施虐'
@@ -77,20 +80,22 @@ class SadistKOF:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ReversedScalesAction:
-    def effect_string_apply(act):
+    def effect_string_apply(self, act):
         return (
             '|G【%s】|r：“来正面上我啊！”'
         ) % (
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-yuuka_rs'
 
 
+@ui_meta
 class SadistAction:
-    def effect_string_apply(act):
+    def effect_string_apply(self, act):
         return (
             '|G【%s】|r又看了看|G【%s】|r：“你也要尝试一下么！”'
         ) % (
@@ -98,12 +103,13 @@ class SadistAction:
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-yuuka_sadist'
 
 
+@ui_meta
 class SadistKOFDamageAction:
-    def effect_string_apply(act):
+    def effect_string_apply(self, act):
         return (
             '|G【%s】|r又看了看|G【%s】|r：“你也要尝试一下么！”'
         ) % (
@@ -111,31 +117,34 @@ class SadistKOFDamageAction:
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-yuuka_sadist'
 
 
+@ui_meta
 class SadistHandler:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '发动【施虐】')
         else:
             return (False, '【施虐】：请弃置一张牌')
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '【施虐】：请选择1名玩家')
 
         return (True, '发动【施虐】')
 
 
+@ui_meta
 class ReversedScalesHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【逆鳞】吗？'
 
 
+@ui_meta
 class Yuuka:
     # Character
     name        = '风见幽香'
@@ -148,6 +157,7 @@ class Yuuka:
     miss_sound_effect = 'thb-cv-yuuka_miss'
 
 
+@ui_meta
 class YuukaKOF:
     # Character
     name        = '风见幽香'

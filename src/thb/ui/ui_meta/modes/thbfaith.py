@@ -5,13 +5,14 @@ from __future__ import absolute_import
 # -- third party --
 # -- own --
 from thb import thbfaith
-from thb.ui.ui_meta.common import gen_metafunc
+from thb.ui.ui_meta.common import ui_meta_for
 
 
 # -- code --
-__metaclass__ = gen_metafunc(thbfaith)
+ui_meta = ui_meta_for(thbfaith)
 
 
+@ui_meta
 class THBattleFaith:
     name = '信仰争夺战'
     logo = 'thb-modelogo-faith'
@@ -38,7 +39,7 @@ class THBattleFaith:
         },
     }
 
-    def ui_class():
+    def ui_class(self):
         from thb.ui.view import THBattleFaithUI
         return THBattleFaithUI
 
@@ -59,6 +60,7 @@ class THBattleFaith:
     del T
 
 
+@ui_meta
 class DeathHandler:  # noqa
     # choose_option
     choose_option_buttons = (('全部换走', True), ('不用换', False))

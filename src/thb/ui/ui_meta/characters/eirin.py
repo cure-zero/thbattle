@@ -4,18 +4,19 @@
 # -- third party --
 # -- own --
 from thb import actions, cards, characters
-from thb.ui.ui_meta.common import gen_metafunc, limit1_skill_used
+from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.eirin)
+ui_meta = ui_meta_for(characters.eirin)
 
 
+@ui_meta
 class FirstAid:
     # Skill
     name = '急救'
     description = '你可以将一张红色牌当|G麻薯|r对濒死角色使用。'
 
-    def clickable(game):
+    def clickable(self, game):
         try:
             act = game.action_stack[-1]
         except IndexError:
@@ -26,7 +27,7 @@ class FirstAid:
 
         return False
 
-    def is_complete(g, cl):
+    def is_complete(self, g, cl):
         skill = cl[0]
         acards = skill.associated_cards
         C = cards.Card
@@ -35,16 +36,17 @@ class FirstAid:
 
         return (True, 'k看不到@#@#￥@#￥')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-eirin_firstaid'
 
 
+@ui_meta
 class Medic:
     # Skill
     name = '医者'
     description = '出牌阶段限一次，你可以弃置一张手牌令一名已受伤的角色回复1点体力。'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
 
         if limit1_skill_used('medic_tag'):
@@ -60,7 +62,7 @@ class Medic:
 
         return False
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         skill = cl[0]
         me = g.me
         cl = skill.associated_cards
@@ -74,7 +76,7 @@ class Medic:
             return (False, '这只精神着呢，不用管她')
         return (True, '少女，身体要紧啊！')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return (
             '|G【%s】|r用一张|G%s|r做药引做了一贴膏药，'
@@ -85,10 +87,11 @@ class Medic:
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-eirin_medic'
 
 
+@ui_meta
 class Eirin:
     # Character
     name        = '八意永琳'

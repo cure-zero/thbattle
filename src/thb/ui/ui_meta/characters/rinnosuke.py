@@ -6,10 +6,10 @@ import time
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.ui.ui_meta.common import gen_metafunc, passive_clickable, passive_is_action_valid
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.rinnosuke)
+ui_meta = ui_meta_for(characters.rinnosuke)
 
 
 class Netoru:
@@ -17,7 +17,7 @@ class Netoru:
     name = '寝取'
     description = '出牌阶段限一次，你可以弃置两张手牌并指定一名已受伤的其他角色，你与其各回复1点体力'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         try:
             if me.tags['netoru_tag'] >= me.tags['turn_count']:
@@ -29,7 +29,7 @@ class Netoru:
             pass
         return False
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         skill = cl[0]
         cl = skill.associated_cards
         me = g.me
@@ -47,17 +47,18 @@ class Netoru:
         else:
             return (True, '少女，做个好梦~')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return '|G【%s】|r一改平日的猥琐形象，竟然用花言巧语将|G【%s】|r骗去啪啪啪了！' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-rinnosuke_nitoru'
 
 
+@ui_meta
 class Psychopath:
     # Skill
     name = '变态'
@@ -67,8 +68,9 @@ class Psychopath:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class PsychopathDrawCards:
-    def effect_string(act):
+    def effect_string(self, act):
         return (
             '|G【%s】|r满脸猥琐地将装备脱掉，结果众人抄起了%d张牌糊在了他身上。'
         ) % (
@@ -76,7 +78,7 @@ class PsychopathDrawCards:
             act.amount,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         tgt = act.target
         t = tgt.tags
         if time.time() - t['__psycopath_lastplay'] > 10:
@@ -84,6 +86,7 @@ class PsychopathDrawCards:
             return 'thb-cv-rinnosuke_psycopath'
 
 
+@ui_meta
 class Rinnosuke:
     # Character
     name        = '森近霖之助'

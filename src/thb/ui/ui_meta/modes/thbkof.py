@@ -5,13 +5,14 @@ from __future__ import absolute_import
 # -- third party --
 # -- own --
 from thb import thbkof
-from thb.ui.ui_meta.common import gen_metafunc
+from thb.ui.ui_meta.common import ui_meta_for
 
 
 # -- code --
-__metaclass__ = gen_metafunc(thbkof)
+ui_meta = ui_meta_for(thbkof)
 
 
+@ui_meta
 class THBattleKOF:
     name = 'KOF模式'
     logo = 'thb-modelogo-kof'
@@ -28,7 +29,7 @@ class THBattleKOF:
     params_disp = {
     }
 
-    def ui_class():
+    def ui_class(self):
         from thb.ui.view import THBattleKOFUI
         return THBattleKOFUI
 

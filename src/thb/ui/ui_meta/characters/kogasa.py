@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from thb import actions, cards, characters
-from thb.ui.ui_meta.common import gen_metafunc, passive_clickable, passive_is_action_valid
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.kogasa)
+ui_meta = ui_meta_for(characters.kogasa)
 
 
+@ui_meta
 class Jolly:
     # Skill
     name = '愉快'
@@ -19,39 +20,42 @@ class Jolly:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class JollyDrawCard:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r高兴地让|G【%s】|r摸了%d张牌~' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
             act.amount,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-kogasa_jolly'
 
 
+@ui_meta
 class JollyHandler:
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if cards:
             return (False, '请不要选择牌！')
 
         return (True, '(～￣▽￣)～')
 
     # choose_players
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '请选择1名玩家，该玩家摸一张牌')
 
         return (True, '(～￣▽￣)～')
 
 
+@ui_meta
 class Surprise:
     # Skill
     name = '惊吓'
     description = '出牌阶段限一次，你可以选择一张手牌并指定一名其他角色，该角色选择一种花色后，获得此牌并明置之。若此牌与其选择的花色不同，你对其造成1点伤害。'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
 
         if me.tags.get('surprise_tag', 0) >= me.tags.get('turn_count', 0):
@@ -67,7 +71,7 @@ class Surprise:
 
         return False
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         if len(tl) != 1:
             return (False, '请选择惊吓对象…')
 
@@ -82,7 +86,7 @@ class Surprise:
         # return (True, u'(´・ω・`)')
         return (True, '\ ( °▽ °) /')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return (
             '|G【%s】|r突然出现在|G【%s】|r面前，伞上'
@@ -93,10 +97,11 @@ class Surprise:
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-kogasa_surprise'
 
 
+@ui_meta
 class SurpriseAction:
     # choose_option
     choose_option_buttons = (
@@ -116,13 +121,14 @@ class SurpriseAction:
 
     choose_option_prompt = '请选择一个花色…'
 
-    def effect_string(act):
+    def effect_string(self, act):
         if act.succeeded:
             return '效果拔群！'
         else:
             return '似乎没有什么效果'
 
 
+@ui_meta
 class Kogasa:
     # Character
     name        = '多多良小伞'

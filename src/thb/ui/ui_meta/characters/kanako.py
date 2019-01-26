@@ -4,14 +4,15 @@
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.kanako)
+ui_meta = ui_meta_for(characters.kanako)
 
 
+@ui_meta
 class Kanako:
     # Character
     name        = '八坂神奈子'
@@ -26,6 +27,7 @@ class Kanako:
     notes = '|RKOF模式不可用|r'
 
 
+@ui_meta
 class KanakoKOF:
     # Character
     name        = '八坂神奈子'
@@ -40,6 +42,7 @@ class KanakoKOF:
     notes = '|RKOF修正角色|r'
 
 
+@ui_meta
 class KanakoFaith:
     # Skill
     name = '信仰'
@@ -49,7 +52,7 @@ class KanakoFaith:
         '|B|R>> |r弃置你一张牌，然后你视为对其使用了一张|G弹幕|r或|G弹幕战|r（按此法使用的弹幕不消耗干劲）。'
     )
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         if me.tags['kanako_faith']:
             return False
@@ -64,7 +67,7 @@ class KanakoFaith:
 
         return False
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         skill = cl[0]
         cl = skill.associated_cards
         if cl:
@@ -75,32 +78,35 @@ class KanakoFaith:
         else:
             return (True, '发动【信仰】')
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r打开神社大门，开始收集|G信仰|r！%s表示很感兴趣。' % (
             act.source.ui_meta.name,
             '、'.join(['|G【%s】|r' % p.ui_meta.name for p in act.target_list]),
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-kanako_faith'
 
 
+@ui_meta
 class KanakoFaithCheers:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r献上了信仰！' % (
             act.source.ui_meta.name,
         )
 
 
+@ui_meta
 class KanakoFaithCounteract:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r决定要拆台！' % (
             act.source.ui_meta.name,
         )
 
 
+@ui_meta
 class KanakoFaithCounteractPart1:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r弃置了|G【%s】|r的%s' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
@@ -108,18 +114,21 @@ class KanakoFaithCounteractPart1:
         )
 
 
+@ui_meta
 class KanakoFaithCounteractPart2:
     # choose_option meta
     choose_option_buttons = (('弹幕战', 'duel'), ('弹幕', 'attack'))
     choose_option_prompt = '信仰：请选择希望的效果'
 
 
+@ui_meta
 class KanakoFaithEffect:
     # choose_option meta
     choose_option_buttons = (('弃置对方的牌', 'drop'), ('对方摸牌', 'draw'))
     choose_option_prompt = '信仰：请选择希望的效果'
 
 
+@ui_meta
 class Virtue:
     # Skill
     name = '神德'
@@ -129,35 +138,38 @@ class Virtue:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class VirtueHandler:
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '神德：请选择1名玩家')
 
         return (True, '神德：放弃摸牌，选定的目标摸2张牌')
 
 
+@ui_meta
 class VirtueAction:
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         prompt = '神德：交给对方一张牌'
         return act.cond(cards), prompt
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r对|G【%s】|r发动了|G神德|r。' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r归还了%s。' % (
             act.target.ui_meta.name,
             card_desc(act.card),
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-kanako_virtue'
 
 
+@ui_meta
 class KanakoFaithKOF:
     # Skill
     name = '信仰'
@@ -172,12 +184,13 @@ class KanakoFaithKOF:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class KanakoFaithKOFAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r又收到的%s张香火钱，比博丽神社不知道高到哪里去了！' % (
             act.target.ui_meta.name,
             act.amount,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-kanako_faith'

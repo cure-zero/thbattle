@@ -347,37 +347,6 @@ def track(f):
     return _wrapper
 
 
-class _Enum(object):
-    def __init__(self, forward, reverse):
-        self.forward = forward
-        self.reverse = reverse
-
-    def __getattr__(self, name):
-        return self.forward[name]
-
-    def rlookup(self, v):
-        return self.reverse[v]
-
-
-class EnumMeta(type):
-    def __new__(cls, clsname, bases, _dict):
-        if bases == (object,):
-            return type.__new__(cls, clsname, bases, _dict)
-
-        forward = {}
-        reverse = {}
-        _dict.pop('__module__')
-        for k, v in _dict.iteritems():
-            forward[k] = v
-            reverse[v] = k
-
-        return _Enum(forward, reverse)
-
-
-class Enum(object):
-    __metaclass__ = EnumMeta
-
-
 def flatten(l):
     rst = []
 

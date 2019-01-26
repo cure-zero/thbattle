@@ -16,7 +16,8 @@ from thb.actions import action_eventhandlers
 from thb.characters.baseclasses import mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
-from utils import BatchList, Enum
+from utils import BatchList
+from enum import IntEnum
 
 
 # -- code --
@@ -57,10 +58,10 @@ class DeathHandler(EventHandler):
 
 
 class Identity(PlayerIdentity):
-    class TYPE(Enum):
-        HIDDEN = 0
+    class TYPE(IntEnum):
+        HIDDEN  = 0
         HAKUREI = 1
-        MORIYA = 2
+        MORIYA  = 2
 
 
 class THBattleBootstrap(GenericAction):

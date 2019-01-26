@@ -6,18 +6,19 @@ import random
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.ui.ui_meta.common import gen_metafunc
+from thb.ui.ui_meta.common import ui_meta_for
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.yukari)
+ui_meta = ui_meta_for(characters.yukari)
 
 
+@ui_meta
 class SpiritingAway:
     # Skill
     name = '神隐'
     description = '出牌阶段限两次，你可以将场上的一张牌暂时移出游戏。你可以观看以此法移出游戏的牌。'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         if me.tags['spirit_away_tag'] >= 2: return False
         try:
@@ -28,7 +29,7 @@ class SpiritingAway:
             pass
         return False
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         skill = cl[0]
         cl = skill.associated_cards
         if cl:
@@ -45,9 +46,10 @@ class SpiritingAway:
         return (True, '发动【神隐】')
 
 
+@ui_meta
 class SpiritingAwayAction:
 
-    def effect_string(act):
+    def effect_string(self, act):
         words = (
             '17岁就是17岁，后面没有零几个月！',
             '叫紫妹就对了，紫妈算什么！',
@@ -60,13 +62,14 @@ class SpiritingAwayAction:
             # card=card_desc(act.card),
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice([
             'thb-cv-yukari_spiritaway1',
             'thb-cv-yukari_spiritaway2',
         ])
 
 
+@ui_meta
 class Yukari:
     # Character
     name        = '八云紫'

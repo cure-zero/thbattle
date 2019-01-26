@@ -3,9 +3,6 @@
 import sys
 import os
 
-__metaclass__ = lambda _1, _2, _dict: _dict.pop('__module__', '..') and _dict
-
-
 # -- begin settings --
 VERSION = 'V270'
 

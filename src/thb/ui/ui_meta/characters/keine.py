@@ -8,14 +8,15 @@ import random
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, my_turn, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.keine)
+ui_meta = ui_meta_for(characters.keine)
 
 
+@ui_meta
 class Devour:
     # Skill
     name = '噬史'
@@ -29,8 +30,9 @@ class Devour:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class DevourAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r默默地拿出了一张%s，把|G【%s】|r的%s记在了卡牌背面。' % (
             act.source.ui_meta.name,
             card_desc(act.card),
@@ -38,7 +40,7 @@ class DevourAction:
             '体力值' if act.effect == 'life' else '卡牌数'
         )
 
-    def sound_effect_before(act):
+    def sound_effect_before(self, act):
         if act.effect == 'life':
             return 'thb-cv-keine_devour1'
         else:
@@ -51,23 +53,26 @@ class DevourAction:
         # ])
 
 
+@ui_meta
 class DevourEffect:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r吞噬掉了刚才发生在|G【%s】|r身上的历史。' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
 
+@ui_meta
 class DevourHandler:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '发动「噬史」')
         else:
             return (False, '请弃置一张牌基本牌或装备牌发动「噬史」（否则不发动）')
 
 
+@ui_meta
 class Teach:
     # Skill
     name = '授业'
@@ -76,10 +81,10 @@ class Teach:
         '|B|R>> |r使用一张牌，|B|R>> |r重铸一张牌。'
     )
 
-    def clickable(g):
+    def clickable(self, g):
         return my_turn() and not ttags(g.me)['teach_used']
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         cards = cl[0].associated_cards
 
         if not cards or len(cards) != 1:
@@ -90,55 +95,59 @@ class Teach:
 
         return True, '发动「授业」'
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '“是这样的|G【%s】|r”，|G【%s】|r说道，“两个1相加是不等于⑨的。即使是两个⑥也不行。不不，天才来算也不行。”' % (
             act.target.ui_meta.name,
             act.source.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice([
             'thb-cv-keine_teach1',
             'thb-cv-keine_teach2',
         ])
 
 
+@ui_meta
 class TeachAction:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '给出这张牌')
         else:
             return (False, '请选择你要给出的牌')
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '请选择1名玩家')
 
         return (True, '传道授业！')
 
 
+@ui_meta
 class TeachTargetEffect:
     # choose_option
     choose_option_buttons = (('重铸一张牌', 'reforge'), ('使用卡牌', 'action'))
     choose_option_prompt = '授业：请选择你的行动'
 
 
+@ui_meta
 class TeachTargetReforgeAction:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '重铸这张牌')
         else:
             return (False, '请选择一张牌重铸')
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '请选择1名玩家')
 
         return (True, '传道授业！')
 
 
+@ui_meta
 class KeineGuard:
     # Skill
     name = '守护'
@@ -153,18 +162,20 @@ class KeineGuard:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class KeineGuardAwake:
-    def effect_string(act):
+    def effect_string(self, act):
         return '直到满月，人们才回想起被|G【%s】|r的头锤 |BCAVED|r 的恐惧！！！！' % (
             act.target.ui_meta.name
         )
 
-    def sound_effect_before(act):
+    def sound_effect_before(self, act):
         return random.choice([
             'thb-cv-keine_guard_awake',
         ])
 
 
+@ui_meta
 class Keine:
     # Character
     name        = '上白泽慧音'

@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, passive_clickable, passive_is_action_valid
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.aya)
+ui_meta = ui_meta_for(characters.aya)
 
 
+@ui_meta
 class UltimateSpeed:
     # Skill
     name = '最速'
@@ -19,16 +20,18 @@ class UltimateSpeed:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class UltimateSpeedAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r：“哼哼，你已经跟不上我的速度了吧～”' % (
             act.source.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-aya_ultimatespeed'
 
 
+@ui_meta
 class Aya:
     # Character
     name        = '射命丸文'

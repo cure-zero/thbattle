@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from thb import actions, cards, characters
-from thb.ui.ui_meta.common import gen_metafunc
+from thb.ui.ui_meta.common import ui_meta_for
 from utils import BatchList
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.chen)
+ui_meta = ui_meta_for(characters.chen)
 
 
+@ui_meta
 class FlyingSkanda:
     # Skill
     name = '飞翔韦驮天'
@@ -19,7 +20,7 @@ class FlyingSkanda:
         '|B|R>> |r在线版本中，不能以此法使用|G人形操控|r'
     )
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         if me.tags['flying_skanda'] >= me.tags['turn_count']: return False
         try:
@@ -30,7 +31,7 @@ class FlyingSkanda:
             pass
         return False
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         acards = skill.associated_cards
         if len(acards) != 1:
@@ -55,7 +56,7 @@ class FlyingSkanda:
         else:
             return (True, '喵！')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         card = act.card.associated_cards[0]
@@ -72,10 +73,11 @@ class FlyingSkanda:
             '】|r、|G【'.join(tl.ui_meta.name),
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-chen_skanda'
 
 
+@ui_meta
 class Shikigami:
     # Skill
     name = '式神'
@@ -84,7 +86,7 @@ class Shikigami:
         '直到下次你的回合开始时，你与其可以在出牌阶段对对方攻击范围内的角色使用|G弹幕|r。'
     )
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         if me.tags.get('shikigami_tag'): return False
         try:
@@ -95,7 +97,7 @@ class Shikigami:
             pass
         return False
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         skill = cl[0]
         cl = skill.associated_cards
         if cl:
@@ -106,15 +108,17 @@ class Shikigami:
         else:
             return (True, '发动【式神】')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-chen_shikigami'
 
 
+@ui_meta
 class ShikigamiAction:
     choose_option_buttons = (('摸2张牌', False), ('回复1点体力', True))
     choose_option_prompt = '请为受到的【式神】选择效果'
 
 
+@ui_meta
 class Chen:
     # Character
     name        = '橙'

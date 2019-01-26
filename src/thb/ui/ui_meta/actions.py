@@ -5,39 +5,42 @@ import random
 from thb import actions
 from utils import BatchList
 
-from .common import gen_metafunc, card_desc, G
+from .common import ui_meta_for, card_desc, G
 
 # -----BEGIN ACTIONS UI META-----
-__metaclass__ = gen_metafunc(actions)
+ui_meta = ui_meta_for(actions)
 
 
+@ui_meta
 class DrawCards:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r摸了%d张牌。' % (
             act.target.ui_meta.name, act.amount,
         )
 
 
+@ui_meta
 class ActiveDropCards:
     # choose_card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, 'OK，就这些了')
         else:
             return (False, '请弃掉%d张牌…' % act.dropn)
 
-    def effect_string(act):
+    def effect_string(self, act):
         if act.dropn > 0 and act.cards:
             return '|G【%s】|r弃掉了%d张牌：%s' % (
                 act.target.ui_meta.name, act.dropn, card_desc(act.cards),
             )
 
 
+@ui_meta
 class Damage:
     update_portrait = True
     play_sound_at_target = True
 
-    def effect_string(act):
+    def effect_string(self, act):
         s, t = act.source, act.target
         if s:
             return '|G【%s】|r对|G【%s】|r造成了%d点伤害。' % (
@@ -48,22 +51,24 @@ class Damage:
                 t.ui_meta.name, act.amount
             )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-sound-hit'
 
 
+@ui_meta
 class LifeLost:
     update_portrait = True
     play_sound_at_target = True
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r流失了%d点体力。' % (
             act.target.ui_meta.name, act.amount
         )
 
 
+@ui_meta
 class LaunchCard:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         s, tl = act.source, BatchList(act.target_list)
         c = act.card
         if not c:
@@ -80,7 +85,7 @@ class LaunchCard:
             act.card.ui_meta.name
         )
 
-    def sound_effect_before(act):
+    def sound_effect_before(self, act):
         c = act.card
         if not c:
             return
@@ -89,7 +94,7 @@ class LaunchCard:
         se = getattr(meta, 'sound_effect', None)
         return se and se(act)
 
-    def ray(act):
+    def ray(self, act):
         if getattr(act.card.ui_meta, 'custom_ray', False):
             return []
 
@@ -97,8 +102,9 @@ class LaunchCard:
         return [(s, t) for t in act.target_list]
 
 
+@ui_meta
 class AskForCard:
-    def sound_effect_after(act):
+    def sound_effect_after(self, act):
         c = act.card
         if not c:
             return
@@ -111,16 +117,17 @@ class AskForCard:
         return se and se(act)
 
 
+@ui_meta
 class PlayerDeath:
     update_portrait = True
 
-    def effect_string(act):
+    def effect_string(self, act):
         tgt = act.target
         return '|G【%s】|r被击坠了。' % (
             tgt.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         meta = act.target.ui_meta
         se = getattr(meta, 'miss_sound_effect', None)
         if isinstance(se, (list, tuple)):
@@ -129,18 +136,20 @@ class PlayerDeath:
             return se
 
 
+@ui_meta
 class PlayerRevive:
     update_portrait = True
 
-    def effect_string(act):
+    def effect_string(self, act):
         tgt = act.target
         return '|G【%s】|r重新回到了场上。' % (
             tgt.ui_meta.name,
         )
 
 
+@ui_meta
 class TurnOverCard:
-    def effect_string(act):
+    def effect_string(self, act):
         tgt = act.target
         return '|G【%s】|r翻开了牌堆顶的一张牌，%s' % (
             tgt.ui_meta.name,
@@ -148,8 +157,9 @@ class TurnOverCard:
         )
 
 
+@ui_meta
 class RevealIdentity:
-    def effect_string(act):
+    def effect_string(self, act):
         g = G()
         me = g.me
         if not (me in act.to if isinstance(act.to, list) else me is act.to):
@@ -168,30 +178,32 @@ class RevealIdentity:
         )
 
 
+@ui_meta
 class Pindian:
     # choose_card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '不服来战！')
         else:
             return (False, '请选择一张牌用于拼点')
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r对|G【%s】|r发起了拼点' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def effect_string(act):
+    def effect_string(self, act):
         winner = act.source if act.succeeded else act.target
         return '|G【%s】|r是人生赢家！' % (
             winner.ui_meta.name
         )
 
 
+@ui_meta
 class Fatetell:
 
-    def fatetell_prompt_string(act):
+    def fatetell_prompt_string(self, act):
         from thb.ui.ui_meta.common import card_desc
 
         act_name = None
@@ -222,21 +234,24 @@ class Fatetell:
         return prompt
 
 
+@ui_meta
 class ActionShootdown:
     target_independent = False
     shootdown_message = '您不能这样出牌'
 
 
+@ui_meta
 class BaseActionStage:
     idle_prompt = '请出牌…'
 
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if not act.cond(cards):
             return False, '您选择的牌不符合出牌规则'
         else:
             return True, '不会显示'
 
 
+@ui_meta
 class VitalityLimitExceeded:
     target_independent = True
     shootdown_message = '你没有干劲了'

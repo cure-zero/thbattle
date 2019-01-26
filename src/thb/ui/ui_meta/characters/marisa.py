@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, limit1_skill_used, my_turn
+from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used, my_turn
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.marisa)
+ui_meta = ui_meta_for(characters.marisa)
 
 
+@ui_meta
 class Marisa:
     # Character
     name        = '雾雨魔理沙'
@@ -22,10 +23,11 @@ class Marisa:
     miss_sound_effect = 'thb-cv-marisa_miss'
 
 
+@ui_meta
 class Daze:
     name = '打贼'
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return '|G【%s】|r喊道：“打贼啦！”向|G【%s】|r使用了|G弹幕|r。' % (
             act.source.ui_meta.name,
@@ -33,18 +35,20 @@ class Daze:
         )
 
 
+@ui_meta
 class BorrowAction:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要视为对魔理沙使用弹幕吗？'
 
 
+@ui_meta
 class Borrow:
     # Skill
     name = '借走'
     description = '出牌阶段限一次，你可以获得其他角色的一张牌，然后该角色可以视为对你使用了一张|G弹幕|r。'
 
-    def clickable(g):
+    def clickable(self, g):
         if limit1_skill_used('borrow_tag'):
             return False
 
@@ -52,7 +56,7 @@ class Borrow:
 
         return True
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         if skill.associated_cards:
             return (False, '请不要选择牌!')
@@ -66,12 +70,12 @@ class Borrow:
 
         return (True, '我死了以后你们再拿回去好了！')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return '大盗|G【%s】|r又出来“|G借走|r”了|G【%s】|r的牌。' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-marisa_borrow'

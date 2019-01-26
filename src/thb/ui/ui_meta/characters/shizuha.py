@@ -4,35 +4,38 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 from utils import BatchList
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.shizuha)
+ui_meta = ui_meta_for(characters.shizuha)
 
 
+@ui_meta
 class AutumnWindEffect:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G秋风|r带走了|G【%s】|r的%s。' % (
             act.target.ui_meta.name,
             card_desc(act.card),
         )
 
 
+@ui_meta
 class AutumnWindAction:
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         tl = BatchList(act.target_list)
         return '当|G秋风|r吹起，|G【%s】|r连牌都拿不住的时候，才回想起，妈妈说的对，要穿秋裤。' % (
             '】|r、|G【'.join(tl.ui_meta.name),
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-shizuha_autumnwind'
 
 
+@ui_meta
 class Decay:
     # Skill
     name = '凋零'
@@ -42,27 +45,31 @@ class Decay:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class DecayAction:
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r觉得屁股凉了一下……' % act.target.ui_meta.name
 
 
+@ui_meta
 class DecayEffect:
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r的|G凋零|r效果生效了。' % act.target.ui_meta.name
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-shizuha_decay'
 
 
+@ui_meta
 class DecayDrawCards:
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-shizuha_decay'
 
 
+@ui_meta
 class AutumnWind:
     # Skill
     name = '秋风'
@@ -72,18 +79,20 @@ class AutumnWind:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class AutumnWindHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【秋风】吗？'
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '秋风：请选择目标玩家')
 
         return (True, '秋风弃牌')
 
 
+@ui_meta
 class Shizuha:
     # Character
     name        = '秋静叶'

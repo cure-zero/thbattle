@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, limit1_skill_used, my_turn
+from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used, my_turn
 from utils import BatchList
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.mamizou)
+ui_meta = ui_meta_for(characters.mamizou)
 
 
+@ui_meta
 class Morphing:
     # Skill
     name = '变化'
@@ -18,7 +19,7 @@ class Morphing:
 
     params_ui = 'UIMorphingCardSelection'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
 
         if limit1_skill_used('mamizou_morphing_tag'):
@@ -29,7 +30,7 @@ class Morphing:
 
         return True
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         assert skill.is_card(characters.mamizou.Morphing)
         cl = skill.associated_cards
@@ -45,7 +46,7 @@ class Morphing:
 
         return skill.treat_as.ui_meta.is_action_valid(g, [skill], target_list)
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         card = act.card
@@ -60,10 +61,11 @@ class Morphing:
 
         return s
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-mamizou_morph'
 
 
+@ui_meta
 class Mamizou:
     # Character
     name        = '二岩猯藏'

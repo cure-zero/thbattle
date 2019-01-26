@@ -5,13 +5,14 @@ from __future__ import absolute_import
 # -- third party --
 # -- own --
 from thb import thb3v3
-from thb.ui.ui_meta.common import gen_metafunc
+from thb.ui.ui_meta.common import ui_meta_for
 
 
 # -- code --
-__metaclass__ = gen_metafunc(thb3v3)
+ui_meta = ui_meta_for(thb3v3)
 
 
+@ui_meta
 class THBattle:
     name = '3v3模式'
     logo = 'thb-modelogo-3v3'
@@ -35,7 +36,7 @@ class THBattle:
         },
     }
 
-    def ui_class():
+    def ui_class(self):
         from thb.ui.view import THBattleUI
         return THBattleUI
 

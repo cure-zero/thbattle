@@ -6,12 +6,13 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, passive_clickable, passive_is_action_valid
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.patchouli)
+ui_meta = ui_meta_for(characters.patchouli)
 
 
+@ui_meta
 class Library:
     # Skill
     name = '图书'
@@ -21,19 +22,21 @@ class Library:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class LibraryDrawCards:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r发动了|G图书|r技能，摸1张牌。' % (
             act.source.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice([
             'thb-cv-patchouli_library1',
             'thb-cv-patchouli_library2',
         ])
 
 
+@ui_meta
 class Knowledge:
     # Skill
     name = '博学'
@@ -43,16 +46,18 @@ class Knowledge:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class KnowledgeAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r一眼就看穿了这张符卡，直接挡下。' % (
             act.source.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-patchouli_knowledge'
 
 
+@ui_meta
 class Patchouli:
     # Character
     name        = '帕秋莉'

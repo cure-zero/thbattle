@@ -16,7 +16,8 @@ from thb.actions import PlayerTurn, RevealIdentity, action_eventhandlers, migrat
 from thb.characters.baseclasses import mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet, SortCharacterInputlet
-from utils import BatchList, Enum
+from utils import BatchList
+from enum import IntEnum
 
 
 # -- code --
@@ -89,10 +90,10 @@ class RedrawCards(DistributeCards):
 
 
 class Identity(PlayerIdentity):
-    class TYPE(Enum):
-        HIDDEN = 0
+    class TYPE(IntEnum):
+        HIDDEN  = 0
         HAKUREI = 1
-        MORIYA = 2
+        MORIYA  = 2
 
 
 class THBattleFaithBootstrap(GenericAction):

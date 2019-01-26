@@ -7,14 +7,15 @@ import random
 # -- third party --
 # -- own --
 from thb import actions, cards, characters
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, limit1_skill_used, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, limit1_skill_used, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.reimu)
+ui_meta = ui_meta_for(characters.reimu)
 
 
+@ui_meta
 class Flight:
     # Skill
     name = '飞行'
@@ -22,10 +23,11 @@ class Flight:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class SpiritualAttack:
     name = '灵击'
 
-    def clickable(g):
+    def clickable(self, g):
         me = g.me
 
         if not (me.cards or me.showncards): return False
@@ -40,7 +42,7 @@ class SpiritualAttack:
 
         return False
 
-    def is_complete(g, cl):
+    def is_complete(self, g, cl):
         skill = cl[0]
         me = g.me
         assert skill.is_card(characters.reimu.SpiritualAttack)
@@ -57,16 +59,17 @@ class SpiritualAttack:
 
         return (True, '反正这条也看不到，偷个懒~~~')
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         return (False, '你不能主动使用灵击')
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-reimu_sa'
 
-    def effect_string(act):
+    def effect_string(self, act):
         return cards.RejectCard.ui_meta.effect_string(act)
 
 
+@ui_meta
 class TributeTarget:
     # Skill
     name = '纳奉'
@@ -76,12 +79,13 @@ class TributeTarget:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class Tribute:
     # Skill
     name = '赛钱'
     description = '出牌阶段限一次，若灵梦的手牌数小于体力上限，你可以将一张手牌置入灵梦的明牌区。'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
 
         if limit1_skill_used('tribute_tag'):
@@ -97,7 +101,7 @@ class Tribute:
 
         return False
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         cl = cl[0].associated_cards
         if not cl: return (False, '请选择要给出的牌')
         if len(cl) != 1: return (False, '只能选择一张手牌')
@@ -113,7 +117,7 @@ class Tribute:
 
         return (True, '投进去……会发生什么呢？')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return (
             '|G【%s】|r向|G【%s】|r的赛钱箱里放了一张%s… 会发生什么呢？'
@@ -123,7 +127,7 @@ class Tribute:
             card_desc(act.card.associated_cards[0]),
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         c = act.card.associated_cards[0]
         if c.is_card(cards.ExinwanCard):
             return 'thb-cv-reimu_tribute_exinwan'
@@ -136,6 +140,7 @@ class Tribute:
 
 # ----------------------
 
+@ui_meta
 class ReimuExterminate:
     # Skill
     name = '退治'
@@ -149,17 +154,19 @@ class ReimuExterminate:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ReimuExterminateAction:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '代表幻想乡消灭你！')
         else:
             return (False, '退治：选择一张弹幕对%s使用（否则不发动）' % act.victim.ui_meta.name)
 
 
+@ui_meta
 class ReimuExterminateLaunchCard:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         if act.cause == 'damage':
             return '|G【%s】|r： (╯‵□′)╯︵ ┻━┻ ！！！' % act.source.ui_meta.name
         else:
@@ -168,13 +175,14 @@ class ReimuExterminateLaunchCard:
                 act.source.ui_meta.name,
             )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         if act.cause == 'damage':
             return 'thb-cv-reimu_exterminate_damage'
         else:
             return 'thb-cv-reimu_exterminate_active'
 
 
+@ui_meta
 class ReimuClear:
     # Skill
     name = '快晴'
@@ -184,22 +192,25 @@ class ReimuClear:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ReimuClearAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '异变解决啦！|G【%s】|r和|G【%s】|r一起去吃饭了！' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-reimu_clear'
 
 
+@ui_meta
 class ReimuClearHandler:
     choose_option_prompt  = '要发动【快晴】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
+@ui_meta
 class Reimu:
     # Character
     name        = '博丽灵梦'

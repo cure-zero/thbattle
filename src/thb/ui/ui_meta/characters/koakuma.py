@@ -5,13 +5,14 @@
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.ui.ui_meta.common import gen_metafunc, my_turn
+from thb.ui.ui_meta.common import ui_meta_for, my_turn
 
 # -- code --
 
-__metaclass__ = gen_metafunc(characters.koakuma)
+ui_meta = ui_meta_for(characters.koakuma)
 
 
+@ui_meta
 class Koakuma:
     # Character
     name        = '小恶魔'
@@ -24,12 +25,13 @@ class Koakuma:
     miss_sound_effect = 'thb-cv-koakuma_miss'
 
 
+@ui_meta
 class Find:
     # Skill
     name = '寻找'
     description = '出牌阶段限一次，你可以弃置至多X张牌，然后摸等量的牌。（X为场上存活角色数）'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         if ttags(me)['find']:
             return False
@@ -39,7 +41,7 @@ class Find:
 
         return False
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         assert skill.is_card(characters.koakuma.Find)
         n = len([i for i in g.players if not i.dead])
@@ -52,7 +54,7 @@ class Find:
 
         return (True, '换掉这些牌')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         card = act.card
@@ -62,5 +64,5 @@ class Find:
         )
         return s
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-koakuma_find'

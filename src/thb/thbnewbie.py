@@ -21,7 +21,7 @@ from thb.cards import SinsackCard, WineCard
 from thb.characters.baseclasses import mixin_character
 from thb.common import PlayerIdentity
 from thb.inputlets import ActionInputlet, GalgameDialogInputlet
-from utils import Enum
+from enum import IntEnum
 
 
 # -- code --
@@ -57,7 +57,7 @@ class DeathHandler(EventHandler):
 
 
 class Identity(PlayerIdentity):
-    class TYPE(Enum):
+    class TYPE(IntEnum):
         HIDDEN = 0
         HAKUREI = 1
         MORIYA = 2

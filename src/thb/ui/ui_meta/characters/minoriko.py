@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, limit1_skill_used, my_turn
+from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used, my_turn
 from thb.ui.ui_meta.common import passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.minoriko)
+ui_meta = ui_meta_for(characters.minoriko)
 
 
+@ui_meta
 class Foison:
     # Skill
     name = '丰收'
@@ -20,23 +21,25 @@ class Foison:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class FoisonDrawCardStage:
-    def effect_string(act):
+    def effect_string(self, act):
         return '大丰收！|G【%s】|r一下子收获了%d张牌！' % (
             act.source.ui_meta.name,
             act.amount,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-minoriko_foison'
 
 
+@ui_meta
 class AutumnFeast:
     # Skill
     name = '秋祭'
     description = '出牌阶段限一次，你可以将两张红色牌当|G五谷丰登|r使用。'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
         if not my_turn(): return False
         if limit1_skill_used('autumnfeast_tag'): return False
@@ -46,7 +49,7 @@ class AutumnFeast:
 
         return True
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         cl = skill.associated_cards
         from thb.cards import Card
@@ -54,7 +57,7 @@ class AutumnFeast:
             return (False, '请选择2张红色的牌！')
         return (True, '发麻薯啦~')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         return (
@@ -63,10 +66,11 @@ class AutumnFeast:
             source.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-minoriko_autumnfeast'
 
 
+@ui_meta
 class AkiTribute:
     # Skill
     name = '上贡'
@@ -76,20 +80,23 @@ class AkiTribute:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class AkiTributeCollectCard:
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-minoriko_akitribute'
 
 
+@ui_meta
 class AkiTributeHandler:
 
-    def target(pl):
+    def target(self, pl):
         if not pl:
             return (False, '请选择1名玩家，将剩余的牌置入该玩家的明牌区')
 
         return (True, '浪费粮食，可不是好行为！')
 
 
+@ui_meta
 class Minoriko:
     # Character
     name        = '秋穰子'

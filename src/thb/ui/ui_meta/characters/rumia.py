@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.ui.ui_meta.common import gen_metafunc, limit1_skill_used, passive_clickable
+from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.rumia)
+ui_meta = ui_meta_for(characters.rumia)
 
 
+@ui_meta
 class Darkness:
     # Skill
     name = '黑暗'
@@ -22,7 +23,7 @@ class Darkness:
 
     custom_ray = True
 
-    def clickable(game):
+    def clickable(self, game):
         try:
             if limit1_skill_used('darkness_tag'):
                 return False
@@ -33,7 +34,7 @@ class Darkness:
             pass
         return False
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         skill = cl[0]
         cl = skill.associated_cards
         if not cl or len(cl) != 1:
@@ -46,7 +47,7 @@ class Darkness:
         else:
             return (True, '你们的关系…是~这样吗？')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return '|G【%s】|r在黑暗中一通乱搅，结果|G【%s】|r和|G【%s】|r打了起来！' % (
             act.source.ui_meta.name,
@@ -54,10 +55,11 @@ class Darkness:
             act.target_list[1].ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-rumia_darkness'
 
 
+@ui_meta
 class DarknessKOF:
     # Skill
     name = '黑暗'
@@ -67,32 +69,36 @@ class DarknessKOF:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class DarknessKOFAction:
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r一出现天就黑了，低头都看不见胖次！' % act.source.ui_meta.name
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-rumia_darkness_kof'
 
 
+@ui_meta
 class DarknessKOFLimit:
     shootdown_message = '【黑暗】你不能对其使用卡牌'
 
 
+@ui_meta
 class DarknessAction:
-    def ray(act):
+    def ray(self, act):
         src = act.source
         tl = act.target_list
         return [(src, tl[0]), (tl[0], tl[1])]
 
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '使用【弹幕】')
         else:
             return (False, '请使用一张【弹幕】（否则受到一点伤害）')
 
 
+@ui_meta
 class Cheating:
     # Skill
     name = '作弊'
@@ -102,14 +108,16 @@ class Cheating:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class CheatingDrawCards:
-    def effect_string(act):
+    def effect_string(self, act):
         return '突然不知道是谁把太阳挡住了。等到大家回过神来，赫然发现牌堆里少了一张牌！'
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-rumia_cheat'
 
 
+@ui_meta
 class Rumia:
     # Character
     name        = '露米娅'
@@ -122,6 +130,7 @@ class Rumia:
     miss_sound_effect = 'thb-cv-rumia_miss'
 
 
+@ui_meta
 class RumiaKOF:
     # Character
     name        = '露米娅'

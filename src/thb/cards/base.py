@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
 from collections import deque
@@ -9,7 +8,7 @@ import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Game, GameError, GameObject, list_shuffle
+from game.autoenv import GameError, GameObject, list_shuffle
 from game.base import GameViralContext
 
 

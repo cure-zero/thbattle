@@ -19,7 +19,7 @@ from client.ui.controls import Panel, TextArea
 from client.ui.resloader import L, get_atlas
 from game.autoenv import Game
 from thb import actions
-from thb.cards import CardList
+from thb.cards import CardList, VirtualCard
 from thb.ui.ui_meta.common import char_desc
 from utils import flatten, rectv2f, rrectv2f
 

@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.ui.ui_meta.common import gen_metafunc, passive_clickable, passive_is_action_valid
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.daiyousei)
+ui_meta = ui_meta_for(characters.daiyousei)
 
 
+@ui_meta
 class Daiyousei:
     # Character
     name        = '大妖精'
@@ -22,6 +23,7 @@ class Daiyousei:
     miss_sound_effect = 'thb-cv-daiyousei_miss'
 
 
+@ui_meta
 class DaiyouseiKOF:
     # Character
     name        = '大妖精'
@@ -36,12 +38,13 @@ class DaiyouseiKOF:
     notes = '|RKOF修正角色|r'
 
 
+@ui_meta
 class Support:
     # Skill
     name = '支援'
     description = '出牌阶段，你可将任意张牌交给其他角色，此阶段你给出的牌首次达到三张时，你回复1点体力。'
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
 
         try:
@@ -54,7 +57,7 @@ class Support:
 
         return False
 
-    def is_action_valid(g, cl, target_list):
+    def is_action_valid(self, g, cl, target_list):
         cl = cl[0].associated_cards
         if not cl: return (False, '请选择要给出的牌')
         me = g.me
@@ -66,7 +69,7 @@ class Support:
         if len(target_list) != 1: return (False, '请选择1名玩家')
         return (True, '加油！')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return '|G【%s】|r发动了|G支援|r技能，将%d张牌交给了|G【%s】|r' % (
             act.source.ui_meta.name,
@@ -74,10 +77,11 @@ class Support:
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-daiyousei_support'
 
 
+@ui_meta
 class SupportKOF:
     # Skill
     name = '支援'
@@ -87,19 +91,22 @@ class SupportKOF:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class SupportKOFAction:
 
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r发动了|G支援|r技能，将所有的牌转移给下一个出场角色。' % (
             act.target.ui_meta.name
         )
 
 
+@ui_meta
 class SupportKOFHandler:
     choose_option_prompt = '你要发动【支援】，将所有牌转移给下一名出场角色吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
+@ui_meta
 class Moe:
     # Skill
     name = '卖萌'
@@ -109,14 +116,15 @@ class Moe:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class MoeDrawCard:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r用手扯开脸颊，向大家做了一个夸张的笑脸，摸了%d张牌跑开了' % (
             act.target.ui_meta.name,
             act.amount,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-daiyousei_moe'
 
 # ----------

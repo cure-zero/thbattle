@@ -6,13 +6,14 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.shinmyoumaru)
+ui_meta = ui_meta_for(characters.shinmyoumaru)
 
 
+@ui_meta
 class MiracleMallet:
     # Skill
     name = '万宝槌'
@@ -22,21 +23,23 @@ class MiracleMallet:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class MiracleMalletAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r将|G【%s】|r的判定结果改为%s。' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
             card_desc(act.card)
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice((
             'thb-cv-shinmyoumaru_mallet1',
             'thb-cv-shinmyoumaru_mallet2',
         ))
 
 
+@ui_meta
 class VengeOfTsukumogami:
     # Skill
     name = '付丧神之怨'
@@ -46,38 +49,42 @@ class VengeOfTsukumogami:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class VengeOfTsukumogamiAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r对|G【%s】|r发动了|G付丧神之怨|r。' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice((
             'thb-cv-shinmyoumaru_venge1',
             'thb-cv-shinmyoumaru_venge2',
         ))
 
 
+@ui_meta
 class MiracleMalletHandler:
     # choose_card
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '发动【万宝槌】！')
         else:
             return (False, '请选择一张牌点数更大的牌代替当前的判定牌')
 
 
+@ui_meta
 class VengeOfTsukumogamiHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
 
-    def choose_option_prompt(act):
+    def choose_option_prompt(self, act):
         prompt = '你要发动【付丧神之怨】吗（对%s）？'
         return prompt % act.target.ui_meta.name
 
 
+@ui_meta
 class Shinmyoumaru:
     # Character
     name        = '少名针妙丸'

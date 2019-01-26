@@ -5,13 +5,14 @@
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.ui.ui_meta.common import card_desc, gen_metafunc, my_turn, passive_clickable
+from thb.ui.ui_meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.cirno)
+ui_meta = ui_meta_for(characters.cirno)
 
 
+@ui_meta
 class PerfectFreeze:
     # Skill
     name = '完美冻结'
@@ -21,8 +22,9 @@ class PerfectFreeze:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class CirnoDropCards:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r弃置了|G【%s】|r的%s。' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
@@ -30,26 +32,29 @@ class CirnoDropCards:
         )
 
 
+@ui_meta
 class PerfectFreezeAction:
-    def effect_string_before(act):
+    def effect_string_before(self, act):
         return '|G【%s】|r被冻伤了。' % act.target.ui_meta.name
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-cirno_perfectfreeze'
 
     # choose_card meta
-    def choose_card_text(g, act, cards):
+    def choose_card_text(self, g, act, cards):
         if act.cond(cards):
             return (True, '弃置这张牌')
         else:
             return (False, '完美冻结：选择一张牌弃置')
 
 
+@ui_meta
 class PerfectFreezeHandler:
     choose_option_prompt = '你要发动【完美冻结】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
+@ui_meta
 class Bakadesu:
     # Skill
     name = '最强'
@@ -59,7 +64,7 @@ class Bakadesu:
         '|B|R>> |r令你弃置其一张牌'
     )
 
-    def clickable(game):
+    def clickable(self, game):
         me = game.me
 
         if ttags(me)['bakadesu']:
@@ -67,7 +72,7 @@ class Bakadesu:
 
         return my_turn()
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         if len(tl) != 1:
             return (False, '请选择嘲讽对象')
 
@@ -76,25 +81,27 @@ class Bakadesu:
 
         return (True, '老娘最强！')
 
-    def effect_string(act):
+    def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string
         return '|G【%s】|r双手叉腰，对着|G【%s】|r大喊：“老娘最强！”' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-cirno_bakadesu'
 
 
+@ui_meta
 class BakadesuAction:
-    def choose_card_text(g, act, cl):
+    def choose_card_text(self, g, act, cl):
         if act.cond(cl):
             return (True, '啪！啪！啪！')
         else:
             return (False, '请选择一张弹幕对【%s】使用' % act.source.ui_meta.name)
 
 
+@ui_meta
 class Cirno:
     # Character
     name        = '琪露诺'

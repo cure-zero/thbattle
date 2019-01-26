@@ -7,41 +7,45 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import gen_metafunc, limit1_skill_used, my_turn, passive_clickable
+from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used, my_turn, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 
 # -- code --
-__metaclass__ = gen_metafunc(characters.seija)
+ui_meta = ui_meta_for(characters.seija)
 
 
+@ui_meta
 class InciteAttack:
     name = '挑拨'
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r立刻将|G弹幕|r甩在了|G【%s】|r的脸上：“看也就看了，能别说么？”' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
 
+@ui_meta
 class InciteFailAttack:
     name = '挑拨'
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r立刻将|G弹幕|r甩在了|G【%s】|r的脸上：“你怎么知道是蓝白条的？”' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
         )
 
 
+@ui_meta
 class InciteSilentFailAction:
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r低头看了一眼，诶，好像真的是蓝白条……' % (
             act.target.ui_meta.name,
         )
 
 
+@ui_meta
 class Incite:
     # Skill
     name = '挑拨'
@@ -49,13 +53,13 @@ class Incite:
 
     custom_ray = True
 
-    def clickable(game):
+    def clickable(self, game):
         if limit1_skill_used('incite_tag'):
             return False
 
         return my_turn()
 
-    def is_action_valid(g, cl, tl):
+    def is_action_valid(self, g, cl, tl):
         if cl[0].associated_cards:
             return (False, '请不要选择牌！')
 
@@ -66,7 +70,7 @@ class Incite:
         else:
             return (True, '大嘴正邪愉快的一天开始了～')
 
-    def effect_string(act):
+    def effect_string(self, act):
         src = act.source
         tgt, victim = act.target_list
         if victim is src:
@@ -81,26 +85,28 @@ class Incite:
                 victim.ui_meta.name,
             )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return random.choice([
             'thb-cv-seija_incite1',
             'thb-cv-seija_incite2',
         ])
 
 
+@ui_meta
 class InciteAction:
     # choose_option
     choose_option_buttons = (('使用', True), ('不使用', False))
 
-    def ray(act):
+    def ray(self, act):
         src = act.source
         tl = act.target_list
         return [(src, tl[0]), (tl[0], tl[1])]
 
-    def choose_option_prompt(act):
+    def choose_option_prompt(self, act):
         return '你要对【%s】使用【弹幕】吗？' % act.source.ui_meta.name
 
 
+@ui_meta
 class Reversal:
     # Skill
     name = '逆转'
@@ -110,25 +116,28 @@ class Reversal:
     is_action_valid = passive_is_action_valid
 
 
+@ui_meta
 class ReversalDuel:
     name = '逆转'
 
-    def effect_string(act):
+    def effect_string(self, act):
         return '|G【%s】|r对|G【%s】|r：“你敢打我脸，我就敢打回去！”' % (
             act.target.ui_meta.name,
             act.source.ui_meta.name,
         )
 
-    def sound_effect(act):
+    def sound_effect(self, act):
         return 'thb-cv-seija_reversal'
 
 
+@ui_meta
 class ReversalHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【逆转】吗？'
 
 
+@ui_meta
 class Seija:
     # Character
     name        = '鬼人正邪'
