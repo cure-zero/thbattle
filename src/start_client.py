@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import sys
-reload(sys)
-sys.setdefaultencoding(sys.getfilesystemencoding())
 
 # Workaround OpenGL resource recycling issue
 import gc

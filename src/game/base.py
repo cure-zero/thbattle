@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 # -- stdlib --
 from collections import defaultdict
@@ -66,17 +66,15 @@ class GameObjectMeta(type):
     #     log.warning('SetAttr: %s.%s = %s' % (cls.__name__, field, repr(v)))
 
 
-class GameObject(object):
-    __metaclass__ = GameObjectMeta
+class GameObject(object, metaclass=GameObjectMeta):
+    pass
 
 
-class TimeLimitExceeded(Timeout):
-    __metaclass__ = GameObjectMeta
+class TimeLimitExceeded(Timeout, metaclass=GameObjectMeta):
+    pass
 
 
-class GameException(Exception):
-    __metaclass__ = GameObjectMeta
-
+class GameException(Exception, metaclass=GameObjectMeta):
     def __init__(self, msg=None, **kwargs):
         Exception.__init__(self, msg)
         self.__dict__.update(kwargs)
@@ -163,7 +161,7 @@ class Game(GameObject, GameViralContext):
 
         n = len(g.players)
 
-        for i in range(id, n) + range(id):
+        for i in list(range(id, n)) + list(range(id)):
             yield g.players[i]
 
     def game_end(self):
@@ -197,7 +195,7 @@ class Game(GameObject, GameViralContext):
         data can be modified.
         '''
         random.random() < 0.01 and gevent.sleep(0.00001)  # prevent buggy logic code blocking scheduling
-        if isinstance(data, (list, tuple, str, str)):
+        if isinstance(data, (list, tuple, str)):
             s = data
         else:
             s = data.__class__.__name__
@@ -325,10 +323,8 @@ class Game(GameObject, GameViralContext):
         raise GameError('Abstract')
 
 
-class ActionShootdown(BaseException):
-    __metaclass__ = GameObjectMeta
-
-    def __nonzero__(self):
+class ActionShootdown(BaseException, metaclass=GameObjectMeta):
+    def __bool__(self):
         return False
 
 
@@ -364,24 +360,24 @@ class EventHandler(GameObject):
 
             table[cls.__name__] = cls(g)
 
-        for grp, lst in groups.iteritems():
+        for grp, lst in groups.items():
             eh = table[grp.__name__]
             eh.set_handlers(EventHandler.make_list(g, lst, fold_group=False))
 
         allnames = frozenset(table)
 
-        for eh in table.itervalues():
+        for eh in table.values():
             eh.execute_before = set(eh.execute_before) & allnames  # make it instance var
             eh.execute_after = set(eh.execute_after) & allnames
 
-        for clsname, eh in table.iteritems():
+        for clsname, eh in table.items():
             for before in eh.execute_before:
                 table[before].execute_after.add(clsname)
 
             for after in eh.execute_after:
                 table[after].execute_before.add(clsname)
 
-        l = table.values()
+        l = list(table.values())
         l.sort(key=lambda v: v.__class__.__name__)  # must sync between server and client
 
         toposorted = []
@@ -531,7 +527,7 @@ def get_seed_for(g, p):
     if Game.SERVER_SIDE:
         seed = g.random.getrandbits(63)
     else:
-        seed = 0L
+        seed = 0
 
     return sync_primitive(seed, p)
 

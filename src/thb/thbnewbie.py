@@ -604,7 +604,7 @@ class THBattleNewbie(Game):
         return True
 
     def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + g.game_ehs.values()
+        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
         ehclasses += g.ehclasses
         ehclasses.remove(ShuffleHandler)  # disable shuffling
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))

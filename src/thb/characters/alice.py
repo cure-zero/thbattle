@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 # -- third party --
@@ -192,7 +192,7 @@ class DollBlastAction(UserAction):
     def apply_action(self):
         g = self.game
         cl = self.cards
-        track_ids = set([c.track_id for c in cl])
+        track_ids = {c.track_id for c in cl}
 
         src, tgt = self.source, self.target
         for c in cl:

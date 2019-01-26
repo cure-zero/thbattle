@@ -302,7 +302,7 @@ class THBattle2v2(Game):
         return new
 
     def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + g.game_ehs.values()
+        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
         ehclasses += g.ehclasses
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 

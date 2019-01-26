@@ -352,7 +352,7 @@ class ReplayButton(ImageButton):
 
         @gevent.spawn
         def replay():
-            from base.baseclasses import main_window
+            from .base.baseclasses import main_window
             filename = get_open_file_name(main_window, '打开Replay', [('THB Replay 文件', '*.thbrep')])
             if not filename:
                 self.state = ImageButton.NORMAL
@@ -431,7 +431,7 @@ class ServerSelectScreen(Screen):
             def __init__(self, *a, **k):
                 SensorLayer.__init__(self, *a, **k)
                 self.balloon = BalloonPrompt(self)
-                from base.baseclasses import main_window
+                from .base.baseclasses import main_window
                 self.window = main_window
                 self.hand_cursor = self.window.get_system_mouse_cursor('hand')
                 self.worldmap_shadow = L('c-bg_worldmap_shadow')

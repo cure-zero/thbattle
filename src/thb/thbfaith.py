@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 from collections import defaultdict
@@ -111,7 +111,7 @@ class THBattleFaithBootstrap(GenericAction):
         g.picks = []
         g.deck = Deck(g)
 
-        g.ehclasses = list(action_eventhandlers) + g.game_ehs.values()
+        g.ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
 
         H, M = Identity.TYPE.HAKUREI, Identity.TYPE.MORIYA
         if params['random_seat']:
@@ -224,7 +224,7 @@ class THBattleFaith(Game):
         return False
 
     def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + g.game_ehs.values()
+        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
         ehclasses += g.ehclasses
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 

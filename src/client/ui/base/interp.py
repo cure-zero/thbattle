@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import baseclasses as bc
+from . import baseclasses as bc
 
 import logging
 log = logging.getLogger('UI_Interp')

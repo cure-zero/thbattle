@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 from collections import namedtuple
@@ -255,7 +255,7 @@ class Button(AbstractButton):
     def batch_draw(btns):
         glPushMatrix()
         glLoadIdentity()
-        batch_list = set([b._batch for b in btns])
+        batch_list = {b._batch for b in btns}
         batch = list(batch_list)[0]
         if not (len(batch_list) == 1 and batch and not batch.need_update):
             for i in batch_list:
@@ -351,7 +351,7 @@ AbstractButton.register_event_type('on_click')
 
 
 def batch_drawlabel(lbls):
-    s = set([l.batch for l in lbls])
+    s = {l.batch for l in lbls}
     if len(s) == 1:
         batch = list(s)[0]
     else:
@@ -372,7 +372,7 @@ def batch_drawlabel(lbls):
 
 
 def batch_drawsprite(sprites):
-    s = list(set([l.batch for l in sprites]))
+    s = list({l.batch for l in sprites})
     if len(s) == 1 and s[0]:
         batch = s[0]
     else:
@@ -553,7 +553,7 @@ class Frame(Control):
         glPushMatrix()
         glLoadIdentity()
 
-        batch_list = set([d._batch for d in dlgs])
+        batch_list = {d._batch for d in dlgs}
         batch = list(batch_list)[0]
         if not (len(batch_list) == 1 and batch and not batch.need_update):
             for i in batch_list:
@@ -573,7 +573,7 @@ class Frame(Control):
         glPopMatrix()
 
         cl = []
-        map(cl.extend, [d.control_list for d in dlgs])
+        list(map(cl.extend, [d.control_list for d in dlgs]))
         Control.do_draw(cl)
 
     def add_label(self, text, x, y, *a, **k):
@@ -1172,7 +1172,7 @@ class PlayerPortrait(Frame):
         sprites = [s for s in sprites if s]
         batch_drawsprite(sprites)
         btns = []
-        map(btns.extend, [p.buttons for p in pps])
+        list(map(btns.extend, [p.buttons for p in pps]))
         Button.batch_draw(btns)
 
 
@@ -1465,14 +1465,14 @@ class ListItem(object):
             ox += w
 
     def __getitem__(self, index):
-        if isinstance(index, basestring):
+        if isinstance(index, str):
             index = self.parent.col_lookup[index]
         return self._data[index]
 
     def __setitem__(self, index, val):
         from pyglet.text import Label
         p = self.parent
-        if isinstance(index, basestring):
+        if isinstance(index, str):
             index = p.col_lookup[index]
         self._data[index] = val
         c = p.color.text + (255,)
@@ -1583,7 +1583,7 @@ class ListView(Control):
         glTranslatef(0, client_height + vy, 0)
         glEnable(GL_SCISSOR_TEST)
         ax, ay = self.abs_coords()
-        ax, ay, w, h = map(int, (ax, ay, self.width, client_height))
+        ax, ay, w, h = list(map(int, (ax, ay, self.width, client_height)))
         glScissor(ax, ay, w, h)
         self.batch.draw()
         cs = self.cur_select

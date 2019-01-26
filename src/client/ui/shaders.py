@@ -7,7 +7,7 @@ import logging
 from pyglet.gl import gl_info
 
 # -- own --
-from base.shader import DummyShader, FragmentShader, ShaderError, ShaderProgram
+from .base.shader import DummyShader, FragmentShader, ShaderError, ShaderProgram
 
 # -- code --
 have = gl_info.have_version
@@ -20,7 +20,7 @@ def _get_gaussian_coef(radius):
 
     f = lambda x: 0.5*erfc(-x*a)
 
-    l = [f(0.5 + i) - f(-0.5 + i) for i in xrange(radius+1)]
+    l = [f(0.5 + i) - f(-0.5 + i) for i in range(radius+1)]
     l = [i for i in l if i > 0.01]
     l1 = l[1:]
     l1.reverse()
@@ -47,7 +47,7 @@ try:
     fshader = FragmentShader(
         src % '\n'.join(
             's += texture2D(tex, vec2(xy.x+(%d.0/float(size[0])), xy.y)) * %f;' % (i, v)
-            for i, v in zip(xrange(-l, l+1), coef)
+            for i, v in zip(range(-l, l+1), coef)
         )
     )
     GaussianBlurHorizontal = ShaderProgram(fshader)
@@ -55,7 +55,7 @@ try:
     fshader = FragmentShader(
         src % '\n'.join(
             's += texture2D(tex, vec2(xy.x, xy.y+(%d.0/float(size[1])))) * %f;' % (i, v)
-            for i, v in zip(xrange(-l, l+1), coef)
+            for i, v in zip(range(-l, l+1), coef)
         )
     )
     GaussianBlurVertical = ShaderProgram(fshader)

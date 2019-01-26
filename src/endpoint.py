@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 from collections import deque
@@ -125,7 +125,7 @@ class Endpoint(object):
             u = self.unpacker
             try:
                 try:
-                    packet = u.next()
+                    packet = next(u)
                 except msgpack.UnpackValueError:
                     raise DecodeError
                 except (StopIteration, IOError):

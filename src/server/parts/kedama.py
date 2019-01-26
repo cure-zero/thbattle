@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 # -- stdlib --
 import logging
@@ -22,7 +22,7 @@ class Kedama(object):
         _['room:join'].subscribe(self._room_join_limit, -5)
 
     # ----- Commands -----
-    @command(None, [basestring, str, dict])
+    @command(None, [str, str, dict])
     def _room_create_limit(self, c, gametype, name, flags):
         core = self.core
         from thb import modes_kedama

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
 import logging
@@ -9,7 +8,6 @@ import gevent
 
 # -- own --
 from endpoint import Endpoint
-from server.utils import command
 from utils.events import FSM
 from utils.misc import throttle, BatchList
 
@@ -82,7 +80,7 @@ class Lobby(object):
         return c._[self]['state']
 
     def all_users(self):
-        return BatchList(self.users.itervalues())
+        return BatchList(self.users.values())
 
 
     # ----- Methods -----

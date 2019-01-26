@@ -552,7 +552,7 @@ class UIShowCardsEffect(Panel):
         self.update()
 
         def coords(n):
-            for i in xrange(n):
+            for i in range(n):
                 y, x = divmod(i, max_per_line)
                 yield x, lines - y - 1
 

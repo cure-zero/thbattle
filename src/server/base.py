@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 # -- stdlib --
 from collections import OrderedDict
@@ -243,7 +243,7 @@ class Game(game.base.Game):
         params = core.game.params_of(g)
         items = core.item.items_of(g)
         m = {core.auth.uid_of(p.client) for p in g.players}
-        items = {m[k]: v for k, v in items.iteritems()}
+        items = {m[k]: v for k, v in items.items()}
 
         try:
             g.process_action(g.bootstrap(params, items))

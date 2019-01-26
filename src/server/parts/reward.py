@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 # -- stdlib --
 import logging
@@ -23,7 +23,7 @@ class Reward(object):
         if not all_dropped:
             bonus = manager.get_bonus()
 
-            for u, l in bonus.iteritems():
+            for u, l in bonus.items():
                 # XXX
                 u.account.add_credit(l)
 

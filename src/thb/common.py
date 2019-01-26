@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 from collections import OrderedDict, defaultdict
@@ -85,7 +85,7 @@ class PlayerIdentity(object):
 
 def roll(g, items):
     from thb.item import European
-    roll = range(len(g.players))
+    roll = list(range(len(g.players)))
     g.random.shuffle(roll)
     pl = g.players
     for i, p in enumerate(pl):
@@ -147,7 +147,7 @@ def build_choices(g, items, candidates, players, num, akaris, shared):
 
     # ----- normal -----
     for e, n in zip(entities, num):
-        for _ in xrange(len(result[e]), n):
+        for _ in range(len(result[e]), n):
             result[e].append(CharChoice(candidates.pop()))
 
     # ----- akaris -----
@@ -159,7 +159,7 @@ def build_choices(g, items, candidates, players, num, akaris, shared):
     g.random.shuffle(rest)
 
     for e, n in zip(entities, akaris):
-        for i in xrange(-n, 0):
+        for i in range(-n, 0):
             result[e][i].set(rest.pop(), True)
 
     # ----- compose final result, reveal, and return -----

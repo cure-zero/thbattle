@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
 
 # -- prioritized --
-import sys
-reload(sys)
-sys.setdefaultencoding('utf-8')
-
 from gevent import monkey
 monkey.patch_all()
 
 # -- stdlib --
 import logging
 import signal
-import urlparse
+import sys
+import urllib.parse
 
 # -- third party --
 from gevent import signal as sig
@@ -52,14 +48,14 @@ def start_server():
 
     import settings
 
-    log = urlparse.urlparse(options.log)
+    log = urllib.parse.urlparse(options.log)
     assert log.scheme == 'file'
-    args = dict(urlparse.parse_qsl(log.query))
+    args = dict(urllib.parse.parse_qsl(log.query))
     utils.log.init_server(args.get('level', 'INFO').upper(), settings.SENTRY_DSN, settings.VERSION, log.path)
 
     if not options.no_backdoor:
         from gevent.backdoor import BackdoorServer
-        a = urlparse.urlparse(options.backdoor)
+        a = urllib.parse.urlparse(options.backdoor)
         gevent.spawn(BackdoorServer((a.hostname, a.port)).serve_forever)
 
     root = logging.getLogger()

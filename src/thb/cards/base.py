@@ -14,7 +14,7 @@ from game.base import GameViralContext
 
 # -- code --
 log = logging.getLogger('THBattle_Cards')
-alloc_id = itertools.count(1).next
+alloc_id = itertools.count(1).__next__
 
 
 class Card(GameObject):
@@ -206,7 +206,7 @@ class VirtualCard(Card, GameViralContext):
         if self._color is not None:
             return self._color
 
-        color = set([c.color for c in self.associated_cards])
+        color = {c.color for c in self.associated_cards}
         color = color.pop() if len(color) == 1 else Card.NOTSET
         return color
 
@@ -219,7 +219,7 @@ class VirtualCard(Card, GameViralContext):
         if self._number is not None:
             return self._number
 
-        num = set([c.number for c in self.associated_cards])
+        num = {c.number for c in self.associated_cards}
         num = num.pop() if len(num) == 1 else Card.NOTSET
         return num
 
@@ -323,7 +323,7 @@ class Deck(GameObject):
 
         cl = self.cards
         rst = []
-        for i in xrange(min(len(cl), num)):
+        for i in range(min(len(cl), num)):
             rst.append(cl[i])
 
         return rst

@@ -10,6 +10,7 @@ import pyglet
 
 # -- own --
 from settings import BASEDIR
+from functools import reduce
 
 # -- code --
 loader    = Loader(os.path.join(BASEDIR, 'resource'))
@@ -129,7 +130,7 @@ def L(name):
     r = name.split('@')
     if len(r) > 1:
         import operator
-        return reduce(operator.getitem, map(int, r[1:]), L(r[0]))
+        return reduce(operator.getitem, list(map(int, r[1:])), L(r[0]))
 
     res = resources.get(name)
     if res:

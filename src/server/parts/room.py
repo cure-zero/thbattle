@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 # -- stdlib --
 from collections import defaultdict
@@ -113,7 +113,7 @@ class Room(object):
         return old
 
     # ----- Client Commands -----
-    @command(['lobby'], [basestring, str, dict])  # TODO dict is too coarse
+    @command(['lobby'], [str, str, dict])  # TODO dict is too coarse
     def _create(self, u, gametype, name, flags):
         core = self.core
         from thb import modes

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 from collections import defaultdict
@@ -398,7 +398,7 @@ class THBattleIdentityBootstrap(GenericAction):
         if Game.CLIENT_SIDE:
             identities = [Identity.TYPE.HIDDEN for _ in identities]
 
-        for p, i in imperial_identities + zip(pl, identities):
+        for p, i in imperial_identities + list(zip(pl, identities)):
             p.identity = Identity()
             p.identity.type = i
             g.process_action(RevealIdentity(p, p))
@@ -538,7 +538,7 @@ class THBattleIdentity(Game):
         return p
 
     def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + g.game_ehs.values()
+        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
         ehclasses += g.ehclasses
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 

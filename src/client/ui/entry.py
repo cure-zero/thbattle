@@ -68,7 +68,7 @@ def start_ui():
     gllib.errcheck = my_errcheck
     # ------------------------------------
 
-    from screens import UpdateScreen, ServerSelectScreen
+    from .screens import UpdateScreen, ServerSelectScreen
     from client.core import Executive
     from options import options
 

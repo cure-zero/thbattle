@@ -25,7 +25,7 @@ SESSION = str(uuid.uuid4())
 def _stats(events):
     if not events: return
 
-    for i in xrange(3):
+    for i in range(3):
         try:
             requests.post(
                 'https://api.leancloud.cn/1.1/stats/open/collect',

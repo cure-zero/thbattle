@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 from collections import deque
@@ -342,7 +342,7 @@ def partition(pred, lst):
 def track(f):
     @functools.wraps(f)
     def _wrapper(*a, **k):
-        print '%s: %s %s' % (f.__name__, a, k)
+        print('%s: %s %s' % (f.__name__, a, k))
         return f(*a, **k)
     return _wrapper
 
@@ -465,7 +465,7 @@ class GenericPool(object):
             container = self.container
 
             if not self.inited:
-                for i in xrange(self.size):
+                for i in range(self.size):
                     container.put(self.factory())
 
                 self.inited = True
@@ -621,7 +621,7 @@ def validate_args(*typelist):
             if e != a:
                 raise ArgCountError(e, a)
 
-            for i, e, v in zip(xrange(1000), typelist, args):
+            for i, e, v in zip(range(1000), typelist, args):
                 if not isinstance(v, e):
                     raise ArgValidationError(i, e, v.__class__)
 
@@ -687,7 +687,7 @@ def imageurl2file(url):
     elif data.startswith('\x89PNG'):
         type = 'png'
 
-    from StringIO import StringIO
+    from io import StringIO
     f = StringIO(data)
 
     return type, f

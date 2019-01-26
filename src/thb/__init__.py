@@ -1,4 +1,4 @@
-from __future__ import absolute_import
+
 
 from thb.thb3v3 import THBattle
 from thb.thbkof import THBattleKOF

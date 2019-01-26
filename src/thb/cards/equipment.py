@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 # -- third party --
@@ -428,7 +428,7 @@ class RepentanceStick(GenericAction):
         cats = [getattr(tgt, i) for i in catnames]
 
         l = []
-        for i in xrange(2):
+        for i in range(2):
             if not (tgt.cards or tgt.showncards or tgt.equips or tgt.fatetell):
                 break
 

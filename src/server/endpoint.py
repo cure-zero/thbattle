@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 # -- stdlib --
 import logging
@@ -55,7 +55,7 @@ class Client(object):
                 if cmd == 'heartbeat':
                     continue
 
-                if not isinstance(cmd, basestring):
+                if not isinstance(cmd, str):
                     continue
 
                 tbl = core.events.client_command

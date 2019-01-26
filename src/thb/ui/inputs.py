@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 import logging
@@ -733,7 +733,7 @@ class Dragger(Control):
         pass
 
     def init(self):
-        self.sprites = [list() for i in xrange(self.rows)]
+        self.sprites = [list() for i in range(self.rows)]
         self.sprites[0] = self.control_list[:]
         for cs in self.sprites[0]:
             cs.zindex = 0
@@ -1102,7 +1102,7 @@ class UIDebugUseCardSelection(CardSelectionPanel):
             return
 
         cl = [c() for c in Card.card_classes.values()]
-        card_lists = [('', cl[i:i+12]) for i in xrange(0, len(cl), 12)]
+        card_lists = [('', cl[i:i+12]) for i in range(0, len(cl), 12)]
         self.panel = panel = CardSelectionPanel(
             parent=self.parent, zindex=10,
             selection_mode=CardSelectionPanel.SINGLE,

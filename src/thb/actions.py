@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
+
 
 # -- stdlib --
 from collections import OrderedDict, defaultdict
@@ -269,7 +269,7 @@ def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
             l[0].unwrapped or migrate_cards(
                 l[0].associated_cards,
                 to if unwrap or detaching else to.owner.special,
-                unwrap if type(unwrap) is bool else unwrap - 1,
+                unwrap if isinstance(unwrap, bool) else unwrap - 1,
                 is_bh,
                 trans
             )
@@ -766,7 +766,7 @@ class LaunchCard(GenericAction):
         n = len(pl)
         dist = OrderedDict([
             (p, min(abs(i), n - abs(i)))
-            for p, i in zip(pl, xrange(-loc, -loc + n))
+            for p, i in zip(pl, range(-loc, -loc + n))
         ])
         return dist
 

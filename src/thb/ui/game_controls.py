@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 # -- third party --
@@ -564,7 +564,7 @@ class CardSelectionPanel(Panel):
                     i += 1
                     h += 125
 
-            for sindex in reversed(xrange(0, len(cl), 6)):
+            for sindex in reversed(range(0, len(cl), 6)):
                 if multiline:
                     cat = cl[sindex:sindex+6]
                 else:
@@ -1024,12 +1024,12 @@ class GameCharacterPortrait(Frame):
             # hp bar
             w = hp.width
             x, y = port.x, port.y
-            for i in xrange(char.maxlife):
+            for i in range(char.maxlife):
                 vertices.extend(
                     hp_bg.get_t4f_v4f_vertices(5+x+i*w, 56+y)
                 )
 
-            for i in xrange(max(char.life, 0)):
+            for i in range(max(char.life, 0)):
                 vertices.extend(
                     hp.get_t4f_v4f_vertices(5+x+i*w, 56+y)
                 )
@@ -1069,7 +1069,7 @@ class GameCharacterPortrait(Frame):
         GameCharacterPortrait.batch_draw_status(gcps)
         glPopMatrix()
         cl = []
-        map(cl.extend, [p.control_list for p in gcps])
+        list(map(cl.extend, [p.control_list for p in gcps]))
         Control.do_draw(cl)
 
     @property

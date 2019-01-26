@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
+
 
 # -- stdlib --
 import logging
@@ -205,7 +205,7 @@ class ProphetInputlet(Inputlet):
             check_type([[int, _]] * 2, data)
             upcards = data[0]
             downcards = data[1]
-            check(sorted(upcards + downcards) == range(len(self.cards)))
+            check(sorted(upcards + downcards) == list(range(len(self.cards))))
         except CheckFailed:
             return [self.cards, []]
 
@@ -220,7 +220,7 @@ class ProphetInputlet(Inputlet):
         upcards = self.upcards
         downcards = self.downcards
         if not set(cards) == set(upcards + downcards):
-            return [range(len(self.cards)), []]
+            return [list(range(len(self.cards))), []]
 
         upcards = [cards.index(c) for c in upcards]
         downcards = [cards.index(c) for c in downcards]
@@ -281,12 +281,12 @@ class SortCharacterInputlet(Inputlet):
         #   Player1: [CharChoice1, ...],
         #   ...
         # }
-        s = set([len(l) for l in mapping.values()])
+        s = {len(l) for l in list(mapping.values())}
         assert(len(s) == 1)
         self.num = n = s.pop()
         self.limit = limit if n >= limit else n
         self.mapping = mapping
-        self.result = range(n)
+        self.result = list(range(n))
 
     def parse(self, data):
         n = self.num
@@ -297,7 +297,7 @@ class SortCharacterInputlet(Inputlet):
             return data
 
         except CheckFailed:
-            return range(n)
+            return list(range(n))
 
     def data(self):
         assert set(self.result) == set(range(self.num))
@@ -321,7 +321,7 @@ class HopeMaskInputlet(Inputlet):
             check_type([[int, _]] * 2, data)
             putback = data[0]
             acquire = data[1]
-            check(sorted(putback+acquire) == range(len(self.cards)))
+            check(sorted(putback+acquire) == list(range(len(self.cards))))
 
             cards = self.cards
             putback = [cards[i] for i in putback]
@@ -348,7 +348,7 @@ class HopeMaskInputlet(Inputlet):
         putback = self.putback
         acquire = self.acquire
         if not set(cards) == set(putback + acquire):
-            return [range(len(self.cards)), []]
+            return [list(range(len(self.cards))), []]
 
         putback = [cards.index(c) for c in putback]
         acquire = [cards.index(c) for c in acquire]
