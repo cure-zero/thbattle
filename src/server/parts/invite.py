@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
 import logging
@@ -9,6 +8,8 @@ import logging
 import gevent
 
 # -- own --
+from server.base import Game
+from server.endpoint import Client
 from server.utils import command
 from utils.events import EventHub
 
@@ -43,8 +44,18 @@ class Invite(object):
         g._[self] = old._[self]
         return ev
 
-    @command(None, [int, int])
-    def _room_join_invite_limit(self, u, gid, slot):
+    def handle_game_left(self, ev):
+        g, c = ev
+        core = self.core
+
+        for bl in g._[self]['banned'].values():
+            bl.discard(core.auth.uid_of(c))
+
+        return ev
+
+    # ----- Commands -----
+    @command()
+    def _room_join_invite_limit(self, u: Client, gid: int, slot: int):
         core = self.core
         g = core.room.get_game_by_id(gid)
         if not g:
@@ -66,18 +77,8 @@ class Invite(object):
             u.write(['error', 'not_invited'])
             return EventHub.STOP_PROPAGATION
 
-    def handle_game_left(self, ev):
-        g, c = ev
-        core = self.core
-
-        for bl in g._[self]['banned'].values():
-            bl.discard(core.auth.uid_of(c))
-
-        return ev
-
-    # ----- Commands -----
-    @command(['room', 'ready'], [int])
-    def _invite(self, u, uid):
+    @command('room', 'ready')
+    def _invite(self, u: Client, uid: int):
         core = self.core
 
         other = core.lobby.get_by_uid(uid)
@@ -95,8 +96,8 @@ class Invite(object):
             g.__class__.__name__,
         ]])
 
-    @command(['room', 'ready'], [int])
-    def _kick(self, c, uid):
+    @command('room', 'ready')
+    def _kick(self, c: Client, uid: int):
         core = self.core
         other = core.lobby.user_from_uid(uid)
         if not other:
@@ -116,10 +117,10 @@ class Invite(object):
         for u in core.room.online_users_of(g):
             u.write(['kick_request', [c, other, len(bl)]])
 
-        if len(bl) >= len(self.users) // 2:
+        if len(bl) >= len(core.room.users_of(g)) // 2:
             g._[self]['invited'].discard(other)
             core.room.exit_game(other)
 
     # ----- Methods -----
-    def add_invited(self, g, u):
+    def add_invited(self, g: Game, u: Client):
         g._[self]['invited'].add(u)

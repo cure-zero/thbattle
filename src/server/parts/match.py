@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
+from typing import List
 import logging
 
 # -- third party --
 import gevent
 
 # -- own --
+from server.base import Game
+from server.endpoint import Client
 from server.utils import command
 from utils import BatchList
 from utils.events import EventHub
@@ -78,8 +80,8 @@ class Match(object):
         return ev
 
     # ----- Client Commands -----
-    @command(None, [str, str, [int]])
-    def _match(self, c, name, typ, uids):
+    @command()
+    def _match(self, c: Client, name: str, typ: str, uids: List[int]):
         core = self.core
         from thb import modes
         gamecls = modes[typ]
@@ -94,8 +96,8 @@ class Match(object):
         }
         self._start_poll(g, uids)
 
-    @command(None, [int, int])
-    def _room_join_match_limit(self, u, gid, slot):
+    @command()
+    def _room_join_match_limit(self, u: Client, gid: int, slot: int):
         core = self.core
         g = core.room.get_game_by_id(gid)
         if not g:
@@ -111,7 +113,7 @@ class Match(object):
                 return EventHub.STOP_PROPAGATION
 
     # ----- Methods -----
-    def _start_poll(self, g, uids):
+    def _start_poll(self, g: Game, uids: List[int]):
         core = self.core
         gid = core.room.gid_of(g)
 

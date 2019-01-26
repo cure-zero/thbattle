@@ -9,7 +9,7 @@ import uuid
 
 # -- third party --
 # -- own --
-from utils.misc import ObservableEvent
+from utils.misc import ObservableEvent, instantiate
 
 
 # -- code --
@@ -62,8 +62,6 @@ class UserSettings(dict):
     def _get_conf_name(self):
         return 'user_settings.json'
 
-
-UserSettings = UserSettings()
 
 UserSettings.add_setting('last_id', '无名の罪袋')
 UserSettings.add_setting('saved_passwd', '')

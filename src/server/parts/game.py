@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
+from collections import defaultdict
 from weakref import WeakSet
 import logging
 import random
 
 # -- third party --
 # -- own --
-from collections import defaultdict
 from game.base import GameData
+from server.endpoint import Client
 from server.utils import command
 from utils import BatchList
 
@@ -105,8 +105,8 @@ class Game(object):
         return ev
 
     # ----- Commands -----
-    @command(['room'], [str, object])
-    def _set_param(self, u, key, value):
+    @command('room')
+    def _set_param(self, u: Client, key: str, value: object):
         core = self.core
 
         if core.lobby.state_of(u) != 'room':
@@ -138,8 +138,8 @@ class Game(object):
             u.write(['set_game_param', [u, key, value]])
             u.write(['game_params', [gid, g._[self]['params']]])
 
-    @command(['game'], [int, int, str, object])
-    def _gamedata(self, u, gid, serial, tag, data):
+    @command('game')
+    def _gamedata(self, u: Client, gid: int, serial: int, tag: str, data: object):
         core = self.core
         g = u._[self]['game']
         if gid != core.room.gid_of(g):

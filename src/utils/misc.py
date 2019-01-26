@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import deque
 from contextlib import contextmanager
 from functools import wraps
+from typing import Mapping
 from weakref import WeakSet
 import functools
 import logging
@@ -19,20 +19,7 @@ import gevent
 
 # -- code --
 log = logging.getLogger('util.misc')
-dbgvals = {}
-
-
-class Packet(list):  # compare by identity list
-    __slots__ = ('scan_count')
-
-    def __hash__(self):
-        return id(self)
-
-    def __eq__(self, other):
-        return id(self) == id(other)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
+dbgvals: Mapping[str, object] = {}
 
 
 class ObjectDict(dict):
@@ -103,138 +90,6 @@ class BatchList(list):
         return self[(i + offset) % n]
 
 
-class CheckFailed(Exception):
-    pass
-
-
-def check(b):
-    if not b:
-        # import traceback
-        # traceback.print_stack()
-        raise CheckFailed
-
-
-_ = Ellipsis
-
-
-def check_type(pattern, obj):
-    if isinstance(pattern, (list, tuple)):
-        check(isinstance(obj, (list, tuple)))
-        if len(pattern) == 2 and pattern[-1] is _:
-            cls = pattern[0]
-            for v in obj:
-                check(isinstance(v, cls))
-        else:
-            check(len(pattern) == len(obj))
-            for cls, v in zip(pattern, obj):
-                check_type(cls, v)
-    else:
-        check(isinstance(obj, pattern))
-
-
-class Framebuffer(object):
-    current_fbo = None
-
-    def __init__(self, texture=None):
-        from pyglet import gl
-        fbo_id = gl.GLuint(0)
-        gl.glGenFramebuffersEXT(1, gl.byref(fbo_id))
-        self.fbo_id = fbo_id
-        self._texture = None
-        if texture:
-            self.bind()
-            self.texture = texture
-            self.unbind()
-
-    def _get_texture(self):
-        return self._texture
-
-    def _set_texture(self, t):
-        self._texture = t
-        from pyglet import gl
-        try:
-            gl.glFramebufferTexture2DEXT(
-                gl.GL_FRAMEBUFFER_EXT,
-                gl.GL_COLOR_ATTACHMENT0_EXT,
-                t.target, t.id, 0,
-            )
-        except gl.GLException:
-            # HACK: Some Intel card return errno == 1286L
-            # which means GL_INVALID_FRAMEBUFFER_OPERATION_EXT
-            # but IT ACTUALLY WORKS FINE!!
-            pass
-
-        gl.glViewport(0, 0, t.width, t.height)
-
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glLoadIdentity()
-        gl.gluOrtho2D(0, t.width, 0, t.height)
-
-        gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glLoadIdentity()
-
-        # ATI cards hack
-        gl.glBegin(gl.GL_LINES)
-        gl.glEnd()
-        # --------------
-
-    texture = property(_get_texture, _set_texture)
-
-    def __enter__(self):
-        self.bind()
-
-    def __exit__(self, exc_type, exc_value, tb):
-        self.unbind()
-
-    def bind(self):
-        assert Framebuffer.current_fbo is None
-        from pyglet import gl
-        t = self.texture
-        gl.glBindFramebufferEXT(gl.GL_FRAMEBUFFER_EXT, self.fbo_id)
-        gl.glPushAttrib(gl.GL_VIEWPORT_BIT | gl.GL_TRANSFORM_BIT)
-        if t:
-            gl.glViewport(0, 0, t.width, t.height)
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glPushMatrix()
-        if t:
-            gl.glLoadIdentity()
-            gl.gluOrtho2D(0, t.width, 0, t.height)
-        gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glPushMatrix()
-        if t:
-            gl.glLoadIdentity()
-
-        Framebuffer.current_fbo = self
-
-    def unbind(self):
-        from pyglet import gl
-        gl.glMatrixMode(gl.GL_MODELVIEW)
-        gl.glPopMatrix()
-        gl.glMatrixMode(gl.GL_PROJECTION)
-        gl.glPopMatrix()
-        gl.glPopAttrib()
-        gl.glBindFramebufferEXT(gl.GL_FRAMEBUFFER_EXT, 0)
-        Framebuffer.current_fbo = None
-
-    def __del__(self):
-        from pyglet import gl
-        try:
-            gl.glDeleteFramebuffersEXT(1, self.fbo_id)
-        except Exception:
-            pass
-
-    def blit_from_current_readbuffer(self, src_box, dst_box=None, mask=None, _filter=None):
-        from pyglet import gl
-        mask = mask if mask else gl.GL_COLOR_BUFFER_BIT
-        _filter = _filter if _filter else gl.GL_LINEAR
-
-        if not dst_box:
-            dst_box = (0, 0, src_box[2] - src_box[0], src_box[3] - src_box[1])
-
-        args = tuple(src_box) + tuple(dst_box) + (mask, _filter)
-        gl.glBlitFramebufferEXT(*args)
-
-
 def remove_dups(s):
     seen = set()
     for i in s:
@@ -260,7 +115,8 @@ def classmix(*_classes):
     cls_cache[classes] = new_cls
     return new_cls
 
-cls_cache = {}
+
+cls_cache: Mapping[tuple, type] = {}
 
 
 def hook(module):
@@ -274,41 +130,6 @@ def hook(module):
         setattr(module, funcname, real_hooker)
         return real_hooker
     return inner
-
-
-def gif_to_animation(giffile):
-    import pyglet
-    from PIL import Image
-
-    im = Image.open(giffile)
-
-    dur = []
-    framedata = []
-
-    while True:
-        dur.append(im.info['duration'])
-        framedata.append(im.convert('RGBA').tostring())
-        try:
-            im.seek(im.tell()+1)
-        except Exception:
-            break
-
-    dur[0] = 100
-
-    w, h = im.size
-
-    frames = []
-    for d, data in zip(dur, framedata):
-        img = pyglet.image.ImageData(w, h, 'RGBA', data, pitch=-w*4)
-        img.anchor_x, img.anchor_y = img.width // 2, img.height // 2
-        frames.append(
-            pyglet.image.AnimationFrame(img, d/1000.0)
-        )
-
-    anim = pyglet.image.Animation(frames)
-    anim.width, anim.height = w, h
-
-    return anim
 
 
 def extendclass(clsname, bases, _dict):
@@ -647,47 +468,3 @@ class exceptions(object):
         cls = type(k, (BusinessException,), {'snake_case': snake_case})
         setattr(self, k, cls)
         return cls
-
-
-def first(l, pred=None):
-    if pred:
-        for i in l:
-            if pred(i):
-                return i
-        else:
-            return None
-    else:
-        return l[0] if len(l) else None
-
-
-cached_images = {}
-
-
-def is_url_cached(url):
-    return url in cached_images
-
-
-def imageurl2file(url):
-    if url in cached_images:
-        data = cached_images[url]
-    else:
-        import requests  # Mobile version don't have this
-        resp = requests.get(url)
-        if not resp.ok:
-            log.warning('Image fetch not ok: %s -> %s', resp.status_code, url)
-            return None, None
-
-        data = resp.content
-        cached_images[url] = data
-
-    if data.startswith('GIF'):
-        type = 'gif'
-    elif data.startswith('\xff\xd8') and data.endswith('\xff\xd9'):
-        type = 'jpg'
-    elif data.startswith('\x89PNG'):
-        type = 'png'
-
-    from io import StringIO
-    f = StringIO(data)
-
-    return type, f

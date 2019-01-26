@@ -249,7 +249,6 @@ class Screen(Overlay):
 
         elif _type == 'invite_request':
             uid, uname, gid, gtype = args[0]
-            from user_settings import UserSettings as us
             if us.no_invite:
                 Executive.invite_grant(gid, False)
                 return

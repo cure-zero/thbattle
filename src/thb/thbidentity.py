@@ -342,14 +342,14 @@ class ChooseBossSkillAction(GenericAction):
             self.skill_chosen = bs[0]
             return True
 
-        self.boss_skills = l = [  # for ui
+        self.boss_skills = lst = [  # for ui
             AssistedAttack,
             AssistedGraze,
             AssistedHeal,
             ExtraCardSlot,
         ]
-        rst = user_input([tgt], ChooseOptionInputlet(self, [i.__name__ for i in l]))
-        rst = first(l, lambda i: i.__name__ == rst) or first(l)
+        rst = user_input([tgt], ChooseOptionInputlet(self, [i.__name__ for i in lst]))
+        rst = next((i for i in lst if i.__name__ == rst), None) or next(lst)
         tgt.skills.append(rst)
         self.skill_chosen = rst  # for ui
         return True

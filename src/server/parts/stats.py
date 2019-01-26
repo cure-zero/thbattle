@@ -9,14 +9,9 @@ import logging
 # -- own --
 
 # -- code --
-log = logging.getLogger('server.actors.stats')
+log = logging.getLogger('server.parts.stats')
 
 
 class Stats(object):
     def __init__(self, core):
         self.core = core
-        core.events.game_started += self.handle_game_started
-
-    def handle_game_started(self, g):
-        stats({'event': 'start_game', 'attributes': {'gametype': manager.gamecls.__name__}})
-        return g

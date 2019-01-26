@@ -8,7 +8,7 @@ import logging
 # -- own --
 from game.autoenv import Game
 from game.base import Inputlet
-from utils import CheckFailed, check, check_type
+from utils.check import CheckFailed, check, check_type
 
 # -- code --
 log = logging.getLogger('Inputlets')
@@ -62,9 +62,8 @@ class ActionInputlet(Inputlet):
         players = []
         params = {}
 
-        _ = Ellipsis
         try:
-            check_type([[int, _]] * 3 + [dict], data)
+            check_type([[int, ...]] * 3 + [dict], data)
 
             sid_list, cid_list, pid_list, params = data
 
@@ -200,9 +199,8 @@ class ProphetInputlet(Inputlet):
         self.downcards = []
 
     def parse(self, data):
-        _ = Ellipsis
         try:
-            check_type([[int, _]] * 2, data)
+            check_type([[int, ...]] * 2, data)
             upcards = data[0]
             downcards = data[1]
             check(sorted(upcards + downcards) == list(range(len(self.cards))))
@@ -316,9 +314,8 @@ class HopeMaskInputlet(Inputlet):
         self.acquire = []
 
     def parse(self, data):
-        _ = Ellipsis
         try:
-            check_type([[int, _]] * 2, data)
+            check_type([[int, ...]] * 2, data)
             putback = data[0]
             acquire = data[1]
             check(sorted(putback+acquire) == list(range(len(self.cards))))

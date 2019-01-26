@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import logging
 
 # -- third party --
 # -- own --
+from server.endpoint import Client
 from server.utils import command
 from utils.events import EventHub
 
@@ -22,28 +22,28 @@ class Kedama(object):
         _['room:join'].subscribe(self._room_join_limit, -5)
 
     # ----- Commands -----
-    @command(None, [str, str, dict])
-    def _room_create_limit(self, c, gametype, name, flags):
+    @command()
+    def _room_create_limit(self, u: Client, gametype: str, name: str, flags: dict):
         core = self.core
         from thb import modes_kedama
-        if core.auth.is_kedama(c) and gametype not in modes_kedama:
-            c.write(['error', 'kedama_limitation'])
+        if core.auth.is_kedama(u) and gametype not in modes_kedama:
+            u.write(['error', 'kedama_limitation'])
             return EventHub.STOP_PROPAGATION
 
-    @command(None, [int, int])
-    def _room_join_limit(self, c, gid, slot):
+    @command()
+    def _room_join_limit(self, u: Client, gid: int, slot: int):
         core = self.core
         g = core.room.get_game_by_id(gid)
         if not g:
             return
 
         from thb import modes_kedama
-        if core.auth.is_kedama(c) and g.__class__.__name__ not in modes_kedama:
-            c.write(['error', 'kedama_limitation'])
+        if core.auth.is_kedama(u) and g.__class__.__name__ not in modes_kedama:
+            u.write(['error', 'kedama_limitation'])
             return EventHub.STOP_PROPAGATION
 
-    @command(None, [int])
-    def _invite(self, c, uid):
+    @command()
+    def _invite(self, c: Client, uid: int):
         core = self.core
         uid = core.auth.uid_of(c)
         if uid <= 0:

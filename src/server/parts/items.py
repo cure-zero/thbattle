@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
 import logging
@@ -9,6 +8,7 @@ import sys
 # -- third party --
 # -- own --
 from game.base import GameItem
+from server.endpoint import Client
 from server.utils import command
 from utils.misc import BusinessException
 
@@ -66,8 +66,8 @@ class Items(object):
         return ev
 
     # ----- Command -----
-    @command(['room'], [str])
-    def _use_item(self, u, sku):
+    @command('room')
+    def _use_item(self, u: Client, sku: str):
         core = self.core
         g = core.game.current(u)
         assert g

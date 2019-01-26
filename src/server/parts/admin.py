@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import logging
 
 # -- third party --
-# -- own --
-from server.utils import command
 import gevent
+
+# -- own --
+from server.endpoint import Client
+from server.utils import command
 
 
 # -- code --
@@ -45,15 +46,15 @@ class Admin(object):
         return wrapper
 
     @_need_admin
-    @command(None, [int])
-    def _kick(self, c, uid):
+    @command()
+    def _kick(self, c: Client, uid: int):
         core = self.core
         u = core.lobby.get_by_uid(uid)
         u and u.close()
 
     @_need_admin
-    @command(None, [])
-    def _clearzombies(self, c):
+    @command()
+    def _clearzombies(self, c: Client):
         core = self.core
         users = core.lobby.all_users()
         for u in users:
@@ -62,8 +63,8 @@ class Admin(object):
                 core.events.client_dropped.emit(u)
 
     @_need_admin
-    @command(None, [])
-    def _migrate(self, c):
+    @command()
+    def _migrate(self, c: Client):
         core = self.core
 
         @gevent.spawn
@@ -85,8 +86,8 @@ class Admin(object):
                 gevent.sleep(1)
 
     @_need_admin
-    @command(None, [])
-    def _stacktrace(self, c):
+    @command()
+    def _stacktrace(self, c: Client):
         core = self.core
         g = core.game.current(c)
         if not g:
@@ -106,8 +107,8 @@ class Admin(object):
         log.info('===========================')
 
     @_need_admin
-    @command(None, [int])
-    def _kill_game(self, c, gid):
+    @command()
+    def _kill_game(self, c: Client, gid: int):
         core = self.core
         g = core.room.get_game(gid)
         if not g: return
@@ -117,26 +118,26 @@ class Admin(object):
             core.room.exit_game(u, is_drop=True)
 
     @_need_admin
-    @command(None, [int])
-    def _add(self, c, uid):
+    @command()
+    def _add(self, c: Client, uid: int):
         self.admins.append(uid)
 
     @_need_admin
-    @command(None, [int])
-    def _remove(self, c, uid):
+    @command()
+    def _remove(self, c: Client, uid: int):
         try:
             self.admins.remove(uid)
         except Exception:
             pass
 
     @_need_admin
-    @command(None, [int])
-    def _add_bigbrother(self, c, uid):
+    @command()
+    def _add_bigbrother(self, c: Client, uid: int):
         core = self.core
         core.observe.add_bigbrother(uid)
 
     @_need_admin
-    @command(None, [int])
-    def _remove_bigbrother(self, c, uid):
+    @command()
+    def _remove_bigbrother(self, c: Client, uid: int):
         core = self.core
         core.observe.remove_bigbrother(uid)

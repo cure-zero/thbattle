@@ -117,7 +117,7 @@ def start_client():
         import pyglet
         pyglet.app.exit()
         raise
-    except:
+    except Exception:
         import pyglet
         pyglet.app.exit()
 

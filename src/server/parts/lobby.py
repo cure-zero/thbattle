@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import List
 import logging
 
 # -- third party --
@@ -8,8 +9,9 @@ import gevent
 
 # -- own --
 from endpoint import Endpoint
+from server.endpoint import Client
 from utils.events import FSM
-from utils.misc import throttle, BatchList
+from utils.misc import BatchList, throttle
 
 
 # -- code --
@@ -76,15 +78,14 @@ class Lobby(object):
 
     # ----- Client Commands -----
     # ----- Public Methods -----
-    def state_of(self, c):
-        return c._[self]['state']
+    def state_of(self, u: Client) -> FSM:
+        return u._[self]['state']
 
-    def all_users(self):
+    def all_users(self) -> List[Client]:
         return BatchList(self.users.values())
 
-
     # ----- Methods -----
-    def _user_join(self, u):
+    def _user_join(self, u: Client):
         core = self.core
         uid = core.auth.uid_of(u)
         name = core.auth.name_of(u)
@@ -116,7 +117,7 @@ class Lobby(object):
 
         log.info('User %s joined, online user %d' % (name, len(self.users)))
 
-    def _user_leave(self, u):
+    def _user_leave(self, u: Client):
         core = self.core
         uid = core.auth.uid_of(u)
         name = core.auth.name_of(u)
@@ -124,7 +125,7 @@ class Lobby(object):
         log.info('User %s left, online user %d' % (name, len(self.users)))
 
     @throttle(3)
-    def _notify_online_users(self, ul):
+    def _notify_online_users(self, ul: List[Client]):
         core = self.core
 
         lst = [core.view.User(u) for u in self.users.values()]

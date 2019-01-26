@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import logging
 
 # -- third party --
-
 # -- own --
+from server.base import Game
+from server.endpoint import Client
+
 
 # -- code --
 log = logging.getLogger('server.parts.view')
@@ -16,7 +17,7 @@ class View(object):
     def __init__(self, core):
         self.core = core
 
-    def User(self, u):
+    def User(self, u: Client):
         core = self.core
 
         return {
@@ -25,7 +26,7 @@ class View(object):
             'state': str(core.lobby.state_of(u)),
         }
 
-    def Game(self, g):
+    def Game(self, g: Game):
         core = self.core
 
         return {
@@ -36,7 +37,7 @@ class View(object):
             'online':   len(core.room.online_users_of(g)),
         }
 
-    def GameDetail(self, g):
+    def GameDetail(self, g: Game):
         core = self.core
 
         rst = {
@@ -47,5 +48,5 @@ class View(object):
         rst.update(self.Game(g))
         return rst
 
-    def Player(self, p):
+    def Player(self, p: Client):
         return self.User(p.client)

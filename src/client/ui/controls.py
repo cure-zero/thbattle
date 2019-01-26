@@ -24,7 +24,7 @@ from client.core import Executive
 from client.ui.base import Control, Overlay
 from client.ui.base.interp import InterpDesc, LinearInterp
 from client.ui.resloader import L
-from utils import flatten, inpoly, instantiate, pyperclip, rectv2f, rrectv2f, textsnap, imageurl2file
+from utils import flatten, inpoly, instantiate, pyperclip, rectv2f, rrectv2f, textsnap
 from utils.stats import stats
 import settings
 import requests
@@ -33,6 +33,74 @@ import requests
 # -- code --
 KEYMOD_MASK = key.MOD_CTRL | key.MOD_ALT | key.MOD_SHIFT
 log = logging.getLogger('UI_Controls')
+
+
+def gif_to_animation(giffile):
+    import pyglet
+    from PIL import Image
+
+    im = Image.open(giffile)
+
+    dur = []
+    framedata = []
+
+    while True:
+        dur.append(im.info['duration'])
+        framedata.append(im.convert('RGBA').tostring())
+        try:
+            im.seek(im.tell()+1)
+        except Exception:
+            break
+
+    dur[0] = 100
+
+    w, h = im.size
+
+    frames = []
+    for d, data in zip(dur, framedata):
+        img = pyglet.image.ImageData(w, h, 'RGBA', data, pitch=-w*4)
+        img.anchor_x, img.anchor_y = img.width // 2, img.height // 2
+        frames.append(
+            pyglet.image.AnimationFrame(img, d/1000.0)
+        )
+
+    anim = pyglet.image.Animation(frames)
+    anim.width, anim.height = w, h
+
+    return anim
+
+
+cached_images = {}
+
+
+def is_url_cached(url):
+    return url in cached_images
+
+
+def imageurl2file(url):
+    if url in cached_images:
+        data = cached_images[url]
+    else:
+        import requests  # Mobile version don't have this
+        resp = requests.get(url)
+        if not resp.ok:
+            log.warning('Image fetch not ok: %s -> %s', resp.status_code, url)
+            return None, None
+
+        data = resp.content
+        cached_images[url] = data
+
+    if data.startswith('GIF'):
+        type = 'gif'
+    elif data.startswith('\xff\xd8') and data.endswith('\xff\xd9'):
+        type = 'jpg'
+    elif data.startswith('\x89PNG'):
+        type = 'png'
+
+    from io import StringIO
+    f = StringIO(data)
+
+    return type, f
 
 
 class Colors:
@@ -1049,7 +1117,6 @@ class PlayerPortrait(Frame):
             def set_avatar(ft, f):
                 try:
                     if ft == 'gif':
-                        from utils import gif_to_animation
                         img = gif_to_animation(f)
                     else:
                         img = pyglet.image.load('foo.%s' % ft, file=f)
@@ -1112,7 +1179,6 @@ class PlayerPortrait(Frame):
 
             try:
                 if ft == 'gif':
-                    from utils import gif_to_animation
                     img = gif_to_animation(f)
                 else:
                     img = pyglet.image.load('foo.%s' % ft, file=f)
@@ -2186,7 +2252,6 @@ class NoInviteButton(OptionButton):
             ('邀请已开启', Colors.orange, False),
         )
         OptionButton.__init__(self, conf=conf, value=UserSettings.no_invite, *a, **k)
-        UserSettings.setting_change += self
 
     def __call__(self, k, v):
         if k == 'no_invite':
@@ -2195,11 +2260,6 @@ class NoInviteButton(OptionButton):
     def on_value_changed(self, value):
         from user_settings import UserSettings as us
         us.no_invite = value
-
-    def delete(self):
-        from user_settings import UserSettings
-        UserSettings.setting_change -= self
-        OptionButton.delete(self)
 
     def on_click(self):
         OptionButton.on_click(self)

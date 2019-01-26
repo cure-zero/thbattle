@@ -134,21 +134,6 @@ def kickob(uid):
     return ''
 
 
-@command('开启/关闭游戏邀请', 'on      开启邀请\noff     关闭邀请')
-@argtypes(str)
-@argdesc('<on||off>')
-def invite(onoff):
-    from user_settings import UserSettings as us
-    if onoff == 'on':
-        us.no_invite = False
-        return '邀请已开启，其他玩家可以邀请你一起游戏。'
-    elif onoff == 'off':
-        us.no_invite = True
-        return '邀请已关闭，其他玩家邀请你时会自动拒绝，不会有提示。'
-    else:
-        return registered_commands['?']('invite')
-
-
 @command('观战', '只能在大厅内使用，uid为右侧玩家列表中[]内的数字id')
 @argtypes(int)
 @argdesc('<uid>')

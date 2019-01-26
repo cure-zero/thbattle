@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import logging
 
@@ -8,6 +7,8 @@ import logging
 import gevent
 
 # -- own --
+from server.base import Game
+from server.endpoint import Client
 from server.utils import command
 from utils import BatchList
 from utils.misc import throttle
@@ -43,7 +44,7 @@ class Observe(object):
 
         elif (f, t) == ('game', 'lobby'):
             for u in c._[self]['obs']:
-                self._observe_detach(u, c)
+                self._observe_detach(u)
 
         if t == 'lobby':
             c._[self] = {
@@ -85,11 +86,11 @@ class Observe(object):
         return ev
 
     # ----- Client Commands -----
-    @command(['lobby'], [int])
-    def _observe(self, ob, observee_uid):
+    @command('lobby')
+    def _observe(self, u: Client, uid: int):
         core = self.core
 
-        observee = core.lobby.get_user(observee_uid)
+        observee = core.lobby.get_user(uid)
         if not observee:
             return
 
@@ -99,14 +100,14 @@ class Observe(object):
         if core.lobby.state_of(observee) not in ('game', 'room', 'ready'):
             return
 
-        uid = core.auth.uid_of(ob)
+        uid = core.auth.uid_of(u)
 
         if uid in self._bigbrothers:
             observee.write(['system_msg', [None,
                 '管理员对你使用了强制观战，效果拔群。'
                 '强制观战功能仅用来处理纠纷，如果涉及滥用，请向 Proton 投诉。'
             ]])
-            self._observe_attach(ob, observee)
+            self._observe_attach(u, observee)
             return
 
         if uid in observee._[self]['reqs']:
@@ -114,10 +115,10 @@ class Observe(object):
             return
 
         observee._[self]['reqs'].add(uid)
-        observee.write(['observe_request', [uid, core.auth.name_of(ob)]])
+        observee.write(['observe_request', [uid, core.auth.name_of(u)]])
 
-    @command(['room', 'ready', 'game'], [int, bool])
-    def _grant(self, c, uid, grant):
+    @command('room', 'ready', 'game')
+    def _grant(self, c: Client, uid: int, grant: bool):
         if uid not in c._[self]['reqs']:
             return
 
@@ -132,8 +133,8 @@ class Observe(object):
         else:
             ob.write(['observe_refused', core.auth.name_of(c)])
 
-    @command(['room', 'ready', 'game'], [int])
-    def _kick(self, c, uid):
+    @command('room', 'ready', 'game')
+    def _kick(self, c: Client, uid: int):
         core = self.core
         ob = core.lobby.get_user(uid)
         if not ob:
@@ -148,7 +149,7 @@ class Observe(object):
 
         assert core.lobby.state_of(u) == 'ob'
 
-        self._observe_detach(u, c)
+        self._observe_detach(u)
         return
 
         # TODO
@@ -166,9 +167,9 @@ class Observe(object):
         self.exit_game(other)
         '''
 
-    @command(['ob'], [])
-    def _leave(self, ob):
-        self._observe_detach(ob)
+    @command('ob')
+    def _leave(self, u: Client):
+        self._observe_detach(u)
 
     # ----- Public Methods -----
     def add_bigbrother(self, uid):
@@ -181,7 +182,7 @@ class Observe(object):
             pass
 
     # ----- Methods -----
-    def _observe_start(self, ob, observee):
+    def _observe_start(self, ob: Client, observee: Client):
         core = self.core
         uid = core.auth.uid_of(observee)
         g = core.game.current(observee)
@@ -195,12 +196,12 @@ class Observe(object):
         ob.write(['observe_started', [params, items, uid, players]])
         core.lobby.state_of(ob).transit('ob')
 
-    def _observe_end(self, ob, observee):
+    def _observe_end(self, ob: Client, observee: Client):
         core = self.core
         ob.write(['game_ended', None])
         core.lobby.state_of(ob).transit('ob')
 
-    def _observe_attach(self, ob, observee):
+    def _observe_attach(self, ob: Client, observee: Client):
         core = self.core
 
         g = core.game.current(observee)
@@ -232,7 +233,7 @@ class Observe(object):
             self._observe_start(ob, observee)
             core.game.replay(observee, to=ob)
 
-    def _observe_detach(self, ob):
+    def _observe_detach(self, ob: Client):
         core = self.core
         assert core.lobby.state_of(ob) == 'ob'
 
@@ -262,7 +263,7 @@ class Observe(object):
             ul.write(info)
             ul._[self]['obs'].write(info)
 
-    def _notify(self, g):
+    def _notify(self, g: Game):
         notifier = g._[self]['_notifier']
         core = self.core
 

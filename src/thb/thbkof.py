@@ -15,7 +15,6 @@ from thb.actions import action_eventhandlers
 from thb.characters.baseclasses import Character, mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
-from utils import first
 
 
 # -- code --
@@ -145,7 +144,7 @@ class THBattleKOFBootstrap(GenericAction):
 
             for p in order:
                 c = user_input([p], ChooseGirlInputlet(g, choices), 10, 'single', trans)
-                c = c or first(choices[p], lambda c: not c.chosen)
+                c = c or next(choices[p], lambda c: not c.chosen, None)
 
                 c.chosen = p
                 chosen[p].append(c)

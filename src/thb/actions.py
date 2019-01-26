@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
@@ -8,11 +7,12 @@ import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGroup, Game
+from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGroup
 from game.autoenv import GameException, InputTransaction, sync_primitive, user_input
 from game.base import GameViralContext
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
-from utils import BatchList, CheckFailed, check, check_type, group_by
+from utils.check import CheckFailed, check, check_type
+from utils.misc import BatchList, group_by
 
 
 # -- code --
@@ -121,7 +121,7 @@ def ask_for_action(initiator, actors, categories, candidates, timeout=None, tran
 
 
 def user_choose_cards(initiator, actor, categories, timeout=None, trans=None):
-    check_type([str, Ellipsis], categories)
+    check_type([str, ...], categories)
 
     _, rst = ask_for_action(initiator, [actor], categories, (), timeout=timeout, trans=trans)
     if not rst:

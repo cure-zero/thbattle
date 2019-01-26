@@ -47,7 +47,7 @@ class Connect(object):
         })
 
     # ----- Public Methods -----
-    def speaker(self, name, text):
+    def speaker(self, name: str, text: str):
         core = self.core
         self._wssend({
             'op': 'Message',

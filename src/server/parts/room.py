@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
+from typing import List
 import logging
 import time
 
@@ -11,6 +11,8 @@ import gevent
 
 # -- own --
 from endpoint import Endpoint
+from server.base import Game
+from server.endpoint import Client
 from server.utils import command
 from utils import BatchList
 from utils.misc import throttle
@@ -113,44 +115,44 @@ class Room(object):
         return old
 
     # ----- Client Commands -----
-    @command(['lobby'], [str, str, dict])  # TODO dict is too coarse
-    def _create(self, u, gametype, name, flags):
+    @command('lobby')
+    def _create(self, u: Client, typ: str, name: str, flags: dict):
         core = self.core
         from thb import modes
 
-        if gametype not in modes:
+        if typ not in modes:
             return
 
         gid = self._new_gid()
-        g = self.create_game(gid, gametype, name, flags)
+        g = self.create_game(gid, typ, name, flags)
         core.invite.add_invited(u)
         core.room.join_game(g, u)
 
-    @command(['lobby', 'ob'], [int, int, object])
-    def _join(self, user, gid, slot):
+    @command('lobby', 'ob')
+    def _join(self, u, gid: int, slot: int):
         g = self.games.get(gid)
         if not g:
             return
 
         log.info("join game")
-        self.join_game(g, user, slot)
+        self.join_game(g, u, slot)
 
-    @command(['room', 'ready', 'game'], [])
-    def _leave(self, c, is_drop=False):
+    @command('room', 'ready', 'game')
+    def _leave(self, u: Client):
         core = self.core
-        self.exit_game(c)
-        core.lobby.state_of(c).transit('lobby')
+        self.exit_game(u)
+        core.lobby.state_of(u).transit('lobby')
 
-    @command(['lobby'], [int])
-    def _users(self, c, gid):
+    @command('lobby')
+    def _users(self, u: Client, gid: int):
         g = self.games.get(gid)
         if not g:
             return
 
-        self._send_users(g, c)
+        self._send_users(g, u)
 
-    @command(['room'], [])
-    def _get_ready(self, u):
+    @command('room')
+    def _get_ready(self, u: Client):
         core = self.core
         g = core.game.current(u)
 
@@ -166,8 +168,8 @@ class Room(object):
                 log.info("game starting")
                 g.greenlet = gevent.spawn(g.run)
 
-    @command(['ready'], [])
-    def _cancel_ready(self, u):
+    @command('ready')
+    def _cancel_ready(self, u: Client):
         core = self.core
         if core.lobby.state_of(u) != 'ready':
             return
@@ -180,50 +182,50 @@ class Room(object):
 
         u.state.transfer('room')
 
-    @command(['room', 'ob'], [int])
-    def _change_location(self, user, loc):
+    @command('room', 'ob')
+    def _change_location(self, u: Client, loc: int):
         core = self.core
 
-        if core.lobby.state_of(user) not in ('room', ):
+        if core.lobby.state_of(u) not in ('room', ):
             return
 
         core = self.core
 
-        g = core.game.current(user)
+        g = core.game.current(u)
         users = g._[self]['users']
 
         if (not 0 <= loc < len(users)) or (users[loc] is not None):
             return
 
-        i = users.index(user)
+        i = users.index(u)
         users[loc], users[i] = users[i], users[loc]
 
         core.events.game_change_location.emit(g)
 
     # ----- Public Methods -----
-    def is_online(self, g, c):
+    def is_online(self, g: Game, c: Client):
         # XXX 'left' is not implemented yet
         rst = c is not None
         rst = rst and c in g._[self]['users']
         rst = rst and not g._[self]['left'][c]
         return rst
 
-    def online_users_of(self, g):
+    def online_users_of(self, g: Game):
         return [u for u in g._[self]['users'] if self.is_online(g, u)]
 
-    def users_of(self, g):
+    def users_of(self, g: Game):
         return g._[self]['users']
 
-    def gid_of(self, g):
+    def gid_of(self, g: Game):
         return g._[self]['gid']
 
-    def name_of(self, g):
+    def name_of(self, g: Game):
         return g._[self]['name']
 
-    def get_game(self, gid):
+    def get_game(self, gid: int):
         return self.games.get(gid)
 
-    def create_game(self, gamecls, name, flags):
+    def create_game(self, gamecls: type, name: str, flags: dict):
         core = self.core
         gid = self._new_gid()
         g = core.game.create_game(gamecls)
@@ -244,35 +246,35 @@ class Room(object):
         assert ev
         return g
 
-    def join_game(self, g, c, slot):
+    def join_game(self, g: Game, u: Client, slot: int):
         core = self.core
 
-        assert core.lobby.state_of(c) == 'lobby'
+        assert core.lobby.state_of(u) == 'lobby'
 
         slot = slot and self._next_slot(g)
         if not (0 <= slot < g.n_persons and g._[self]['users'][slot] is None):
             return
 
-        g._[self]['users'][slot] = c
+        g._[self]['users'][slot] = u
 
-        core.lobby.state_of(c).transit('room')
-        c.write(['game_joined', core.view.Game(g)])
+        core.lobby.state_of(u).transit('room')
+        u.write(['game_joined', core.view.Game(g)])
 
-        core.events.game_joined.emit((g, c))
+        core.events.game_joined.emit((g, u))
 
-    def exit_game(self, c):
+    def exit_game(self, u: Client):
         core = self.core
 
-        g = core.game.current(c)
-        assert c in g._[self]['users']
-        c.write(['game_left', None])
+        g = core.game.current(u)
+        assert u in g._[self]['users']
+        u.write(['game_left', None])
 
         if self.game_started:
             log.info('player dropped')
         else:
             log.info('player leave')
 
-        core.events.game_left.emit((g, c))
+        core.events.game_left.emit((g, u))
 
         gid = g._[self]['uid']
         if gid not in self.games:
@@ -292,7 +294,7 @@ class Room(object):
             log.info('game canceled')
             self.games.pop(gid, 0)
 
-    def send_room_users(self, g, to):
+    def send_room_users(self, g: Game, to: List[Client]):
         core = self.core
         gid = g._[self]['gid']
         pl = [core.view.User(u) for u in g._[self]['users']]
@@ -301,7 +303,7 @@ class Room(object):
             u.raw_write(s)
 
     # ----- Methods -----
-    def _notify(self, g):
+    def _notify(self, g: Game):
         notifier = g._[self]['_notifier']
 
         if notifier:
@@ -316,7 +318,7 @@ class Room(object):
         notifier()
 
     @throttle(3)
-    def _notify_gamelist(self, ul):
+    def _notify_gamelist(self, ul: List[Client]):
         core = self.core
 
         lst = [core.view.Game(g) for g in self.games.values()]
@@ -330,7 +332,7 @@ class Room(object):
             for u in ul:
                 u.write(d)
 
-    def _next_slot(self, g):
+    def _next_slot(self, g: Game):
         try:
             return g._[self]['users'].index(None)
         except ValueError:

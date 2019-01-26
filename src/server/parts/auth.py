@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import logging
 
 # -- third party --
 # -- own --
+from server.endpoint import Client
 from server.utils import command
 
 
@@ -22,13 +22,13 @@ class Auth(object):
         core.events.client_command['auth'] += self._auth
 
     def handle_user_state_transition(self, ev):
-        c, f, t = ev
+        u, f, t = ev
 
         if (f, t) == ('initial', 'connected'):
             from settings import VERSION
             core = self.core
-            c.write(['thbattle_greeting', (core.options.node, VERSION)])
-            c._[self] = {
+            u.write(['thbattle_greeting', (core.options.node, VERSION)])
+            u._[self] = {
                 'uid': 0,
                 'name': '',
                 'kedama': False,
@@ -38,8 +38,8 @@ class Auth(object):
         return ev
 
     # ----- Command -----
-    @command(['connected'], [str])
-    def _auth(self, c, token):
+    @command('connected')
+    def _auth(self, u: Client, token: str):
         core = self.core
         rst = core.backend.query('''
             query($token: String) {
@@ -62,16 +62,16 @@ class Auth(object):
         ''', token=token)
 
         if not rst or rst['player']:
-            c.write(['auth:error', {'error': 'invalid_credential'}])
+            u.write(['auth:error', {'error': 'invalid_credential'}])
             return
 
         rst = rst['player']
 
         if not rst['user']['isActive']:
-            c.write(['auth:error', {'error': 'not_available'}])
+            u.write(['auth:error', {'error': 'not_available'}])
         else:
-            c.write(['auth:result', {'uid': rst['id'], 'name': rst['name']}])
-            c._[self] = {
+            u.write(['auth:result', {'uid': rst['id'], 'name': rst['name']}])
+            u._[self] = {
                 'uid': int(rst['id']),
                 'name': rst['name'],
                 'kedama': False,
@@ -80,29 +80,29 @@ class Auth(object):
                     [i['codename'] for i in rst['user']['groups']['permissions']]
                 ),
             }
-            core.lobby.state_of(c).transit('authed')
+            core.lobby.state_of(u).transit('authed')
 
     # ----- Public Methods -----
-    def uid_of(self, c):
-        return c._[self]['uid']
+    def uid_of(self, u: Client) -> int:
+        return u._[self]['uid']
 
-    def name_of(self, c):
-        return c._[self]['name']
+    def name_of(self, u: Client) -> str:
+        return u._[self]['name']
 
-    def is_kedama(self, c):
-        return c._[self]['kedama']
+    def is_kedama(self, u: Client) -> bool:
+        return u._[self]['kedama']
 
     # ----- Auxiliary Methods -----
-    def set_auth(self, c, uid=1, name='Foo', kedama=False, permissions=[]):
+    def set_auth(self, u: Client, uid=1, name='Foo', kedama=False, permissions=[]):
         '''
         Used by tests
         '''
         core = self.core
-        assert core.lobby.state_of(c) == 'connected'
-        c._[self] = {
+        assert core.lobby.state_of(u) == 'connected'
+        u._[self] = {
             'uid': uid,
             'name': name,
             'kedama': kedama,
             'permissions': set(permissions),
         }
-        core.lobby.state_of(c).transit('authed')
+        core.lobby.state_of(u).transit('authed')
