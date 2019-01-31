@@ -140,18 +140,6 @@ def extendclass(clsname, bases, _dict):
             setattr(cls, key, value)
 
 
-def textsnap(text, font, l):
-    tl = 0
-    for i, g in enumerate(font.get_glyphs(text)):
-        if tl + g.advance > l:
-            break
-        tl += g.advance
-    else:
-        return text
-
-    return text[:i]
-
-
 def partition(pred, lst):
     f, t = [], []
     for i in lst:
@@ -243,17 +231,6 @@ def log_failure(logger):
         return wrapper
 
     return decorate
-
-
-def openurl(url):
-    import sys
-    import os
-
-    if sys.platform == 'win32':
-        os.startfile(url, 'open')
-
-    elif sys.platform.startswith('linux'):
-        os.system("xdg-open '%s'" % url)
 
 
 class ObservableEvent(object):
