@@ -11,7 +11,7 @@ import random
 # -- own --
 from game.autoenv import Game, sync_primitive
 from game.base import get_seed_for, GameViralContext
-from utils import partition
+from utils.misc import partition
 import settings
 
 

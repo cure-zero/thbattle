@@ -2,7 +2,6 @@
 
 # -- stdlib --
 from collections import defaultdict
-from weakref import WeakSet
 import logging
 import random
 
@@ -11,7 +10,7 @@ import random
 from game.base import GameData
 from server.endpoint import Client
 from server.utils import command
-from utils import BatchList
+from utils.misc import BatchList
 
 
 # -- code --

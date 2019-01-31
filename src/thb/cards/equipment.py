@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, GameError, user_input
+from game.autoenv import EventHandler, GameError, user_input
 from thb.actions import ActionLimitExceeded, ActionStageLaunchCard, Damage, DrawCards, DropCardStage
 from thb.actions import DropCards, FatetellAction, FatetellStage, FinalizeStage, ForEach
 from thb.actions import GenericAction, LaunchCard, MaxLifeChange, MigrateCardsTransaction, Reforge
@@ -13,7 +12,8 @@ from thb.actions import random_choose_card, register_eh, ttags, user_choose_card
 from thb.cards import basic, spellcard
 from thb.cards.base import Card, Skill, TreatAs, VirtualCard, t_None, t_OtherLessEqThanN, t_OtherOne
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
-from utils import CheckFailed, check, classmix
+from utils.check import CheckFailed, check
+from utils.misc import classmix
 
 
 # -- code --

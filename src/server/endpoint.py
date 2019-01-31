@@ -6,12 +6,11 @@ import logging
 
 # -- third party --
 from gevent import Timeout, getcurrent
-from gevent.queue import Queue
 import gevent
 
 # -- own --
-from endpoint import Endpoint, EndpointDied
-from utils import log_failure
+from endpoint import EndpointDied
+from utils.misc import log_failure
 
 
 # -- code --

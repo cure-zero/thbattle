@@ -192,10 +192,12 @@ class Update(object):
 
 
 def meh():
+        '''
         from options import options
         import settings
         if options.no_update:
             return 'update_disabled'
+        '''
 
         pool = Pool(2)
 
@@ -208,4 +210,3 @@ def meh():
         pool.join()
 
         return 'updated' if not errord[0] else 'error'
-

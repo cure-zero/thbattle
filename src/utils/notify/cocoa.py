@@ -1,4 +1,12 @@
-from pyglet.libs.darwin.cocoapy import ObjCClass, get_NSString, objc, ObjCSubclass
+# -*- coding: utf-8 -*-
+
+# -- stdlib --
+# -- third party --
+from pyglet.libs.darwin.cocoapy import ObjCClass, ObjCSubclass, get_NSString, objc
+
+# -- own --
+
+# -- code --
 
 NSUserNotificationCenter = ObjCClass("NSUserNotificationCenter")
 NSUserNotification = ObjCClass("NSUserNotification")
@@ -8,10 +16,13 @@ NSUserNotificationCenterDelegate = objc.objc_getProtocol(bytes("NSUserNotificati
 NSApp = NSApplication.sharedApplication()
 
 NotificationDelegateClass = ObjCSubclass('NSObject', 'NotificationDelegate', register=False)
+
+
 @NotificationDelegateClass.method("v@@")
 def userNotificationCenter_didActivateNotification_(self, notificationCenter, notification):
     # bring window to front
     NSApp.activateIgnoringOtherApps_(True)
+
 
 objc.class_addProtocol(NotificationDelegateClass.objc_cls, NSUserNotificationCenterDelegate)
 NotificationDelegateClass.register()
@@ -19,6 +30,7 @@ NotificationDelegate = ObjCClass("NotificationDelegate")
 
 notificationCenter = NSUserNotificationCenter.defaultUserNotificationCenter()
 notificationCenter.setDelegate_(NotificationDelegate.alloc().init())
+
 
 def _notify(title, msg):
     notification = NSUserNotification.alloc().init().autorelease()

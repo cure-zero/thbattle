@@ -32,6 +32,6 @@ class Auth(object):
         return ev
 
     # ----- Public Methods -----
-    def login(self, token):
+    def login(self, token: str):
         core = self.core
         core.server.write(['auth', token])

@@ -17,7 +17,7 @@ import pyglet
 
 # -- code --
 class ShaderError(Exception):
-    pass
+    infolog: str
 
 
 def _get_infolog(oid):

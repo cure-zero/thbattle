@@ -76,7 +76,7 @@ class RPCClient(object):
             try:
                 msgpack.pack([REQUEST, func_name, args, kwargs], self.sock)
                 resp = self.unpacker.unpack()
-            except:
+            except Exception:
                 swallow(self.sock.close)()
                 self.sock = self.unpacker = None
                 raise RPCServerGone()
@@ -129,5 +129,5 @@ class RPCService(Greenlet):
 
                 msgpack.pack(rst, sock)
 
-        except:
+        except Exception:
             swallow(sock.close)()

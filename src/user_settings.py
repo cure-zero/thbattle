@@ -9,15 +9,15 @@ import uuid
 
 # -- third party --
 # -- own --
-from utils.misc import ObservableEvent, instantiate
+from utils.misc import ObservableEvent
 
 
 # -- code --
 log = logging.getLogger('user_settings')
 
 
-class UserSettings(dict):
-    __slots__ = ('setting_change', )
+class UserSettingsClass(dict):
+    __slots__ = ('setting_change',)
 
     def __init__(self, *a, **k):
         dict.__init__(self, *a, **k)
@@ -63,6 +63,7 @@ class UserSettings(dict):
         return 'user_settings.json'
 
 
+UserSettings = UserSettingsClass()
 UserSettings.add_setting('last_id', '无名の罪袋')
 UserSettings.add_setting('saved_passwd', '')
 UserSettings.add_setting('notify_level', 1)
@@ -71,7 +72,6 @@ UserSettings.add_setting('bgm_volume', 1.0)
 UserSettings.add_setting('se_volume', 1.0)
 UserSettings.add_setting('blocked_users', [])
 UserSettings.add_setting('client_id', str(uuid.uuid4()))
-
 UserSettings.load()
 
 # reset at start

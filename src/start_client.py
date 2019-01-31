@@ -11,13 +11,13 @@ def start_client():
     import ctypes
     try:
         ctypes.cdll.avbin  # force avbin load
-    except:
+    except Exception:
         pass
 
     import logging
     import os
     import argparse
-    import utils.logging
+    import utils.log
 
     parser = argparse.ArgumentParser(prog=sys.argv[0])
     parser.add_argument('--no-update', action='store_true')
@@ -39,7 +39,7 @@ def start_client():
     IS_PROTON = hasattr(os, 'uname') and os.uname()[:2] == ('Linux', 'Proton')
 
     import settings
-    utils.logging.init(options.log.upper(), settings.SENTRY_DSN, settings.VERSION, IS_PROTON or options.color_log)
+    utils.log.init(options.log.upper(), settings.SENTRY_DSN, settings.VERSION, IS_PROTON or options.color_log)
 
     if options.no_update:
         import autoupdate
@@ -63,7 +63,6 @@ def start_client():
         opmodule.mutex = thb_mutex
     else:
         opmodule.mutex = None
-
 
     from gevent import monkey
     monkey.patch_socket()

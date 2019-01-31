@@ -3,7 +3,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, user_input
+from game.autoenv import EventHandler, user_input
 from thb.actions import ActionStage, DrawCardStage, GenericAction, MigrateCardsTransaction
 from thb.actions import PlayerDeath, UserAction, migrate_cards
 from thb.cards import CardList, Heal, Skill, t_None, t_OtherOne
@@ -17,12 +17,12 @@ class SupportAction(UserAction):
         cl = self.associated_card.associated_cards
         src = self.source
         tgt = self.target
-        l = src.tags.get('daiyousei_spnum', 0)
+        lst = src.tags.get('daiyousei_spnum', 0)
         n = len(cl)
-        if l < 3 <= l + n:
+        if lst < 3 <= lst + n:
             g = self.game
             g.process_action(Heal(src, src))
-        src.tags['daiyousei_spnum'] = l + n
+        src.tags['daiyousei_spnum'] = lst + n
         tgt.reveal(cl)
         migrate_cards([self.associated_card], tgt.cards, unwrap=True)
         self.cards = cl
@@ -67,8 +67,8 @@ class SupportKOFReturningAction(GenericAction):
 
 
 class SupportKOFHandler(EventHandler):
-    interested = ('character_debut', 'action_apply')
-    execute_after = ('DeathHandler',)
+    interested = ['character_debut', 'action_apply']
+    execute_after = ['DeathHandler']
 
     def handle(self, evt_type, arg):
         if evt_type == 'character_debut':
@@ -110,7 +110,7 @@ class MoeDrawCard(DrawCardStage):
 
 
 class DaiyouseiHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     # Well, well, things are getting messy
     def handle(self, evt_type, act):

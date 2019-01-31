@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import OrderedDict
 from copy import copy
+from typing import Callable, Any
 import logging
 
 # -- third party --
@@ -12,10 +12,11 @@ from gevent.pool import Group as GreenletGroup
 import gevent
 
 # -- own --
+from .endpoint import Client
 from endpoint import EndpointDied
-from game.base import AbstractPlayer, GameEnded, GameViralContext, InputTransaction
+from game.base import AbstractPlayer, GameEnded, GameViralContext, InputTransaction, Inputlet
 from game.base import TimeLimitExceeded
-from utils import log_failure
+from utils.misc import log_failure
 from utils.stats import stats
 import game.base
 
@@ -112,14 +113,14 @@ def user_input(players, inputlet, timeout=25, type='single', trans=None):
             try:
                 rst = w.get()
                 p, data = w.player, rst
-            except:
+            except Exception:
                 p, data = w.player, None
 
             my = ilets[p]
 
             try:
                 rst = my.parse(data)
-            except:
+            except Exception:
                 log.error('user_input: exception in .process()', exc_info=1)
                 # ----- FOR DEBUG -----
                 if g.IS_DEBUG:
@@ -177,35 +178,6 @@ def user_input(players, inputlet, timeout=25, type='single', trans=None):
         return OrderedDict([(p, results[p]) for p in orig_players])
 
     assert False, 'WTF?!'
-
-
-class Player(AbstractPlayer):
-    is_npc  = False
-
-    def __init__(self, game, client):
-        self.game = game
-        self.client = client
-
-    def reveal(self, obj_list):
-        g = self.game
-        core = g.core
-        st = g.get_synctag()
-        core.game.write(g, self.client, 'Sync:%d' % st, obj_list)  # XXX encode?
-
-
-class NPCPlayer(AbstractPlayer):
-    is_npc  = True
-
-    def __init__(self, game, name, input_handler):
-        self.game = game
-        self.name = name
-        self.handle_user_input = input_handler
-
-    def reveal(self, obj_list):
-        self.game.get_synctag()
-
-    def handle_user_input(self, trans, ilet):
-        raise Exception('WTF?!')
 
 
 class Game(game.base.Game):
@@ -279,3 +251,29 @@ class Game(game.base.Game):
 
     def pause(self, time):
         gevent.sleep(time)
+
+
+class Player(AbstractPlayer):
+    is_npc  = False
+
+    def __init__(self, g: Game, client: Client):
+        self.game = g
+        self.client = client
+
+    def reveal(self, obj_list):
+        g = self.game
+        core = g.core
+        st = g.get_synctag()
+        core.game.write(g, self.client, 'Sync:%d' % st, obj_list)  # XXX encode?
+
+
+class NPCPlayer(AbstractPlayer):
+    is_npc  = True
+
+    def __init__(self, g: Game, name: str, handler: Callable[[InputTransaction, Inputlet], Any]):
+        self.game = g
+        self.name = name
+        self.handle_user_input = handler
+
+    def reveal(self, obj_list):
+        self.game.get_synctag()

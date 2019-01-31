@@ -5,8 +5,6 @@ from collections import defaultdict
 import logging
 
 # -- third party --
-import gevent
-
 # -- own --
 from server.base import Game
 from server.endpoint import Client

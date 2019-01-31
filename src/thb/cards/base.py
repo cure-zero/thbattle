@@ -2,14 +2,16 @@
 
 # -- stdlib --
 from collections import deque
+from typing import Callable, Dict, List, Optional, Tuple, Type
 from weakref import WeakValueDictionary
 import itertools
 import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import GameError, GameObject, list_shuffle
-from game.base import GameViralContext
+from game.autoenv import Game, GameError, GameObject, list_shuffle
+from game.base import AbstractPlayer, GameViralContext
+from thb.actions import UserAction
 
 
 # -- code --
@@ -40,7 +42,7 @@ class Card(GameObject):
     }
 
     _color = None
-    card_classes = {}
+    card_classes: Dict[str, Type['Card']] = {}
     usage = 'launch'
 
     # True means this card's associated cards have already been taken.
@@ -183,7 +185,7 @@ class VirtualCard(Card, GameViralContext):
 
     @classmethod
     def unwrap(cls, vcards):
-        l = []
+        lst = []
         sl = vcards[:]
 
         while sl:
@@ -191,9 +193,9 @@ class VirtualCard(Card, GameViralContext):
             try:
                 sl.extend(s.associated_cards)
             except AttributeError:
-                l.append(s)
+                lst.append(s)
 
-        return l
+        return lst
 
     @classmethod
     def wrap(cls, cl, player, params=None):
@@ -316,8 +318,8 @@ class Deck(GameObject):
             dcl.extend(dropped[-10:])
 
             tmpcl = CardList(None, 'temp')
-            l = [c.__class__(c.suit, c.number, cl, c.track_id) for c in dropped[:-10]]
-            tmpcl.extend(l)
+            lst = [c.__class__(c.suit, c.number, cl, c.track_id) for c in dropped[:-10]]
+            tmpcl.extend(lst)
             self.shuffle(tmpcl)
             cl.extend(tmpcl)
 
@@ -329,14 +331,14 @@ class Deck(GameObject):
         return rst
 
     def lookupcards(self, idlist):
-        l = []
+        lst = []
         cr = self.cards_record
         vcr = self.vcards_record
         for cid in idlist:
             c = vcr.get(cid, None) or cr.get(cid, None)
-            c and l.append(c)
+            c and lst.append(c)
 
-        return l
+        return lst
 
     def register_card(self, card):
         assert not card.sync_id
@@ -371,7 +373,10 @@ class Deck(GameObject):
 
 
 class Skill(VirtualCard):
-    category = ('skill', )
+    target: Callable[[Game, AbstractPlayer, List[AbstractPlayer]], Tuple[List[AbstractPlayer], bool]]
+    associated_action: Optional[UserAction]
+    associated_cards: List[Card]
+    category = ['skill']
 
     def __init__(self, player):
         assert player is not None
@@ -380,18 +385,14 @@ class Skill(VirtualCard):
     def check(self):  # override this
         return False
 
-    # target = xxx
-    # associated_action = xxx
-    # instance var: associated_cards = xxx
-
 
 class TreatAs(object):
-    treat_as = None  # can't be VirtualCard here
+    treat_as: PhysicalCard
     usage = 'launch'
 
     @property
     def category(self):
-        return ('skill', 'treat_as') + self.treat_as.category
+        return ['skill', 'treat_as'] + self.treat_as.category
 
     def check(self):
         return False
@@ -410,69 +411,58 @@ class TreatAs(object):
 
 
 # card targets:
-@staticmethod
-def t_None(g, source, tl):
-    return (None, False)
+def t_None(self, g, src, tl):
+    return ([], False)
 
 
-@staticmethod
-def t_Self(g, source, tl):
-    return ([source], True)
+def t_Self(self, g, src, tl):
+    return ([src], True)
 
 
-@staticmethod
-def t_OtherOne(g, source, tl):
+def t_OtherOne(self, g, src, tl):
     tl = [t for t in tl if not t.dead]
     try:
-        tl.remove(source)
+        tl.remove(src)
     except ValueError:
         pass
     return (tl[-1:], bool(len(tl)))
 
 
-@staticmethod
-def t_One(g, source, tl):
+def t_One(self, g, src, tl):
     tl = [t for t in tl if not t.dead]
     return (tl[-1:], bool(len(tl)))
 
 
-@staticmethod
-def t_All(g, source, tl):
-    l = g.players.rotate_to(source)
-    del l[0]
-    return ([t for t in l if not t.dead], True)
+def t_All(self, g, src, tl):
+    return ([t for t in g.players.rotate_to(src)[1:] if not t.dead], True)
 
 
-@staticmethod
-def t_AllInclusive(g, source, tl):
-    l = g.players.rotate_to(source)
-    return ([t for t in l if not t.dead], True)
+def t_AllInclusive(self, g, src, tl):
+    pl = g.players.rotate_to(src)
+    return ([t for t in pl if not t.dead], True)
 
 
 def t_OtherLessEqThanN(n):
-    @staticmethod
-    def _t_OtherLessEqThanN(g, source, tl):
+    def _t_OtherLessEqThanN(self, g, src, tl):
         tl = [t for t in tl if not t.dead]
         try:
-            tl.remove(source)
+            tl.remove(src)
         except ValueError:
             pass
         return (tl[:n], bool(len(tl)))
     return _t_OtherLessEqThanN
 
 
-@staticmethod
-def t_OneOrNone(g, source, tl):
+def t_OneOrNone(self, g, src, tl):
     tl = [t for t in tl if not t.dead]
     return (tl[-1:], True)
 
 
 def t_OtherN(n):
-    @staticmethod
-    def _t_OtherN(g, source, tl):
+    def _t_OtherN(self, g, src, tl):
         tl = [t for t in tl if not t.dead]
         try:
-            tl.remove(source)
+            tl.remove(src)
         except ValueError:
             pass
         return (tl[:n], bool(len(tl) >= n))

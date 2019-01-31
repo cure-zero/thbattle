@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
-from collections import defaultdict
 
 # -- third party --
 # -- own --
 from . import parts
-from .base import Client, Game
-from game.base import Packet
+from .base import Game
 from utils.events import EventHub
 
 
@@ -51,11 +48,9 @@ class Events(object):
         self.update_progress.emit([object, object])
 
         # Joined a game
-        # ev = (g: Game, c: Client)
         self.game_joined = EventHub(Game)
 
         # Left a game
-        # ev = (g: Game, c: Client)
         self.game_left = EventHub(Game)
 
         # Left a game

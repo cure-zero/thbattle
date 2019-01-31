@@ -10,7 +10,7 @@ from .baseclasses import Character, register_character_to
 # -- code --
 class FirstAid(Skill):
     associated_action = None
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_None
     usage = 'launch'
 

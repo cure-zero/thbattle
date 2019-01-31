@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
 from collections import deque
+from typing import Callable, Dict
 import logging
 import random
 import re
@@ -50,7 +50,7 @@ class MockEndpoint(object):
 
 
 class MockBackend(object):
-    MOCKED = {}
+    MOCKED: Dict[str, Callable] = {}
 
     def __init__(self, core):
         self.core = core
@@ -104,7 +104,7 @@ class ServerWorld(object):
         core = self.core
         g = core.room.create_game(cls, 'Game-%s' % base, flags)
 
-        for i in xrange(g.n_persons):
+        for i in range(g.n_persons):
             u = self.client()
             core.auth.set_auth(u, base + i, 'UID%d' % (base + i))
             core.room.join_game(g, u, i)

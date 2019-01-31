@@ -11,7 +11,7 @@ import functools
 
 # -- code --
 class ViralContext(object):
-    VIRAL_SEARCH = 'self',
+    VIRAL_SEARCH = ['self']
     _viral_mro_cache = None
 
     def __new__(cls, *args, **kwargs):

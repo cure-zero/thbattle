@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import namedtuple
 from math import copysign
@@ -18,6 +17,7 @@ from pyglet.sprite import Sprite
 from pyglet.window import key, mouse
 import gevent
 import pyglet
+import requests
 
 # -- own --
 from client.core import Executive
@@ -27,7 +27,6 @@ from client.ui.resloader import L
 from utils import flatten, inpoly, instantiate, pyperclip, rectv2f, rrectv2f, textsnap
 from utils.stats import stats
 import settings
-import requests
 
 
 # -- code --

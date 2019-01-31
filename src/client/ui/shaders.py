@@ -29,6 +29,7 @@ def _get_gaussian_coef(radius):
     l = [i/s for i in l]
     return l
 
+
 try:
     r = 9
     coef = _get_gaussian_coef(r)

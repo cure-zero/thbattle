@@ -1,6 +1,14 @@
-from pyglet.libs.darwin.cocoapy import ObjCClass, cfstring_to_string, get_NSString
+# -*- coding: utf-8 -*-
+
+# -- stdlib --
 from ctypes import c_void_p
 
+# -- third party --
+from pyglet.libs.darwin.cocoapy import ObjCClass, cfstring_to_string, get_NSString
+
+# -- own --
+
+# -- code --
 NSOpenPanel = ObjCClass('NSOpenPanel')
 NSSavePanel = ObjCClass('NSSavePanel')
 NSArray = ObjCClass('NSArray')
@@ -19,7 +27,7 @@ def _get_file_name(panel, title, filters):
     panel.setCanChooseDirectories_(False)
     panel.setAllowsMultipleSelection_(False)
     panel.setTitle_(get_NSString(title))
-    
+
     filters = [get_NSString(f[1][2:]) for f in filters]
     panel.setAllowedFileTypes_(_get_nsarray(filters))
     if panel.runModal():

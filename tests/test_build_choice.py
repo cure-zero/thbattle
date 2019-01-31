@@ -3,22 +3,17 @@ from __future__ import absolute_import
 
 # -- stdlib --
 # -- third party --
-from utils import ObjectDict, BatchList
+from utils import BatchList
 
 # -- own --
 
 # -- code --
 
 
-class ObjectDict(ObjectDict):
-    def __hash__(self):
-        return id(self)
-
-
 class TestFunctions(object):
 
     @classmethod
-    def setUpClass(cls):
+    def setup_class(cls):
         from game import autoenv
         autoenv.init('Server')
 

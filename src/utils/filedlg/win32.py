@@ -9,6 +9,7 @@ import os
 # -- own --
 from utils.misc import flatten
 
+
 # -- code --
 HWND = HINSTANCE = DWORD = LPARAM = c_uint
 LPOFNHOOKPROC = c_void_p
@@ -82,7 +83,7 @@ def _do_open_dlg(func, window, title, filters, flags):
     ofn.nMaxFile = 1024
     ofn.lpstrTitle = c_wchar_p(title)
     ofn.flags = flags
-    
+
     if window:
         ofn.hwndOwner = window._hwnd
 

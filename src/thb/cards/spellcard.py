@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, InputTransaction, sync_primitive, user_input
+from game.autoenv import EventHandler, InputTransaction, sync_primitive, user_input
 from thb.actions import ActionStage, Damage, DrawCardStage, DrawCards, DropCards, FatetellAction
 from thb.actions import ForEach, LaunchCard, PlayerTurn, UserAction, ask_for_action, detach_cards
 from thb.actions import migrate_cards, random_choose_card, register_eh, user_choose_cards
 from thb.cards import basic
 from thb.inputlets import ChooseIndividualCardInputlet, ChoosePeerCardInputlet
-from utils import BatchList, CheckFailed, check, flatten
+from utils.check import CheckFailed, check
+from utils.misc import BatchList, flatten
 
 
 # -- code --

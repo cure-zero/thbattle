@@ -17,7 +17,8 @@ class Reward(object):
         core.events.game_ended += self.handle_game_ended
 
     def handle_game_ended(self, g):
-        all_dropped = not bool(actors.room.metadata_of(g)['users'])
+        core = self.core
+        all_dropped = not bool(core.room.users_of(g))
 
         # XXX bonus
         if not all_dropped:

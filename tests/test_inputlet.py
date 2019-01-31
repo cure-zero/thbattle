@@ -34,6 +34,7 @@ class TestInputletServer(object):
         from .mock import ServerWorld
         w = ServerWorld()
         g = w.fullgame(THBattle)
+        self.game = g
         p = g.players[0]
 
         ilets = [
@@ -69,10 +70,9 @@ class TestInputletServer(object):
 
     def testChooseOptionInputlet(self):
         from game.autoenv import user_input
-        from client.core import TheChosenOne, PeerPlayer
 
         from thb.inputlets import ChooseOptionInputlet
-        from utils import BatchList
+        from utils.misc import BatchList
 
         from .mock import ServerWorld
         w = ServerWorld()

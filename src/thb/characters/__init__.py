@@ -54,13 +54,6 @@ from . import kyouko
 from . import keine
 from . import yuyuko
 
-# weektour
-import youmu20150620
-import mima20150705
-import meirin20150714
-import satori20150804
-import minamitsu20150818
-
 # special
 from . import akari
 

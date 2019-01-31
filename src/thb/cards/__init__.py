@@ -5,5 +5,4 @@ from .base import *
 from .basic import *
 from .equipment import *
 from .spellcard import *
-from .special import *
 from .debug import *

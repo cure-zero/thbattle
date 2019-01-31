@@ -3,7 +3,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, user_input
+from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, DropCards, GenericAction, LaunchCard, LifeLost, UserAction
 from thb.actions import random_choose_card, ttags, user_choose_cards
 from thb.cards import AttackCard, Skill, t_None, t_OtherOne, DuelCard, VirtualCard
@@ -121,12 +121,12 @@ class PerfectFreezeAction(UserAction):
 
 
 class PerfectFreezeHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
-    execute_after = (
+    execute_after = [
         'RepentanceStickHandler',
         'AyaRoundfanHandler',
-    )
+    ]
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):

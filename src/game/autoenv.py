@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
-from gevent import Greenlet
-
 # -- own --
-from game.base import Action, ActionShootdown, EventHandler, EventHandlerGroup, Game, GameEnded  # noqa
+from game.base import Action, ActionShootdown, EventHandler, EventHandlerGroup, Game as BaseGame, GameEnded  # noqa
 from game.base import GameError, GameException, GameItem, GameObject, InputTransaction  # noqa
 from game.base import InterruptActionFlow, NPC, get_seed_for, list_shuffle, sync_primitive  # noqa
 
 
 # -- code --
-class Game(Game):
+class Game(BaseGame):
     pass
 
 

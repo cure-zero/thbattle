@@ -8,7 +8,8 @@
 #   spam = pyperclip.paste()
 
 # On Mac, this module makes use of the pbcopy and pbpaste commands, which should come with the os.
-# On Linux, this module makes use of the xclip command, which should come with the os. Otherwise run "sudo apt-get install xclip"
+# On Linux, this module makes use of the xclip command, which should come
+# with the os. Otherwise run "sudo apt-get install xclip"
 
 
 # Copyright (c) 2010, Albert Sweigart
@@ -40,19 +41,31 @@
 
 # Change Log:
 # 1.2 Use the platform module to help determine OS.
-# 1.3 Changed ctypes.windll.user32.OpenClipboard(None) to ctypes.windll.user32.OpenClipboard(0), after some people ran into some TypeError
+# 1.3 Changed ctypes.windll.user32.OpenClipboard(None) to
+# ctypes.windll.user32.OpenClipboard(0), after some people ran into some
+# TypeError
 
-import platform, os
+
+# -- stdlib --
+import os
+import platform
+
+# -- third party --
+# -- own --
+
+# -- code --
+
 
 def winGetClipboard():
     ctypes.windll.user32.OpenClipboard(0)
-    pcontents = ctypes.windll.user32.GetClipboardData(13) # CF_UNICODETEXT
+    pcontents = ctypes.windll.user32.GetClipboardData(13)  # CF_UNICODETEXT
     data = ctypes.c_wchar_p(pcontents).value
     ctypes.windll.user32.CloseClipboard()
     return data
 
+
 def winSetClipboard(text):
-    GMEM_DDESHARE = 0x2000 # Compat for 16-bit windows !?
+    GMEM_DDESHARE = 0x2000  # Compat for 16-bit windows !?
     ctypes.windll.user32.OpenClipboard(0)
     ctypes.windll.user32.EmptyClipboard()
     lpwstr = ctypes.c_wchar_p(text)
@@ -61,13 +74,15 @@ def winSetClipboard(text):
     pcd = ctypes.windll.kernel32.GlobalLock(hcd)
     ctypes.cdll.msvcrt.wcscpy(pcd, lpwstr)
     ctypes.windll.kernel32.GlobalUnlock(hcd)
-    ctypes.windll.user32.SetClipboardData(13, hcd) # CF_UNICODETEXT
+    ctypes.windll.user32.SetClipboardData(13, hcd)  # CF_UNICODETEXT
     ctypes.windll.user32.CloseClipboard()
+
 
 def macSetClipboard(text):
     outf = os.popen('pbcopy', 'w')
     outf.write(text)
     outf.close()
+
 
 def macGetClipboard():
     outf = os.popen('pbpaste', 'r')
@@ -75,24 +90,30 @@ def macGetClipboard():
     outf.close()
     return content
 
+
 def gtkGetClipboard():
     return gtk.Clipboard().wait_for_text()
+
 
 def gtkSetClipboard(text):
     cb = gtk.Clipboard()
     cb.set_text(text)
     cb.store()
 
+
 def qtGetClipboard():
     return str(cb.text())
 
+
 def qtSetClipboard(text):
     cb.setText(text)
+
 
 def xclipSetClipboard(text):
     outf = os.popen('xclip -selection c', 'w')
     outf.write(text)
     outf.close()
+
 
 def xclipGetClipboard():
     outf = os.popen('xclip -selection c -o', 'r')
@@ -100,10 +121,12 @@ def xclipGetClipboard():
     outf.close()
     return content
 
+
 def xselSetClipboard(text):
     outf = os.popen('xsel -i', 'w')
     outf.write(text)
     outf.close()
+
 
 def xselGetClipboard():
     outf = os.popen('xsel -o', 'r')
@@ -133,7 +156,9 @@ elif os.name == 'posix' or platform.system() == 'Linux':
             import gtk
             getcb = gtkGetClipboard
             setcb = gtkSetClipboard
-        except:
+        except Exception:
+            getcb = setcb = lambda *a, **k: ''
+            '''
             try:
                 import PyQt4.QtCore
                 import PyQt4.QtGui
@@ -141,8 +166,9 @@ elif os.name == 'posix' or platform.system() == 'Linux':
                 cb = PyQt4.QtGui.QApplication.clipboard()
                 getcb = qtGetClipboard
                 setcb = qtSetClipboard
-            except:
+            except Exception:
                 getcb = setcb = lambda *a, **k: ''
+            '''
 
 copy = setcb
 paste = getcb

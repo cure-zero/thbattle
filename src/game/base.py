@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
+from typing import Any, List, Mapping
 import logging
 import random
 
@@ -13,7 +13,7 @@ import gevent
 
 # -- own --
 from endpoint import EndpointDied
-from utils import BatchList, exceptions, instantiate
+from utils.misc import BatchList, exceptions, instantiate
 from utils.viral import ViralContext
 
 
@@ -94,8 +94,26 @@ class InterruptActionFlow(GameException):
         self.unwind_to = unwind_to
 
 
+class AbstractPlayer(GameObject):
+    index = None
+
+    def reveal(self, obj_list):
+        raise GameError('Abstract')
+
+    def __repr__(self):
+        return self.__class__.__name__
+
+
+class NPC(object):
+    __slots__ = ('name', 'input_handler')
+
+    def __init__(self, name, input_handler):
+        self.name = name
+        self.input_handler = input_handler
+
+
 class GameViralContext(ViralContext):
-    VIRAL_SEARCH = 'g', 'self'
+    VIRAL_SEARCH = ['g', 'self']
 
     def viral_import(self, g):
         self.game = g
@@ -112,14 +130,13 @@ class Game(GameObject, GameViralContext):
     Instance variables:
         players: list(Players)
         event_handlers: list(EventHandler)
-        npc_players: list(NPC)
 
         and all game related vars, eg. tags used by [EventHandler]s and [Action]s
     '''
     # event_handlers = []
     IS_DEBUG = False
-    params_def = {}
-    npc_players = []
+    params_def: Mapping[str, Any] = {}
+    npc_players: List[NPC] = []
 
     def __init__(self):
         self.players = BatchList()
@@ -168,7 +185,7 @@ class Game(GameObject, GameViralContext):
         self.ended = True
         try:
             winner = self.winners[0].identity
-        except:
+        except Exception:
             winner = None
 
         log.info('>> Winner: %s', winner)
@@ -329,15 +346,16 @@ class ActionShootdown(BaseException, metaclass=GameObjectMeta):
 
 
 class EventHandler(GameObject):
-    execute_before = ()
-    execute_after = ()
+    interested: List[str]     = []
+    execute_before: List[str] = []
+    execute_after: List[str]  = []
+
     group = None
-    interested = None
 
     def __init__(self, g):
         self.game = g
 
-    def handle(self, evt_type, data):
+    def handle(self, evt_type: str, data: Any):
         raise GameError('Override handle function to implement EventHandler logics!')
 
     def get_interested(self):
@@ -377,14 +395,14 @@ class EventHandler(GameObject):
             for after in eh.execute_after:
                 table[after].execute_before.add(clsname)
 
-        l = list(table.values())
-        l.sort(key=lambda v: v.__class__.__name__)  # must sync between server and client
+        lst = list(table.values())
+        lst.sort(key=lambda v: v.__class__.__name__)  # must sync between server and client
 
         toposorted = []
-        while l:
+        while lst:
             deferred = []
             commit = []
-            for eh in l:
+            for eh in lst:
                 if not eh.execute_after:
                     for b in eh.execute_before:
                         table[b].execute_after.remove(eh.__class__.__name__)
@@ -396,7 +414,7 @@ class EventHandler(GameObject):
                 raise GameError("Can't resolve dependencies! Check for circular reference!")
 
             toposorted.extend(commit)
-            l = deferred
+            lst = deferred
 
         return toposorted
 
@@ -474,24 +492,6 @@ class Action(GameObject, GameViralContext):
         return self.__class__.__name__
 
 
-class AbstractPlayer(GameObject):
-    index = None
-
-    def reveal(self, obj_list):
-        raise GameError('Abstract')
-
-    def __repr__(self):
-        return self.__class__.__name__
-
-
-class NPC(object):
-    __slots__ = ('name', 'input_handler')
-
-    def __init__(self, name, input_handler):
-        self.name = name
-        self.input_handler = input_handler
-
-
 class SyncPrimitive(GameObject):
     def __init__(self, value):
         self.value = value
@@ -511,10 +511,10 @@ def sync_primitive(val, to):
         return val
 
     if isinstance(val, list):
-        l = [SyncPrimitive(i) for i in val]
-        to.reveal(l)
+        lst = [SyncPrimitive(i) for i in val]
+        to.reveal(lst)
         return val.__class__(
-            i.value for i in l
+            i.value for i in lst
         )
     else:
         v = SyncPrimitive(val)
@@ -759,10 +759,10 @@ class GameData(object):
 
 
 class GameItem(object):
-    inventory = {}
+    inventory: Mapping[str, type] = {}
 
-    key  = None
-    args = []
+    key: str  = ''
+    args: List[str] = []
     usable = False
 
     title = 'ITEM-TITLE'

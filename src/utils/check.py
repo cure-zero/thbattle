@@ -29,14 +29,14 @@ class CheckFailed(Exception):
         self.args = (self.path_string(), )
 
 
-def _check(cond):
+def check(cond):
     if not cond:
         raise CheckFailed
 
 
 def _check_isinstance(obj, cls):
     try:
-        _check(isinstance(obj, cls))
+        check(isinstance(obj, cls))
     except TypeError as e:
         raise CheckFailed from e
 
@@ -53,7 +53,7 @@ def check_type_exc(pattern, obj, path=None):
                 for i, v in enumerate(obj):
                     check_type_exc(cls, v, i)
             else:
-                _check(len(pattern) == len(obj))
+                check(len(pattern) == len(obj))
                 for i, (cls, v) in enumerate(zip(pattern, obj)):
                     check_type_exc(cls, v, i)
 
@@ -74,7 +74,7 @@ def check_type_exc(pattern, obj, path=None):
                 elif match == '?':
                     iterkeys = lkeys & rkeys
                 elif match == '=':
-                    _check(lkeys == rkeys)
+                    check(lkeys == rkeys)
                     iterkeys = lkeys
                 else:
                     assert False, 'WTF?!'
@@ -94,11 +94,11 @@ def check_type_exc(pattern, obj, path=None):
         else:
             if issubclass(type(pattern), types.FunctionType):
                 try:
-                    _check(pattern(obj))
+                    check(pattern(obj))
                 except Exception as e:
                     raise CheckFailed from e
             elif issubclass(type(pattern), (int, str, bytes, tuple)):
-                _check(obj == pattern)
+                check(obj == pattern)
             else:
                 _check_isinstance(obj, pattern)
 
@@ -109,6 +109,7 @@ def check_type_exc(pattern, obj, path=None):
             e.finalize()
 
         raise
+
 
 '''
 def check_type(pattern, obj):

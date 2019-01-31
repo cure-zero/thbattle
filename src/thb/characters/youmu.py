@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, user_input
-from thb.actions import ActionStage, Damage, DropCards, MigrateCardsTransaction, UserAction
-from thb.actions import migrate_cards, random_choose_card
-from thb.cards import Attack, BaseDuel, LaunchGraze, Skill, UseAttack, t_None, t_Self
+from game.autoenv import EventHandler, user_input
+from thb.actions import ActionStage, Damage, DropCards, UserAction, migrate_cards
+from thb.actions import random_choose_card
+from thb.cards import Attack, BaseDuel, LaunchGraze, Skill, UseAttack, t_None
 from thb.characters.baseclasses import Character, register_character_to
 from thb.inputlets import ChooseIndividualCardInputlet
-from utils import classmix
+from utils.misc import classmix
 
 
 # -- code --

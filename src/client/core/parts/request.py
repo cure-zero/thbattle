@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
+from typing import Optional, Union, Any
 import functools
 
 # -- third party --
@@ -26,31 +26,31 @@ class Room(object):
         self.core = core
 
     @request('room:create')
-    def create(self, mode, name, flags):
+    def create(self, mode: str, name: str, flags: dict) -> None:
         pass
 
     @request('room:join')
-    def join(self, gid, slot):
+    def join(self, gid: int, slot: Optional[int]) -> None:
         pass
 
     @request('room:leave')
-    def leave(self):
+    def leave(self) -> None:
         pass
 
     @request('room:users')
-    def users(self, gid):
+    def users(self, gid: int) -> None:
         pass
 
     @request('room:get-ready')
-    def get_ready(self):
+    def get_ready(self) -> None:
         pass
 
     @request('room:cancel-ready')
-    def cancel_ready(self):
+    def cancel_ready(self) -> None:
         pass
 
     @request('room:change-location')
-    def change_location(self, loc):
+    def change_location(self, loc: int) -> None:
         pass
 
 
@@ -59,19 +59,19 @@ class Observe(object):
         self.core = core
 
     @request('ob:observe')
-    def observe(self, uid):
+    def observe(self, uid: int) -> None:
         pass
 
     @request('ob:grant')
-    def grant(self, uid, grant):
+    def grant(self, uid: int, grant: bool) -> None:
         pass
 
     @request('ob:kick')
-    def kick(self, uid):
+    def kick(self, uid: int) -> None:
         pass
 
     @request('ob:leave')
-    def leave(self, ob):
+    def leave(self) -> None:
         pass
 
 
@@ -80,11 +80,11 @@ class Invite(object):
         self.core = core
 
     @request('invite:invite')
-    def invite(self, uid):
+    def invite(self, uid: int) -> None:
         pass
 
     @request('invite:kick')
-    def kick(self, uid):
+    def kick(self, uid: int) -> None:
         pass
 
 
@@ -93,11 +93,11 @@ class Game(object):
         self.core = core
 
     @request('game:set-param')
-    def set_param(self, key, value):
+    def set_param(self, key: str, value: Union[int, str, bool]) -> None:
         pass
 
     @request('game:data')
-    def data(self, gid, serial, tag, data):
+    def data(self, gid: int, serial: int, tag: str, data: Any) -> None:
         pass
 
 
@@ -106,7 +106,7 @@ class Item(object):
         self.core = core
 
     @request('item:use')
-    def use(self, sku):
+    def use(self, sku: str) -> None:
         pass
 
 

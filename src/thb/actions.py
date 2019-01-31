@@ -279,7 +279,7 @@ def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
 
 
 class PostCardMigrationHandler(EventHandlerGroup):
-    interested = ('post_card_migration',)
+    interested = ['post_card_migration']
 
     def handle(self, evt_type, arg):
         if evt_type != 'post_card_migration': return arg
@@ -731,7 +731,7 @@ class LaunchCard(GenericAction):
         act.target_list = tl
         try:
             act.action_shootdown_exception()
-        except:
+        except Exception:
             log.debug('LaunchCard card_action.can_fire() FALSE')
             raise
 
@@ -945,7 +945,7 @@ class TurnOverCard(BaseFatetell):
 
 
 class FatetellMalleateHandler(EventHandlerGroup):
-    interested = ('fatetell',)
+    interested = ['fatetell']
 
     def handle(self, evt_type, data):
         if evt_type != 'fatetell': return data

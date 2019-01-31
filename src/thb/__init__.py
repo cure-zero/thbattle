@@ -1,17 +1,25 @@
+# -*- coding: utf-8 -*-
 
+# -- stdlib --
+from collections import OrderedDict
+from typing import Dict, Type
 
-from thb.thb3v3 import THBattle
-from thb.thbkof import THBattleKOF
-from thb.thbidentity import THBattleIdentity
-from thb.thbfaith import THBattleFaith
+# -- third party --
+# -- own --
+from game.base import Game
 from thb.thb2v2 import THBattle2v2
+from thb.thb3v3 import THBattle
+from thb.thbfaith import THBattleFaith
+from thb.thbidentity import THBattleIdentity
+from thb.thbkof import THBattleKOF
 from thb.thbnewbie import THBattleNewbie
 
-import thb.item  # noqa, init it
-from collections import OrderedDict
 
-modes = OrderedDict()
-l = [
+# -- code --
+import thb.item  # noqa, init it
+
+modes: Dict[str, Type[Game]] = OrderedDict()
+modelst = [
     THBattle,
     THBattleKOF,
     THBattleIdentity,
@@ -20,10 +28,10 @@ l = [
     THBattleNewbie,
 ]
 
-for g in l:
+for g in modelst:
     modes[g.__name__] = g
 
-del l, g, OrderedDict
+del modelst, g, OrderedDict
 
 modes_kedama = {
     'THBattleNewbie',

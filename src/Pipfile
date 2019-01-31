@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 pytest = "*"
 ipython = "*"
+neovim = "*"
 
 [packages]
 pillow = "*"
@@ -17,6 +18,7 @@ requests = "*"
 raven = "*"
 websocket-client = "*"
 arrow = "*"
+dnspython = "*"
 
 [requires]
 python_version = "3.6"

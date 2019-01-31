@@ -76,7 +76,7 @@ def start_server():
         cli = Client(core, ep)
         cli.serve()
 
-    a = urlparse(options.listen)
+    a = urllib.parse.urlparse(options.listen)
     server = StreamServer((a.hostname, options.port), serve, None)
     server.serve_forever()
 
