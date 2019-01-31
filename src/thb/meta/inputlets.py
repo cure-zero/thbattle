@@ -6,7 +6,6 @@ import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Game
 from thb import actions as thbactions, cards as thbcards, inputlets
 from thb.ui.ui_meta.common import ui_meta_for
 
@@ -43,7 +42,7 @@ def walk_wrapped(g, cl, check_is_complete):
         if check_is_complete:
             try:
                 is_complete = c.ui_meta.is_complete
-            except:
+            except Exception:
                 is_complete = None
 
             if not is_complete:
@@ -52,7 +51,7 @@ def walk_wrapped(g, cl, check_is_complete):
 
             try:
                 rst, reason = is_complete(g, [c])
-            except:
+            except Exception:
                 log.exception('card.ui_meta.is_complete error')
                 raise ActionDisplayResult(False, '[card.ui_meta.is_complete错误]', False, [], [])
 
@@ -95,7 +94,7 @@ def pasv_handle_player_selection(g, ilet, players):
     try:
         ui_meta_valid, reason = ilet.initiator.ui_meta.target(players)
         assert bool(logic_valid) == bool(ui_meta_valid), 'logic: %s, ui: %s' % (logic_valid, ui_meta_valid)
-    except:
+    except Exception:
         log.exception('act.ui_meta.target error')
         raise ActionDisplayResult(False, '[act.ui_meta.target错误]', bool(ilet.candidates), disables, players)
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from .definition import *
-from .base import *
-from .basic import *
-from .equipment import *
-from .spellcard import *
-from .debug import *
+from .definition import *  # noqa
+from .base import *  # noqa
+from .basic import *  # noqa
+from .equipment import *  # noqa
+from .spellcard import *  # noqa
+from .debug import *  # noqa

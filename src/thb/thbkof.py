@@ -19,17 +19,10 @@ from thb.inputlets import ChooseGirlInputlet
 
 # -- code --
 log = logging.getLogger('THBattle')
-_game_ehs = {}
 
 
-def game_eh(cls):
-    _game_ehs[cls.__name__] = cls
-    return cls
-
-
-@game_eh
 class DeathHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type != 'action_apply': return act
@@ -58,9 +51,12 @@ class DeathHandler(EventHandler):
         return act
 
 
-@game_eh
 class KOFCharacterSwitchHandler(EventHandler):
-    interested = ('action_after', 'action_before', 'action_stage_action')
+    interested = ['action_after', 'action_before', 'action_stage_action']
+
+    def __init__(self, g):
+        EventHandler.__init__(self, g)
+        g.switch_handler = self
 
     def handle(self, evt_type, act):
         cond = evt_type in ('action_before', 'action_after')
@@ -69,17 +65,15 @@ class KOFCharacterSwitchHandler(EventHandler):
         cond and self.do_switch_dead()
         return act
 
-    @classmethod
-    def do_switch_dead(cls):
+    def do_switch_dead(self):
         g = self.game
 
         for p in [p for p in g.players if p.dead and p.choices]:
-            new = cls.switch(p)
+            new = self.switch(p)
             g.process_action(DistributeCards(new, 4))
             g.emit_event('character_debut', (p, new))
 
-    @staticmethod
-    def switch(p):
+    def switch(self, p):
         g = self.game
         mapping = {p: p.choices}
 
@@ -193,7 +187,7 @@ class THBattleKOFBootstrap(GenericAction):
             p = g.players[idx]
             if i >= 6000: break
             if p.dead:
-                KOFCharacterSwitchHandler.do_switch_dead()
+                g.switch_handler.do_switch_dead()
                 p = g.players[idx]  # player changed
 
             assert not p.dead
@@ -207,7 +201,6 @@ class THBattleKOFBootstrap(GenericAction):
 
 class THBattleKOF(Game):
     n_persons  = 2
-    game_ehs   = _game_ehs
     bootstrap  = THBattleKOFBootstrap
     params_def = {}
 
@@ -224,7 +217,11 @@ class THBattleKOF(Game):
         return False
 
     def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
+        game_ehs = [
+            DeathHandler,
+            KOFCharacterSwitchHandler,
+        ]
+        ehclasses = list(action_eventhandlers) + game_ehs
         ehclasses += g.ehclasses
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 

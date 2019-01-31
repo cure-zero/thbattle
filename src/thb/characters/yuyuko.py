@@ -4,7 +4,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, user_input
+from game.autoenv import EventHandler, user_input
 from thb.actions import DrawCards, DummyAction, FinalizeStage, GenericAction, LifeLost
 from thb.actions import MaxLifeChange, Pindian, PlayerDeath, TryRevive, UserAction, ttags
 from thb.cards import Heal, Skill, t_None, t_OtherOne
@@ -152,7 +152,7 @@ class PerfectCherryBlossomExtractAction(UserAction):
 class PerfectCherryBlossomAction(UserAction):
     def apply_action(self):
         src, tgt = self.source, self.target
-        if tgt.dead:self.game
+        if tgt.dead: return True
         g = self.game
         ttags(src)['perfect_cherry_blossom'] = True
         g.process_action(LifeLost(src, tgt, 1))

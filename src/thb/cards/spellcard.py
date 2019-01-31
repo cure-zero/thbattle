@@ -369,7 +369,7 @@ class HarvestEffect(InstantSpellCardAction):
     def is_valid(self):
         try:
             cards = ForEach.get_actual_action(self).cards
-        except:
+        except Exception:
             return False
 
         if self.target.dead:

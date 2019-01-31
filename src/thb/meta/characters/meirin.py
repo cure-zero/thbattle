@@ -42,7 +42,7 @@ class Taichi:
             if act.cond([build_handcard(cards.GrazeCard)]):
                 return True
 
-        except:
+        except Exception:
             pass
 
         return False

@@ -6,7 +6,7 @@
 from ..actions import DrawCards, PlayerTurn, UserAction
 from ..cards import Skill, t_None
 from .baseclasses import Character, register_character_to
-from game.autoenv import EventHandler, Game
+from game.autoenv import EventHandler
 
 
 # -- code --

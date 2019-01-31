@@ -6,7 +6,7 @@ import itertools
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, sync_primitive, user_input
+from game.autoenv import EventHandler, sync_primitive, user_input
 from thb.actions import ActionStage, ActionStageLaunchCard, AskForCard, Damage, FinalizeStage
 from thb.actions import GenericAction, LaunchCard, ShowCards, UserAction, migrate_cards, ttags
 from thb.cards import AttackCard, CardList, DollControlCard, DuelCard, Skill, TreatAs, VirtualCard

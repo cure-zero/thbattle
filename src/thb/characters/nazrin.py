@@ -7,7 +7,7 @@ from thb.actions import FatetellAction, FatetellStage, migrate_cards
 from thb.cards import Card, GrazeCard, Skill, TreatAs, t_None
 from thb.inputlets import ChooseOptionInputlet
 from thb.characters.baseclasses import Character, register_character_to
-from game.autoenv import EventHandler, Game, user_input
+from game.autoenv import EventHandler, user_input
 
 
 # -- code --

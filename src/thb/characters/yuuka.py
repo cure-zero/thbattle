@@ -3,7 +3,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, user_input
+from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, DrawCards, ForEach, LaunchCard, PlayerDeath, UserAction
 from thb.actions import user_choose_players
 from thb.cards import AttackCard, Duel, InstantSpellCardAction, Reject, Skill, TreatAs

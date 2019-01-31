@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 
-from game.autoenv import Game
-G = Game.getgame
+# -- stdlib --
+# -- third party --
+# -- own --
+from game.base import GameViralContext
 
-import sys
 
+# -- code --
 UI_META = {}
+
+
+def G():
+    return GameViralContext().game
 
 
 class UIMetaAccessor(object):

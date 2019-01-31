@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+import logging
 
 # -- third party --
-
 # -- own --
 from .actions import MaxLifeChange, PlayerRevive, UserAction
+from .cards import Card, DummyCard, Skill, TreatAs, t_One
 from .characters.baseclasses import Character
-from .cards import Card, TreatAs, Skill, DummyCard, t_One
-from game.autoenv import Game, EventHandler
-import logging
+from game.autoenv import EventHandler
+
 
 # -- code --
 log = logging.getLogger('THBattleDebug')
 
 
 class DebugUseCard(TreatAs, Skill):
-    skill_category = ('debug', 'active')
+    skill_category = ['debug', 'active']
 
     @property
     def treat_as(self):
@@ -53,7 +53,7 @@ class DebugDecMaxLife(Skill):
 
 
 class DebugHandler(EventHandler):
-    interested = ('action_after', 'game_begin', 'switch_character')
+    interested = ['action_after', 'game_begin', 'switch_character']
     '''
     Add this handler to game_eh to active debug skills
     '''

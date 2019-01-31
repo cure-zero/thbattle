@@ -4,7 +4,6 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import Game
 from thb.actions import DrawCards, UserAction, ttags
 from thb.cards import Skill, t_Self
 from thb.characters.baseclasses import Character, register_character_to

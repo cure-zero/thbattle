@@ -22,7 +22,7 @@ from thb.characters.baseclasses import mixin_character
 from thb.common import CharChoice, PlayerIdentity, build_choices
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from thb.item import ImperialIdentity
-from utils.misc import BatchList, classmix, first
+from utils.misc import BatchList, classmix
 from enum import IntEnum
 
 
@@ -440,7 +440,7 @@ class THBattleIdentityBootstrap(GenericAction):
 
         try:
             chars.remove(c.char_cls)
-        except:
+        except Exception:
             pass
 
         # mix it in advance

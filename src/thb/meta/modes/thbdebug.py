@@ -39,7 +39,7 @@ class DebugUseCard:
         skill = cl[0]
         try:
             skill.treat_as.ui_meta
-        except:
+        except Exception:
             return False, 'Dummy'
 
         return skill.treat_as.ui_meta.is_action_valid(g, [skill], target_list)

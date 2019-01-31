@@ -6,7 +6,7 @@ from collections import defaultdict
 
 # -- third party --
 # -- own --
-from game.autoenv import Game, GameObject
+from game.autoenv import GameObject
 from utils.misc import partition
 
 # -- code --
@@ -75,10 +75,9 @@ def get_characters(*cats):
     return chars
 
 
-def mixin_character(player, char_cls):
+def mixin_character(g, player, char_cls):
     assert issubclass(char_cls, Character)
 
-    g = self.game
     player.index = g.get_playerid(player)
 
     old = None

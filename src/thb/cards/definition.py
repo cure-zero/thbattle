@@ -15,6 +15,7 @@ def physical_card(cls):
     Card.card_classes[cls.__name__] = cls
     return cls
 
+
 # ==================================================
 from thb.cards import basic
 
@@ -54,8 +55,8 @@ class ExinwanCard(PhysicalCard):
     target = t_Self
     category = ('basic', )
 
-# --------------------------------------------------
 
+# --------------------------------------------------
 from thb.cards import spellcard
 
 
@@ -411,6 +412,7 @@ class GrimoireCard(PhysicalCard):
     category = ('equipment', 'weapon')
     equipment_skill = equipment.GrimoireSkill
     equipment_category = 'weapon'
+
 
 # --------------------------------------------------
 from thb.cards import debug

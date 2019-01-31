@@ -89,7 +89,6 @@ class Craftsman:
         return s
 
     def sound_effect(self, act):
-        g = act.game
         if isinstance(act, actions.LaunchCard):
             if act.card.is_card(cards.AttackCard):
                 l = ['1', '2']

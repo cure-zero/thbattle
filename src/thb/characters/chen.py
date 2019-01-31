@@ -8,7 +8,7 @@ from ..cards import AttackCard, DollControlCard, Heal, InstantSpellCardAction, R
 from ..cards import t_OtherOne
 from ..inputlets import ChooseOptionInputlet
 from .baseclasses import Character, register_character_to
-from game.autoenv import EventHandler, Game, user_input
+from game.autoenv import EventHandler, user_input
 
 
 # -- code --

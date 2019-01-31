@@ -6,7 +6,7 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import ui_meta_for, meta_property, passive_clickable
+from thb.ui.ui_meta.common import ui_meta_for, passive_clickable
 from thb.ui.ui_meta.common import passive_is_action_valid
 
 # -- code --

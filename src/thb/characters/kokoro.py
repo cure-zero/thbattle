@@ -3,12 +3,12 @@
 # -- stdlib --
 # -- third party --
 # -- own --
+from game.autoenv import EventHandler, user_input
 from thb.actions import ActionStage, DropCards, ShowCards, UserAction, migrate_cards
 from thb.actions import user_choose_cards
 from thb.cards import Card, Skill, t_None, t_OtherOne
-from thb.inputlets import ChooseOptionInputlet, HopeMaskInputlet, HopeMaskKOFInputlet
 from thb.characters.baseclasses import Character, register_character_to
-from game.autoenv import EventHandler, Game, user_input
+from thb.inputlets import ChooseOptionInputlet, HopeMaskInputlet, HopeMaskKOFInputlet
 
 
 # -- code --
@@ -106,7 +106,7 @@ class BaseDarkNohAction(UserAction):
             cl = list(tgt.cards) + list(tgt.showncards)
             try:
                 cl.remove(card)
-            except:
+            except Exception:
                 pass
 
             cards = cl[:n]

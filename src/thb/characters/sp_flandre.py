@@ -4,7 +4,7 @@ from __future__ import absolute_import
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, user_input
+from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, GenericAction, LaunchCard, LifeLost, MaxLifeChange, PlayerTurn
 from thb.actions import ttags, user_choose_players
 from thb.cards import Skill, t_None

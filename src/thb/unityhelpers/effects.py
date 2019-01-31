@@ -2,7 +2,6 @@
 
 
 # -- stdlib --
-import itertools
 
 # -- third party --
 # -- own --

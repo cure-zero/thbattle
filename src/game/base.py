@@ -2,7 +2,8 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Any, List, Mapping
+from random import Random
+from typing import Any, List, Mapping, Type
 import logging
 import random
 
@@ -133,10 +134,13 @@ class Game(GameObject, GameViralContext):
 
         and all game related vars, eg. tags used by [EventHandler]s and [Action]s
     '''
-    # event_handlers = []
     IS_DEBUG = False
+    event_handlers: List['EventHandler'] = []
     params_def: Mapping[str, Any] = {}
     npc_players: List[NPC] = []
+    random: Random
+    n_persons: int
+    bootstrap: Type['Action']
 
     def __init__(self):
         self.players = BatchList()

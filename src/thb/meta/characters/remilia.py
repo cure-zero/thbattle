@@ -80,7 +80,7 @@ class ScarletMistAction:
         tl = list(act.target_list)
         try:
             tl.remove(src)
-        except:
+        except Exception:
             pass
 
         return '|G【%s】|r释放出了|G红雾|r，威严爆表！%s流了鼻血！' % (

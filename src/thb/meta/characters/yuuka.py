@@ -28,7 +28,7 @@ class ReversedScales:
         try:
             act = g.action_stack[-1]
             return act.cond([build_handcard(cards.AttackCard)])
-        except:
+        except Exception:
             pass
 
         return False

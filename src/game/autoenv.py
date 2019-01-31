@@ -23,7 +23,7 @@ def init(place, custom=None):
     elif place == 'Server':
         from server.base import Game as G, user_input as U
     elif place == 'Client':
-        from client.core import Game as G, user_input as U  # noqa
+        from client.base import Game as G, user_input as U  # noqa
     else:
         raise Exception('Where am I?')
 

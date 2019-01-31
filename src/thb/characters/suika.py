@@ -4,7 +4,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game
+from game.autoenv import EventHandler
 from thb.actions import ActionLimitExceeded, ActionShootdown, ActionStage, DrawCards, LaunchCard
 from thb.actions import Pindian, PlayerTurn, UserAction
 from thb.cards import AttackCard, Skill, TreatAs, VirtualCard, WineCard, t_None, t_OtherOne

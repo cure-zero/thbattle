@@ -266,7 +266,7 @@ class THBattleFaith(Game):
     def get_remaining_characters(g):
         try:
             hakurei, moriya = g.forces
-        except:
+        except Exception:
             return -1, -1
 
         h, m = len(hakurei.pool) - 1, len(moriya.pool) - 1

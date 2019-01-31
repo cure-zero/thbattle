@@ -4,7 +4,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, user_input
+from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, FatetellMalleateHandler, MigrateCardsTransaction, UseCard
 from thb.actions import UserAction, detach_cards, migrate_cards, user_choose_cards
 from thb.cards import Skill, t_None

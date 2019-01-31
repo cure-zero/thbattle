@@ -408,7 +408,7 @@ class ScarletRhapsodySkill(WeaponSkill):
     def distance(self):
         try:
             return max(1, self.associated_cards[0].distance)
-        except:
+        except Exception:
             return 1
 
 

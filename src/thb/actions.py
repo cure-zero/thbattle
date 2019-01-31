@@ -3,13 +3,15 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
+from typing import List
 import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGroup
+from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGroup, Game
 from game.autoenv import GameException, InputTransaction, sync_primitive, user_input
 from game.base import GameViralContext
+from thb.cards.base import CardList
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check, check_type
 from utils.misc import BatchList, group_by
@@ -138,13 +140,12 @@ def user_choose_players(initiator, actor, candidates, timeout=None, trans=None):
     return rst[1]  # players
 
 
-def random_choose_card(cardlists):
+def random_choose_card(g: Game, cardlists: List[CardList]):
     from itertools import chain
     allcards = list(chain.from_iterable(cardlists))
     if not allcards:
         return None
 
-    g = self.game
     c = g.random.choice(allcards)
     v = sync_primitive(c.sync_id, g.players)
     cl = g.deck.lookupcards([v])
@@ -320,14 +321,15 @@ migrate_cards.DETACHED = _MigrateCardsDetached()
 migrate_cards.UNWRAPPED = _MigrateCardsUnwrapped()
 
 
+action_eventhandlers = set()
+
+
 def register_eh(cls):
     action_eventhandlers.add(cls)
     return cls
-action_eventhandlers = set()
+
 
 # ------------------------------------------
-
-
 class GenericAction(Action):
     pass
 

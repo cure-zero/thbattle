@@ -274,9 +274,9 @@ class CardList(GameObject, deque):
     SPECIAL = 'special'
     FAITHS = 'faiths'
 
-    def __init__(self, owner, type):
+    def __init__(self, owner: AbstractPlayer, typ: str):
         self.owner = owner
-        self.type = type
+        self.type = typ
         deque.__init__(self)
 
     def __eq__(self, rhs):
@@ -376,7 +376,7 @@ class Skill(VirtualCard):
     target: Callable[[Game, AbstractPlayer, List[AbstractPlayer]], Tuple[List[AbstractPlayer], bool]]
     associated_action: Optional[UserAction]
     associated_cards: List[Card]
-    category = ['skill']
+    category: List[str] = ['skill']
 
     def __init__(self, player):
         assert player is not None

@@ -201,7 +201,7 @@ class THBattleNewbieBootstrap(GenericAction):
         def remove_eh(eh):
             try:
                 g.remove_adhoc_event_handler(eh)
-            except:
+            except Exception:
                 pass
 
         def fail():

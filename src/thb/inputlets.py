@@ -6,7 +6,6 @@ import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Game
 from game.base import Inputlet
 from utils.check import CheckFailed, check, check_type
 
@@ -264,7 +263,7 @@ class ChooseGirlInputlet(Inputlet):
 
         try:
             return self.mapping[self.actor].index(self.choice)
-        except:
+        except Exception:
             log.exception('WTF?!')
             return None
 

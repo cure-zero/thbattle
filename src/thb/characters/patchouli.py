@@ -4,7 +4,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game
+from game.autoenv import EventHandler
 from thb.actions import DrawCards, GenericAction
 from thb.cards import Card, RejectCard, Skill, SpellCardAction, t_None
 from thb.characters.baseclasses import Character, register_character_to

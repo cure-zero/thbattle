@@ -4,7 +4,6 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import Game
 from thb.actions import Damage, ForEach, UserAction
 
 

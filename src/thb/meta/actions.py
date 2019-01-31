@@ -169,7 +169,7 @@ class RevealIdentity:
         i = tgt.identity
         try:
             name = '|G%s|r' % tgt.ui_meta.name
-        except:
+        except Exception:
             name = '|R%s|r' % tgt.account.username
 
         return '%s的身份是：|R%s|r' % (
