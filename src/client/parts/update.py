@@ -189,24 +189,3 @@ class Update(object):
         result = result.answer[0]
         url = result.items[0].strings[0]
         return url
-
-
-def meh():
-        '''
-        from options import options
-        import settings
-        if options.no_update:
-            return 'update_disabled'
-        '''
-
-        pool = Pool(2)
-
-        # --------------------
-
-        pool.spawn(do_update, 'logic_progress', settings.LOGIC_UPDATE_BASE, settings.LOGIC_UPDATE_SERVER)
-        if settings.INTERPRETER_UPDATE_BASE:
-            pool.spawn(do_update, 'interpreter_progress', settings.INTERPRETER_UPDATE_BASE, settings.INTERPRETER_UPDATE_SERVER)
-
-        pool.join()
-
-        return 'updated' if not errord[0] else 'error'

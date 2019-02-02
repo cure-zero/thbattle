@@ -30,6 +30,7 @@ class Reward(object):
 
         return g
 
+    # ----- Methods -----
     def get_bonus(self, g):
         # XXX
         # self is GameManager
