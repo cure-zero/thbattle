@@ -20,7 +20,7 @@ cryptography = "*"
 itsdangerous = "*"
 msgpack = "*"
 pymysql = "*"
-psycopg2 = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 ipython = "*"

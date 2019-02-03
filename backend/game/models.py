@@ -19,14 +19,14 @@ class Game(models.Model):
         verbose_name        = '完结的游戏'
         verbose_name_plural = '完结的游戏'
 
-    gid         = models.IntegerField(primary_key=True, **_('游戏ID'))
-    name        = models.CharField(max_length=100, **_('游戏名称'))
-    type        = models.CharField(max_length=20, **_('游戏类型'))
-    flags       = pg.JSONField(**_('游戏选项'))
-    players     = models.ManyToManyField(Player, related_name='+', **_('玩家列表'))
-    winners     = models.ManyToManyField(Player, related_name='+', **_('胜利玩家'))
-    duration    = models.PositiveIntegerField(**_('持续时间'))
-    finished_at = models.DateTimeField(auto_now_add=True, **_('结束时刻'))
+    gid        = models.IntegerField(**_('游戏ID'), primary_key=True)
+    name       = models.CharField(**_('游戏名称'), max_length=100)
+    type       = models.CharField(**_('游戏类型'), max_length=20)
+    flags      = pg.JSONField(**_('游戏选项'))
+    players    = models.ManyToManyField(Player, **_('参与玩家'), related_name='+')
+    winners    = models.ManyToManyField(Player, **_('胜利玩家'), related_name='+')
+    started_at = models.DateTimeField(auto_now_add=True, **_('开始时间'))
+    duration   = models.PositiveIntegerField(**_('持续时间'))
 
     def __str__(self):
         return f'[{self.gid}]self.name'
@@ -35,13 +35,13 @@ class Game(models.Model):
 class GameReward(models.Model):
 
     class Meta:
-        verbose_name        = '游戏奖励'
-        verbose_name_plural = '游戏奖励'
+        verbose_name        = '游戏积分'
+        verbose_name_plural = '游戏积分'
 
     id     = models.AutoField(primary_key=True)
     game   = models.ForeignKey(Game, **_('游戏'), related_name='rewards', on_delete=models.CASCADE)
     player = models.ForeignKey(Player,  **_('玩家'), on_delete=models.CASCADE)
-    type   = models.CharField(**_('奖励类型'), max_length=20)
+    type   = models.CharField(**_('积分类型'), max_length=20)
     amount = models.PositiveIntegerField(**_('数量'))
 
     def __str__(self):
@@ -51,8 +51,8 @@ class GameReward(models.Model):
 class GameArchive(models.Model):
 
     class Meta:
-        verbose_name        = '游戏存档'
-        verbose_name_plural = '游戏存档'
+        verbose_name        = '游戏 Replay 存档'
+        verbose_name_plural = '游戏 Replay 存档'
 
     game = models.OneToOneField(Game,
         **_('游戏'),
