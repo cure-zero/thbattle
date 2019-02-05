@@ -23,7 +23,7 @@ class Connect(object):
         core.events.game_created += self.refresh_status
         core.events.game_started += self.refresh_status
         core.events.game_ended += self.refresh_status
-        core.events.game_killed += self.refresh_status
+        core.events.game_aborted += self.refresh_status
         core.events.user_state_transition += self.refresh_status
 
         self._wsconn = websocket.create_connection(core.options.interconnect)

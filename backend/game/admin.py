@@ -11,11 +11,11 @@ from . import models
 # -- code --
 @admin.register(models.Game)
 class GameAdmin(admin.ModelAdmin):
-    list_display = ('gid', 'name', 'type', 'flags', 'started_at', 'duration')
+    list_display = ('id', 'name', 'type', 'flags', 'started_at', 'duration')
     list_filter = ('type',)
     search_fields = ('name',)
     filter_horizontal = ('players', 'winners')
-    ordering = ('-gid',)
+    ordering = ('-id',)
 
 
 @admin.register(models.GameReward)
@@ -31,6 +31,6 @@ class GameArchiveAdmin(admin.ModelAdmin):
     list_display = ('game',)
     list_filter = ()
     search_fields = ()
-    ordering = ('-game__gid',)
+    ordering = ('-game__id',)
 
 # Register your models here.

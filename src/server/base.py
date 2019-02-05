@@ -221,6 +221,9 @@ class Game(game.base.Game):
             g.process_action(g.bootstrap(params, items))
         except GameEnded:
             pass
+        except Exception:
+            core.game.mark_crashed(g)
+            raise
         finally:
             core.events.game_ended.emit(g)
 

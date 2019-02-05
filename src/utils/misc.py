@@ -81,8 +81,9 @@ class BatchList(list):
     def replace(self, old, new):
         try:
             self[self.index(old)] = new
+            return True
         except ValueError:
-            pass
+            return False
 
     def sibling(self, me, offset=1):
         i = self.index(me)

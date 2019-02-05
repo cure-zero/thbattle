@@ -70,7 +70,6 @@ class Room(object):
 
     def handle_game_left(self, ev):
         g, c = ev
-        g, c = ev
         g._[self]['left'][c] = bool(g.greenlet)
         return ev
 
@@ -204,11 +203,13 @@ class Room(object):
 
     # ----- Public Methods -----
     def is_online(self, g: Game, c: Client):
-        # XXX 'left' is not implemented yet
         rst = c is not None
         rst = rst and c in g._[self]['users']
         rst = rst and not g._[self]['left'][c]
         return rst
+
+    def is_left(self, g: Game, c: Client):
+        return g._[self]['left'][c]
 
     def online_users_of(self, g: Game):
         return [u for u in g._[self]['users'] if self.is_online(g, u)]
@@ -221,6 +222,9 @@ class Room(object):
 
     def name_of(self, g: Game):
         return g._[self]['name']
+
+    def flags_of(self, g: Game):
+        return g._[self]['flags']
 
     def get_game(self, gid: int):
         return self.games.get(gid)
@@ -266,17 +270,21 @@ class Room(object):
         core = self.core
 
         g = core.game.current(u)
-        assert u in g._[self]['users']
+        rst = g._[self]['users'].replace(u, None)
+        assert rst
         u.write(['game_left', None])
 
-        if self.game_started:
-            log.info('player dropped')
-        else:
-            log.info('player leave')
+        gid = core.game.gid_of(g),
+
+        log.info(
+            'Player %s left game [%s]',
+            core.auth.name_of(u),
+            gid,
+        )
 
         core.events.game_left.emit((g, u))
 
-        gid = g._[self]['uid']
+        gid = g._[self]['gid']
         if gid not in self.games:
             return
 
@@ -286,12 +294,10 @@ class Room(object):
             return
 
         if g.greenlet:
-            log.info('game aborted')
-            g.suicide = True  # game will kill itself in get_synctag()
-            # And then triggers GAME_ENDED, so nothing to do here
-            core.events.game_killed.emit(g)
+            log.info('Game [%s] aborted', gid)
+            core.game.abort(g)
         else:
-            log.info('game canceled')
+            log.info('Game [%s] cancelled', gid)
             self.games.pop(gid, 0)
 
     def send_room_users(self, g: Game, to: List[Client]):

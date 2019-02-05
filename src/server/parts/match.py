@@ -25,7 +25,7 @@ class Match(object):
 
         core.events.user_state_transition += self.handle_user_state_transition
         core.events.game_started += self.handle_game_started
-        core.events.game_killed += self.handle_game_killed
+        core.events.game_aborted += self.handle_game_aborted
         core.events.game_ended += self.handle_game_ended
         core.events.game_successive_create += self.handle_game_successive_create
 
@@ -51,7 +51,7 @@ class Match(object):
 
         return g
 
-    def handle_game_killed(self, g):
+    def handle_game_aborted(self, g):
         core = self.core
         if g.greenlet and core.game.flags_of(g).get('match'):
             core.interconnect.speaker(

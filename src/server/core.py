@@ -82,7 +82,7 @@ class Events(object):
         # Game ended in half way.
         # This fires before GAME_ENDED
         # ev = (g: Game)
-        self.game_killed = EventHub(Game)
+        self.game_aborted = EventHub(Game)
 
 
 class Core(object):

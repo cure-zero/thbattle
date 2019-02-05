@@ -19,7 +19,7 @@ class Game(models.Model):
         verbose_name        = '完结的游戏'
         verbose_name_plural = '完结的游戏'
 
-    gid        = models.IntegerField(**_('游戏ID'), primary_key=True)
+    id         = models.IntegerField(**_('游戏ID'), primary_key=True)
     name       = models.CharField(**_('游戏名称'), max_length=100)
     type       = models.CharField(**_('游戏类型'), max_length=20)
     flags      = pg.JSONField(**_('游戏选项'))

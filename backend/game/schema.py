@@ -60,7 +60,7 @@ class GameQuery(gh.ObjectType):
 
 
 class GameInput(gh.InputObjectType):
-    gid        = gh.Int(required=True, description='游戏ID')
+    game_id    = gh.Int(required=True, description='游戏ID')
     name       = gh.String(required=True, description='游戏名称')
     type       = gh.String(required=True, description='游戏类型')
     flags      = ghg.GenericScalar(required=True, description='游戏选项')
@@ -71,21 +71,21 @@ class GameInput(gh.InputObjectType):
 
 
 class GameRewardInput(gh.InputObjectType):
-    gid    = gh.Int(required=True, description='游戏GId')
-    pid    = gh.Int(required=True, description='玩家ID')
-    type   = gh.String(required=True, description='积分类型')
-    amount = gh.Int(required=True, description='数量')
+    player_id  = gh.Int(required=True, description='玩家ID')
+    type       = gh.String(required=True, description='积分类型')
+    amount     = gh.Int(required=True, description='数量')
 
 
 class GameOps(gh.ObjectType):
     archive = gh.Field(
         Game,
-        meta=gh.Argument(GameInput, required=True, description='游戏元数据'),
+        game=gh.Argument(GameInput, required=True, description='游戏元数据'),
         archive=gh.String(required=True, description='游戏 Replay 数据（Base64）'),
         description='保存游戏存档',
     )
     add_reward = gh.Field(
-        Player,
+        Game,
+        game_id=gh.Int(required=True, description='游戏ID'),
         rewards=gh.List(gh.NonNull(GameRewardInput), required=True, description='积分列表'),
         description='增加游戏积分',
     )

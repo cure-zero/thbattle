@@ -9,7 +9,6 @@ ipython = "*"
 neovim = "*"
 
 [packages]
-pillow = "*"
 colorlog = "*"
 gevent = "*"
 msgpack-python = "*"

@@ -7,7 +7,7 @@ import random
 
 # -- third party --
 # -- own --
-from game.base import GameData
+from game.base import GameData, Game as BaseGame
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList
@@ -159,6 +159,8 @@ class Game(object):
         g._[self] = {
             'params': {k: v[0] for k, v in cls.params_def.items()},
             'fleed': defaultdict(bool),
+            'aborted': False,
+            'crashed': False,
             'data': {},
         }
 
@@ -176,6 +178,21 @@ class Game(object):
             to.write(['game:data', [p.id, p.tag, p.data]])
 
     # ----- Public Methods -----
+    def mark_crashed(self, g: BaseGame):
+        g._[self]['crashed'] = True
+
+    def is_crashed(self, g: BaseGame):
+        return g._[self]['crashed']
+
+    def abort(self, g: BaseGame):
+        core = self.core
+        g.suicide = True  # game will kill itself in get_synctag()
+        g._[self]['aborted'] = True
+        core.events.game_aborted.emit(g)
+
+    def is_aborted(self, g: BaseGame):
+        return g._[self]['aborted']
+
     def setup_game(self, g):
         core = self.core
         users = core.room.users_of(g)
@@ -194,7 +211,7 @@ class Game(object):
 
         return pl
 
-    def is_user_fleed(self, g, u):
+    def is_fleed(self, g, u):
         return g._[self]['fleed'][u]
 
     def get_gamedata_archive(self, g):
