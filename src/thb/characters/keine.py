@@ -233,6 +233,7 @@ class DevourHandler(EventHandler):
 
 register_character_to('common', '-kof')  # make pyflakes happy
 
+
 # @register_character_to('common', '-kof')
 class Keine(Character):
     skills = [Teach, KeineGuard]

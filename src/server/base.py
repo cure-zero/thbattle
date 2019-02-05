@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict
 from copy import copy
-from typing import Callable, Any
+from typing import Any, Callable
 import logging
 
 # -- third party --
@@ -16,6 +16,7 @@ from .endpoint import Client
 from endpoint import EndpointDied
 from game.base import AbstractPlayer, GameEnded, GameViralContext, InputTransaction, Inputlet
 from game.base import TimeLimitExceeded
+from server.core import Core
 from utils.misc import log_failure
 from utils.stats import stats
 import game.base
@@ -196,7 +197,9 @@ class Game(game.base.Game):
     CLIENT_SIDE = False
     SERVER_SIDE = True
 
-    def __init__(self, core):
+    core: Core
+
+    def __init__(self, core: Core):
         game.base.Game.__init__(self)
         self.core = core
         self.greenlet = None

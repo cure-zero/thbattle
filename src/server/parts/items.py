@@ -74,7 +74,7 @@ class Items(object):
 
         try:
             i = GameItem.from_sku(sku)
-            i.should_usable(g, u, g._[self]['items'])
+            i.should_usable(g, u)
             g._[self]['items'].append(sku)
             u.write(['info', 'use_item_success'])
         except BusinessException as e:

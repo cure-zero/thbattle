@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
 from game.base import GameItem
+from server.base import Client, Game as ServerGame
 from thb.characters.baseclasses import Character
 from utils import exceptions
 
@@ -29,10 +29,13 @@ class ImperialChoice(GameItem):
     def description(self):
         return '你可以选择%s出场。2v2模式不可用。' % self.char_cls.ui_meta.name
 
-    def should_usable(self, g, u, items):
+    def should_usable(self, g: ServerGame, u: Client):
         from thb.thb2v2 import THBattle2v2
         if isinstance(g, THBattle2v2):
             raise exceptions.IncorrectGameMode
+
+        core = g.core
+        items = core.game.items_of(g)
 
         for l in items.values():
             if self.sku in l:
@@ -83,7 +86,7 @@ class ImperialIdentity(GameItem):
     def description(self):
         return '你可以选择%s身份。身份场可用。' % self.disp_name
 
-    def should_usable(self, g, u, items):
+    def should_usable(self, g: ServerGame, u: Client):
         from thb.thbidentity import THBattleIdentity
         if not isinstance(g, THBattleIdentity):
             raise exceptions.IncorrectGameMode
@@ -155,12 +158,15 @@ class European(GameItem):
     title = '欧洲卡'
     description = 'Roll点保证第一。身份场不可用。'
 
-    def should_usable(self, g, u, items):
+    def should_usable(self, g: ServerGame, u: Client):
         from thb.thbidentity import THBattleIdentity
-        if isinstance(mgr.game, THBattleIdentity):
+        if isinstance(g, THBattleIdentity):
             raise exceptions.IncorrectGameMode
 
-        for l in mgr.game_items.values():
+        core = g.core
+        items = core.game.items_of(g)
+
+        for l in items:
             if self.key in l:
                 raise exceptions.EuropeanConflict
 
