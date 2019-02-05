@@ -6,8 +6,8 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import card_desc, ui_meta_for, passive_clickable
-from thb.ui.ui_meta.common import passive_is_action_valid
+from thb.meta.common import card_desc, ui_meta_for, passive_clickable
+from thb.meta.common import passive_is_action_valid
 
 # -- code --
 ui_meta = ui_meta_for(characters.shinmyoumaru)

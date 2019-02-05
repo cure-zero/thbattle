@@ -31,7 +31,7 @@ class SupportAction(UserAction):
 
 class Support(Skill):
     associated_action = SupportAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
     usage = 'handover'
     no_drop = True
@@ -95,13 +95,13 @@ class SupportKOFHandler(EventHandler):
 
 class SupportKOF(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class Moe(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 

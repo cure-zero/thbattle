@@ -48,7 +48,7 @@ class HeavyDrinkerAction(UserAction):
 
 
 class HeavyDrinker(Skill):
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     associated_action = HeavyDrinkerAction
     target = t_OtherOne
 
@@ -57,8 +57,8 @@ class HeavyDrinker(Skill):
 
 
 class HeavyDrinkerHandler(EventHandler):
-    interested = ('action_apply', )
-    execute_before = ('WineHandler', )
+    interested = ['action_apply']
+    execute_before = ['WineHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, ActionStage):
@@ -70,7 +70,7 @@ class HeavyDrinkerHandler(EventHandler):
 class DrunkenDream(Skill):
     target = t_None
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
 
 
 class DrunkenDreamDrawCards(DrawCards):
@@ -78,8 +78,8 @@ class DrunkenDreamDrawCards(DrawCards):
 
 
 class DrunkenDreamHandler(EventHandler):
-    interested = ('action_apply', 'calcdistance')
-    execute_before = ('WineHandler', )
+    interested = ['action_apply', 'calcdistance']
+    execute_before = ['WineHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'calcdistance':

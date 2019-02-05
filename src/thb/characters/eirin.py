@@ -44,7 +44,7 @@ class EirinHeal(Heal):
 
 class Medic(Skill):
     associated_action = EirinHeal
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_One
     usage = 'drop'
 

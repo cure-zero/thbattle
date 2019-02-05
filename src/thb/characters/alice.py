@@ -26,7 +26,7 @@ class LittleLegionDollControlCard(TreatAs, VirtualCard):
 
 class LittleLegion(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -116,7 +116,7 @@ class LittleLegionControlAction(UserAction):
 
 
 class LittleLegionHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, ActionStage):
@@ -162,7 +162,7 @@ class LittleLegionHandler(EventHandler):
 
 class DollBlast(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -218,7 +218,7 @@ class DollBlastHandlerCommon(object):
 
 
 class DollBlastMigrationHandler(DollBlastHandlerCommon, EventHandler):
-    interested = ('post_card_migration',)
+    interested = ['post_card_migration']
     group = PostCardMigrationHandler
 
     def handle(self, p, trans):
@@ -248,7 +248,7 @@ class DollBlastMigrationHandler(DollBlastHandlerCommon, EventHandler):
 
 
 class DollBlastDropHandler(DollBlastHandlerCommon, EventHandler):
-    interested = ('action_before', 'action_after')
+    interested = ['action_before', 'action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, DropCards):

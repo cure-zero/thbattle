@@ -4,8 +4,8 @@
 # -- third party --
 # -- own --
 from thb import cards, characters
-from thb.ui.ui_meta.common import build_handcard, ui_meta_for, my_turn, passive_clickable
-from thb.ui.ui_meta.common import passive_is_action_valid
+from thb.meta.common import build_handcard, ui_meta_for, my_turn, passive_clickable
+from thb.meta.common import passive_is_action_valid
 
 # -- code --
 ui_meta = ui_meta_for(characters.yuuka)

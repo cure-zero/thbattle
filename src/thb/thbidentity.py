@@ -38,8 +38,8 @@ def game_eh(cls):
 
 @game_eh
 class IdentityRevealHandler(EventHandler):
-    interested = ('action_apply', )
-    execute_before = ('DeathHandler', )
+    interested = ['action_apply']
+    execute_before = ['DeathHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
@@ -53,7 +53,7 @@ class IdentityRevealHandler(EventHandler):
 
 @game_eh
 class DeathHandler(EventHandler):
-    interested = ('action_apply', 'action_after')
+    interested = ['action_apply', 'action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
@@ -165,7 +165,7 @@ class AssistedAttackAction(UserAction):
 class AssistedAttack(Skill):
     associated_action = AssistedAttackAction
     target = t_One
-    skill_category = ('character', 'active', 'boss')
+    skill_category = ['character', 'active', 'boss']
     distance = 1
 
     def check(self):
@@ -175,7 +175,7 @@ class AssistedAttack(Skill):
 class AssistedGraze(Skill):
     associated_action = None
     target = t_None
-    skill_category = ('character', 'passive', 'boss')
+    skill_category = ['character', 'passive', 'boss']
 
 
 class DoNotProcessCard(object):
@@ -213,7 +213,7 @@ class AssistedUseAction(UserAction):
 
 
 class AssistedUseHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, AskForCard):
@@ -242,7 +242,7 @@ class AssistedAttackHandler(AssistedUseHandler):
 
 @game_eh
 class AssistedAttackRangeHandler(AssistedUseHandler):
-    interested = ('calcdistance', )
+    interested = ['calcdistance']
 
     def handle(self, evt_type, arg):
         src, card, dist = arg
@@ -270,7 +270,7 @@ class AssistedHealAction(UserAction):
 
 @game_eh
 class AssistedHealHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, TryRevive):
@@ -295,12 +295,12 @@ class AssistedHealHandler(EventHandler):
 class AssistedHeal(Skill):
     associated_action = None
     target = t_None
-    skill_category = ('character', 'passive', 'boss')
+    skill_category = ['character', 'passive', 'boss']
 
 
 @game_eh
 class ExtraCardSlotHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, DropCardStage):
@@ -319,7 +319,7 @@ class ExtraCardSlotHandler(EventHandler):
 class ExtraCardSlot(Skill):
     associated_action = None
     target = t_None
-    skill_category = ('character', 'passive', 'boss')
+    skill_category = ['character', 'passive', 'boss']
 
 
 class Identity(PlayerIdentity):

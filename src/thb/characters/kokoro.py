@@ -51,7 +51,7 @@ class HopeMaskKOFAction(BaseHopeMaskAction):
 
 
 class BaseHopeMaskHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, ActionStage):
@@ -66,13 +66,13 @@ class BaseHopeMaskHandler(EventHandler):
 
 class HopeMask(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class HopeMaskKOF(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -158,7 +158,7 @@ class DarkNohKOFAction(BaseDarkNohAction):
 
 class BaseDarkNoh(Skill):
     no_drop = True
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
     usage = 'handover'
 

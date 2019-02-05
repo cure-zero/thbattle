@@ -40,7 +40,7 @@ class DebugUseCard(TreatAs, Skill):
 
 
 class DebugDecMaxLife(Skill):
-    skill_category = ('debug', 'active')
+    skill_category = ['debug', 'active']
 
     class associated_action(MaxLifeChange, UserAction):
         def __init__(self, source, target):

@@ -47,7 +47,7 @@ class MiracleAction(UserAction):
 
 class Miracle(Skill):
     associated_action = MiracleAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_Self
     usage = 'drop'
 
@@ -125,7 +125,7 @@ class SanaeFaithAction(UserAction):
 
 class SanaeFaith(Skill):
     associated_action = SanaeFaithAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     usage = 'launch'
 
     @staticmethod
@@ -144,7 +144,7 @@ class SanaeFaith(Skill):
 
 class SanaeFaithKOF(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -153,7 +153,7 @@ class SanaeFaithKOFDrawCards(DrawCards):
 
 
 class SanaeFaithKOFHandler(EventHandler):
-    interested = ('card_migration',)
+    interested = ['card_migration']
 
     def handle(self, evt_type, arg):
         if evt_type == 'card_migration':
@@ -199,7 +199,7 @@ class SanaeFaithKOFHandler(EventHandler):
 
 class GodDescendant(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
 
 
 class GodDescendantEffect(UserAction):
@@ -231,8 +231,8 @@ class GodDescendantAction(AskForCard):
 
 
 class GodDescendantHandler(EventHandler):
-    interested = ('choose_target',)
-    execute_before = ('MaidenCostumeHandler', )
+    interested = ['choose_target']
+    execute_before = ['MaidenCostumeHandler']
 
     def handle(self, evt_type, arg):
         if evt_type == 'choose_target':

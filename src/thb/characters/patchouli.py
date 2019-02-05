@@ -13,13 +13,13 @@ from thb.characters.baseclasses import Character, register_character_to
 # -- code --
 class Library(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
 class Knowledge(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -38,8 +38,8 @@ class KnowledgeAction(GenericAction):
 
 
 class KnowledgeHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('RejectHandler', )
+    interested = ['action_before']
+    execute_before = ['RejectHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, SpellCardAction) and not act.cancelled:
@@ -53,8 +53,8 @@ class KnowledgeHandler(EventHandler):
 
 
 class LibraryHandler(EventHandler):
-    interested = ('action_before', 'calcdistance', 'choose_target')
-    execute_before = ('RejectHandler',)
+    interested = ['action_before', 'calcdistance', 'choose_target']
+    execute_before = ['RejectHandler']
 
     def handle(self, evt_type, arg):
         if evt_type == 'choose_target':

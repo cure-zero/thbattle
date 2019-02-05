@@ -33,7 +33,7 @@ class DismantleAction(UserAction):
 
 class Dismantle(Skill):
     associated_action = DismantleAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
 
     def check(self):
@@ -41,7 +41,7 @@ class Dismantle(Skill):
 
 
 class Craftsman(TreatAs, Skill):
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
 
     @property
     def treat_as(self):
@@ -66,7 +66,7 @@ class Craftsman(TreatAs, Skill):
 
 
 class CraftsmanHandler(EventHandler):
-    interested = ('action_after', 'action_shootdown')
+    interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, ActionStageLaunchCard):

@@ -14,7 +14,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class SpearTheGungnir(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -30,12 +30,9 @@ class SpearTheGungnirAction(GenericAction):
 
 
 class SpearTheGungnirHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('ScarletRhapsodySwordHandler', )
-    execute_after = (
-        'HakuroukenEffectHandler',
-        'HouraiJewelHandler',
-    )
+    interested = ['action_before']
+    execute_before = ['ScarletRhapsodySwordHandler']
+    execute_after = ['HakuroukenEffectHandler', 'HouraiJewelHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Attack):
@@ -58,7 +55,7 @@ class SpearTheGungnirHandler(EventHandler):
 
 class VampireKiss(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -70,7 +67,7 @@ class VampireKissAction(GenericAction):
 
 
 class VampireKissHandler(EventHandler):
-    interested = ('action_apply', 'calcdistance')
+    interested = ['action_apply', 'calcdistance']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, Damage):
@@ -102,12 +99,12 @@ class ScarletMistAttackLimit(ActionShootdown):
 
 
 class ScarletMistHandler(EventHandler):
-    interested = (
+    interested = [
         'action_after',
         'action_apply',
         'action_shootdown',
         'post_calcdistance',
-    )
+    ]
 
     def handle(self, evt_type, act):
         if evt_type == 'action_shootdown' and isinstance(act, LaunchCard):
@@ -185,7 +182,7 @@ class ScarletMistEndAction(GenericAction):
 
 class ScarletMist(Skill):
     associated_action = ScarletMistAction
-    skill_category = ('character', 'active', 'once', 'boss')
+    skill_category = ['character', 'active', 'once', 'boss']
 
     def check(self):
         return not len(self.associated_cards)

@@ -54,7 +54,7 @@ class AutumnWindAction(UserAction):
 
 
 class AutumnWindHandler(EventHandler):
-    interested = ('action_after', )
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, DropCardStage):
@@ -94,7 +94,7 @@ class AutumnWindHandler(EventHandler):
 
 class AutumnWind(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -103,8 +103,8 @@ class DecayDrawCards(DrawCards):
 
 
 class DecayDrawCardHandler(EventHandler):
-    interested = ('card_migration',)
-    execute_before = ('LuckHandler',)
+    interested = ['card_migration']
+    execute_before = ['LuckHandler']
 
     def handle(self, evt_type, arg):
         if evt_type != 'card_migration':
@@ -152,8 +152,8 @@ class DecayEffect(UserAction):
 
 
 class DecayDamageHandler(EventHandler):
-    interested = ('action_after', 'action_before')
-    execute_after = ('SuwakoHatHandler', )
+    interested = ['action_after', 'action_before']
+    execute_after = ['SuwakoHatHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
@@ -180,7 +180,7 @@ class DecayDamageHandler(EventHandler):
 
 class Decay(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 

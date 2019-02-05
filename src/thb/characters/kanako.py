@@ -104,7 +104,7 @@ class KanakoFaithAction(ForEach):
 
 class KanakoFaith(Skill):
     associated_action = KanakoFaithAction
-    skill_category = ('character', 'active', 'once')
+    skill_category = ['character', 'active', 'once']
 
     def check(self):
         return not self.associated_cards
@@ -147,7 +147,7 @@ class VirtueAction(UserAction):
 
 
 class VirtueHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, DrawCardStage):
@@ -178,7 +178,7 @@ class VirtueHandler(EventHandler):
 
 class KanakoFaithKOF(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -187,7 +187,7 @@ class KanakoFaithKOFAction(DrawCards):
 
 
 class KanakoFaithKOFHandler(EventHandler):
-    interested = ('action_before', 'action_apply')
+    interested = ['action_before', 'action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, FinalizeStage):
@@ -215,7 +215,7 @@ class KanakoFaithKOFHandler(EventHandler):
 
 class Virtue(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 

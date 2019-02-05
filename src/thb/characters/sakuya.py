@@ -12,7 +12,7 @@ from thb.characters.baseclasses import Character, register_character_to
 
 # -- code --
 class Dagger(TreatAs, Skill):
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     treat_as = AttackCard
     distance = 99999
 
@@ -47,13 +47,13 @@ class LunaDialActionStage(ActionStage):
 
 class LunaDial(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
 class LunaDialHandler(EventHandler):
-    interested = ('action_after',)
-    execute_after = ('CiguateraHandler', )
+    interested = ['action_after']
+    execute_after = ['CiguateraHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, PrepareStage):

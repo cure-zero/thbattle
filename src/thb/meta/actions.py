@@ -204,7 +204,7 @@ class Pindian:
 class Fatetell:
 
     def fatetell_prompt_string(self, act):
-        from thb.ui.ui_meta.common import card_desc
+        from thb.meta.common import card_desc
 
         act_name = None
 

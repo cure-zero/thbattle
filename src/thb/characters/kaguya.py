@@ -15,7 +15,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class Dilemma(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -59,8 +59,8 @@ class DilemmaHealAction(DrawCards):
 
 
 class DilemmaHandler(EventHandler):
-    interested = ('action_after',)
-    execute_after = ('DyingHandler', )
+    interested = ['action_after']
+    execute_after = ['DyingHandler']
 
     def handle(self, evt_type, act):
         if evt_type != 'action_after': return act
@@ -87,14 +87,14 @@ class DilemmaHandler(EventHandler):
 
 class ImperishableNight(TreatAs, Skill):
     treat_as = SealingArrayCard
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
 
     def check(self):
         return self.game.current_player is not self.player
 
 
 class ImperishableNightHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
     card_usage = 'launch'
 
     def handle(self, evt_type, act):

@@ -15,7 +15,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class Ciguatera(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -37,7 +37,7 @@ class CiguateraAction(UserAction):
 
 
 class CiguateraHandler(EventHandler):
-    interested = ('action_after', 'action_before')
+    interested = ['action_after', 'action_before']
     card_usage = 'drop'
 
     def handle(self, evt_type, act):
@@ -66,7 +66,7 @@ class CiguateraHandler(EventHandler):
 
 class Melancholy(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -103,7 +103,7 @@ class MelancholyAction(GenericAction):
 
 
 class MelancholyHandler(EventHandler):
-    interested = ('action_after', 'action_shootdown')
+    interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):

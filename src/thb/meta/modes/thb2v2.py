@@ -7,7 +7,7 @@ from collections import OrderedDict
 # -- third party --
 # -- own --
 from thb import thb2v2
-from thb.ui.ui_meta.common import ui_meta_for
+from thb.meta.common import ui_meta_for
 
 
 # -- code --

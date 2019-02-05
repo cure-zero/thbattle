@@ -60,7 +60,7 @@ class SpiritingAwayReturningAction(GenericAction):
 
 class SpiritingAway(Skill):
     associated_action = SpiritingAwayAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_One
 
     def check(self):
@@ -68,7 +68,7 @@ class SpiritingAway(Skill):
 
 
 class SpiritingAwayHandler(EventHandler):
-    interested = ('action_after', 'action_apply')
+    interested = ['action_after', 'action_apply']
 
     def handle(self, evt_type, arg):
         if evt_type == 'action_apply' and isinstance(arg, PlayerTurn):

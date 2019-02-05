@@ -7,8 +7,8 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used, my_turn, passive_clickable
-from thb.ui.ui_meta.common import passive_is_action_valid
+from thb.meta.common import ui_meta_for, limit1_skill_used, my_turn, passive_clickable
+from thb.meta.common import passive_is_action_valid
 
 
 # -- code --

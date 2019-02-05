@@ -12,7 +12,7 @@ from game.autoenv import EventHandler
 # -- code --
 class UltimateSpeed(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -23,7 +23,7 @@ class UltimateSpeedAction(UserAction):
 
 
 class UltimateSpeedHandler(EventHandler):
-    interested = ('action_apply', 'choose_target', 'post_calcdistance')
+    interested = ['action_apply', 'choose_target', 'post_calcdistance']
 
     def handle(self, evt_type, arg):
         def is_card(card):

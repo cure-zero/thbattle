@@ -16,13 +16,13 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class Ashes(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class Reborn(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -50,8 +50,8 @@ class RebornAction(UserAction):
 
 
 class AshesHandler(EventHandler):
-    interested = ('action_after',)
-    execute_before = ('CiguateraHandler', )
+    interested = ['action_after']
+    execute_before = ['CiguateraHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, PlayerTurn):
@@ -66,8 +66,8 @@ class AshesHandler(EventHandler):
 
 
 class RebornHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('CiguateraHandler', )
+    interested = ['action_before']
+    execute_before = ['CiguateraHandler']
     card_usage = 'drop'
 
     def handle(self, evt_type, act):

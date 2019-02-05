@@ -40,7 +40,7 @@ def game_action(cls):
 
 @game_eh
 class DeathHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type != 'action_apply': return act
@@ -81,8 +81,8 @@ class HeritageAction(UserAction):
 
 @game_eh
 class HeritageHandler(EventHandler):
-    interested = ('action_before',)
-    execute_after = ('DeathHandler', 'SadistHandler')
+    interested = ['action_before']
+    execute_after = ['DeathHandler', 'SadistHandler']
 
     def handle(self, evt_type, act):
         if evt_type != 'action_before': return act
@@ -110,7 +110,7 @@ class HeritageHandler(EventHandler):
 
 @game_eh
 class ExtraCardHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type != 'action_before':

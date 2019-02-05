@@ -33,7 +33,7 @@ def game_eh(cls):
 
 @game_eh
 class DeathHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type != 'action_apply': return act

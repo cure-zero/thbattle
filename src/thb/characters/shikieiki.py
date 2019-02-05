@@ -15,13 +15,13 @@ from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 # -- code --
 class Trial(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class Majesty(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -44,7 +44,7 @@ class TrialAction(UseCard):
 
 
 class TrialHandler(EventHandler):
-    interested = ('fatetell', )
+    interested = ['fatetell']
     group = FatetellMalleateHandler
     card_usage = 'use'
 
@@ -84,7 +84,7 @@ class MajestyAction(UserAction):
 
 
 class MajestyHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if not evt_type == 'action_after': return act

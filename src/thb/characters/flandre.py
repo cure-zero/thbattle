@@ -16,7 +16,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class CriticalStrike(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -33,17 +33,17 @@ class CriticalStrikeLimit(ActionLimitExceeded):
 
 
 class CriticalStrikeHandler(EventHandler):
-    interested = ('action_apply', 'action_before', 'action_shootdown', 'action_stage_action')
-    execute_after = (
+    interested = ['action_apply', 'action_before', 'action_shootdown', 'action_stage_action']
+    execute_after = [
         'AttackCardHandler',
         'FrozenFrogHandler',
         'ElementalReactorHandler',
         'ReversedScalesHandler',
-    )
-    execute_before = (
+    ]
+    execute_before = [
         'MomijiShieldHandler',
         'WineHandler',
-    )
+    ]
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, DrawCardStage):
@@ -122,7 +122,7 @@ class CriticalStrikeHandler(EventHandler):
 
 class Exterminate(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -139,7 +139,7 @@ class ExterminateAction(UserAction):
 
 
 class ExterminateHandler(EventHandler):
-    interested = ('choose_target',)
+    interested = ['choose_target']
 
     def handle(self, evt_type, arg):
         if evt_type == 'choose_target':
@@ -162,7 +162,7 @@ class ExterminateHandler(EventHandler):
 
 @register_eh
 class ExterminateFadeHandler(EventHandler):
-    interested = ('action_after', 'action_apply')
+    interested = ['action_after', 'action_apply']
 
     def handle(self, evt_type, arg):
         if ((evt_type == 'action_after' and isinstance(arg, PlayerTurn)) or

@@ -53,7 +53,7 @@ class InevitableAttack(Attack):
 
 @register_eh
 class AttackCardRangeHandler(EventHandler):
-    interested = ('calcdistance', )
+    interested = ['calcdistance']
 
     def handle(self, evt_type, act):
         if evt_type == 'calcdistance':
@@ -82,7 +82,7 @@ class AttackCardRangeHandler(EventHandler):
 
 @register_eh
 class AttackCardVitalityHandler(EventHandler):
-    interested = ('action_before', 'action_shootdown')
+    interested = ['action_before', 'action_shootdown']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, ActionStageLaunchCard):
@@ -124,7 +124,7 @@ class AttackCardVitalityHandler(EventHandler):
 
 @register_eh
 class VitalityHandler(EventHandler):
-    interested = ('action_before', )
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, ActionStage):
@@ -252,7 +252,7 @@ class WineRevive(GenericAction):
 
 @register_eh
 class WineHandler(EventHandler):
-    interested = ('action_apply', 'action_before', 'post_choose_target')
+    interested = ['action_apply', 'action_before', 'post_choose_target']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, BaseAttack):
@@ -327,7 +327,7 @@ class ExinwanEffect(GenericAction):
 class ExinwanHandler(EventHandler):
     # 恶心丸
 
-    interested = ('card_migration', 'post_card_migration')
+    interested = ['card_migration', 'post_card_migration']
 
     def handle(self, evt_type, arg):
         from .base import VirtualCard, HiddenCard

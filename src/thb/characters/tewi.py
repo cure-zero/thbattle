@@ -13,7 +13,7 @@ from thb.characters.baseclasses import Character, register_character_to
 # -- code --
 class Luck(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -22,7 +22,7 @@ class LuckDrawCards(DrawCards):
 
 
 class LuckHandler(EventHandler):
-    interested = ('card_migration',)
+    interested = ['card_migration']
 
     def handle(self, evt_type, arg):
         if evt_type != 'card_migration':

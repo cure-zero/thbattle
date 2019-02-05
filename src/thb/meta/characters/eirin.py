@@ -4,7 +4,7 @@
 # -- third party --
 # -- own --
 from thb import actions, cards, characters
-from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used
+from thb.meta.common import ui_meta_for, limit1_skill_used
 
 # -- code --
 ui_meta = ui_meta_for(characters.eirin)

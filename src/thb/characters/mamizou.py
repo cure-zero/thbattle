@@ -11,7 +11,7 @@ from game.autoenv import EventHandler
 
 # -- code --
 class Morphing(TreatAs, Skill):
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
 
     @property
     def treat_as(self):
@@ -84,7 +84,7 @@ class Morphing(TreatAs, Skill):
 
 
 class MorphingHandler(EventHandler):
-    interested = ('action_after', 'action_shootdown')
+    interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, ActionStageLaunchCard):

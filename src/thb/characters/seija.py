@@ -68,7 +68,7 @@ class InciteAction(UserAction):
 
 class Incite(Skill):
     associated_action = InciteAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     usage = 'none'
 
     def target(self, g, source, tl):
@@ -86,7 +86,7 @@ class Incite(Skill):
 
 class Reversal(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -98,17 +98,15 @@ class ReversalDuel(TreatAs, VirtualCard):
 
 
 class ReversalHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = (
+    interested = ['action_before']
+    execute_before = [
         'HouraiJewelHandler',
         'RejectHandler',
         'FreakingPowerHandler',
         'RoukankenEffectHandler',
-    )
+    ]
 
-    execute_after = (
-        'DeathSickleHandler',
-    )
+    execute_after = ['DeathSickleHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, BaseAttack):

@@ -14,7 +14,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class Jolly(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -55,7 +55,7 @@ class SurpriseAction(UserAction):
 
 class Surprise(Skill):
     associated_action = SurpriseAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
     no_reveal = True
     no_drop = True
@@ -82,7 +82,7 @@ class JollyDrawCard(DrawCards):
 
 
 class JollyHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
     choose_player_target = t_One
 
     def handle(self, evt_type, act):

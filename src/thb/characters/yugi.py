@@ -15,13 +15,13 @@ from utils import classmix
 
 # -- code --
 class Assault(RedUFOSkill):
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     increment = 1
 
 
 class AssaultKOF(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -30,7 +30,7 @@ class AssaultAttack(TreatAs, VirtualCard):
 
 
 class AssaultKOFHandler(EventHandler):
-    interested = ('character_debut', )
+    interested = ['character_debut']
 
     def handle(self, evt_type, arg):
         if evt_type == 'character_debut':
@@ -52,7 +52,7 @@ class AssaultKOFHandler(EventHandler):
 
 class FreakingPower(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -78,7 +78,7 @@ class FreakingPowerAction(FatetellAction):
 
 
 class FreakingPowerHandler(EventHandler):
-    interested = ('action_after', 'action_before', )
+    interested = ['action_after', 'action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, BaseAttack) and not marked(act, 'freaking_power'):

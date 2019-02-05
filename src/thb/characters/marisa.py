@@ -48,7 +48,7 @@ class BorrowAction(UserAction):
 
 class Borrow(Skill):
     associated_action = BorrowAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
 
     def check(self):

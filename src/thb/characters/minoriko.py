@@ -13,7 +13,7 @@ from thb.characters.baseclasses import Character, register_character_to
 # -- code --
 class Foison(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -24,7 +24,7 @@ class FoisonDrawCardStage(DrawCardStage):
 
 
 class FoisonHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, DrawCardStage):
@@ -50,7 +50,7 @@ class AutumnFeastAction(Harvest):
 class AutumnFeast(TreatAs, Skill):
     treat_as = HarvestCard
     associated_action = AutumnFeastAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
 
     def check(self):
         cl = self.associated_cards
@@ -61,7 +61,7 @@ class AutumnFeast(TreatAs, Skill):
 
 class AkiTribute(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -77,7 +77,7 @@ class AkiTributeCollectCard(UserAction):
 
 
 class AkiTributeHandler(EventHandler):
-    interested = ('choose_target', 'harvest_finish')
+    interested = ['choose_target', 'harvest_finish']
 
     def handle(self, evt_type, act):
         if evt_type == 'choose_target':

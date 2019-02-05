@@ -97,6 +97,7 @@ class InterruptActionFlow(GameException):
 
 class AbstractPlayer(GameObject):
     index = None
+    dead: bool
 
     def reveal(self, obj_list):
         raise GameError('Abstract')
@@ -354,7 +355,7 @@ class EventHandler(GameObject):
     execute_before: List[str] = []
     execute_after: List[str]  = []
 
-    group = None
+    group: Type['EventHandlerGroup']
 
     def __init__(self, g):
         self.game = g

@@ -7,7 +7,7 @@ import random
 # -- own --
 from thb import actions, cards, characters
 from thb.actions import ttags
-from thb.ui.ui_meta.common import build_handcard, ui_meta_for, my_turn
+from thb.meta.common import build_handcard, ui_meta_for, my_turn
 
 
 # -- code --

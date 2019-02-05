@@ -5,7 +5,7 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
+from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
 
 
 # -- code --

@@ -69,7 +69,7 @@ class BakadesuAction(UserAction):
 
 class Bakadesu(Skill):
     associated_action = BakadesuAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
 
     def check(self):
@@ -78,7 +78,7 @@ class Bakadesu(Skill):
 
 class PerfectFreeze(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 

@@ -4,7 +4,7 @@
 # -- third party --
 # -- own --
 from thb import cards, characters
-from thb.ui.ui_meta.common import ui_meta_for, my_turn
+from thb.meta.common import ui_meta_for, my_turn
 
 # -- code --
 ui_meta = ui_meta_for(characters.parsee)

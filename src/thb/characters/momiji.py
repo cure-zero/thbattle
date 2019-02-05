@@ -43,8 +43,8 @@ class DisarmReturningAction(GenericAction):
 
 
 class DisarmHandler(EventHandler):
-    interested = ('action_after',)
-    execute_after = ('DeathHandler',)
+    interested = ['action_after']
+    execute_after = ['DeathHandler']
 
     card_usage = 'launch'
 
@@ -86,7 +86,7 @@ class DisarmHandler(EventHandler):
 
 class Disarm(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -105,7 +105,7 @@ class SentryAction(AskForCard):
 
 
 class SentryHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, ActionStage):
@@ -134,13 +134,13 @@ class SentryAttack(TreatAs, VirtualCard):
 
 class Sentry(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class TelegnosisHandler(EventHandler):
-    interested = ('calcdistance',)
-    execute_after = ('AttackCardHandler', 'UFODistanceHandler')
+    interested = ['calcdistance']
+    execute_after = ['AttackCardHandler', 'UFODistanceHandler']
 
     processing = False
 
@@ -169,13 +169,13 @@ class TelegnosisHandler(EventHandler):
 
 class Telegnosis(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
 class SolidShieldHandler(EventHandler):
-    interested = ('action_before',)
-    execute_after = ('AttackCardHandler',)
+    interested = ['action_before']
+    execute_after = ['AttackCardHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, ActionStageLaunchCard):
@@ -243,7 +243,7 @@ class SolidShieldAction(UserAction):
 class SolidShield(Skill):
     distance = 1
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 

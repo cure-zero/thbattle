@@ -6,7 +6,7 @@ import time
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.ui.ui_meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
 
 # -- code --
 ui_meta = ui_meta_for(characters.rinnosuke)

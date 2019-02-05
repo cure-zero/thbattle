@@ -82,7 +82,7 @@ class WindWalkTargetLimit(ActionShootdown):
 
 
 class WindWalkHandler(EventHandler):
-    interested = ('action_apply', 'action_shootdown')
+    interested = ['action_apply', 'action_shootdown']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, LaunchCard):
@@ -120,7 +120,7 @@ class WindWalkHandler(EventHandler):
 
 class WindWalk(Skill):
     associated_action = WindWalkAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_Self
     usage = 'drop'
 
@@ -137,7 +137,7 @@ class WindWalk(Skill):
 
 class Dominance(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -146,7 +146,7 @@ class DominanceAction(PlayerTurn):
 
 
 class DominanceHandler(EventHandler):
-    interested = ('action_after', 'action_apply')
+    interested = ['action_after', 'action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerTurn):

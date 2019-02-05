@@ -21,8 +21,8 @@ class HeterodoxySkipAction(GenericAction):
 
 
 class HeterodoxyHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('MaidenCostumeHandler', )
+    interested = ['action_before']
+    execute_before = ['MaidenCostumeHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and ForEach.is_group_effect(act):
@@ -87,7 +87,7 @@ class HeterodoxyAction(UserAction):
 class Heterodoxy(Skill):
     no_drop = True
     associated_action = HeterodoxyAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     usage = 'handover'
 
     def check(self):
@@ -119,7 +119,7 @@ class Heterodoxy(Skill):
 
 class Summon(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'once')
+    skill_category = ['character', 'passive', 'once']
     target = t_None
 
 
@@ -148,7 +148,7 @@ class SummonAction(UserAction):
 
 
 class SummonHandler(EventHandler):
-    interested = ('action_before', )
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, PlayerDeath):
@@ -227,7 +227,7 @@ class SummonKOFCollect(UserAction):
 
 
 class SummonKOFHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
@@ -245,7 +245,7 @@ class SummonKOFHandler(EventHandler):
 
 class SummonKOF(Skill):
     associated_action = SummonKOFAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_Self
 
     def check(self):

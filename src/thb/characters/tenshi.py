@@ -15,7 +15,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class Masochist(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -62,7 +62,7 @@ class MasochistAction(UserAction):
 
 
 class MasochistHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
@@ -82,7 +82,7 @@ class MasochistHandler(EventHandler):
 class ScarletPerception(Skill):
     distance = 1
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -98,7 +98,7 @@ class ScarletPerceptionAction(GenericAction):
 
 
 class ScarletPerceptionHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Fatetell):

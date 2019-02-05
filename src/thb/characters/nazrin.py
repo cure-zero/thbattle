@@ -31,13 +31,13 @@ class TreasureHuntAction(FatetellAction):
 
 class TreasureHunt(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class TreasureHuntHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('CiguateraHandler', )
+    interested = ['action_before']
+    execute_before = ['CiguateraHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, FatetellStage):
@@ -53,7 +53,7 @@ class TreasureHuntHandler(EventHandler):
 
 
 class Agile(TreatAs, Skill):
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     treat_as = GrazeCard
 
     def check(self):
@@ -66,7 +66,7 @@ class Agile(TreatAs, Skill):
 
 
 class AgileKOF(TreatAs, Skill):
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     treat_as = GrazeCard
 
     def check(self):

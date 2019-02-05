@@ -14,7 +14,7 @@ from thb.inputlets import ChooseOptionInputlet
 
 # -- code --
 class ReversedScales(TreatAs, Skill):
-    skill_category = ('character', 'active', 'compulsory')
+    skill_category = ['character', 'active', 'compulsory']
     treat_as = AttackCard
 
     def check(self):
@@ -30,13 +30,13 @@ class ReversedScales(TreatAs, Skill):
 
 class Sadist(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class SadistKOF(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -52,8 +52,8 @@ class SadistKOFDamageAction(UserAction):
 
 
 class SadistKOFHandler(EventHandler):
-    interested = ('action_after', 'character_debut')
-    execute_after = ('DeathHandler', )
+    interested = ['action_after', 'character_debut']
+    execute_after = ['DeathHandler']
 
     def handle(self, evt_type, arg):
         if evt_type == 'action_after' and isinstance(arg, PlayerDeath):
@@ -90,8 +90,8 @@ class ReversedScalesAction(UserAction):
 
 
 class ReversedScalesHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('MaidenCostumeHandler', )
+    interested = ['action_before']
+    execute_before = ['MaidenCostumeHandler']
 
     def handle(self, evt_type, act):
         if evt_type != 'action_before':
@@ -139,10 +139,10 @@ class SadistAction(UserAction):
 
 
 class SadistHandler(EventHandler):
-    interested = ('action_after', 'action_before')
+    interested = ['action_after', 'action_before']
     card_usage = 'drop'
-    execute_before = ('WineHandler', )
-    execute_after = ('DeathHandler', )
+    execute_before = ['WineHandler']
+    execute_after = ['DeathHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, PlayerDeath):

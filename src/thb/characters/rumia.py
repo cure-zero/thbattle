@@ -58,7 +58,7 @@ class DarknessAction(UserAction):
 
 class Darkness(Skill):
     associated_action = DarknessAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherN(2)
     usage = 'drop'
 
@@ -75,7 +75,7 @@ class Darkness(Skill):
 
 class DarknessKOF(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -92,7 +92,7 @@ class DarknessKOFLimit(ActionShootdown):
 
 
 class DarknessKOFHandler(EventHandler):
-    interested = ('character_debut', 'action_shootdown')
+    interested = ['character_debut', 'action_shootdown']
 
     def handle(self, evt_type, arg):
         if evt_type == 'character_debut':
@@ -129,7 +129,7 @@ class DarknessKOFHandler(EventHandler):
 
 class Cheating(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -138,8 +138,8 @@ class CheatingDrawCards(DrawCards):
 
 
 class CheatingHandler(EventHandler):
-    interested = ('action_after',)
-    execute_before = ('CiguateraHandler', )
+    interested = ['action_after']
+    execute_before = ['CiguateraHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, PlayerTurn):

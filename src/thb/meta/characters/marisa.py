@@ -4,7 +4,7 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used, my_turn
+from thb.meta.common import ui_meta_for, limit1_skill_used, my_turn
 
 # -- code --
 ui_meta = ui_meta_for(characters.marisa)

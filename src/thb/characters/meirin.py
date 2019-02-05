@@ -15,12 +15,12 @@ from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 # -- code --
 class LoongPunch(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class Taichi(TreatAs, Skill):
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
 
     @property
     def treat_as(self):
@@ -45,7 +45,7 @@ class Taichi(TreatAs, Skill):
 
 class RiverBehind(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'awake')
+    skill_category = ['character', 'passive', 'awake']
     target = t_None
 
 
@@ -67,8 +67,8 @@ class LoongPunchAction(GenericAction):
 
 
 class LoongPunchHandler(EventHandler):
-    interested = ('action_after',)
-    execute_after = ('DeathSickleHandler', )
+    interested = ['action_after']
+    execute_after = ['DeathSickleHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, LaunchGraze):
@@ -102,7 +102,7 @@ class RiverBehindAwake(GenericAction):
 
 
 class RiverBehindHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerTurn):

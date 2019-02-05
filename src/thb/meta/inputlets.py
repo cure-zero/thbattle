@@ -7,7 +7,7 @@ import logging
 # -- third party --
 # -- own --
 from thb import actions as thbactions, cards as thbcards, inputlets
-from thb.ui.ui_meta.common import ui_meta_for
+from thb.meta.common import ui_meta_for
 
 # -- code --
 log = logging.getLogger('Inputlets UI Meta')

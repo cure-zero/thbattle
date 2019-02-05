@@ -5,7 +5,7 @@
 # -- third party --
 # -- own --
 from thb import thb3v3
-from thb.ui.ui_meta.common import ui_meta_for
+from thb.meta.common import ui_meta_for
 
 
 # -- code --

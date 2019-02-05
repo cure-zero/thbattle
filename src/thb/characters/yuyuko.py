@@ -15,7 +15,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class GuidedDeath(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -39,7 +39,7 @@ class GuidedDeathEffect(GenericAction):
 
 
 class GuidedDeathHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, FinalizeStage):
@@ -60,7 +60,7 @@ class GuidedDeathHandler(EventHandler):
 
 class SoulDrain(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -88,7 +88,7 @@ class SoulDrainEffect(GenericAction):
 
 
 class SoulDrainHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, TryRevive):
@@ -113,7 +113,7 @@ class SoulDrainHandler(EventHandler):
 
 
 class PerfectCherryBlossomHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
@@ -172,7 +172,7 @@ class PerfectCherryBlossomAction(UserAction):
 
 class PerfectCherryBlossom(Skill):
     associated_action = PerfectCherryBlossomAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
     usage = 'drop'
 

@@ -15,13 +15,13 @@ from thb.inputlets import ChooseOptionInputlet, ProphetInputlet
 # -- code --
 class Prophet(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class ExtremeIntelligence(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -52,7 +52,7 @@ class ProphetAction(GenericAction):
 
 
 class ProphetHandler(EventHandler):
-    interested = ('action_apply',)
+    interested = ['action_apply']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, PlayerTurn):
@@ -113,7 +113,7 @@ class ExtremeIntelligenceAction(GenericAction):
 
 
 class ExtremeIntelligenceHandler(EventHandler):
-    interested = ('action_after', 'game_begin')
+    interested = ['action_after', 'game_begin']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, InstantSpellCardAction):
@@ -157,7 +157,7 @@ class ExtremeIntelligenceHandler(EventHandler):
 
 
 class ExtremeIntelligenceKOF(TreatAs, Skill):
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
 
     def __init__(self, player):
         Skill.__init__(self, player)
@@ -173,7 +173,7 @@ class ExtremeIntelligenceKOF(TreatAs, Skill):
 
 
 class ExtremeIntelligenceKOFHandler(EventHandler):
-    interested = ('action_apply', 'action_shootdown')
+    interested = ['action_apply', 'action_shootdown']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_apply' and isinstance(act, ActionStageLaunchCard):
@@ -199,7 +199,7 @@ class ExtremeIntelligenceKOFHandler(EventHandler):
 
 class NakedFox(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -215,7 +215,7 @@ class NakedFoxAction(GenericAction):
 
 
 class NakedFoxHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):

@@ -88,7 +88,7 @@ class TeachAction(UserAction):
 
 class Teach(Skill):
     associated_action = TeachAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     no_drop = True
     target = t_OtherOne
     usage = 'reforge'
@@ -103,7 +103,7 @@ class Teach(Skill):
 
 class KeineGuard(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'awake')
+    skill_category = ['character', 'passive', 'awake']
     target = t_None
 
 
@@ -118,7 +118,7 @@ class KeineGuardAwake(UserAction):
 
 
 class KeineGuardHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, PrepareStage):
@@ -137,7 +137,7 @@ class KeineGuardHandler(EventHandler):
 
 class Devour(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -192,7 +192,7 @@ class DevourEffect(GenericAction):
 
 
 class DevourHandler(EventHandler):
-    interested = ('action_before', 'action_after')
+    interested = ['action_before', 'action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, ActionStage):

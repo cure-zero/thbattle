@@ -6,8 +6,8 @@
 # -- own --
 from thb import cards, thbidentity
 from thb.actions import ttags
-from thb.ui.ui_meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
-from thb.ui.ui_meta.common import passive_is_action_valid
+from thb.meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
+from thb.meta.common import passive_is_action_valid
 
 
 # -- code --

@@ -4,8 +4,8 @@
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.ui.ui_meta.common import ui_meta_for, limit1_skill_used, passive_clickable
-from thb.ui.ui_meta.common import passive_is_action_valid
+from thb.meta.common import ui_meta_for, limit1_skill_used, passive_clickable
+from thb.meta.common import passive_is_action_valid
 
 # -- code --
 ui_meta = ui_meta_for(characters.rumia)

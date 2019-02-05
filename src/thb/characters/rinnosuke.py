@@ -12,7 +12,7 @@ from game.autoenv import EventHandler
 # -- code --
 class Psychopath(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
@@ -37,7 +37,7 @@ class NetoruAction(UserAction):
 
 class Netoru(Skill):
     associated_action = NetoruAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
     usage = 'drop'
 
@@ -55,7 +55,7 @@ class PsychopathDrawCards(DrawCards):
 
 
 class PsychopathHandler(EventHandler):
-    interested = ('card_migration',)
+    interested = ['card_migration']
 
     def handle(self, evt_type, args):
         if evt_type == 'card_migration':

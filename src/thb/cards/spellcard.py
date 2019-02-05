@@ -66,7 +66,7 @@ class Reject(InstantSpellCardAction):
 
 @register_eh
 class RejectHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
     card_usage = 'launch'
 
     def handle(self, evt_type, act):

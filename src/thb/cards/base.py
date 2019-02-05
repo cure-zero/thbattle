@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import deque
-from typing import Callable, Dict, List, Optional, Tuple, Type
+from typing import Callable, Dict, List, MYPY, Optional, Tuple, Type
 from weakref import WeakValueDictionary
 import itertools
 import logging
@@ -373,10 +373,10 @@ class Deck(GameObject):
 
 
 class Skill(VirtualCard):
-    target: Callable[[Game, AbstractPlayer, List[AbstractPlayer]], Tuple[List[AbstractPlayer], bool]]
-    associated_action: Optional[UserAction]
+    associated_action: Optional[Type[UserAction]]
     associated_cards: List[Card]
     category: List[str] = ['skill']
+    skill_category: List[str] = []
 
     def __init__(self, player):
         assert player is not None
@@ -385,14 +385,20 @@ class Skill(VirtualCard):
     def check(self):  # override this
         return False
 
+    def target(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+        raise Exception('Override this')
+
 
 class TreatAs(object):
-    treat_as: PhysicalCard
+    treat_as: Type[PhysicalCard]
     usage = 'launch'
 
-    @property
-    def category(self):
-        return ['skill', 'treat_as'] + self.treat_as.category
+    if MYPY:
+        category = ['skill', 'treat_as']
+    else:
+        @property
+        def category(self):
+            return ['skill', 'treat_as'] + self.treat_as.category
 
     def check(self):
         return False
@@ -411,15 +417,15 @@ class TreatAs(object):
 
 
 # card targets:
-def t_None(self, g, src, tl):
+def t_None(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
     return ([], False)
 
 
-def t_Self(self, g, src, tl):
+def t_Self(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
     return ([src], True)
 
 
-def t_OtherOne(self, g, src, tl):
+def t_OtherOne(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
     tl = [t for t in tl if not t.dead]
     try:
         tl.remove(src)
@@ -428,22 +434,22 @@ def t_OtherOne(self, g, src, tl):
     return (tl[-1:], bool(len(tl)))
 
 
-def t_One(self, g, src, tl):
+def t_One(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
     tl = [t for t in tl if not t.dead]
     return (tl[-1:], bool(len(tl)))
 
 
-def t_All(self, g, src, tl):
+def t_All(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
     return ([t for t in g.players.rotate_to(src)[1:] if not t.dead], True)
 
 
-def t_AllInclusive(self, g, src, tl):
+def t_AllInclusive(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
     pl = g.players.rotate_to(src)
     return ([t for t in pl if not t.dead], True)
 
 
 def t_OtherLessEqThanN(n):
-    def _t_OtherLessEqThanN(self, g, src, tl):
+    def _t_OtherLessEqThanN(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
         tl = [t for t in tl if not t.dead]
         try:
             tl.remove(src)
@@ -453,13 +459,13 @@ def t_OtherLessEqThanN(n):
     return _t_OtherLessEqThanN
 
 
-def t_OneOrNone(self, g, src, tl):
+def t_OneOrNone(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
     tl = [t for t in tl if not t.dead]
     return (tl[-1:], True)
 
 
 def t_OtherN(n):
-    def _t_OtherN(self, g, src, tl):
+    def _t_OtherN(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
         tl = [t for t in tl if not t.dead]
         try:
             tl.remove(src)
@@ -477,7 +483,7 @@ class HiddenCard(Card):  # special thing....
 class DummyCard(Card):  # another special thing....
     associated_action = None
     target = t_None
-    category = ('dummy', )
+    category = ['dummy']
 
     def __init__(self, suit=Card.NOTSET, number=0, resides_in=None, **kwargs):
         Card.__init__(self, suit, number, resides_in)

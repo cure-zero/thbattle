@@ -5,7 +5,7 @@
 # -- own --
 from thb import actions, cards
 from thb.actions import ttags
-from thb.ui.ui_meta.common import G, ui_meta_for
+from thb.meta.common import G, ui_meta_for
 
 # -- code --
 ui_meta = ui_meta_for(cards)

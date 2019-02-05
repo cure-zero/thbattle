@@ -43,7 +43,7 @@ class RiversideAction(UserAction):
 
 
 class RiversideHandler(EventHandler):
-    interested = ('calcdistance',)
+    interested = ['calcdistance']
 
     def handle(self, evt_type, arg):
         if evt_type == 'calcdistance':
@@ -61,7 +61,7 @@ class RiversideHandler(EventHandler):
 
 class Riverside(Skill):
     associated_action = RiversideAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_OtherOne
     usage = 'drop'
 
@@ -83,7 +83,7 @@ class ReturningAwake(GenericAction):
 
 
 class ReturningHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, PlayerTurn):
@@ -99,13 +99,13 @@ class ReturningHandler(EventHandler):
 
 class Returning(Skill):
     associated_action = None
-    skill_category = ('character', 'passive', 'awake')
+    skill_category = ['character', 'passive', 'awake']
     target = t_None
 
 
 class FerryFee(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
     distance = 1
 
@@ -125,7 +125,7 @@ class FerryFeeEffect(UserAction):
 
 
 class FerryFeeHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):

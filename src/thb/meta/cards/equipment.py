@@ -8,8 +8,8 @@ import random
 # -- own --
 from thb import actions, cards
 from thb.actions import ttags
-from thb.ui.ui_meta.common import card_desc, ui_meta_for, passive_clickable
-from thb.ui.ui_meta.common import passive_is_action_valid
+from thb.meta.common import card_desc, ui_meta_for, passive_clickable
+from thb.meta.common import passive_is_action_valid
 from utils import BatchList
 
 

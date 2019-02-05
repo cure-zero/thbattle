@@ -63,7 +63,7 @@ class NitoryuuWearEquipmentAction(UserAction):
 
 
 class NitoryuuWearEquipmentHandler(EventHandler):
-    interested = ('wear_equipment',)
+    interested = ['wear_equipment']
 
     def handle(self, evt_type, arg):
         we, tgt, c, rst = arg
@@ -78,9 +78,9 @@ class NitoryuuWearEquipmentHandler(EventHandler):
 
 
 class YoumuHandler(EventHandler):
-    interested = ('action_apply', 'action_before', 'attack_aftergraze', 'card_migration')
-    execute_before = ('ScarletRhapsodySwordHandler', 'LaevateinHandler', 'HouraiJewelHandler')
-    execute_after = ('VitalityHandler', )
+    interested = ['action_apply', 'action_before', 'attack_aftergraze', 'card_migration']
+    execute_before = ['ScarletRhapsodySwordHandler', 'LaevateinHandler', 'HouraiJewelHandler']
+    execute_after = ['VitalityHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before':
@@ -137,14 +137,14 @@ class YoumuHandler(EventHandler):
 class Mijincihangzhan(Skill):
     # 迷津慈航斩
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
 
 class Nitoryuu(Skill):
     # 二刀流
     associated_action = None
-    skill_category = ('character', 'passive', 'compulsory')
+    skill_category = ['character', 'passive', 'compulsory']
     target = t_None
 
     def check(self):

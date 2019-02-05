@@ -34,7 +34,7 @@ class FlyingSkandaAction(ForEach):
 
 class FlyingSkanda(Skill):
     associated_action = FlyingSkandaAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     usage = 'launch'
 
     def target(self, g, source, tl):
@@ -77,7 +77,7 @@ class FlyingSkanda(Skill):
 
 
 class FlyingSkandaHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, LaunchCard):
@@ -112,7 +112,7 @@ class ShikigamiAction(UserAction):
 
 class Shikigami(Skill):
     associated_action = ShikigamiAction
-    skill_category = ('character', 'active', 'once')
+    skill_category = ['character', 'active', 'once']
     target = t_OtherOne
 
     def check(self):
@@ -120,7 +120,7 @@ class Shikigami(Skill):
 
 
 class ShikigamiHandler(EventHandler):
-    interested = ('post_calcdistance',)
+    interested = ['post_calcdistance']
 
     def handle(self, evt_type, arg):
         if evt_type == 'post_calcdistance':

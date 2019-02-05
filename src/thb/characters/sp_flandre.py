@@ -16,7 +16,7 @@ from thb.inputlets import ChooseOptionInputlet
 class DestructionImpulse(Skill):
     distance = 1
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -33,8 +33,8 @@ class DestructionImpulseAction(GenericAction):
 
 
 class DestructionImpulseHandler(EventHandler):
-    interested = ('action_after',)
-    execute_before = ('CiguateraHandler', )
+    interested = ['action_after']
+    execute_before = ['CiguateraHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
@@ -82,7 +82,7 @@ class DestructionImpulseHandler(EventHandler):
 
 class FourOfAKind(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -102,15 +102,15 @@ class FourOfAKindAction(GenericAction):
 
 
 class FourOfAKindHandler(EventHandler):
-    interested = ('action_before', )
-    execute_before = ('WineHandler', )
-    execute_after = (
+    interested = ['action_before']
+    execute_before = ['WineHandler']
+    execute_after = [
         'RepentanceStickHandler',
         'DeathSickleHandler',
         'CriticalStrikeHandler',
         'SadistHandler',
         'PerfectFreezeHandler',
-    )
+    ]
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):

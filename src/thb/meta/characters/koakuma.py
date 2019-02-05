@@ -5,7 +5,7 @@
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.ui.ui_meta.common import ui_meta_for, my_turn
+from thb.meta.common import ui_meta_for, my_turn
 
 # -- code --
 

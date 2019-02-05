@@ -4,8 +4,8 @@
 # -- third party --
 # -- own --
 from thb import cards, characters
-from thb.ui.ui_meta.common import card_desc, ui_meta_for, limit1_skill_used, my_turn
-from thb.ui.ui_meta.common import passive_clickable, passive_is_action_valid
+from thb.meta.common import card_desc, ui_meta_for, limit1_skill_used, my_turn
+from thb.meta.common import passive_clickable, passive_is_action_valid
 
 # -- code --
 ui_meta = ui_meta_for(characters.kokoro)

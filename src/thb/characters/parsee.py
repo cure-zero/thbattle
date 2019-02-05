@@ -14,7 +14,7 @@ from utils.misc import classmix
 # -- code --
 class Envy(TreatAs, Skill):
     treat_as = DemolitionCard
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
 
     def check(self):
         cards = self.associated_cards
@@ -37,7 +37,7 @@ class EnvyRecycle(DummyCard):
 
 
 class EnvyHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type != 'action_before': return act

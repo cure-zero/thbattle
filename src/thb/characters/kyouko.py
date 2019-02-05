@@ -15,7 +15,7 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class Echo(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -30,7 +30,7 @@ class EchoAction(UserAction):
 
 
 class EchoHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
@@ -73,7 +73,7 @@ class EchoHandler(EventHandler):
 
 class Resonance(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -104,7 +104,7 @@ class ResonanceAction(AskForCard):
 
 
 class ResonanceHandler(EventHandler):
-    interested = ('action_done',)
+    interested = ['action_done']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_done' and isinstance(act, Attack):

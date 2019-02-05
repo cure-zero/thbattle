@@ -11,7 +11,7 @@ from thb.characters.baseclasses import Character, register_character_to
 # -- code --
 class AkariSkill(Skill):
     associated_action = None
-    skill_category = ()
+    skill_category = []
     target = t_None
 
 

@@ -48,7 +48,7 @@ class ReforgeWeapon(Reforge):
 
 @register_eh
 class WeaponReforgeHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, ActionStageLaunchCard):
@@ -71,7 +71,7 @@ class WeaponReforgeHandler(EventHandler):
 
 @register_eh
 class EquipmentTransferHandler(EventHandler):
-    interested = ('card_migration',)
+    interested = ['card_migration']
 
     def handle(self, evt, args):
         if evt == 'card_migration':
@@ -98,7 +98,7 @@ class ShieldSkill(Skill):
 
 class OpticalCloakSkill(TreatAs, ShieldSkill):  # just a tag
     treat_as = Card.card_classes['GrazeCard']
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
 
     def check(self):
         return False
@@ -119,8 +119,8 @@ class OpticalCloak(FatetellAction):
 
 @register_eh
 class OpticalCloakHandler(EventHandler):
-    interested = ('action_apply',)
-    execute_after = ('AssistedGrazeHandler', )
+    interested = ['action_apply']
+    execute_after = ['AssistedGrazeHandler']
 
     def handle(self, evt_type, act):
         from .basic import BaseUseGraze
@@ -140,7 +140,7 @@ class OpticalCloakHandler(EventHandler):
 
 
 class MomijiShieldSkill(ShieldSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
 
 
 class MomijiShield(GenericAction):
@@ -155,8 +155,8 @@ class MomijiShield(GenericAction):
 
 @register_eh
 class MomijiShieldHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('HouraiJewelHandler', )
+    interested = ['action_before']
+    execute_before = ['HouraiJewelHandler']
 
     def handle(self, evt_type, act):
         from .basic import BaseAttack
@@ -172,7 +172,7 @@ class MomijiShieldHandler(EventHandler):
 
 class UFOSkill(Skill):
     associated_action = None
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     target = t_None
 
 
@@ -186,7 +186,7 @@ class RedUFOSkill(UFOSkill):
 
 @register_eh
 class UFODistanceHandler(EventHandler):
-    interested = ('calcdistance',)
+    interested = ['calcdistance']
 
     def handle(self, evt_type, arg):
         if not evt_type == 'calcdistance': return arg
@@ -216,7 +216,7 @@ class WeaponSkill(Skill):
 
 class RoukankenSkill(WeaponSkill):
     associated_action = None
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     target = t_None
     range = 3
 
@@ -258,8 +258,8 @@ class Roukanken(GenericAction):
 
 @register_eh
 class RoukankenEffectHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = (
+    interested = ['action_before']
+    execute_before = [
         'MomijiShieldHandler',
         'OpticalCloakHandler',
         'SaigyouBranchHandler',
@@ -267,7 +267,7 @@ class RoukankenEffectHandler(EventHandler):
         'SpearTheGungnirHandler',
         'HakuroukenHandler',
         'FreakingPowerHandler',
-    )
+    ]
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, basic.BaseAttack):
@@ -287,7 +287,7 @@ class RoukankenEffectHandler(EventHandler):
 
 class NenshaPhoneSkill(WeaponSkill):
     associated_action = None
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     target = t_None
     range = 4
 
@@ -306,7 +306,7 @@ class NenshaPhone(GenericAction):
 
 @register_eh
 class NenshaPhoneHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         from .basic import BaseAttack
@@ -326,15 +326,15 @@ class NenshaPhoneHandler(EventHandler):
 
 class ElementalReactorSkill(WeaponSkill):
     associated_action = None
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     target = t_None
     range = 1
 
 
 @register_eh
 class ElementalReactorHandler(EventHandler):
-    interested = ('action_stage_action', 'card_migration')
-    execute_after = ('EquipmentTransferHandler', )
+    interested = ['action_stage_action', 'card_migration']
+    execute_after = ['EquipmentTransferHandler']
 
     def handle(self, evt_type, arg):
         if evt_type == 'action_stage_action':
@@ -358,7 +358,7 @@ class ElementalReactorHandler(EventHandler):
 
 class GungnirSkill(TreatAs, WeaponSkill):
     target = t_OtherOne
-    skill_category = ('equip', 'active')
+    skill_category = ['equip', 'active']
     range = 3
     treat_as = Card.card_classes['AttackCard']  # arghhhhh, nasty circular references!
 
@@ -376,8 +376,8 @@ class ScarletRhapsody(ForEach):
 class ScarletRhapsodySkill(WeaponSkill):
     range = 4
     associated_action = ScarletRhapsody
-    category = ('skill', 'treat_as', 'basic')
-    skill_category = ('equip', 'active')
+    category = ['skill', 'treat_as', 'basic']
+    skill_category = ['equip', 'active']
     target = t_OtherLessEqThanN(3)
     usage = 'launch'
 
@@ -414,7 +414,7 @@ class ScarletRhapsodySkill(WeaponSkill):
 
 class RepentanceStickSkill(WeaponSkill):
     range = 2
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     associated_action = None
     target = t_None
 
@@ -449,8 +449,8 @@ class RepentanceStick(GenericAction):
 
 @register_eh
 class RepentanceStickHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('WineHandler', )
+    interested = ['action_before']
+    execute_before = ['WineHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):
@@ -473,14 +473,14 @@ class RepentanceStickHandler(EventHandler):
 
 
 class IbukiGourdSkill(RedUFOSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     increment = 0
 
 
 @register_eh
 class IbukiGourdHandler(EventHandler):
-    interested = ('action_apply', 'action_after', 'card_migration')
-    execute_after = ('WineHandler', )
+    interested = ['action_apply', 'action_after', 'card_migration']
+    execute_after = ['WineHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
@@ -528,15 +528,15 @@ class HouraiJewelAttack(basic.BaseAttack, spellcard.InstantSpellCardAction):
 
 class HouraiJewelSkill(WeaponSkill):
     associated_action = None
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     target = t_None
     range = 1
 
 
 @register_eh
 class HouraiJewelHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('RejectHandler', 'WineHandler')  # wine does not affect this.
+    interested = ['action_before']
+    execute_before = ['RejectHandler', 'WineHandler']  # wine does not affect this.
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, basic.Attack):
@@ -550,7 +550,7 @@ class HouraiJewelHandler(EventHandler):
 
 
 class UmbrellaSkill(ShieldSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
 
 
 class UmbrellaEffect(GenericAction):
@@ -567,8 +567,8 @@ class UmbrellaEffect(GenericAction):
 @register_eh
 class UmbrellaHandler(EventHandler):
     # 紫的阳伞
-    interested = ('action_before',)
-    execute_before = ('RejectHandler', )
+    interested = ['action_before']
+    execute_before = ['RejectHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):
@@ -584,7 +584,7 @@ class UmbrellaHandler(EventHandler):
 
 class MaidenCostume(TreatAs, ShieldSkill):
     treat_as = Card.card_classes['RejectCard']
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
 
     def check(self):
         return False
@@ -615,9 +615,9 @@ class MaidenCostumeAction(FatetellAction):
 
 @register_eh
 class MaidenCostumeHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('RejectHandler', )
-    execute_after = ('HouraiJewelHandler', )
+    interested = ['action_before']
+    execute_before = ['RejectHandler']
+    execute_after = ['HouraiJewelHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, spellcard.SpellCardAction):
@@ -636,7 +636,7 @@ class MaidenCostumeHandler(EventHandler):
 
 class HakuroukenSkill(WeaponSkill):
     range = 2
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     associated_action = None
     target = t_None
 
@@ -665,13 +665,13 @@ class Hakurouken(GenericAction):
 
 @register_eh
 class HakuroukenHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     # BUG WITH OUT THIS LINE:
     # src equips [Gourd, Hakurouken], tgt drops Exinwan
     # then src drops Gourd,
     # but Attack.damage == 1, Wine tag preserved.
-    execute_before = ('WineHandler', 'MomijiShieldHandler')
+    execute_before = ['WineHandler', 'MomijiShieldHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, basic.BaseAttack):
@@ -730,15 +730,15 @@ class AyaRoundfan(GenericAction):
 
 class AyaRoundfanSkill(WeaponSkill):
     range = 5
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     associated_action = None
     target = t_None
 
 
 @register_eh
 class AyaRoundfanHandler(EventHandler):
-    interested = ('action_after',)
-    execute_after = ('DyingHandler',)
+    interested = ['action_after']
+    execute_after = ['DyingHandler']
     card_usage = 'drop'
 
     def handle(self, evt_type, act):
@@ -772,14 +772,14 @@ class Laevatein(UserAction):
 
 class LaevateinSkill(WeaponSkill):
     range = 3
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     associated_action = None
     target = t_None
 
 
 @register_eh
 class LaevateinHandler(EventHandler):
-    interested = ('attack_aftergraze',)
+    interested = ['attack_aftergraze']
     card_usage = 'drop'
 
     def handle(self, evt_type, arg):
@@ -823,7 +823,7 @@ class LaevateinHandler(EventHandler):
 
 class DeathSickleSkill(WeaponSkill):
     range = 2
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     associated_action = None
     target = t_None
 
@@ -840,8 +840,8 @@ class DeathSickle(GenericAction):
 
 @register_eh
 class DeathSickleHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('WineHandler', )
+    interested = ['action_before']
+    execute_before = ['WineHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, Damage):
@@ -859,7 +859,7 @@ class DeathSickleHandler(EventHandler):
 
 
 class KeystoneSkill(GreenUFOSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     increment = 1
 
 
@@ -876,8 +876,8 @@ class Keystone(GenericAction):
 
 @register_eh
 class KeystoneHandler(EventHandler):
-    interested = ('action_before',)
-    execute_before = ('SaigyouBranchHandler', 'RejectHandler')
+    interested = ['action_before']
+    execute_before = ['SaigyouBranchHandler', 'RejectHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, spellcard.Sinsack):
@@ -889,7 +889,7 @@ class KeystoneHandler(EventHandler):
 
 
 class WitchBroomSkill(RedUFOSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     increment = 2
 
 
@@ -924,13 +924,13 @@ class YinYangOrb(GenericAction):
 
 
 class YinYangOrbSkill(AccessoriesSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
 
 
 @register_eh
 class YinYangOrbHandler(EventHandler):
-    interested = ('fatetell',)
-    execute_after = ('FatetellMalleateHandler', )
+    interested = ['fatetell']
+    execute_after = ['FatetellMalleateHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'fatetell':
@@ -946,7 +946,7 @@ class YinYangOrbHandler(EventHandler):
 
 
 class SuwakoHatSkill(AccessoriesSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
 
 
 class SuwakoHatEffect(UserAction):
@@ -961,7 +961,7 @@ class SuwakoHatEffect(UserAction):
 
 @register_eh
 class SuwakoHatHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, DropCardStage):
@@ -973,7 +973,7 @@ class SuwakoHatHandler(EventHandler):
 
 
 class YoumuPhantomSkill(AccessoriesSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
 
 
 class YoumuPhantomHeal(basic.Heal):
@@ -982,7 +982,7 @@ class YoumuPhantomHeal(basic.Heal):
 
 @register_eh
 class YoumuPhantomHandler(EventHandler):
-    interested = ('card_migration',)
+    interested = ['card_migration']
 
     def handle(self, evt_type, arg):
         if not evt_type == 'card_migration': return arg
@@ -1011,7 +1011,7 @@ class YoumuPhantomHandler(EventHandler):
 
 
 class IceWingSkill(RedUFOSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
     increment = 1
 
 
@@ -1028,10 +1028,10 @@ class IceWing(GenericAction):
 
 @register_eh
 class IceWingHandler(EventHandler):
-    interested = ('action_before',)
+    interested = ['action_before']
     _effect_cls = spellcard.SealingArray, spellcard.FrozenFrog
 
-    execute_before = ('RejectHandler', 'SaigyouBranchHandler')
+    execute_before = ['RejectHandler', 'SaigyouBranchHandler']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, self._effect_cls):
@@ -1042,7 +1042,7 @@ class IceWingHandler(EventHandler):
 
 
 class GrimoireSkill(TreatAs, WeaponSkill):
-    skill_category = ('equip', 'active')
+    skill_category = ['equip', 'active']
     range = 1
     from .base import Card
     lookup_tbl = {
@@ -1072,7 +1072,7 @@ class GrimoireSkill(TreatAs, WeaponSkill):
 
 @register_eh
 class GrimoireHandler(EventHandler):
-    interested = ('action_after', 'action_shootdown')
+    interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_shootdown':
@@ -1120,12 +1120,12 @@ class SinsackHatAction(FatetellAction):
 
 
 class SinsackHat(ShieldSkill):
-    skill_category = ('equip', 'passive')
+    skill_category = ['equip', 'passive']
 
 
 @register_eh
 class SinsackHatHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, FatetellStage):

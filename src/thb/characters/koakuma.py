@@ -41,7 +41,7 @@ class FindAction(UserAction):
 
 class Find(Skill):
     associated_action = FindAction
-    skill_category = ('character', 'active')
+    skill_category = ['character', 'active']
     target = t_Self
     usage = 'drop'
 

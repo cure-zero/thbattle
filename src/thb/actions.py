@@ -860,7 +860,7 @@ class ActionStage(BaseActionStage):
 
 @register_eh
 class ShuffleHandler(EventHandler):
-    interested = ('action_after', 'action_before', 'action_stage_action', 'card_migration', 'user_input_start')
+    interested = ['action_after', 'action_before', 'action_stage_action', 'card_migration', 'user_input_start']
 
     def handle(self, evt_type, arg):
         g = self.game
@@ -1216,7 +1216,7 @@ class Reforge(GenericAction):
 
 @register_eh
 class DyingHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if not evt_type == 'action_after': return act

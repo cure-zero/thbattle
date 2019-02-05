@@ -16,13 +16,13 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class MiracleMallet(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class VengeOfTsukumogami(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -46,8 +46,8 @@ class MiracleMalletAction(UseCard):
 
 
 class MiracleMalletHandler(EventHandler):
-    interested = ('fatetell', )
-    execute_before = ('YinYangOrbHandler', )
+    interested = ['fatetell']
+    execute_before = ['YinYangOrbHandler']
     group = FatetellMalleateHandler
     card_usage = 'use'
 
@@ -92,7 +92,7 @@ class VengeOfTsukumogamiAction(FatetellAction):
 
 
 class VengeOfTsukumogamiHandler(EventHandler):
-    interested = ('post_card_migration',)
+    interested = ['post_card_migration']
     group = PostCardMigrationHandler
 
     def handle(self, p, trans):

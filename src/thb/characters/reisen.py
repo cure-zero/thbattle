@@ -14,20 +14,20 @@ from thb.inputlets import ChooseOptionInputlet
 # -- code --
 class Lunatic(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class Discarder(Skill):
     associated_action = None
     distance = 1
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
 class MahjongDrug(Skill):
     associated_action = None
-    skill_category = ('character', 'passive')
+    skill_category = ['character', 'passive']
     target = t_None
 
 
@@ -39,7 +39,7 @@ class LunaticAction(UserAction):
 
 
 class LunaticHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Damage):
@@ -76,7 +76,7 @@ class DiscarderDistanceLimit(ActionShootdown):
 
 
 class DiscarderHandler(EventHandler):
-    interested = ('action_after', 'action_shootdown')
+    interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_shootdown' and isinstance(act, ActionStageLaunchCard):
@@ -116,7 +116,7 @@ class MahjongDrugAction(UserAction):
 
 
 class MahjongDrugHandler(EventHandler):
-    interested = ('action_after',)
+    interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, Heal):
