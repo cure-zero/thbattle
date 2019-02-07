@@ -8,7 +8,7 @@ from thb.actions import Damage, DrawCards, DropCards, FatetellStage, GenericActi
 from thb.actions import LaunchCard, LifeLost, ShowCards, UseCard, UserAction
 from thb.actions import user_choose_cards
 from thb.cards import Card, Skill, VirtualCard, Wine, t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 
 

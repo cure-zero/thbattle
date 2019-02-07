@@ -11,7 +11,7 @@ from thb.actions import ActionStage, ActionStageLaunchCard, AskForCard, Damage, 
 from thb.actions import GenericAction, LaunchCard, ShowCards, UserAction, migrate_cards, ttags
 from thb.cards import AttackCard, CardList, DollControlCard, DuelCard, Skill, TreatAs, VirtualCard
 from thb.cards import t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 
 

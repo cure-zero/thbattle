@@ -8,7 +8,7 @@ from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, DrawCards, DropCardStage, DropCards, GenericAction, UserAction
 from thb.actions import random_choose_card, user_choose_players
 from thb.cards import Skill, VirtualCard, t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 
 

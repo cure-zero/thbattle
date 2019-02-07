@@ -9,7 +9,7 @@ from thb.actions import ActionStage, AskForCard, DistributeCards, DrawCardStage,
 from thb.actions import GenericAction, PlayerTurn, Reforge, UserAction, migrate_cards
 from thb.actions import random_choose_card, ttags, user_choose_cards, user_choose_players
 from thb.cards import Heal, PhysicalCard, Skill, t_None, t_Self
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 
 
 # -- code --

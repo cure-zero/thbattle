@@ -5,7 +5,7 @@
 # -- own --
 from game.base import GameItem
 from server.base import Client, Game as ServerGame
-from thb.characters.baseclasses import Character
+from thb.characters.base import Character
 from utils.misc import exceptions
 
 

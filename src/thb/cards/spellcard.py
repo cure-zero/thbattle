@@ -79,7 +79,7 @@ class RejectHandler(EventHandler):
 
             has_reject = False
             while g.SERVER_SIDE:
-                # from thb.characters.baseclasses import Character
+                # from thb.characters.base import Character
                 # from thb.characters.reimu import SpiritualAttack
                 # for p in g.players:
                 #     if isinstance(p, Character) and p.has_skill(SpiritualAttack):

@@ -8,7 +8,7 @@ from game.autoenv import EventHandler, user_input
 from thb.actions import ActionStage, ForEach, GenericAction, LaunchCard, LifeLost, PlayerDeath
 from thb.actions import UserAction
 from thb.cards import AttackCard, AttackCardVitalityHandler, Skill, t_None, t_Self
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.common import CharChoice
 from thb.inputlets import ChooseOptionInputlet
 from thb.thbkof import KOFCharacterSwitchHandler

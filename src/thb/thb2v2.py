@@ -14,7 +14,7 @@ from game.autoenv import user_input
 from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards, GenericAction
 from thb.actions import MigrateCardsTransaction, PlayerDeath, PlayerTurn, RevealIdentity, UserAction
 from thb.actions import action_eventhandlers, migrate_cards
-from thb.characters.baseclasses import mixin_character
+from thb.characters.base import mixin_character
 from thb.common import CharChoice, PlayerIdentity, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from utils.misc import BatchList, partition

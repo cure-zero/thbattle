@@ -14,7 +14,7 @@ import gevent
 import gevent.hub
 
 # -- own --
-from .game.autoenv import EventHandler
+from game.autoenv import EventHandler
 from utils.misc import instantiate
 import settings
 
@@ -29,7 +29,7 @@ Emits:
 
 class UnityUIEventHook(EventHandler):
     def __init__(self, g, warpgate):
-        EventHandler.__init__(self)
+        EventHandler.__init__(self, g)
         self.warpgate = warpgate
         self.game = g
         self.live = False

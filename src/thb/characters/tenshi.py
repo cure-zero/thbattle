@@ -8,7 +8,7 @@ from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, DrawCards, Fatetell, GenericAction, LaunchCard, UserAction
 from thb.actions import ask_for_action, migrate_cards
 from thb.cards import Card, Skill, t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 
 

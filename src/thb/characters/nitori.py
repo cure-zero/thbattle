@@ -7,7 +7,7 @@ from game.autoenv import user_input
 from thb.actions import ActionLimitExceeded, ActionStageLaunchCard, DrawCards, EventHandler
 from thb.actions import Reforge, UserAction, random_choose_card, ttags
 from thb.cards import AttackCard, Card, Skill, TreatAs, t_OtherOne
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChoosePeerCardInputlet
 
 

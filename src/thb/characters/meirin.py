@@ -8,7 +8,7 @@ from game.autoenv import EventHandler, user_input
 from thb.actions import DropCards, GenericAction, MaxLifeChange, PlayerTurn, random_choose_card
 from thb.cards import AttackCard, BaseAttack, DummyCard, GrazeCard, LaunchGraze, Skill, TreatAs
 from thb.cards import t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 
 

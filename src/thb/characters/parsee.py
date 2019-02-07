@@ -6,7 +6,7 @@
 from game.autoenv import user_input
 from thb.actions import DropCards, EventHandler, LaunchCard, migrate_cards
 from thb.cards import Card, Demolition, DemolitionCard, DummyCard, Skill, TreatAs
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 from utils.misc import classmix
 

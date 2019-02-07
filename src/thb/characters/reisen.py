@@ -7,7 +7,7 @@
 from game.autoenv import ActionShootdown, EventHandler, user_input
 from thb.actions import ActionStageLaunchCard, Damage, LaunchCard, PlayerTurn, UserAction
 from thb.cards import AttackCard, DuelCard, Heal, HealCard, PhysicalCard, Skill, t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 
 

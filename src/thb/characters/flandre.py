@@ -9,7 +9,7 @@ from thb.actions import ActionStageLaunchCard, Damage, DrawCardStage, GenericAct
 from thb.actions import PlayerTurn, register_eh, ttags
 from thb.cards import ActionLimitExceeded, AttackCard, AttackCardVitalityHandler, BaseAttack
 from thb.cards import BaseDuel, DuelCard, ElementalReactorSkill, Skill, UserAction, t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 
 

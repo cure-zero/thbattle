@@ -8,14 +8,14 @@ import logging
 import gevent
 
 # -- own --
-from client.core.base import ForcedKill, Game as ClientGame, Someone, Theone
+from client.base import ForcedKill, Game as ClientGame, Someone, Theone
 from game.base import GameData
 from utils.events import EventHub
 from utils.misc import BatchList
 
 
 # -- code --
-log = logging.getLogger('client.core.parts.Game')
+log = logging.getLogger('client.parts.Game')
 STOP = EventHub.STOP_PROPAGATION
 
 

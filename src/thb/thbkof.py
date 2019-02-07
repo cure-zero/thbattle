@@ -12,7 +12,7 @@ from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFl
 from game.autoenv import user_input
 from thb.actions import DistributeCards, GenericAction, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.actions import action_eventhandlers
-from thb.characters.baseclasses import Character, mixin_character
+from thb.characters.base import Character, mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
 

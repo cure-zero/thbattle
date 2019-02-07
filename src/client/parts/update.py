@@ -7,12 +7,18 @@
 # replay: saves current commit sha1 as version.
 # when playing, switch to that version.
 
+# -*- coding: utf-8 -*-
+
 # -- stdlib --
 from threading import RLock
 import logging
+import socket
 
 # -- third party --
 from gevent.hub import get_hub
+import dns.message
+import dns.query
+import dns.resolver
 import gevent
 
 # -- own --
@@ -136,28 +142,21 @@ class Update(object):
         group = Group()
 
         def local():
-            import dns.resolver
             return dns.resolver.query(server_name, 'TXT').response
 
         def recursive():
-            import dns.resolver
             from settings import NAME_SERVER
             ns = dns.resolver.query(NAME_SERVER, 'NS').response.answer[0]
             ns = ns.items[0].target.to_text()
 
-            import socket
             ns = socket.gethostbyname(ns)
 
-            import dns.message
-            import dns.query
             q = dns.message.make_query(server_name, 'TXT')
 
             return dns.query.udp(q, ns)
 
         def public(ns):
             def _public():
-                import dns.message
-                import dns.query
                 q = dns.message.make_query(server_name, 'TXT')
                 return dns.query.udp(q, ns)
 

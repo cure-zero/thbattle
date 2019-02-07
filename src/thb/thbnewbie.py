@@ -18,7 +18,7 @@ from thb.cards import ElementalReactorCard, ExinwanCard, FrozenFrogCard, GrazeCa
 from thb.cards import GreenUFOCard, Heal, HealCard, LaunchGraze, MomijiShieldCard
 from thb.cards import NazrinRodCard, RedUFOCard, Reject, RejectCard, RejectHandler
 from thb.cards import SinsackCard, WineCard
-from thb.characters.baseclasses import mixin_character
+from thb.characters.base import mixin_character
 from thb.common import PlayerIdentity
 from thb.inputlets import ActionInputlet, GalgameDialogInputlet
 from enum import IntEnum

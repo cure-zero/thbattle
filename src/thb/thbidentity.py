@@ -18,7 +18,7 @@ from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerT
 from thb.actions import TryRevive, UserAction, action_eventhandlers, ask_for_action, ttags
 from thb.cards import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, Skill, TreatAs
 from thb.cards import VirtualCard, t_None, t_One
-from thb.characters.baseclasses import mixin_character
+from thb.characters.base import mixin_character
 from thb.common import CharChoice, PlayerIdentity, build_choices
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from thb.item import ImperialIdentity

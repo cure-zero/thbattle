@@ -7,7 +7,7 @@ from game.autoenv import EventHandler, user_input
 from thb.actions import ActionStage, Damage, DropCards, UserAction, migrate_cards
 from thb.actions import random_choose_card
 from thb.cards import Attack, BaseDuel, LaunchGraze, Skill, UseAttack, t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseIndividualCardInputlet
 from utils.misc import classmix
 

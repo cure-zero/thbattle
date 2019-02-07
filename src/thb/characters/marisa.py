@@ -7,7 +7,7 @@
 from game.autoenv import user_input
 from thb.actions import LaunchCard, UserAction, migrate_cards, random_choose_card
 from thb.cards import AttackCard, Skill, TreatAs, VirtualCard, t_OtherOne
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 
 

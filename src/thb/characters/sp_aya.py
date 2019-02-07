@@ -8,7 +8,7 @@ from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCardS
 from thb.actions import FinalizeStage, GenericAction, LaunchCard, PlayerTurn, ShowCards
 from thb.actions import UserAction, ask_for_action
 from thb.cards import Card, PhysicalCard, Skill, VirtualCard, t_None, t_Self
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 
 

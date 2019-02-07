@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 import logging
 
 # -- third party --
@@ -11,11 +11,14 @@ import logging
 from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGroup, Game
 from game.autoenv import GameException, InputTransaction, sync_primitive, user_input
 from game.base import GameViralContext
-from thb.cards.base import CardList
-from thb.characters.baseclasses import Character
+from thb.cards.base import CardList, VirtualCard
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check, check_type
 from utils.misc import BatchList, group_by
+
+# -- typing --
+if TYPE_CHECKING:
+    from thb.characters.base import Character
 
 
 # -- code --
@@ -203,9 +206,8 @@ class MigrateCardsTransaction(GameViralContext):
 
     def commit(self):
         g = self.game
-        DETACHED = migrate_cards.DETACHED
-        UNWRAPPED = migrate_cards.UNWRAPPED
-        from thb.cards import VirtualCard
+        DETACHED = MigrateSpecial.DETACHED
+        UNWRAPPED = MigrateSpecial.UNWRAPPED
         act = self.action
 
         for cards, _from, to, is_bh in self.movements:
@@ -232,9 +234,9 @@ class MigrateCardsTransaction(GameViralContext):
         if include_detach:
             return self.movements
         elif only_detach:
-            return (m for m in self.movements if m[2] is migrate_cards.DETACHED)
+            return (m for m in self.movements if m[2] is MigrateSpecial.DETACHED)
         else:
-            return (m for m in self.movements if m[2] is not migrate_cards.DETACHED)
+            return (m for m in self.movements if m[2] is not MigrateSpecial.DETACHED)
 
 
 def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
@@ -255,7 +257,6 @@ def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
         trans.cancelled = True
         return
 
-    from .cards import VirtualCard
     groups = group_by(cards, lambda c: id(c) if c.is_card(VirtualCard) else id(c.resides_in))
 
     DETACHED = MigrateSpecial.DETACHED
@@ -313,8 +314,8 @@ class PostCardMigrationHandler(EventHandlerGroup):
         return arg
 
 
-def detach_cards(cards, trans=None):
-    migrate_cards(cards, migrate_cards.DETACHED, trans=trans)
+def detach_cards(cards: Iterable[Card], trans=None):
+    migrate_cards(cards, MigrateSpecial.DETACHED, trans=trans)
 
 
 action_eventhandlers = set()
@@ -327,10 +328,10 @@ def register_eh(cls):
 
 # ------------------------------------------
 class THBAction(Action):
-    source: Optional[Character]
-    target: Optional[Character]
+    source: Character
+    target: Character
 
-    def __init__(self, source: Optional[Character], target: Optional[Character]):
+    def __init__(self, source: Character, target: Character):
         self.source = source
         self.target = target
 

@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import deque
-from typing import Callable, Dict, List, TYPE_CHECKING, Optional, Tuple, Type
+from typing import Dict, List, TYPE_CHECKING, Optional, Tuple, Type
 from weakref import WeakValueDictionary
 import itertools
 import logging

@@ -2,7 +2,7 @@
 # Character definitions are here.
 # flake8: noqa
 
-from . import baseclasses
+from . import base
 
 from . import parsee
 from . import youmu
@@ -57,4 +57,4 @@ from . import yuyuko
 # special
 from . import akari
 
-from .baseclasses import get_characters
+from .base import get_characters

@@ -6,7 +6,7 @@
 # -- own --
 from thb.actions import DrawCards, UserAction, ttags
 from thb.cards import Skill, t_Self
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 
 
 # -- code --

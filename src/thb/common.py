@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from itertools import cycle
+from typing import List, Optional
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.autoenv import Game, sync_primitive
-from game.base import get_seed_for, GameViralContext
+from game.autoenv import Action, Game, sync_primitive
+from game.base import GameViralContext, get_seed_for
 from utils.misc import partition
 import settings
 
@@ -30,7 +30,7 @@ class CharChoice(GameViralContext):
         return self.char_cls.__name__ if not self.akari else 'Akari'
 
     def sync(self, data):
-        from thb.characters.baseclasses import Character
+        from thb.characters.base import Character
         self.set(Character.character_classes[data], False)
 
     def conceal(self):
@@ -103,7 +103,7 @@ def roll(g, items):
 
 def build_choices(g, items, candidates, players, num, akaris, shared):
     from thb.item import ImperialChoice
-    from thb.characters.baseclasses import Character
+    from thb.characters.base import Character
 
     # ----- testing -----
     all_characters = Character.character_classes

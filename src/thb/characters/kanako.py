@@ -9,7 +9,7 @@ from thb.actions import LaunchCard, ShowCards, UserAction, migrate_cards
 from thb.actions import random_choose_card, ttags, user_choose_cards, user_choose_players
 from thb.actions import user_input
 from thb.cards import AttackCard, Card, DuelCard, Skill, TreatAs, VirtualCard, t_None
-from thb.characters.baseclasses import Character, register_character_to
+from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 
 
