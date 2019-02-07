@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
-from collections import OrderedDict
-
 # -- third party --
 # -- own --
+from .common import ModeMeta
 from thb import thb2v2
 from thb.meta.common import ui_meta_for
 
@@ -15,7 +13,7 @@ ui_meta = ui_meta_for(thb2v2)
 
 
 @ui_meta
-class THBattle2v2:
+class THBattle2v2(ModeMeta):
     name = '2v2模式'
     logo = 'thb-modelogo-2v2'
     description = (
@@ -36,42 +34,18 @@ class THBattle2v2:
         '当一方所有的角色都阵亡时，游戏结束，另一方获胜。\n'
     )
 
-    params_disp = OrderedDict((
-        ('random_force', {
-            'desc': '随机阵营',
-            'options': [
-                ('随机', True),
-                ('固定', False),
-            ],
-        }),
-        ('draw_extra_card', {
+    params_disp = {
+        'draw_extra_card': {
             'desc': '摸牌数量',
-            'options': [
-                ('2张', False),
-                ('3张', True),
-            ],
-        }),
-    ))
-
-    def ui_class(self):
-        from thb.ui.view import THBattle2v2UI
-        return THBattle2v2UI
-
-    T = thb2v2.Identity.TYPE
-    identity_table = {
-        T.HIDDEN:  '？',
-        T.HAKUREI: '博丽',
-        T.MORIYA:  '守矢'
+            'options': [('2张', False), ('3张', True)]
+        },
+        'random_force': {
+            'desc': '随机阵营',
+            'options': [('随机', True), ('固定', False)]
+        }
     }
 
-    identity_color = {
-        T.HIDDEN:  'blue',
-        T.HAKUREI: 'blue',
-        T.MORIYA:  'orange'
-    }
-
-    IdentityType = T
-    del T
+    identities = thb2v2.Identity.TYPE
 
 
 @ui_meta

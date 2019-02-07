@@ -8,6 +8,8 @@ import sys
 # -- third party --
 # -- own --
 from game.base import GameItem
+from server.core import Core
+from server.base import Game
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BusinessException
@@ -18,14 +20,14 @@ log = logging.getLogger('server.parts.items')
 
 
 class Items(object):
-    def __init__(self, core):
+    def __init__(self, core: Core):
         self.core = core
         core.events.game_created += self.handle_game_created
         core.events.game_started += self.handle_game_started
         _ = core.events.client_command
         _['item:use'] += self._use_item
 
-    def handle_game_started(self, g):
+    def handle_game_started(self, g: Game):
         core = self.core
         final = {}
         for uid, l in g._[self]['items']:
@@ -51,13 +53,13 @@ class Items(object):
 
         return g
 
-    def handle_game_created(self, g):
+    def handle_game_created(self, g: Game):
         g._[self] = {
             'items': defaultdict(list),  # userid -> ['item:meh', ...]
         }
         return g
 
-    def handle_game_left(self, ev):
+    def handle_game_left(self, ev: T):
         g, u = ev
         core = self.core
         if not g.greenlet and not g.ended:
@@ -79,7 +81,7 @@ class Items(object):
             u.write(['info', 'use_item_success'])
         except BusinessException as e:
             uid = core.auth.uid_of(u)
-            log.info('User %s failed to use item %s', uid, sku, exc_info=sys.exc_info())
+            log.exception('User %s failed to use item %s', uid, sku)
             u.write(['error', e.snake_case])
 
     # ----- Methods ------

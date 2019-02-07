@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
 from copy import copy
+from enum import IntEnum
 from itertools import cycle
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, get_seed_for
-from game.autoenv import user_input
+from game.autoenv import EventHandler, Game, GameEnded, InputTransaction, InterruptActionFlow
+from game.autoenv import get_seed_for, user_input
 from game.base import sync_primitive
 from thb.actions import ActionStageLaunchCard, AskForCard, DistributeCards, DrawCards, DropCardStage
 from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerTurn, RevealIdentity
@@ -23,7 +23,6 @@ from thb.common import CharChoice, PlayerIdentity, build_choices
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from thb.item import ImperialIdentity
 from utils.misc import BatchList, classmix
-from enum import IntEnum
 
 
 # -- code --
@@ -70,8 +69,7 @@ class DeathHandler(EventHandler):
                 pl.reveal([p.identity for p in g.players])
 
                 if survivors[0].identity.type == T.CURTAIN:
-                    g.winners = survivors[:]
-                    g.game_end()
+                    raise GameEnded(survivors[:])
 
             deads = defaultdict(list)
             for p in g.players:
@@ -82,8 +80,10 @@ class DeathHandler(EventHandler):
                 pl = g.players
                 pl.reveal([p.identity for p in g.players])
 
-                g.winners = [p for p in pl if p.identity.type in identities]
-                g.game_end()
+                raise GameEnded([
+                    p for p in pl
+                    if p.identity.type in identities
+                ])
 
             def no(identity):
                 return len(deads[identity]) == g.identities.count(identity)

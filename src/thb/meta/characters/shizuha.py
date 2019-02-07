@@ -6,7 +6,7 @@
 from thb import characters
 from thb.meta.common import card_desc, ui_meta_for, passive_clickable
 from thb.meta.common import passive_is_action_valid
-from utils import BatchList
+from utils.misc import BatchList
 
 
 # -- code --

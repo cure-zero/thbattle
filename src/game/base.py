@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import defaultdict
 from random import Random
-from typing import Any, List, Mapping, Type
+from typing import Any, Dict, List, Optional, Set, Type, Union
 import logging
 import random
 
@@ -85,10 +85,6 @@ class GameError(GameException):
     pass
 
 
-class GameEnded(GameException):
-    pass
-
-
 class InterruptActionFlow(GameException):
     def __init__(self, unwind_to=None):
         GameException.__init__(self)
@@ -97,6 +93,7 @@ class InterruptActionFlow(GameException):
 
 class AbstractPlayer(GameObject):
     index = None
+    game: 'Game'
     dead: bool
 
     def reveal(self, obj_list):
@@ -114,6 +111,14 @@ class NPC(object):
         self.input_handler = input_handler
 
 
+class GameEnded(GameException):
+    winners: List[AbstractPlayer]
+
+    def __init__(self, winners: List[AbstractPlayer]):
+        GameException.__init__(self)
+        self.winners = winners
+
+
 class GameViralContext(ViralContext):
     VIRAL_SEARCH = ['g', 'self']
 
@@ -125,31 +130,36 @@ class GameViralContext(ViralContext):
 
 
 class Game(GameObject, GameViralContext):
-    '''
-    The Game class, all game mode derives from this.
-    Provides fundamental behaviors.
-
-    Instance variables:
-        players: list(Players)
-        event_handlers: list(EventHandler)
-
-        and all game related vars, eg. tags used by [EventHandler]s and [Action]s
-    '''
     IS_DEBUG = False
-    event_handlers: List['EventHandler'] = []
-    params_def: Mapping[str, Any] = {}
-    npc_players: List[NPC] = []
-    random: Random
+
+    # ----- Class Fields -----
     n_persons: int
+    npc_players: List[NPC] = []
+    params_def: Dict[str, Any] = {}
     bootstrap: Type['Action']
 
-    def __init__(self):
+    # ----- Instance Variables -----
+    game: 'Game'
+    event_handlers: List['EventHandler']
+    action_stack: List['Action']
+    hybrid_stack: List[Union['Action', 'EventHandler']]
+    ended: bool
+    winners: List[AbstractPlayer]
+    random: Random
+    event_observer: Optional['EventHandler']
+    _: Dict[Any, dict]
+
+    # ----- Private Variables -----
+    _adhoc_ehs: List['EventHandler']
+    _ehs_cache: Dict[str, List['EventHandler']]
+
+    def __init__(self) -> None:
         self.players = BatchList()
         self.game = self
 
         self.event_handlers = []
-        self.adhoc_ehs      = []
-        self.ehs_cache      = {}
+        self._adhoc_ehs     = []
+        self._ehs_cache     = {}
         self.action_stack   = []
         self.hybrid_stack   = []
         self.ended          = False
@@ -157,23 +167,23 @@ class Game(GameObject, GameViralContext):
         self.turn_count     = 0
         self.event_observer = None
 
-        self._ = {}
+        self._: Dict[Any, dict] = {}
 
-    def set_event_handlers(self, ehs):
+    def set_event_handlers(self, ehs: List['EventHandler']):
         self.event_handlers = ehs[:]
-        self.ehs_cache = {}
-        self.adhoc_ehs = []
+        self._ehs_cache = {}
+        self._adhoc_ehs = []
 
-    def add_adhoc_event_handler(self, eh):
-        self.adhoc_ehs.insert(0, eh)
+    def add_adhoc_event_handler(self, eh: 'EventHandler'):
+        self._adhoc_ehs.insert(0, eh)
 
-    def remove_adhoc_event_handler(self, eh):
+    def remove_adhoc_event_handler(self, eh: 'EventHandler'):
         try:
-            self.adhoc_ehs.remove(eh)
+            self._adhoc_ehs.remove(eh)
         except ValueError:
             pass
 
-    def players_from(g, p):
+    def players_from(g: 'Game', p: AbstractPlayer):
         if p is None:
             id = 0
         elif p in g.players:
@@ -188,18 +198,12 @@ class Game(GameObject, GameViralContext):
 
     def game_end(self):
         self.ended = True
-        try:
-            winner = self.winners[0].identity
-        except Exception:
-            winner = None
-
-        log.info('>> Winner: %s', winner)
         gevent.sleep(2)
 
         raise GameEnded
 
-    def _get_relevant_eh(self, tag):
-        ehs = self.ehs_cache.get(tag)
+    def _get_relevant_eh(self, tag: str):
+        ehs = self._ehs_cache.get(tag)
         if ehs is not None:
             return ehs
 
@@ -207,7 +211,7 @@ class Game(GameObject, GameViralContext):
             eh for eh in self.event_handlers if
             tag in eh.get_interested()
         ]
-        self.ehs_cache[tag] = ehs
+        self._ehs_cache[tag] = ehs
 
         return ehs
 
@@ -233,7 +237,7 @@ class Game(GameObject, GameViralContext):
         if ob:
             data = ob.handle(evt_type, data)
 
-        adhoc = self.adhoc_ehs
+        adhoc = self._adhoc_ehs
         ehs = self._get_relevant_eh(evt_type)
 
         for l in adhoc, ehs:
@@ -426,7 +430,7 @@ class EventHandler(GameObject):
     @staticmethod
     def _dump_eh_dependency_graph():
         from game.autoenv import EventHandler
-        ehs = {i for i in all_gameobjects if issubclass(i, EventHandler)}
+        ehs: Set[Type[EventHandler]] = {i for i in all_gameobjects if issubclass(i, EventHandler)}
         ehs.remove(EventHandler)
         dependencies = set()
         for eh in ehs:
@@ -456,11 +460,6 @@ class Action(GameObject, GameViralContext):
     cancelled = False
     done = False
     invalid = False
-
-    def __init__(self, source, target):
-        raise Exception('Run!')
-        self.source = source
-        self.target = target
 
     def action_shootdown_exception(self):
         if not self.is_valid():
@@ -764,10 +763,10 @@ class GameData(object):
 
 
 class GameItem(object):
-    inventory: Mapping[str, type] = {}
+    inventory: Dict[str, type] = {}
 
     key: str  = ''
-    args: List[str] = []
+    args: List[type] = []
     usable = False
 
     title = 'ITEM-TITLE'

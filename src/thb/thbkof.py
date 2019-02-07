@@ -202,7 +202,6 @@ class THBattleKOFBootstrap(GenericAction):
 class THBattleKOF(Game):
     n_persons  = 2
     bootstrap  = THBattleKOFBootstrap
-    params_def = {}
 
     def get_opponent(g, p):
         a, b = g.players

@@ -59,5 +59,4 @@ class Borrow(Skill):
 @register_character_to('common')
 class Marisa(Character):
     skills = [Borrow]
-    eventhandlers_required = []
     maxlife = 4

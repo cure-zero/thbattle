@@ -50,10 +50,3 @@ from . import sp_aya
 from . import kyouko
 from . import keine
 from . import yuyuko
-
-# weektour
-from . import youmu20150620
-from . import mima20150705
-from . import meirin20150714
-from . import satori20150804
-from . import minamitsu20150818

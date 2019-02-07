@@ -4,7 +4,7 @@
 from collections import deque
 from contextlib import contextmanager
 from functools import wraps
-from typing import Mapping
+from typing import Dict, Type
 from weakref import WeakSet
 import functools
 import logging
@@ -19,7 +19,7 @@ import gevent
 
 # -- code --
 log = logging.getLogger('util.misc')
-dbgvals: Mapping[str, object] = {}
+dbgvals: Dict[str, object] = {}
 
 
 class ObjectDict(dict):
@@ -117,7 +117,7 @@ def classmix(*_classes):
     return new_cls
 
 
-cls_cache: Mapping[tuple, type] = {}
+cls_cache: Dict[tuple, type] = {}
 
 
 def hook(module):
@@ -433,12 +433,11 @@ def validate_args(*typelist):
 
 
 class BusinessException(Exception):
-    pass
+    snake_case: str
 
 
-@instantiate
-class exceptions(object):
-    def __getattr__(self, k):
+class BusinessExceptionGenerator(object):
+    def __getattr__(self, k: str) -> Type[BusinessException]:
         snake_case = '_'.join([
             i.lower() for i in re.findall(r'[A-Z][a-z]+|[A-Z]+(?![a-z])', k)
         ])
@@ -446,3 +445,6 @@ class exceptions(object):
         cls = type(k, (BusinessException,), {'snake_case': snake_case})
         setattr(self, k, cls)
         return cls
+
+
+exceptions = BusinessExceptionGenerator()

@@ -1,50 +1,60 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
+from typing import Callable, Generic, List, Tuple, TypeVar, Union
+import logging
 import sys
 import zlib
-import logging
 
 # -- third party --
 # -- own --
 
-
 # -- code --
 log = logging.getLogger('utils.events')
+T = TypeVar('T')
 
 
-class EventHub(object):
-    __slots__ = ('_subscribers', '_contract')
-    STOP_PROPAGATION = object()
+class _StopPropagation:
+    __slots__ = ()
 
-    def __init__(self, contract):
+
+class EventHub(Generic[T]):
+    __slots__ = ('_subscribers',)
+    STOP_PROPAGATION = _StopPropagation()
+
+    _subscribers: List[Tuple[float, Callable[[T], Union[T, _StopPropagation]]]]
+
+    def __init__(self):
         self._subscribers = []
-        self._contract = contract
 
-    def subscribe(self, cb, prio):
+    def subscribe(self, cb: Callable[[T], Union[T, _StopPropagation]], prio: float):
         self._subscribers.append((prio, cb))
         self._subscribers.sort()
         return self
 
-    def __iadd__(self, cb):
+    def __iadd__(self, cb: Callable[[T], Union[T, _StopPropagation]]):
         # deterministic priority
         f = sys._getframe(1)
-        s = '{}:{}'.format(f.f_code.co_filename, f.f_lineno)
+        s = '{}:{}'.format(f.f_code.co_filename, f.f_lineno).encode('utf-8')
         prio = zlib.crc32(s) * 1.0 / 0x100000000
         self.subscribe(cb, prio)
         return self
 
-    def emit(self, ev):
+    def emit(self, ev: T):
         if not self._subscribers:
             log.warning('Emit event when no subscribers present!')
             return
 
         for prio, cb in self._subscribers:
-            ev = cb(ev)
-            if ev is self.STOP_PROPAGATION:
+            r = cb(ev)
+
+            # if r is self.STOP_PROPAGATION:
+            if isinstance(r, _StopPropagation):
                 return None
-            elif ev is None:
+            else:
+                ev = r
+
+            if ev is None:
                 raise Exception("Returning None in EventHub!")
 
         return ev

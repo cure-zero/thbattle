@@ -1,24 +1,33 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
+from typing import Dict, Iterable, List, Set, Type
 
 # -- third party --
 # -- own --
-from game.autoenv import GameObject
+from game.autoenv import EventHandler, GameObject
+from game.base import AbstractPlayer
+from thb.cards.base import Skill
 from utils.misc import partition
+
 
 # -- code --
 # common, id8, faith, kof, 3v3, testing
 # -id8, ...
-characters_by_category = defaultdict(set)
+characters_by_category: Dict[str, Set[Type['Character']]] = defaultdict(set)
 
 
 class Character(GameObject):
-    character_classes = {}
+    # ----- Class Variables -----
+    character_classes: Dict[str, Type['Character']] = {}
+    eventhandlers_required: List[Type[EventHandler]] = []
+    categories: Iterable[str]
 
-    def __init__(self, player):
+    # ----- Instance Variables -----
+    disabled_skills: Dict[str, Set[Type[Skill]]]
+
+    def __init__(self, player: AbstractPlayer):
         self.player = player
         self.disabled_skills = defaultdict(set)
 
@@ -34,7 +43,7 @@ class Character(GameObject):
 
         return self.get_skills(skill)
 
-    def disable_skill(self, skill, reason):
+    def disable_skill(self, skill: Type[Skill], reason: str):
         self.disabled_skills[reason].add(skill)
 
     def reenable_skill(self, reason):
@@ -55,24 +64,26 @@ class Character(GameObject):
 def register_character_to(*cats):
     sets = [characters_by_category[c] for c in set(cats)]
 
-    def register(cls):
+    def register(cls: Type[Character]):
         Character.character_classes[cls.__name__] = cls
-        [s.add(cls) for s in sets]
+
+        for s in sets:
+            s.add(cls)
+
         cls.categories = cats
         return cls
 
     return register
 
 
-def get_characters(*cats):
-    cats = set(cats)
-    chars = set()
+def get_characters(*categories):
+    cats: Set[str] = set(categories)
+    chars: Set[Type[Character]] = set()
     pos, neg = partition(lambda c: not c.startswith('-'), cats)
     chars.update(*[characters_by_category[c] for c in pos])
     chars.difference_update(*[characters_by_category['-' + c] for c in pos])
     chars.difference_update(*[characters_by_category[c.strip('-')] for c in neg])
-    chars = list(sorted(chars, key=lambda i: i.__name__))
-    return chars
+    return list(sorted(chars, key=lambda i: i.__name__))
 
 
 def mixin_character(g, player, char_cls):

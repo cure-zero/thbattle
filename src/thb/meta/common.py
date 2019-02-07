@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import Dict
+
 # -- third party --
 # -- own --
 from game.base import GameViralContext
 
 
 # -- code --
-UI_META = {}
+UI_META: Dict[type, type] = {}
 
 
 def G():
@@ -16,7 +18,7 @@ def G():
 
 class UIMetaAccessor(object):
     def __init__(self, cls):
-        self.cls = cls
+        self.for_cls = cls
         self.mro = cls.mro()
 
     def __getattr__(self, name):

@@ -5,7 +5,7 @@
 # -- own --
 from thb import characters
 from thb.meta.common import ui_meta_for, limit1_skill_used, my_turn
-from utils import BatchList
+from utils.misc import BatchList
 
 # -- code --
 ui_meta = ui_meta_for(characters.mamizou)

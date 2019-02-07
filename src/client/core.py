@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import Tuple, List
 
 # -- third party --
 # -- own --
@@ -19,68 +20,68 @@ class Options(object):
 
 
 class Events(object):
-    def __init__(self):
+    def __init__(self: 'Events'):
         # ev = (core: Core)
-        self.core_initialized = EventHub([Core])
+        self.core_initialized = EventHub[Core]()
 
         # Fires when server send some command
         # ev = (cmd: str, arg: object)
-        self.server_command = EventHub([str, object])
+        self.server_command = EventHub[Tuple[str, object]]()
 
         # Server connected
-        self.server_connected = EventHub(None)
+        self.server_connected = EventHub[None]()
 
         # Server timed-out or actively rejects
-        self.server_refused = EventHub(None)
+        self.server_refused = EventHub[None]()
 
         # Server dropped
-        self.server_dropped = EventHub(None)
+        self.server_dropped = EventHub[None]()
 
         # Server & client version mismatch
-        self.version_mismatch = EventHub(None)
+        self.version_mismatch = EventHub[None]()
 
         # Update error'd
         # ev = (up: GitUpdator, rst: Exception)
-        self.update_error.emit([object, Exception])
+        self.update_error = EventHub[Tuple[object, Exception]]()
 
         # Update in progress
         # ev = (up: GitUpdator, stat: <SomeComplexObjectFromPyGit>)
-        self.update_progress.emit([object, object])
+        self.update_progress = EventHub[Tuple[object, object]]()
 
         # Joined a game
-        self.game_joined = EventHub(Game)
+        self.game_joined = EventHub[Game]()
 
         # Left a game
-        self.game_left = EventHub(Game)
+        self.game_left = EventHub[Game]()
 
         # Left a game
         # ev = (g: Game, users: [server.core.view.User(u), ...])
-        self.room_users = EventHub([Game, [dict, ...]])
+        self.room_users = EventHub[Tuple[Game, List[dict]]]()
 
         # Server side game started, and client core has finished preparing the game,
         # ready to launch
-        self.game_prepared = EventHub(Game)
+        self.game_prepared = EventHub[Game]()
 
         # Game is up and running
         # ev = (g: Game)
-        self.game_started = EventHub(Game)
+        self.game_started = EventHub[Game]()
 
         # ev = (g: Game)
-        self.game_crashed = EventHub(Game)
+        self.game_crashed = EventHub[Game]()
 
         # Client game finished,
         # Server will send `game_end` soon if everything goes right
-        self.client_game_finished = EventHub(Game)
+        self.client_game_finished = EventHub[Game]()
 
         # ev = (g: Game)
-        self.game_ended = EventHub(Game)
+        self.game_ended = EventHub[Game]()
 
         # ev = (success: bool, reason: str)
-        self.auth = EventHub([bool, str])
+        self.auth = EventHub[Tuple[bool, str]]()
 
 
 class Core(object):
-    def __init__(self, **options):
+    def __init__(self: 'Core', **options):
         self.options = Options(options)
 
         self.events = Events()

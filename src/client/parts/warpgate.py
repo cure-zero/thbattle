@@ -159,7 +159,7 @@ class Warpgate(object):
         from .game import autoenv
         autoenv.init('Client')
 
-        import thb.ui.ui_meta  # noqa, init ui_meta
+        import thb.meta  # noqa, init ui_meta
 
     def get_events(self):
         l = self.events

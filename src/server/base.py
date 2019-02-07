@@ -7,7 +7,7 @@ from typing import Any, Callable
 import logging
 
 # -- third party --
-from gevent import Greenlet, getcurrent, iwait
+from gevent import Greenlet, GreenletExit, iwait
 from gevent.pool import Group as GreenletGroup
 import gevent
 
@@ -182,7 +182,6 @@ def user_input(players, inputlet, timeout=25, type='single', trans=None):
 
 
 class Game(game.base.Game):
-    suicide = False
     '''
     The Game class, all game mode derives from this.
     Provides fundamental behaviors.
@@ -205,11 +204,8 @@ class Game(game.base.Game):
         self.greenlet = None
 
     @log_failure(log)
-    def run(g):
+    def run(g) -> None:
         g.synctag = 0
-        gr = getcurrent()
-        g.greenlet = gr
-        gr.game = g
 
         core = g.core
 
@@ -222,22 +218,17 @@ class Game(game.base.Game):
 
         try:
             g.process_action(g.bootstrap(params, items))
-        except GameEnded:
-            pass
+        except GameEnded as e:
+            g.winners = e.winners
         except Exception:
             core.game.mark_crashed(g)
             raise
         finally:
+            g.ended = True
             core.events.game_ended.emit(g)
-
-        assert g.ended
 
         # XXX stats
         stats(*g.get_stats())
-
-    @staticmethod
-    def getgame():
-        return getcurrent().game
 
     def __repr__(self):
         try:
@@ -247,20 +238,21 @@ class Game(game.base.Game):
 
         return '%s:%s' % (self.__class__.__name__, gid)
 
-    def get_synctag(self):
-        if self.suicide:
-            self.greenlet.kill()
-            return
+    def get_synctag(self) -> int:
+        core = self.core
+        if core.game.is_aborted(self):
+            raise GreenletExit
 
         self.synctag += 1
         return self.synctag
 
-    def pause(self, time):
+    def pause(self, time: float):
         gevent.sleep(time)
 
 
 class Player(AbstractPlayer):
-    is_npc  = False
+    is_npc = False
+    client: Client
 
     def __init__(self, g: Game, client: Client):
         self.game = g

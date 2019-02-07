@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
+from .common import ModeMeta
 from thb import cards, thbidentity
 from thb.actions import ttags
-from thb.meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
-from thb.meta.common import passive_is_action_valid
+from thb.meta.common import card_desc, my_turn, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta_for
 
 
 # -- code --
@@ -15,7 +15,7 @@ ui_meta = ui_meta_for(thbidentity)
 
 
 @ui_meta
-class THBattleIdentity:
+class THBattleIdentity(ModeMeta):
     name = '8人身份场'
     logo = 'thb-modelogo-8id'
     description = (
@@ -59,29 +59,7 @@ class THBattleIdentity:
         },
     }
 
-    def ui_class(self):
-        from thb.ui.view import THBattleIdentityUI
-        return THBattleIdentityUI
-
-    T = thbidentity.Identity.TYPE
-    identity_table = {
-        T.HIDDEN:     '？',
-        T.ATTACKER:   '城管',
-        T.BOSS:       'BOSS',
-        T.ACCOMPLICE: '道中',
-        T.CURTAIN:    '黑幕',
-    }
-
-    identity_color = {
-        T.HIDDEN:     'blue',
-        T.ATTACKER:   'blue',
-        T.BOSS:       'red',
-        T.ACCOMPLICE: 'orange',
-        T.CURTAIN:    'green',
-    }
-
-    IdentityType = T
-    del T
+    identities = thbidentity.Identity.TYPE
 
 
 @ui_meta

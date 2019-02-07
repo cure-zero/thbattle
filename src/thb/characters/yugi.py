@@ -10,7 +10,7 @@ from thb.cards import AttackCard, BaseAttack, Card, InevitableAttack, RedUFOSkil
 from thb.cards import TreatAs, VirtualCard, t_None
 from thb.characters.baseclasses import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
-from utils import classmix
+from utils.misc import classmix
 
 
 # -- code --

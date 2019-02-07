@@ -114,5 +114,5 @@ def card_migration_instructions(g, args):
 
 
 def get_display_tags(p):
-    from thb.ui.ui_meta.tags import get_display_tags as ui_tags
+    from thb.meta.tags import get_display_tags as ui_tags
     return [i[0] for i in ui_tags(p)]

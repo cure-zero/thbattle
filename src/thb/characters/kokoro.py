@@ -176,7 +176,7 @@ class DarkNoh(BaseDarkNoh):
     associated_action = DarkNohAction
 
 
-class DarkNohKOF(DarkNoh):
+class DarkNohKOF(BaseDarkNoh):
     associated_action = DarkNohKOFAction
 
 

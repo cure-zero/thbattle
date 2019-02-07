@@ -10,8 +10,7 @@ import gevent
 from server.base import Game
 from server.endpoint import Client
 from server.utils import command
-from utils import BatchList
-from utils.misc import throttle
+from utils.misc import BatchList, throttle
 
 
 # -- code --
@@ -272,7 +271,7 @@ class Observe(object):
             return
 
         @throttle(0.5)
-        def notifier():
+        def _notifier():
             pl = core.room.users_of(g)
             obs = []
             for u in pl:
@@ -280,6 +279,6 @@ class Observe(object):
 
             gevent.spawn(core.room.send_room_users, g, obs)
 
-        g._[self]['_notifier'] = notifier
+        g._[self]['_notifier'] = _notifier
 
-        notifier()
+        _notifier()

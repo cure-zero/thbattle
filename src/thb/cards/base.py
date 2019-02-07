@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import deque
-from typing import Callable, Dict, List, MYPY, Optional, Tuple, Type
+from typing import Callable, Dict, List, TYPE_CHECKING, Optional, Tuple, Type
 from weakref import WeakValueDictionary
 import itertools
 import logging
@@ -42,7 +42,7 @@ class Card(GameObject):
     }
 
     _color = None
-    card_classes: Dict[str, Type['Card']] = {}
+    card_classes: Dict[str, Type['PhysicalCard']] = {}
     usage = 'launch'
 
     # True means this card's associated cards have already been taken.
@@ -393,7 +393,7 @@ class TreatAs(object):
     treat_as: Type[PhysicalCard]
     usage = 'launch'
 
-    if MYPY:
+    if TYPE_CHECKING:
         category = ['skill', 'treat_as']
     else:
         @property

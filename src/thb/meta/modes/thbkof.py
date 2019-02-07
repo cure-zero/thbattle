@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
+from .common import ModeMeta
 from thb import thbkof
 from thb.meta.common import ui_meta_for
 
@@ -13,7 +13,7 @@ ui_meta = ui_meta_for(thbkof)
 
 
 @ui_meta
-class THBattleKOF:
+class THBattleKOF(ModeMeta):
     name = 'KOF模式'
     logo = 'thb-modelogo-kof'
     description = (
@@ -26,25 +26,4 @@ class THBattleKOF:
         '|R胜利条件|r：当其中一方3名角色被击坠时，判对方胜出'
     )
 
-    params_disp = {
-    }
-
-    def ui_class(self):
-        from thb.ui.view import THBattleKOFUI
-        return THBattleKOFUI
-
-    T = thbkof.Identity.TYPE
-    identity_table = {
-        T.HIDDEN:  '？',
-        T.HAKUREI: '博丽',
-        T.MORIYA:  '守矢'
-    }
-
-    identity_color = {
-        T.HIDDEN:  'blue',
-        T.HAKUREI: 'blue',
-        T.MORIYA:  'orange'
-    }
-
-    IdentityType = T
-    del T
+    identities = thbkof.Identity.TYPE

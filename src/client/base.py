@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import OrderedDict
 from copy import copy
+from random import Random
 import logging
 
 # -- third party --
 import gevent
 
 # -- own --
+from client.core import Core
 from game.base import AbstractPlayer, GameEnded, InputTransaction, TimeLimitExceeded
 import game.base
 
@@ -173,29 +174,18 @@ class Someone(AbstractPlayer):
 
 
 class Game(game.base.Game):
-    '''
-    The Game class, all game mode derives from this.
-    Provides fundamental behaviors.
-
-    Instance variables:
-        players: list(Players)
-        event_handlers: list(EventHandler)
-
-        and all game related vars, eg. tags used by [EventHandler]s and [Action]s
-    '''
     CLIENT_SIDE = True
     SERVER_SIDE = False
-    event_observer = None
     is_observe = False
 
-    import random  # noqa, intentionally put here
+    random = Random()
 
-    def __init__(self, core):
+    def __init__(self, core: Core):
         game.base.Game.__init__(self)
         self.core = core
         self._my_user_input = (None, None)
 
-    def run(g):
+    def run(g) -> None:
         g.synctag = 0
         core = g.core
         core.events.game_started.emit(g)
@@ -204,14 +194,14 @@ class Game(game.base.Game):
 
         try:
             g.process_action(g.bootstrap(params, items))
-        except GameEnded:
-            pass
-
-        assert g.ended
+        except GameEnded as e:
+            g.winners = e.winners
+        finally:
+            g.ended = True
 
         core.events.client_game_finished.emit(g)
 
-    def get_synctag(self):
+    def get_synctag(self) -> int:
         self.synctag += 1
         return self.synctag
 

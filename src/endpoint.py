@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import deque
+from typing import Deque, Any
 import json
 import logging
 import zlib
@@ -44,7 +44,7 @@ class Endpoint(object):
         self.writelock  = RLock()
         self.address    = address
         self.link_state = 'connected'  # or disconnected
-        self.recv_buf   = deque()
+        self.recv_buf: Deque[Any]   = deque()
 
     def __repr__(self):
         return '%s:%s:%s' % (

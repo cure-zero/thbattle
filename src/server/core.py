@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
+from typing import Dict, Tuple
 
 # -- third party --
 # -- own --
@@ -14,6 +14,10 @@ from utils.events import EventHub
 
 
 # -- code --
+class CorePart(object):
+    core: 'Core'
+
+
 class Options(object):
     def __init__(self, options):
         self.node         = options.get('node', 'localhost')  # Current node name
@@ -24,69 +28,72 @@ class Options(object):
 
 
 class Events(object):
-    def __init__(self):
+    def __init__(self) -> None:
         # ev = (core: Core)
-        self.core_initialized = EventHub([Core])
+        self.core_initialized = EventHub[Core]()
 
         # Fires when user state changes,
         # ev = (c: Client, from: str, to: str)
-        self.user_state_transition = EventHub([Client, str, str])
+        self.user_state_transition = EventHub[Tuple[Client, str, str]]()
 
         # Client connected
-        self.client_connected = EventHub(Client)
+        self.client_connected = EventHub[Client]()
 
         # Client dropped(connection lost)
-        self.client_dropped = EventHub(Client)
+        self.client_dropped = EventHub[Client]
 
         # Client logged in when previous login still online, or still in active game
         # ev = c: Client  # old client obj with new connection `pivot_to`ed to it
-        self.client_pivot = EventHub(Client)
+        self.client_pivot = EventHub[Client]()
 
         # Client send some command
         # ev = (c: Client, args: (...))
-        self.client_command = defaultdict(lambda: EventHub([Client, []]))
+        self.client_command: Dict[str, EventHub[Tuple[Client, list]]] = \
+            defaultdict(lambda: EventHub[Tuple[Client, list]]())
 
         # Game is created
         # ev = g: Game
-        self.game_created = EventHub(Game)
+        self.game_created = EventHub[Game]()
+
+        # Sent client game data
+        self.game_data_send = EventHub[Tuple[Game, Client, Packet]]()
 
         # Received client game data
-        # ev = (g: Game, u: Client, pkt: Packet)
-        self.game_data_recv = EventHub([Game, Client, Packet])
+        self.game_data_recv = EventHub[Tuple[Game, Client, Packet]]()
 
         # Fires after old game ended and new game created.
         # Actors should copy settings from old to new
         # ev = (old: Game, g: Game)
-        self.game_successive_create = EventHub([Game, Game])
+        self.game_successive_create = EventHub[Tuple[Game, Game]]()
 
         # All the things are ready, waiting UI to prepare and ignite
         # ev = (g: Game)
-        self.game_prepared = EventHub(Game)
+        self.game_prepared = EventHub[Game]()
 
         # Game started running
         # ev = (g: Game)
-        self.game_started = EventHub(Game)
+        self.game_started = EventHub[Game]()
 
         # Client joined a game
         # ev = (g: Game, c: Client)
-        self.game_joined = EventHub([Game, Client])
+        self.game_joined = EventHub[Tuple[Game, Client]]()
 
         # Client left a game
         # ev = (g: Game, c: Client)
-        self.game_left = EventHub([Game, Client])
+        self.game_left = EventHub[Tuple[Game, Client]]()
 
         # Game was ended, successfully or not.
         # ev = (g: Game)
-        self.game_ended = EventHub(Game)
+        self.game_ended = EventHub[Game]()
 
         # Game ended in half way.
         # This fires before GAME_ENDED
         # ev = (g: Game)
-        self.game_aborted = EventHub(Game)
+        self.game_aborted = EventHub[Game]()
 
 
 class Core(object):
-    def __init__(self, **options):
+    def __init__(self: 'Core', **options):
         self.options = Options(options)
 
         self.events = Events()
@@ -98,7 +105,7 @@ class Core(object):
         self.game    = parts.game.Game(self) if 'game' not in disables else None
         self.observe = parts.observe.Observe(self) if 'observe' not in disables else None
         self.invite  = parts.invite.Invite(self) if 'invite' not in disables else None
-        self.items   = parts.items.Items(self) if 'items' not in disables else None
+        self.item    = parts.item.Item(self) if 'item' not in disables else None
         self.reward  = parts.reward.Reward(self) if 'reward' not in disables else None
         self.match   = parts.match.Match(self) if 'match' not in disables else None
         self.admin   = parts.admin.Admin(self) if 'admin' not in disables else None

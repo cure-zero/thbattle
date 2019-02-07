@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
+from .common import ModeMeta
 from thb import thbfaith
 from thb.meta.common import ui_meta_for
 
@@ -13,7 +13,7 @@ ui_meta = ui_meta_for(thbfaith)
 
 
 @ui_meta
-class THBattleFaith:
+class THBattleFaith(ModeMeta):
     name = '信仰争夺战'
     logo = 'thb-modelogo-faith'
     description = (
@@ -39,29 +39,11 @@ class THBattleFaith:
         },
     }
 
-    def ui_class(self):
-        from thb.ui.view import THBattleFaithUI
-        return THBattleFaithUI
-
-    T = thbfaith.Identity.TYPE
-    identity_table = {
-        T.HIDDEN:  '？',
-        T.HAKUREI: '博丽',
-        T.MORIYA:  '守矢'
-    }
-
-    identity_color = {
-        T.HIDDEN:  'blue',
-        T.HAKUREI: 'blue',
-        T.MORIYA:  'orange'
-    }
-
-    IdentityType = T
-    del T
+    identities = thbfaith.Identity.TYPE
 
 
 @ui_meta
-class DeathHandler:  # noqa
+class DeathHandler:
     # choose_option
     choose_option_buttons = (('全部换走', True), ('不用换', False))
     choose_option_prompt  = '你要将摸到的牌全部换掉吗？'

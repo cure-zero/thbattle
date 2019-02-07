@@ -3,7 +3,7 @@
 import random
 
 from thb import actions
-from utils import BatchList
+from utils.misc import BatchList
 
 from .common import ui_meta_for, card_desc, G
 

@@ -9,10 +9,11 @@ import gevent
 
 # -- own --
 from server.base import Game
+from server.core import Core
 from server.endpoint import Client
 from server.utils import command
-from utils import BatchList
 from utils.events import EventHub
+from utils.misc import BatchList
 
 
 # -- code --
@@ -20,7 +21,7 @@ log = logging.getLogger('Match')
 
 
 class Match(object):
-    def __init__(self, core):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.user_state_transition += self.handle_user_state_transition
@@ -39,7 +40,7 @@ class Match(object):
 
     def handle_game_started(self, g):
         core = self.core
-        flags = core.game.flags_of(g)
+        flags = core.room.flags_of(g)
 
         if flags.get('match'):
             core.interconnect.speaker(
@@ -99,16 +100,17 @@ class Match(object):
     @command()
     def _room_join_match_limit(self, u: Client, gid: int, slot: int):
         core = self.core
-        g = core.room.get_game_by_id(gid)
+
+        g = core.room.get_game(gid)
         if not g:
             return
 
-        flags = core.game.flags_of(g)
+        flags = core.room.flags_of(g)
         uid = core.auth.uid_of(u)
 
         if flags.get('match'):
             uid = core.auth.uid_of(u)
-            if uid not in self.match_users:
+            if uid not in g._[self]['match_uids']:
                 u.write(['error', 'not_invited'])
                 return EventHub.STOP_PROPAGATION
 
@@ -116,10 +118,11 @@ class Match(object):
     def _start_poll(self, g: Game, uids: List[int]):
         core = self.core
         gid = core.room.gid_of(g)
+        name = core.room.name_of(g)
 
         gevent.spawn(lambda: [
             gevent.sleep(1),
-            core.interconnect.speaker('文文', '“%s”房间已经建立，请相关玩家就位！' % self.game_name),
+            core.connect.speaker('文文', '“%s”房间已经建立，请相关玩家就位！' % name),
         ])
 
         @gevent.spawn

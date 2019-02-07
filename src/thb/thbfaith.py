@@ -16,7 +16,7 @@ from thb.actions import PlayerTurn, RevealIdentity, action_eventhandlers, migrat
 from thb.characters.baseclasses import mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet, SortCharacterInputlet
-from utils import BatchList
+from utils.misc import BatchList
 from enum import IntEnum
 
 

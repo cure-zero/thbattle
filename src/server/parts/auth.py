@@ -7,6 +7,7 @@ import logging
 # -- own --
 from server.endpoint import Client
 from server.utils import command
+from server.core import Core
 
 
 # -- code --
@@ -14,14 +15,14 @@ log = logging.getLogger('Auth')
 
 
 class Auth(object):
-    def __init__(self, core):
+    def __init__(self, core: Core):
         self.core = core
         self._kedama_uid = -10032
 
         core.events.user_state_transition += self.handle_user_state_transition
         core.events.client_command['auth'] += self._auth
 
-    def handle_user_state_transition(self, ev):
+    def handle_user_state_transition(self: 'Auth', ev):
         u, f, t = ev
 
         if (f, t) == ('initial', 'connected'):

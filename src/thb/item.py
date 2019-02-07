@@ -6,7 +6,7 @@
 from game.base import GameItem
 from server.base import Client, Game as ServerGame
 from thb.characters.baseclasses import Character
-from utils import exceptions
+from utils.misc import exceptions
 
 
 # -- code --
@@ -153,7 +153,6 @@ class ImperialIdentity(GameItem):
 @GameItem.register
 class European(GameItem):
     key = 'european'
-    args = []
 
     title = '欧洲卡'
     description = 'Roll点保证第一。身份场不可用。'

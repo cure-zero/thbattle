@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import List
+from typing import List, Optional
 import logging
 
 # -- third party --
@@ -12,6 +12,7 @@ from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGrou
 from game.autoenv import GameException, InputTransaction, sync_primitive, user_input
 from game.base import GameViralContext
 from thb.cards.base import CardList
+from thb.characters.baseclasses import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check, check_type
 from utils.misc import BatchList, group_by
@@ -48,7 +49,7 @@ def ask_for_action(initiator, actors, categories, candidates, timeout=None, tran
 
     timeout = timeout or 25
 
-    from thb.cards import VirtualCard
+    from thb.cards.base import VirtualCard
 
     ilet = ActionInputlet(initiator, categories, candidates)
 
@@ -257,8 +258,8 @@ def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
     from .cards import VirtualCard
     groups = group_by(cards, lambda c: id(c) if c.is_card(VirtualCard) else id(c.resides_in))
 
-    DETACHED = migrate_cards.DETACHED
-    UNWRAPPED = migrate_cards.UNWRAPPED
+    DETACHED = MigrateSpecial.DETACHED
+    UNWRAPPED = MigrateSpecial.UNWRAPPED
     detaching = to is DETACHED
 
     for l in groups:
@@ -277,6 +278,22 @@ def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
 
         else:
             trans.move(l, cl, to, is_bh)
+
+
+class MigrateSpecial(object):
+
+    class _SPECIAL(object):
+        owner = None
+
+        def __init__(self, name):
+            self.type = name.lower()
+
+        def __repr__(self):
+            return self.name.upper()
+
+    DETACHED     = _SPECIAL('DETACHED')
+    UNWRAPPED    = _SPECIAL('UNWRAPPED')
+    SINGLE_LAYER = 1
 
 
 class PostCardMigrationHandler(EventHandlerGroup):
@@ -300,27 +317,6 @@ def detach_cards(cards, trans=None):
     migrate_cards(cards, migrate_cards.DETACHED, trans=trans)
 
 
-class _MigrateCardsDetached(object):
-    owner = None
-    type = 'detached'
-
-    def __repr__(self):
-        return 'DETACHED'
-
-
-class _MigrateCardsUnwrapped(object):
-    owner = None
-    type = 'unwrapped'
-
-    def __repr__(self):
-        return 'UNWRAPPED'
-
-
-migrate_cards.SINGLE_LAYER = 1
-migrate_cards.DETACHED = _MigrateCardsDetached()
-migrate_cards.UNWRAPPED = _MigrateCardsUnwrapped()
-
-
 action_eventhandlers = set()
 
 
@@ -330,11 +326,20 @@ def register_eh(cls):
 
 
 # ------------------------------------------
-class GenericAction(Action):
+class THBAction(Action):
+    source: Optional[Character]
+    target: Optional[Character]
+
+    def __init__(self, source: Optional[Character], target: Optional[Character]):
+        self.source = source
+        self.target = target
+
+
+class GenericAction(THBAction):
     pass
 
 
-class UserAction(Action):  # card/character skill actions
+class UserAction(THBAction):  # card/character skill actions
     pass
 
 

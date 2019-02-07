@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
+from .common import ModeMeta
 from thb import thbnewbie
 from thb.meta.common import ui_meta_for
 
@@ -13,10 +13,9 @@ ui_meta = ui_meta_for(thbnewbie)
 
 
 @ui_meta
-class THBattleNewbie:
+class THBattleNewbie(ModeMeta):
     name = '琪露诺的完美THB教室'
     logo = 'thb-modelogo-newbie'
-    params_disp = {}
     description = (
         '|R游戏人数|r：1人+1NPC\n'
         '\n'
@@ -25,10 +24,6 @@ class THBattleNewbie:
         '|G胜利条件|r：完整的完成教学，不掉线\n'
         '\n'
     ).strip()
-
-    def ui_class(self):
-        from thb.ui.view import THBattleNewbieUI
-        return THBattleNewbieUI
 
     T = thbnewbie.Identity.TYPE
     identity_table = {

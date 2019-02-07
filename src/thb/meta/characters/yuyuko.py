@@ -63,9 +63,6 @@ class PerfectCherryBlossom:
         '若你以此法击坠一名角色，你增加一点体力上限并回复一点体力，然后失去此技能。'
     )
 
-    clickable = passive_clickable
-    is_action_valid = passive_is_action_valid
-
     def clickable(self, g):
         me = g.me
         if ttags(me)['perfect_cherry_blossom']:

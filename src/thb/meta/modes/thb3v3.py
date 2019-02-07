@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
+from .common import ModeMeta
 from thb import thb3v3
 from thb.meta.common import ui_meta_for
 
@@ -13,7 +13,7 @@ ui_meta = ui_meta_for(thb3v3)
 
 
 @ui_meta
-class THBattle:
+class THBattle(ModeMeta):
     name = '3v3模式'
     logo = 'thb-modelogo-3v3'
     description = (
@@ -36,22 +36,4 @@ class THBattle:
         },
     }
 
-    def ui_class(self):
-        from thb.ui.view import THBattleUI
-        return THBattleUI
-
-    T = thb3v3.Identity.TYPE
-    identity_table = {
-        T.HIDDEN: '？',
-        T.HAKUREI: '博丽',
-        T.MORIYA: '守矢'
-    }
-
-    identity_color = {
-        T.HIDDEN: 'blue',
-        T.HAKUREI: 'blue',
-        T.MORIYA: 'orange'
-    }
-
-    IdentityType = T
-    del T
+    identities = thb3v3.Identity.TYPE

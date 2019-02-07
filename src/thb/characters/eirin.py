@@ -61,5 +61,4 @@ class Medic(Skill):
 @register_character_to('common', '-kof')
 class Eirin(Character):
     skills = [Medic, FirstAid]
-    eventhandlers_required = []
     maxlife = 3

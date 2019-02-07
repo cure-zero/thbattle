@@ -14,8 +14,7 @@ from endpoint import Endpoint
 from server.base import Game
 from server.endpoint import Client
 from server.utils import command
-from utils import BatchList
-from utils.misc import throttle
+from utils.misc import BatchList, throttle
 
 
 # -- code --
@@ -70,7 +69,7 @@ class Room(object):
 
     def handle_game_left(self, ev):
         g, c = ev
-        g._[self]['left'][c] = bool(g.greenlet)
+        g._[self]['left'][c] = bool(g._[self]['greenlet'])
         return ev
 
     def handle_game_started(self, g):
@@ -122,8 +121,7 @@ class Room(object):
         if typ not in modes:
             return
 
-        gid = self._new_gid()
-        g = self.create_game(gid, typ, name, flags)
+        g = self.create_game(modes[typ], name, flags)
         core.invite.add_invited(u)
         core.room.join_game(g, u)
 
@@ -148,7 +146,7 @@ class Room(object):
         if not g:
             return
 
-        self._send_users(g, u)
+        self.send_room_users(g, [u])
 
     @command('room')
     def _get_ready(self, u: Client):
@@ -163,23 +161,13 @@ class Room(object):
 
         if all(core.lobby.state_of(u) == 'ready' for u in users):
             # prevent double starting
-            if not g.greenlet:
+            if not g._[self]['greenlet']:
                 log.info("game starting")
-                g.greenlet = gevent.spawn(g.run)
+                g._[self]['greenlet'] = gevent.spawn(g.run)
 
     @command('ready')
     def _cancel_ready(self, u: Client):
-        core = self.core
-        if core.lobby.state_of(u) != 'ready':
-            return
-
-        g = core.game.current(u)
-        users = g._[self]['users']
-        if u not in users:
-            log.error('User not in player list')
-            return
-
-        u.state.transfer('room')
+        self.cancel_ready(u)
 
     @command('room', 'ob')
     def _change_location(self, u: Client, loc: int):
@@ -226,6 +214,12 @@ class Room(object):
     def flags_of(self, g: Game):
         return g._[self]['flags']
 
+    def greenlet_of(self, g: Game):
+        return g._[self]['greenlet']
+
+    def is_started(self, g: Game):
+        return bool(g._[self]['greenlet'])
+
     def get_game(self, gid: int):
         return self.games.get(gid)
 
@@ -242,6 +236,7 @@ class Room(object):
             'name': name,
             'flags': flags,  # {'match': 1, 'invite': 1}
             'start_time': 0,
+            'greenlet': None,
 
             '_notifier': None,
         }
@@ -293,7 +288,7 @@ class Room(object):
         if users:
             return
 
-        if g.greenlet:
+        if g._[self]['greenlet']:
             log.info('Game [%s] aborted', gid)
             core.game.abort(g)
         else:
@@ -308,6 +303,19 @@ class Room(object):
         for u in to:
             u.raw_write(s)
 
+    def cancel_ready(self, u: Client):
+        core = self.core
+        if core.lobby.state_of(u) != 'ready':
+            return
+
+        g = core.game.current(u)
+        users = g._[self]['users']
+        if u not in users:
+            log.error('User not in player list')
+            return
+
+        core.lobby.state_of(u).transfer('room')
+
     # ----- Methods -----
     def _notify(self, g: Game):
         notifier = g._[self]['_notifier']
@@ -317,11 +325,11 @@ class Room(object):
             return
 
         @throttle(0.5)
-        def notifier():
+        def _notifier():
             gevent.spawn(self.send_room_users, g, g._[self]['users'])
 
-        g._[self]['_notifier'] = notifier
-        notifier()
+        g._[self]['_notifier'] = _notifier
+        _notifier()
 
     @throttle(3)
     def _notify_gamelist(self, ul: List[Client]):

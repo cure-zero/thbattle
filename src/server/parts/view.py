@@ -5,7 +5,7 @@ import logging
 
 # -- third party --
 # -- own --
-from server.base import Game
+from server.base import Game as ServerGame, Player as ServerPlayer
 from server.endpoint import Client
 
 
@@ -26,18 +26,18 @@ class View(object):
             'state': str(core.lobby.state_of(u)),
         }
 
-    def Game(self, g: Game):
+    def Game(self, g: ServerGame):
         core = self.core
 
         return {
             'gid':      core.room.gid_of(g),
             'type':     g.__class__.__name__,
             'name':     core.room.name_of(g),
-            'started':  bool(g.greenlet),
+            'started':  core.room.is_started(g),
             'online':   len(core.room.online_users_of(g)),
         }
 
-    def GameDetail(self, g: Game):
+    def GameDetail(self, g: ServerGame):
         core = self.core
 
         rst = {
@@ -48,5 +48,5 @@ class View(object):
         rst.update(self.Game(g))
         return rst
 
-    def Player(self, p: Client):
+    def Player(self, p: ServerPlayer):
         return self.User(p.client)

@@ -97,7 +97,7 @@ class AgileKOF:
     name = '轻敏'
     description = '你可以将一张|B黑桃|r手牌当|G擦弹|r使用或打出。'
 
-    clickable = Agile['clickable']
+    clickable = Agile.clickable
 
     def is_complete(self, g, cl):
         skill = cl[0]
@@ -112,7 +112,7 @@ class AgileKOF:
                 return (False, '请选择一张黑桃色手牌牌！')
             return (True, '这种三脚猫的弹幕，想要打中我是不可能的啦~')
 
-    sound_effect = Agile['sound_effect']
+    sound_effect = Agile.sound_effect
 
 
 @ui_meta

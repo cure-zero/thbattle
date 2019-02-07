@@ -2,12 +2,15 @@
 
 # -- stdlib --
 from collections import defaultdict
+from typing import List, Type
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.base import GameData, Game as BaseGame
+from game.base import GameData
+from server.base import Game as ServerGame
+from server.core import Core
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList
@@ -18,7 +21,7 @@ log = logging.getLogger('Game')
 
 
 class Game(object):
-    def __init__(self, core):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.game_started += self.handle_game_started
@@ -74,7 +77,8 @@ class Game(object):
 
     def handle_game_joined(self, ev):
         g, c = ev
-        if g.greenlet:
+        core = self.core
+        if core.room.is_started(g):
             g._[self]['data'][c].revive()
             g._[self]['fleed'][c] = False
 
@@ -84,7 +88,8 @@ class Game(object):
 
     def handle_game_left(self, ev):
         g, c = ev
-        if g.greenlet:
+        core = self.core
+        if core.room.is_started(g):
             g._[self]['data'][c].die()
             g._[self]['fleed'][c] = bool(g.can_leave(self._find_player(c)))
 
@@ -148,25 +153,26 @@ class Game(object):
         core.events.game_data_recv.emit((g, u, pkt))
 
     # ----- Public Methods -----
-    def create_game(self, cls):
+    def create_game(self, cls: Type[ServerGame]):
         core = self.core
         g = cls(core)
 
-        g.rndseed   = random.getrandbits(63)
-        g.random    = random.Random(g.rndseed)
-        g.players   = BatchList()
+        seed = random.getrandbits(63)
+        g.random = random.Random(seed)
+        g.players = BatchList()
 
         g._[self] = {
             'params': {k: v[0] for k, v in cls.params_def.items()},
             'fleed': defaultdict(bool),
             'aborted': False,
             'crashed': False,
+            'rngseed': seed,
             'data': {},
         }
 
         return g
 
-    def replay(self, c, to):
+    def replay(self, c: Client, to: Client):
         # XXX compress
         g = c._[self]['game']
         pkts = g._[self]['data'][c].get_sent()
@@ -178,19 +184,18 @@ class Game(object):
             to.write(['game:data', [p.id, p.tag, p.data]])
 
     # ----- Public Methods -----
-    def mark_crashed(self, g: BaseGame):
+    def mark_crashed(self, g: ServerGame):
         g._[self]['crashed'] = True
 
-    def is_crashed(self, g: BaseGame):
+    def is_crashed(self, g: ServerGame):
         return g._[self]['crashed']
 
-    def abort(self, g: BaseGame):
+    def abort(self, g: ServerGame):
         core = self.core
-        g.suicide = True  # game will kill itself in get_synctag()
         g._[self]['aborted'] = True
         core.events.game_aborted.emit(g)
 
-    def is_aborted(self, g: BaseGame):
+    def is_aborted(self, g: ServerGame):
         return g._[self]['aborted']
 
     def setup_game(self, g):
@@ -203,7 +208,7 @@ class Game(object):
             for u in users
         }
 
-    def build_players(self, g, users):
+    def build_players(self, g: ServerGame, users: List[Client]):
         from server.base import Player, NPCPlayer
 
         pl = BatchList([Player(g, u) for u in users])
@@ -211,16 +216,16 @@ class Game(object):
 
         return pl
 
-    def is_fleed(self, g, u):
+    def is_fleed(self, g: ServerGame, u: Client) -> bool:
         return g._[self]['fleed'][u]
 
-    def get_gamedata_archive(self, g):
+    def get_gamedata_archive(self, g: ServerGame):
         return [
             g._[self]['data'][i].archive()
             for i in g._[self]['users']
         ]
 
-    def write(self, g, u, tag, data):
+    def write(self, g: ServerGame, u: Client, tag: str, data: object):
         core = self.core
         assert u._[self]['game'] is g
         pkt = g._[self]['data'][u].feed_send(tag, data)
@@ -228,5 +233,8 @@ class Game(object):
         u.write(['game:data', [gid, pkt.serial, pkt.tag, pkt.data]])
         core.events.game_data_send.emit((g, u, pkt))
 
-    def current(self, u):
+    def current(self, u: Client) -> ServerGame:
         return u._[self]['game']
+
+    def params_of(self, g: ServerGame) -> dict:
+        return g._[self]['params']

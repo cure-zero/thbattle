@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
+from enum import IntEnum
 from itertools import cycle
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, get_seed_for
-from game.autoenv import user_input
+from game.autoenv import EventHandler, Game, GameEnded, InputTransaction, InterruptActionFlow
+from game.autoenv import get_seed_for, user_input
 from thb.actions import DrawCards, GenericAction, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.actions import action_eventhandlers
 from thb.characters.baseclasses import mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
-from utils import BatchList
-from enum import IntEnum
+from utils.misc import BatchList
 
 
 # -- code --
@@ -35,7 +34,7 @@ def game_eh(cls):
 class DeathHandler(EventHandler):
     interested = ['action_apply']
 
-    def handle(self, evt_type, act):
+    def handle(self, evt_type, act: PlayerDeath):
         if evt_type != 'action_apply': return act
         if not isinstance(act, PlayerDeath): return act
 
@@ -47,12 +46,10 @@ class DeathHandler(EventHandler):
         dead = lambda p: p.dead or p.dropped or p is tgt
 
         if all(dead(p) for p in force1):
-            g.winners = force2[:]
-            g.game_end()
+            raise GameEnded(force2[:])
 
         if all(dead(p) for p in force2):
-            g.winners = force1[:]
-            g.game_end()
+            raise GameEnded(force1[:])
 
         return act
 
@@ -209,7 +206,7 @@ class THBattle(Game):
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def decorate(g, p):
-        from .cards import CardList
+        from .cards.base import CardList
         from .characters.baseclasses import Character
         assert isinstance(p, Character)
 

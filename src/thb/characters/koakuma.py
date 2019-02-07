@@ -58,5 +58,4 @@ class Find(Skill):
 @register_character_to('common')
 class Koakuma(Character):
     skills = [Find]
-    eventhandlers_required = []
     maxlife = 4
