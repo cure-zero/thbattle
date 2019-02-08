@@ -4,8 +4,8 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from thb.actions import ActionLimitExceeded, ActionStageLaunchCard, DrawCards, EventHandler
-from thb.actions import Reforge, UserAction, random_choose_card, ttags
+from thb.actions import ActionLimitExceeded, ActionStageLaunchCard, DrawCards, EventHandler, Reforge
+from thb.actions import UserAction, random_choose_card, ttags
 from thb.cards.classes import AttackCard, Card, Skill, TreatAs, t_OtherOne
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChoosePeerCardInputlet

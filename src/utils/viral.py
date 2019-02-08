@@ -22,7 +22,7 @@ class ViralContext(object):
             cls._viral_mro_cache = cache
 
         for c in cache:
-            that = c.viral_search(start=2)
+            that = c.viral_search(start=2) if cls.VIRAL_SEARCH else None
             c.viral_import(self, that.viral_export() if that else None)
 
         return self

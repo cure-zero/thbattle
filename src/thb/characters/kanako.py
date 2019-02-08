@@ -3,11 +3,10 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler
+from game.base import EventHandler
 from thb.actions import Damage, DrawCardStage, DrawCards, DropCards, FinalizeStage, ForEach
-from thb.actions import LaunchCard, ShowCards, UserAction, migrate_cards
-from thb.actions import random_choose_card, ttags, user_choose_cards, user_choose_players
-from thb.actions import user_input
+from thb.actions import LaunchCard, ShowCards, UserAction, migrate_cards, random_choose_card, ttags
+from thb.actions import user_choose_cards, user_choose_players, user_input
 from thb.cards.classes import AttackCard, Card, DuelCard, Skill, TreatAs, VirtualCard, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet

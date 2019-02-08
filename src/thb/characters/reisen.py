@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import ActionShootdown, EventHandler, user_input
+from game.autoenv import user_input
+from game.base import ActionShootdown, EventHandler
 from thb.actions import ActionStageLaunchCard, Damage, LaunchCard, PlayerTurn, UserAction
 from thb.cards.classes import AttackCard, DuelCard, Heal, HealCard, PhysicalCard, Skill, t_None
 from thb.characters.base import Character, register_character_to

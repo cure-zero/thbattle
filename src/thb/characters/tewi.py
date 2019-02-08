@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler
+from game.base import EventHandler
 from thb.actions import DrawCards
 from thb.cards.classes import Skill, t_None
 from thb.characters.base import Character, register_character_to

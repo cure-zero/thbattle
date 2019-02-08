@@ -11,12 +11,13 @@ import random
 # -- third party --
 # -- own --
 from game.autoenv import Game, user_input
-from game.base import AbstractPlayer, EventHandler, InputTransaction, InterruptActionFlow, NPC
+from game.base import AbstractPlayer, BootstrapAction, EventHandler, InputTransaction
+from game.base import InterruptActionFlow, NPC
 from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCards, FatetellStage
 from thb.actions import GenericAction, LaunchCard, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.actions import ShuffleHandler, ask_for_action, migrate_cards
-from thb.cards.base import CardList
-from thb.cards.classes import AskForHeal, AttackCard, Card, Deck, Demolition, DemolitionCard
+from thb.cards.base import Card, CardList, Deck
+from thb.cards.classes import AskForHeal, AttackCard, Demolition, DemolitionCard
 from thb.cards.classes import ElementalReactorCard, ExinwanCard, FrozenFrogCard, GrazeCard
 from thb.cards.classes import GreenUFOCard, Heal, HealCard, LaunchGraze, MomijiShieldCard
 from thb.cards.classes import NazrinRodCard, RedUFOCard, Reject, RejectCard, RejectHandler
@@ -24,6 +25,7 @@ from thb.cards.classes import SinsackCard, WineCard
 from thb.characters.base import Character, mixin_character
 from thb.common import PlayerIdentity
 from thb.inputlets import ActionInputlet, GalgameDialogInputlet
+from thb.mode import THBattle
 
 
 # -- code --
@@ -148,7 +150,7 @@ class DummyPlayerTurn(PlayerTurn):
         return True
 
 
-class THBattleNewbieBootstrap(GenericAction):
+class THBattleNewbieBootstrap(BootstrapAction):
     def __init__(self, params, items):
         self.source = self.target = None
         self.params = params
@@ -588,7 +590,7 @@ class THBattleNewbieBootstrap(GenericAction):
         return True
 
 
-class THBattleNewbie(Game):
+class THBattleNewbie(THBattle):
     n_persons   = 1
     game_ehs    = [DeathHandler]
     npc_players = [NPC('琪露诺', CirnoAI.ai_main)]

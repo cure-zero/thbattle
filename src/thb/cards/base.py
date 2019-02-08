@@ -9,8 +9,8 @@ import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Game, GameError, GameObject, list_shuffle
-from game.base import AbstractPlayer, GameViralContext
+from game.autoenv import Game
+from game.base import AbstractPlayer, GameError, GameObject, GameViralContext, list_shuffle
 from thb.actions import UserAction
 
 # -- typing --

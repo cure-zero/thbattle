@@ -3,14 +3,15 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, GameError, user_input
+from game.autoenv import user_input
+from game.base import EventHandler, GameError
 from thb.actions import ActionLimitExceeded, ActionStageLaunchCard, Damage, DrawCards, DropCardStage
 from thb.actions import DropCards, FatetellAction, FatetellStage, FinalizeStage, ForEach
 from thb.actions import GenericAction, LaunchCard, MaxLifeChange, MigrateCardsTransaction, Reforge
 from thb.actions import UserAction, VitalityLimitExceeded, detach_cards, migrate_cards
 from thb.actions import random_choose_card, register_eh, ttags, user_choose_cards
-from thb.cards.classes import basic, spellcard
 from thb.cards.base import Card, Skill, TreatAs, VirtualCard, t_None, t_OtherLessEqThanN, t_OtherOne
+from thb.cards import basic, spellcard
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check
 from utils.misc import classmix
@@ -228,7 +229,7 @@ class RoukankenMixin(object):
         tgt = self.target
 
         try:
-            rst = super(RoukankenMixin, self).apply_action()
+            rst = super(RoukankenMixin, self).apply_action()  # type: ignore
         finally:
             for s in self.roukanken_disabled_skills:
                 tgt.reenable_skill('roukanken')
@@ -808,7 +809,7 @@ class LaevateinHandler(EventHandler):
     def cond(self, cards):
         if not len(cards) == 2: return False
 
-        from ..cards import LaevateinCard
+        from thb.cards.definition import LaevateinCard
         for c in cards:
             t = c.resides_in.type
             if t not in ('cards', 'showncards', 'equips'):

@@ -160,7 +160,7 @@ class Game(GameObject, GameViralContext):
         self.turn_count     = 0
         self.event_observer = None
 
-        self._: Dict[Any, dict] = {}
+        self._ = {}
 
         self.refresh_dispatcher()
 
@@ -462,13 +462,21 @@ class EventDispatcher(GameObject):
         return ehs
 
 
-class Action(GameObject, GameViralContext):
+class ActionViralContext(ViralContext):
+    VIRAL_SEARCH: List[str] = []
+    _: dict
+
+    def viral_import(self, _):
+        self._ = defaultdict(bool)
+
+
+class Action(GameObject, GameViralContext, ActionViralContext):
     cancelled = False
     done = False
     invalid = False
     succeeded: bool
 
-    def action_shootdown_exception(self):
+    def action_shootdown_exception(self) -> None:
         if not self.is_valid():
             raise ActionShootdown(self)
 

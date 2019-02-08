@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, user_input
+from game.autoenv import user_input
+from game.base import EventHandler
 from thb.actions import DropCards, GenericAction, MaxLifeChange, PlayerTurn, random_choose_card
-from thb.cards.classes import AttackCard, BaseAttack, DummyCard, GrazeCard, LaunchGraze, Skill, TreatAs
-from thb.cards.classes import t_None
+from thb.cards.classes import AttackCard, BaseAttack, DummyCard, GrazeCard, LaunchGraze, Skill
+from thb.cards.classes import TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 

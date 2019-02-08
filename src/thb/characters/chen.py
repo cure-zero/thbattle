@@ -3,12 +3,13 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from ..actions import DrawCards, ForEach, LaunchCard, UserAction
-from ..cards import AttackCard, DollControlCard, Heal, InstantSpellCardAction, RejectCard, Skill
-from ..cards import t_OtherOne
-from ..inputlets import ChooseOptionInputlet
-from .baseclasses import Character, register_character_to
-from game.autoenv import EventHandler, user_input
+from game.autoenv import user_input
+from game.base import EventHandler
+from thb.actions import DrawCards, ForEach, LaunchCard, UserAction
+from thb.cards.classes import AttackCard, DollControlCard, Heal, InstantSpellCardAction, RejectCard
+from thb.cards.classes import Skill, t_OtherOne
+from thb.characters.base import Character, register_character_to
+from thb.inputlets import ChooseOptionInputlet
 
 
 # -- code --

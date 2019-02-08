@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, user_input
+from game.autoenv import user_input
+from game.base import EventHandler
 from thb.actions import DrawCards, DummyAction, FinalizeStage, GenericAction, LifeLost
 from thb.actions import MaxLifeChange, Pindian, PlayerDeath, TryRevive, UserAction, ttags
 from thb.cards.classes import Heal, Skill, t_None, t_OtherOne

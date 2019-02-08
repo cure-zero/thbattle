@@ -16,6 +16,7 @@ from game.base import sync_primitive
 from thb.actions import ActionStageLaunchCard, AskForCard, DistributeCards, DrawCards, DropCardStage
 from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.actions import TryRevive, UserAction, ask_for_action, ttags
+from thb.cards.base import Deck
 from thb.cards.classes import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, Skill, TreatAs
 from thb.cards.classes import VirtualCard, t_None, t_One
 from thb.characters.base import mixin_character
@@ -27,11 +28,8 @@ from utils.misc import BatchList, classmix
 
 # -- code --
 log = logging.getLogger('THBattleIdentity')
-_game_ehs = {}
 
 
-
-@game_eh
 class IdentityRevealHandler(EventHandler):
     interested = ['action_apply']
     execute_before = ['DeathHandler']
@@ -46,7 +44,6 @@ class IdentityRevealHandler(EventHandler):
         return act
 
 
-@game_eh
 class DeathHandler(EventHandler):
     interested = ['action_apply', 'action_after']
 
@@ -230,13 +227,11 @@ class AssistedUseHandler(EventHandler):
         return act
 
 
-@game_eh
 class AssistedAttackHandler(AssistedUseHandler):
     skill = AssistedAttack
     card_cls = AttackCard
 
 
-@game_eh
 class AssistedAttackRangeHandler(AssistedUseHandler):
     interested = ['calcdistance']
 
@@ -249,7 +244,6 @@ class AssistedAttackRangeHandler(AssistedUseHandler):
         return arg
 
 
-@game_eh
 class AssistedGrazeHandler(AssistedUseHandler):
     skill = AssistedGraze
     card_cls = GrazeCard
@@ -264,7 +258,6 @@ class AssistedHealAction(UserAction):
         return True
 
 
-@game_eh
 class AssistedHealHandler(EventHandler):
     interested = ['action_after']
 
@@ -294,7 +287,6 @@ class AssistedHeal(Skill):
     skill_category = ['character', 'passive', 'boss']
 
 
-@game_eh
 class ExtraCardSlotHandler(EventHandler):
     interested = ['action_before']
 
@@ -360,8 +352,6 @@ class THBattleIdentityBootstrap(GenericAction):
     def apply_action(self):
         g = self.game
         params = self.params
-
-        from thb.cards.classes import Deck
 
         g.deck = Deck(g)
         g.ehclasses = []

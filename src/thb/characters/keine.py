@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, GameException, user_input
+from game.autoenv import user_input
+from game.base import EventHandler, GameException
 from thb.actions import ActionStage, ActiveDropCards, BaseActionStage, DrawCards, DropCards
 from thb.actions import GenericAction, LaunchCard, LifeLost, MaxLifeChange, PrepareStage, Reforge
 from thb.actions import UserAction, migrate_cards, random_choose_card, ttags, user_choose_cards

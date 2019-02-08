@@ -3,11 +3,12 @@
 # -- stdlib --
 # -- third party --
 # -- own --
+from game.autoenv import user_input
+from game.base import EventHandler
 from thb.actions import FatetellAction, FatetellStage, migrate_cards
 from thb.cards.classes import Card, GrazeCard, Skill, TreatAs, t_None
-from thb.inputlets import ChooseOptionInputlet
 from thb.characters.base import Character, register_character_to
-from game.autoenv import EventHandler, user_input
+from thb.inputlets import ChooseOptionInputlet
 
 
 # -- code --

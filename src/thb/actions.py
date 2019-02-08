@@ -8,10 +8,10 @@ import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGroup, Game
-from game.autoenv import GameException, InputTransaction, sync_primitive, user_input
-from game.base import GameViralContext
-from thb.cards.base import Card, CardList, VirtualCard
+from game.autoenv import Game, user_input
+from game.base import Action, ActionShootdown, EventArbiter, EventHandler, GameException
+from game.base import GameViralContext, InputTransaction, sync_primitive
+from thb.cards.base import Card, CardList, PhysicalCard, VirtualCard
 from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check, check_type
@@ -294,7 +294,7 @@ class MigrateSpecial(object):
     SINGLE_LAYER = 1
 
 
-class PostCardMigrationHandler(EventHandlerGroup):
+class PostCardMigrationHandler(EventArbiter):
     interested = ['post_card_migration']
 
     def handle(self, evt_type, arg):
@@ -518,12 +518,13 @@ class UseCard(GenericAction):
 
 class AskForCard(GenericAction):
 
-    def __init__(self, source, target, card_cls, categories=('cards', 'showncards')):
+    def __init__(self, source: Character, target: Character, card_cls: Type[PhysicalCard], categories: Iterable[str]=('cards', 'showncards')):
         self.source = source
         self.target = target
         self.card_cls = card_cls
         self.categories = categories
-        self.card = None
+
+        self.card: Optional[Card] = None
 
     def apply_action(self):
         target = self.target

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, user_input
+from game.autoenv import user_input
+from game.base import EventHandler
 from thb.actions import Damage, FatetellMalleateHandler, MigrateCardsTransaction, UseCard
 from thb.actions import UserAction, detach_cards, migrate_cards, user_choose_cards
 from thb.cards.classes import Skill, t_None
@@ -45,7 +45,7 @@ class TrialAction(UseCard):
 
 class TrialHandler(EventHandler):
     interested = ['fatetell']
-    group = FatetellMalleateHandler
+    arbiter = FatetellMalleateHandler
     card_usage = 'use'
 
     def handle(self, p, act):

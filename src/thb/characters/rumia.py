@@ -3,10 +3,10 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import ActionShootdown, EventHandler
-from thb.actions import Damage, DrawCards, LaunchCard, PlayerTurn, UserAction
-from thb.actions import user_choose_cards
-from thb.cards.classes import Attack, AttackCard, BaseDuel, PhysicalCard, RejectCard, Skill, t_None, t_OtherN
+from game.base import ActionShootdown, EventHandler
+from thb.actions import Damage, DrawCards, LaunchCard, PlayerTurn, UserAction, user_choose_cards
+from thb.cards.classes import Attack, AttackCard, BaseDuel, PhysicalCard, RejectCard, Skill, t_None
+from thb.cards.classes import t_OtherN
 from thb.characters.base import Character, register_character_to
 
 

@@ -3,10 +3,10 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from ..actions import ActionStageLaunchCard, ActionLimitExceeded
-from ..cards import Card, DummyCard, Skill, TreatAs
-from .baseclasses import Character, register_character_to
-from game.autoenv import EventHandler
+from game.base import EventHandler
+from thb.actions import ActionLimitExceeded, ActionStageLaunchCard
+from thb.cards.classes import Card, DummyCard, Skill, TreatAs
+from thb.characters.base import Character, register_character_to
 
 
 # -- code --

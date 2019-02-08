@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, user_input
+from game.autoenv import user_input
+from game.base import EventHandler
 from thb.actions import Damage, DropCards, FatetellAction, FatetellMalleateHandler
 from thb.actions import MigrateCardsTransaction, PostCardMigrationHandler, UseCard, detach_cards
 from thb.actions import migrate_cards, user_choose_cards
@@ -48,7 +48,7 @@ class MiracleMalletAction(UseCard):
 class MiracleMalletHandler(EventHandler):
     interested = ['fatetell']
     execute_before = ['YinYangOrbHandler']
-    group = FatetellMalleateHandler
+    arbiter = FatetellMalleateHandler
     card_usage = 'use'
 
     def handle(self, p, act):
@@ -93,7 +93,7 @@ class VengeOfTsukumogamiAction(FatetellAction):
 
 class VengeOfTsukumogamiHandler(EventHandler):
     interested = ['post_card_migration']
-    group = PostCardMigrationHandler
+    arbiter = PostCardMigrationHandler
 
     def handle(self, p, trans):
         if not p.has_skill(VengeOfTsukumogami):

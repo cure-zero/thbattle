@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import itertools
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, sync_primitive, user_input
+from game.autoenv import user_input
+from game.base import EventHandler, sync_primitive
 from thb.actions import ActionStage, ActionStageLaunchCard, AskForCard, Damage, FinalizeStage
 from thb.actions import GenericAction, LaunchCard, ShowCards, UserAction, migrate_cards, ttags
-from thb.cards.classes import AttackCard, CardList, DollControlCard, DuelCard, Skill, TreatAs, VirtualCard
-from thb.cards.classes import t_None
+from thb.cards.classes import AttackCard, CardList, DollControlCard, DuelCard, Skill, TreatAs
+from thb.cards.classes import VirtualCard, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 

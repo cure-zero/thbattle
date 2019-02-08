@@ -3,10 +3,10 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from ..actions import DrawCards, PlayerTurn, UserAction
-from ..cards import Skill, t_None
-from .baseclasses import Character, register_character_to
-from game.autoenv import EventHandler
+from game.base import EventHandler
+from thb.actions import DrawCards, PlayerTurn, UserAction
+from thb.cards.base import Skill, t_None
+from thb.characters.base import Character, register_character_to
 
 
 # -- code --

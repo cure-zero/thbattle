@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler
+from game.base import EventHandler
 from thb.actions import ActionStage, ActionStageLaunchCard, AskForCard, Damage, DistributeCards
 from thb.actions import DropCards, ForEach, GenericAction, LaunchCard, PlayerTurn, UseCard
 from thb.actions import UserAction, VitalityLimitExceeded, register_eh, user_choose_cards
@@ -84,22 +83,22 @@ class AttackCardRangeHandler(EventHandler):
 class AttackCardVitalityHandler(EventHandler):
     interested = ['action_before', 'action_shootdown']
 
-    def handle(self, evt_type, act):
+    @classmethod
+    def handle(cls, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, ActionStageLaunchCard):
             from .definition import AttackCard
             src = act.source
-            if act.card.is_card(AttackCard) and not self.is_disabled(src):
-                act.vitality_consumed = True
+            if act.card.is_card(AttackCard) and not cls.is_disabled(src):
+                act._[cls] = 'already-handled'
                 src.tags['vitality'] -= 1
 
         elif evt_type == 'action_shootdown' and isinstance(act, ActionStageLaunchCard):
-            from .definition import AttackCard
             if act.card.is_card(AttackCard):
                 src = act.source
-                if self.is_disabled(src):
+                if cls.is_disabled(src):
                     return act
 
-                if getattr(act, 'vitality_consumed', False):
+                if act._[cls]:
                     return act
 
                 if src.tags['vitality'] > 0:

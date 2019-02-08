@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, user_input
-from thb.actions import ActionStage, Damage, DrawCards, DropCardStage, DropCards
-from thb.actions import GenericAction, LaunchCard, PlayerTurn, PostCardMigrationHandler
-from thb.actions import Reforge, UserAction, mark, marked, random_choose_card
-from thb.actions import user_choose_cards, user_choose_players
-from thb.cards.classes import AttackCard, DollControlCard, Heal, Skill, TreatAs, VirtualCard
-from thb.cards.classes import t_None
+from game.autoenv import user_input
+from game.base import EventHandler
+from thb.actions import ActionStage, Damage, DrawCards, DropCardStage, DropCards, GenericAction
+from thb.actions import LaunchCard, PlayerTurn, PostCardMigrationHandler, Reforge, UserAction, mark
+from thb.actions import marked, random_choose_card, user_choose_cards, user_choose_players
+from thb.cards.classes import AttackCard, DollControlCard, Heal, Skill, TreatAs, VirtualCard, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 
@@ -219,7 +217,7 @@ class DollBlastHandlerCommon(object):
 
 class DollBlastMigrationHandler(DollBlastHandlerCommon, EventHandler):
     interested = ['post_card_migration']
-    group = PostCardMigrationHandler
+    arbiter = PostCardMigrationHandler
 
     def handle(self, p, trans):
         if not p.has_skill(DollBlast):

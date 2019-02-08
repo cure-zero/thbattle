@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, user_input
+from game.autoenv import user_input
+from game.base import EventHandler
 from thb.actions import Damage, DrawCards, Fatetell, GenericAction, LaunchCard, UserAction
 from thb.actions import ask_for_action, migrate_cards
 from thb.cards.classes import Card, Skill, t_None

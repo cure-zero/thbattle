@@ -5,7 +5,7 @@ from typing import List, Type
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler
+from game.base import EventHandler
 from thb.cards.classes import Skill, t_None
 from thb.characters.base import Character, register_character_to
 
