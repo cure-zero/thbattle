@@ -14,8 +14,8 @@ class ViralContext(object):
     VIRAL_SEARCH = ['self']
     _viral_mro_cache = None
 
-    def __new__(cls, *args, **kwargs):
-        self = super(ViralContext, cls).__new__(cls, *args, **kwargs)
+    def __new__(cls):
+        self = super(ViralContext, cls).__new__(cls)
         cache = cls._viral_mro_cache if '_viral_mro_cache' in cls.__dict__ else None
         if not cache:
             cache = [c for c in cls.mro() if ViralContext in c.__bases__]

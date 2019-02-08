@@ -6,7 +6,7 @@
 # -- own --
 from game.autoenv import EventHandler, user_input
 from thb.actions import ActionShootdown, Damage, GenericAction, LaunchCard, PrepareStage, UserAction
-from thb.cards import Attack, AttackCard, Card, DummyCard, Heal, InevitableAttack, Skill, t_None
+from thb.cards.classes import Attack, AttackCard, Card, DummyCard, Heal, InevitableAttack, Skill, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 

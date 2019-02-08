@@ -2,6 +2,7 @@
 
 # -- stdlib --
 import types
+from typing import List
 
 # -- third party --
 # -- own --
@@ -9,6 +10,8 @@ import types
 
 # -- code --
 class CheckFailed(Exception):
+    path: List[str]
+
     def __init__(self):
         Exception.__init__(self)
         self.path = []

@@ -3,8 +3,9 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from ..cards import Card, Heal, HealCard, Skill, t_None, t_One
-from .baseclasses import Character, register_character_to
+from thb.cards.base import Card
+from thb.cards.classes import Heal, HealCard, Skill, t_None, t_One
+from thb.characters.base import Character, register_character_to
 
 
 # -- code --

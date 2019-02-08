@@ -106,7 +106,7 @@ class THBattleFaithBootstrap(GenericAction):
         g = self.game
         params = self.params
 
-        from thb.cards import Deck
+        from thb.cards.classes import Deck
 
         g.picks = []
         g.deck = Deck(g)
@@ -254,7 +254,7 @@ class THBattleFaith(Game):
         return p
 
     def decorate(g, p):
-        from thb.cards import CardList
+        from thb.cards.classes import CardList
         p.cards          = CardList(p, 'cards')       # Cards in hand
         p.showncards     = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
         p.equips         = CardList(p, 'equips')      # Equipments

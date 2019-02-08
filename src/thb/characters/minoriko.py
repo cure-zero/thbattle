@@ -6,7 +6,7 @@
 # -- own --
 from game.autoenv import EventHandler
 from thb.actions import DrawCardStage, UserAction, migrate_cards, user_choose_players
-from thb.cards import Card, Harvest, HarvestCard, Skill, TreatAs, t_None
+from thb.cards.classes import Card, Harvest, HarvestCard, Skill, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 
 

@@ -17,7 +17,7 @@ def physical_card(cls):
 
 
 # ==================================================
-from thb.cards import basic
+from thb.cards.classes import basic
 
 
 @physical_card
@@ -57,7 +57,7 @@ class ExinwanCard(PhysicalCard):
 
 
 # --------------------------------------------------
-from thb.cards import spellcard
+from thb.cards.classes import spellcard
 
 
 @physical_card
@@ -176,7 +176,7 @@ class DonationBoxCard(PhysicalCard):
 
 
 # --------------------------------------------------
-from thb.cards import equipment
+from thb.cards.classes import equipment
 
 
 @physical_card
@@ -415,7 +415,7 @@ class GrimoireCard(PhysicalCard):
 
 
 # --------------------------------------------------
-from thb.cards import debug
+from thb.cards.classes import debug
 
 
 @physical_card

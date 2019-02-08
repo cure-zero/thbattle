@@ -6,7 +6,7 @@
 # -- third party --
 # -- own --
 from thb.actions import BaseFatetell
-from thb.cards import VirtualCard
+from thb.cards.classes import VirtualCard
 
 
 # -- code --

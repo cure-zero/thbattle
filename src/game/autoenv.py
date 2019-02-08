@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Callable, Type
+from typing import Callable
 
 # -- third party --
 # -- own --
-from game.base import Action, ActionShootdown, EventHandler, EventHandlerGroup, Game as BaseGame  # noqa
-from game.base import GameEnded, GameError, GameException, GameItem, GameObject, InputTransaction  # noqa
-from game.base import InterruptActionFlow, NPC, get_seed_for, list_shuffle, sync_primitive  # noqa
+from game.base import Game as BaseGame
 
 
 # -- code --
@@ -16,7 +14,6 @@ class Game(BaseGame):
 
 
 U: Callable
-G: Type[BaseGame]
 
 
 def user_input(*a, **k):

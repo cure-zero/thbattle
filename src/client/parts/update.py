@@ -7,8 +7,6 @@
 # replay: saves current commit sha1 as version.
 # when playing, switch to that version.
 
-# -*- coding: utf-8 -*-
-
 # -- stdlib --
 from threading import RLock
 import logging
@@ -22,13 +20,14 @@ import dns.resolver
 import gevent
 
 # -- own --
+from client.core import Core
 
 # -- code --
 log = logging.getLogger('client.core.parts.update')
 
 
 class GitUpdator(object):
-    def __init__(self, core, base, url=None):
+    def __init__(self, core: Core, name: str, base: str, url: str=None):
         self.base = base
         self.core = core
 

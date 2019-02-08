@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import List, Optional, TYPE_CHECKING
+from typing import Iterable, List, Optional, TYPE_CHECKING
 import logging
 
 # -- third party --
@@ -12,13 +12,10 @@ from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGrou
 from game.autoenv import GameException, InputTransaction, sync_primitive, user_input
 from game.base import GameViralContext
 from thb.cards.base import CardList, VirtualCard
+from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check, check_type
 from utils.misc import BatchList, group_by
-
-# -- typing --
-if TYPE_CHECKING:
-    from thb.characters.base import Character
 
 
 # -- code --

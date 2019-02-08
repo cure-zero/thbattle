@@ -6,8 +6,8 @@
 # -- own --
 from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, DropCards, FatetellAction, LaunchCard, mark, marked
-from thb.cards import AttackCard, BaseAttack, Card, InevitableAttack, RedUFOSkill, Skill
-from thb.cards import TreatAs, VirtualCard, t_None
+from thb.cards.classes import AttackCard, BaseAttack, Card, InevitableAttack, RedUFOSkill, Skill
+from thb.cards.classes import TreatAs, VirtualCard, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 from utils.misc import classmix

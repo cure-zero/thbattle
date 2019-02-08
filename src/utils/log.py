@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
+from typing import Any
 import datetime
 import logging
 import sys
 
 # -- third party --
-from raven.transport.gevent import GeventedHTTPTransport
 from raven.handlers.logging import SentryHandler
+from raven.transport.gevent import GeventedHTTPTransport
 import gevent
 import raven
 
 # -- own --
 
 # -- code --
-
-
 class UnityLogHandler(logging.Handler):
 
     def emit(self, rec):
@@ -72,7 +70,7 @@ class ServerLogFormatter(logging.Formatter):
         return '[%s %s%s] %s' % (
             rec.levelname[0],
             time.strftime('%y%m%d %H:%M:%S'),
-            gr_name.decode('utf-8'),
+            gr_name,
             msg,
         )
 
@@ -82,6 +80,8 @@ def init(level, sentry_dsn, release, colored=False):
 
     root = logging.getLogger()
     root.setLevel(0)
+
+    hdlr: Any
 
     hdlr = logging.FileHandler('client_log.txt', encoding='utf-8')
     hdlr.setLevel(logging.INFO)

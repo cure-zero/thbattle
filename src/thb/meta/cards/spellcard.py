@@ -75,7 +75,7 @@ class RejectCard:
         return 'thb-cv-card_reject'
 
     def has_reject_card(self, p):
-        from thb.cards import RejectCard
+        from thb.cards.classes import RejectCard
         if any([c.is_card(RejectCard) for c in itertools.chain(p.cards, p.showncards)]):
             return True
 

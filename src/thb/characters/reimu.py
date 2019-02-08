@@ -7,7 +7,7 @@
 from game.autoenv import EventHandler, InterruptActionFlow, user_input
 from thb.actions import ActionStage, Damage, DrawCards, FinalizeStage, LaunchCard, PlayerRevive, AskForCard
 from thb.actions import UserAction, migrate_cards, ttags
-from thb.cards import AttackCard, Card, GreenUFOSkill, RejectCard, Skill, TreatAs, UFOSkill, t_None
+from thb.cards.classes import AttackCard, Card, GreenUFOSkill, RejectCard, Skill, TreatAs, UFOSkill, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 

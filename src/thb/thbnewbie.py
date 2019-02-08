@@ -2,26 +2,27 @@
 
 # -- stdlib --
 from collections import defaultdict
+from enum import IntEnum
 from itertools import chain, combinations, cycle
+from typing import Callable
 import logging
 import random
 
 # -- third party --
 # -- own --
 from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, NPC, user_input
-from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCards
-from thb.actions import FatetellStage, GenericAction, LaunchCard, PlayerDeath, PlayerTurn
-from thb.actions import RevealIdentity, ShuffleHandler, action_eventhandlers
-from thb.actions import ask_for_action, migrate_cards
-from thb.cards import AskForHeal, AttackCard, Card, Demolition, DemolitionCard
-from thb.cards import ElementalReactorCard, ExinwanCard, FrozenFrogCard, GrazeCard
-from thb.cards import GreenUFOCard, Heal, HealCard, LaunchGraze, MomijiShieldCard
-from thb.cards import NazrinRodCard, RedUFOCard, Reject, RejectCard, RejectHandler
-from thb.cards import SinsackCard, WineCard
-from thb.characters.base import mixin_character
+from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCards, FatetellStage
+from thb.actions import GenericAction, LaunchCard, PlayerDeath, PlayerTurn, RevealIdentity
+from thb.actions import ShuffleHandler, action_eventhandlers, ask_for_action, migrate_cards
+from thb.cards.base import CardList
+from thb.cards.classes import AskForHeal, AttackCard, Card, Demolition, DemolitionCard
+from thb.cards.classes import ElementalReactorCard, ExinwanCard, FrozenFrogCard, GrazeCard
+from thb.cards.classes import GreenUFOCard, Heal, HealCard, LaunchGraze, MomijiShieldCard
+from thb.cards.classes import NazrinRodCard, RedUFOCard, Reject, RejectCard, RejectHandler
+from thb.cards.classes import SinsackCard, WineCard
+from thb.characters.base import Character, mixin_character
 from thb.common import PlayerIdentity
 from thb.inputlets import ActionInputlet, GalgameDialogInputlet
-from enum import IntEnum
 
 
 # -- code --
@@ -124,7 +125,8 @@ class CirnoAI(object):
 
 
 class AdhocEventHandler(EventHandler):
-    pass
+    def __init__(self, g: Game, hook: Callable):
+        self.handle = hook
 
 
 class DrawShownCards(DrawCards):
@@ -166,7 +168,7 @@ class THBattleNewbieBootstrap(GenericAction):
         from thb.characters.sakuya import Sakuya
 
         # ----- Init -----
-        from thb.cards import Deck
+        from thb.cards.classes import Deck
         g.deck = Deck(g)
         g.ehclasses = []
 
@@ -193,7 +195,7 @@ class THBattleNewbieBootstrap(GenericAction):
             user_input([meirin], GalgameDialogInputlet(g, character, dialog, voice), timeout=60)
 
         def inject_eh(hook):
-            eh = AdhocEventHandler()
+            eh = AdhocEventHandler(g)
             eh.handle = hook
             g.add_adhoc_event_handler(eh)
             return eh
@@ -610,7 +612,7 @@ class THBattleNewbie(Game):
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def set_character(g, p, cls):
-        new, old_cls = mixin_character(p, cls)
+        new, old_cls = mixin_character(g, p, cls)
         g.decorate(new)
         g.players.replace(p, new)
 
@@ -623,8 +625,6 @@ class THBattleNewbie(Game):
         return new
 
     def decorate(g, p):
-        from .cards import CardList
-        from .characters.baseclasses import Character
         assert isinstance(p, Character)
 
         p.cards      = CardList(p, 'cards')       # Cards in hand

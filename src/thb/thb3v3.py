@@ -4,16 +4,18 @@
 from collections import defaultdict
 from enum import IntEnum
 from itertools import cycle
+from typing import Any, Dict, List
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, GameEnded, InputTransaction, InterruptActionFlow
-from game.autoenv import get_seed_for, user_input
-from thb.actions import DrawCards, GenericAction, PlayerDeath, PlayerTurn, RevealIdentity
-from thb.actions import action_eventhandlers
-from thb.characters.base import mixin_character
+from game.autoenv import Game, user_input
+from game.base import AbstractPlayer, BootstrapAction, EventHandler, GameEnded, GameItem
+from game.base import InputTransaction, InterruptActionFlow, get_seed_for
+from thb.actions import DrawCards, PlayerDeath, PlayerTurn, RevealIdentity, action_eventhandlers
+from thb.cards.base import CardList, Deck
+from thb.characters.base import Character, mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
 from utils.misc import BatchList
@@ -61,8 +63,10 @@ class Identity(PlayerIdentity):
         MORIYA  = 2
 
 
-class THBattleBootstrap(GenericAction):
-    def __init__(self, params, items):
+class THBattleBootstrap(BootstrapAction):
+    def __init__(self, params: Dict[str, Any],
+                       items: Dict[AbstractPlayer, List[GameItem]],
+                       players: List[AbstractPlayer]):
         self.source = self.target = None
         self.params = params
         self.items = items
@@ -71,13 +75,11 @@ class THBattleBootstrap(GenericAction):
         g = self.game
         params = self.params
 
-        from thb.cards import Deck
-
         g.deck = Deck(g)
         g.ehclasses = []
 
         if params['random_seat']:
-            seed = get_seed_for(g.players)
+            seed = get_seed_for(g, g.players)
             random.Random(seed).shuffle(g.players)
             g.emit_event('reseat', None)
 
@@ -188,7 +190,7 @@ class THBattle(Game):
 
     def set_character(g, p, cls):
         # mix char class with player -->
-        new, old_cls = mixin_character(p, cls)
+        new, old_cls = mixin_character(g, p, cls)
         g.decorate(new)
         g.players.replace(p, new)
         g.forces[0].replace(p, new)
@@ -206,8 +208,6 @@ class THBattle(Game):
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def decorate(g, p):
-        from .cards.base import CardList
-        from .characters.baseclasses import Character
         assert isinstance(p, Character)
 
         p.cards          = CardList(p, 'cards')       # Cards in hand

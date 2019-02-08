@@ -143,7 +143,7 @@ class THBattle2v2Bootstrap(GenericAction):
         g = self.game
         params = self.params
 
-        from thb.cards import Deck
+        from thb.cards.classes import Deck
 
         g.stats = []
 

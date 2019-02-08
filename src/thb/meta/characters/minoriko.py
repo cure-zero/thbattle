@@ -52,7 +52,7 @@ class AutumnFeast:
     def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         cl = skill.associated_cards
-        from thb.cards import Card
+        from thb.cards.classes import Card
         if len(cl) != 2 or any(c.color != Card.RED for c in cl):
             return (False, '请选择2张红色的牌！')
         return (True, '发麻薯啦~')

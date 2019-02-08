@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import List
+from typing import Dict, List, TYPE_CHECKING, Tuple
 import logging
 
 # -- third party --
@@ -9,9 +9,14 @@ import gevent
 
 # -- own --
 from endpoint import Endpoint
+from server.base import Game
 from server.endpoint import Client
 from utils.events import FSM
 from utils.misc import BatchList, throttle
+
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core
 
 
 # -- code --
@@ -19,17 +24,17 @@ log = logging.getLogger('Lobby')
 
 
 class Lobby(object):
-    def __init__(self, core):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.client_connected += self.handle_client_connected
         core.events.user_state_transition += self.handle_user_state_transition
         core.events.game_ended += self.handle_game_ended
 
-        self.users = {}          # all users
-        self.dropped_users = {}  # passively dropped users
+        self.users: Dict[int, Client] = {}          # all users
+        self.dropped_users: Dict[int, Client] = {}  # passively dropped users
 
-    def handle_user_state_transition(self, ev):
+    def handle_user_state_transition(self, ev: Tuple[Client, str, str]):
         c, f, t = ev
 
         if (f, t) == ('connected', 'authed'):
@@ -44,7 +49,7 @@ class Lobby(object):
 
         return ev
 
-    def handle_client_connected(self, c):
+    def handle_client_connected(self, c: Client):
         core = self.core
         c._[self] = {
             'state': FSM(
@@ -67,7 +72,7 @@ class Lobby(object):
         c._[self]['state'].transit('connected')
         return c
 
-    def handle_game_ended(self, g):
+    def handle_game_ended(self, g: Game):
         core = self.core
         users = core.room.users_of(g)
 

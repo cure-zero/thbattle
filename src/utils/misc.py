@@ -4,7 +4,7 @@
 from collections import deque
 from contextlib import contextmanager
 from functools import wraps
-from typing import Dict, Type
+from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, Type
 from weakref import WeakSet
 import functools
 import logging
@@ -92,15 +92,15 @@ class BatchList(list):
 
 
 def remove_dups(s):
-    seen = set()
+    seen: Set[Any] = set()
     for i in s:
         if i not in seen:
             yield i
             seen.add(i)
 
 
-def classmix(*_classes):
-    classes = []
+def classmix(*_classes) -> type:
+    classes: Any = []
     for c in _classes:
         if hasattr(c, '_is_mixedclass'):
             classes.extend(c.__bases__)
@@ -141,7 +141,9 @@ def extendclass(clsname, bases, _dict):
             setattr(cls, key, value)
 
 
-def partition(pred, lst):
+def partition(pred: Callable[[Any], bool], lst: Iterable[Any]):
+    f: List[Any]
+    t: List[Any]
     f, t = [], []
     for i in lst:
         (f, t)[pred(i)].append(i)
@@ -235,6 +237,8 @@ def log_failure(logger):
 
 
 class ObservableEvent(object):
+    listeners: Set[Callable]
+
     def __init__(self, weakref=False):
         self.listeners = WeakSet() if weakref else set()
 
@@ -287,32 +291,34 @@ class GenericPool(object):
 def debounce(seconds):
     def decorate(f):
         lock = Semaphore(1)
+        last = None
 
         def bouncer(fire, *a, **k):
+            nonlocal last
             gevent.sleep(seconds)
-            wrapper.last = None
+            last = None
             fire and f(*a, **k)
 
         @wraps(f)
         def wrapper(*a, **k):
+            nonlocal last
             rst = lock.acquire(blocking=False)
             if not rst:
                 return
 
             try:
                 run = False
-                if wrapper.last is None:
-                    wrapper.last = gevent.spawn(bouncer, False)
+                if last is None:
+                    last = gevent.spawn(bouncer, False)
                     run = True
                 else:
-                    wrapper.last.kill()
-                    wrapper.last = gevent.spawn(bouncer, True, *a, **k)
+                    last.kill()
+                    last = gevent.spawn(bouncer, True, *a, **k)
             finally:
                 lock.release()
 
             run and f(*a, **k)
 
-        wrapper.last = None
         wrapper.__name__ == f.__name__
         return wrapper
 
@@ -321,6 +327,10 @@ def debounce(seconds):
 
 class ThrottleState(object):
     __slots__ = ('running', 'pending', 'args')
+
+    running: bool
+    pending: bool
+    args: Tuple[tuple, dict]
 
     def __init__(self):
         self.running = self.pending = False
@@ -421,7 +431,7 @@ def validate_args(*typelist):
                 raise ArgCountError(e, a)
 
             for i, e, v in zip(range(1000), typelist, args):
-                if not isinstance(v, e):
+                if not isinstance(v, e):  # type: ignore
                     raise ArgValidationError(i, e, v.__class__)
 
             return f(*args)

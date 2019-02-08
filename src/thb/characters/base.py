@@ -2,14 +2,17 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Dict, Iterable, List, Set, Type
+from typing import Dict, Iterable, List, Set, TYPE_CHECKING, Type
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, GameObject
+from game.autoenv import EventHandler, Game, GameObject
 from game.base import AbstractPlayer
-from thb.cards.base import Skill
 from utils.misc import partition
+
+# -- typing --
+if TYPE_CHECKING:
+    from thb.cards.base import Skill
 
 
 # -- code --
@@ -86,9 +89,7 @@ def get_characters(*categories):
     return list(sorted(chars, key=lambda i: i.__name__))
 
 
-def mixin_character(g, player, char_cls):
-    assert issubclass(char_cls, Character)
-
+def mixin_character(g: Game, player, char_cls: Type[Character]):
     player.index = g.get_playerid(player)
 
     old = None

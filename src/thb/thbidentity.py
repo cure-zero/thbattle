@@ -16,8 +16,8 @@ from game.base import sync_primitive
 from thb.actions import ActionStageLaunchCard, AskForCard, DistributeCards, DrawCards, DropCardStage
 from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.actions import TryRevive, UserAction, action_eventhandlers, ask_for_action, ttags
-from thb.cards import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, Skill, TreatAs
-from thb.cards import VirtualCard, t_None, t_One
+from thb.cards.classes import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, Skill, TreatAs
+from thb.cards.classes import VirtualCard, t_None, t_One
 from thb.characters.base import mixin_character
 from thb.common import CharChoice, PlayerIdentity, build_choices
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
@@ -365,7 +365,7 @@ class THBattleIdentityBootstrap(GenericAction):
         g = self.game
         params = self.params
 
-        from thb.cards import Deck
+        from thb.cards.classes import Deck
 
         g.deck = Deck(g)
         g.ehclasses = []
@@ -543,7 +543,7 @@ class THBattleIdentity(Game):
         g.set_event_handlers(EventHandler.make_list(g, ehclasses))
 
     def decorate(g, p):
-        from thb.cards import CardList
+        from thb.cards.classes import CardList
         p.cards          = CardList(p, 'cards')       # Cards in hand
         p.showncards     = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
         p.equips         = CardList(p, 'equips')      # Equipments

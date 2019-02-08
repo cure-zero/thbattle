@@ -4,7 +4,7 @@
 # -- third party --
 # -- own --
 from thb.actions import DrawCards, LaunchCard, Pindian, UserAction
-from thb.cards import AttackCard, BaseAttack, DuelCard, Skill, TreatAs, VirtualCard, t_None
+from thb.cards.classes import AttackCard, BaseAttack, DuelCard, Skill, TreatAs, VirtualCard, t_None
 from thb.inputlets import ChooseOptionInputlet
 from thb.characters.base import Character, register_character_to
 from game.autoenv import EventHandler, user_input

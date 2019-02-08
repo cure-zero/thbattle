@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import deque
-from typing import Dict, List, TYPE_CHECKING, Optional, Tuple, Type
+from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, Type
 from weakref import WeakValueDictionary
 import itertools
 import logging
@@ -12,6 +12,10 @@ import logging
 from game.autoenv import Game, GameError, GameObject, list_shuffle
 from game.base import AbstractPlayer, GameViralContext
 from thb.actions import UserAction
+
+# -- typing --
+if TYPE_CHECKING:
+    from thb.characters.base import Character
 
 
 # -- code --
@@ -274,7 +278,7 @@ class CardList(GameObject, deque):
     SPECIAL = 'special'
     FAITHS = 'faiths'
 
-    def __init__(self, owner: AbstractPlayer, typ: str):
+    def __init__(self, owner: Character, typ: str):
         self.owner = owner
         self.type = typ
         deque.__init__(self)
@@ -290,7 +294,7 @@ class CardList(GameObject, deque):
 
 class Deck(GameObject):
     def __init__(self, g, card_definition=None):
-        from thb.cards import definition
+        from thb.cards.classes import definition
         self.game = g
         card_definition = card_definition or definition.card_definition
 

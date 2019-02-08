@@ -9,7 +9,7 @@ from thb.actions import DropCards, FatetellAction, FatetellStage, FinalizeStage,
 from thb.actions import GenericAction, LaunchCard, MaxLifeChange, MigrateCardsTransaction, Reforge
 from thb.actions import UserAction, VitalityLimitExceeded, detach_cards, migrate_cards
 from thb.actions import random_choose_card, register_eh, ttags, user_choose_cards
-from thb.cards import basic, spellcard
+from thb.cards.classes import basic, spellcard
 from thb.cards.base import Card, Skill, TreatAs, VirtualCard, t_None, t_OtherLessEqThanN, t_OtherOne
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check

@@ -6,8 +6,8 @@
 from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, DrawCards, ForEach, LaunchCard, PlayerDeath, UserAction
 from thb.actions import user_choose_players
-from thb.cards import AttackCard, Duel, InstantSpellCardAction, Reject, Skill, TreatAs
-from thb.cards import t_None
+from thb.cards.classes import AttackCard, Duel, InstantSpellCardAction, Reject, Skill, TreatAs
+from thb.cards.classes import t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 

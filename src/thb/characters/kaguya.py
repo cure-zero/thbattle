@@ -7,7 +7,7 @@
 from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, DrawCards, LaunchCard, LifeLost, UserAction, migrate_cards
 from thb.actions import skill_check, skill_wrap, user_choose_cards
-from thb.cards import Card, Heal, SealingArrayCard, Skill, TreatAs, VirtualCard, t_None
+from thb.cards.classes import Card, Heal, SealingArrayCard, Skill, TreatAs, VirtualCard, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 

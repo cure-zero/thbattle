@@ -136,7 +136,7 @@ class Game(GameObject, GameViralContext):
     n_persons: int
     npc_players: List[NPC] = []
     params_def: Dict[str, Any] = {}
-    bootstrap: Type['Action']
+    bootstrap: Type['BootstrapAction']
 
     # ----- Instance Variables -----
     game: 'Game'
@@ -215,7 +215,7 @@ class Game(GameObject, GameViralContext):
 
         return ehs
 
-    def emit_event(self, evt_type, data):
+    def emit_event(self, evt_type: str, data: Any):
         '''
         Fire an event, all relevant event handlers will see this,
         data can be modified.
@@ -359,7 +359,7 @@ class EventHandler(GameObject):
     execute_before: List[str] = []
     execute_after: List[str]  = []
 
-    group: Type['EventHandlerGroup']
+    group: Type['EventArbiter']
 
     def __init__(self, g):
         self.game = g
@@ -376,19 +376,19 @@ class EventHandler(GameObject):
     def make_list(g, eh_classes, fold_group=True):
         table = {}
         eh_classes = set(eh_classes)
-        groups = defaultdict(list)
+        arbiters: Any = defaultdict(list)
 
         for cls in eh_classes:
-            assert not issubclass(cls, EventHandlerGroup), 'Should not pass group in make_list, %r' % cls
+            assert not issubclass(cls, EventArbiter), 'Should not pass arbiters in make_list, %r' % cls
             grp = cls.group if fold_group else None
             if grp is not None:
-                groups[grp].append(cls)
+                arbiters[grp].append(cls)
                 cls = grp
 
             table[cls.__name__] = cls(g)
 
-        for grp, lst in groups.items():
-            eh = table[grp.__name__]
+        for a, lst in arbiters.items():
+            eh = table[a.__name__]
             eh.set_handlers(EventHandler.make_list(g, lst, fold_group=False))
 
         allnames = frozenset(table)
@@ -429,7 +429,6 @@ class EventHandler(GameObject):
 
     @staticmethod
     def _dump_eh_dependency_graph():
-        from game.autoenv import EventHandler
         ehs: Set[Type[EventHandler]] = {i for i in all_gameobjects if issubclass(i, EventHandler)}
         ehs.remove(EventHandler)
         dependencies = set()
@@ -449,11 +448,15 @@ class EventHandler(GameObject):
             f.write('}')
 
 
-class EventHandlerGroup(EventHandler):
+class EventArbiter(EventHandler):
     handlers = ()
 
     def set_handlers(self, handlers):
         self.handlers = handlers[:]
+
+
+class EventDispatcher(GameObject):
+    pass
 
 
 class Action(GameObject, GameViralContext):
@@ -494,6 +497,13 @@ class Action(GameObject, GameViralContext):
 
     def __repr__(self):
         return self.__class__.__name__
+
+
+class BootstrapAction(Action):
+    def __init__(self, params: Dict[str, Any],
+                       items: Dict[AbstractPlayer, List['GameItem']],
+                       players: List[AbstractPlayer]):
+        raise Exception('Override this!')
 
 
 class SyncPrimitive(GameObject):
@@ -551,21 +561,16 @@ class Inputlet(GameObject):
     RETRY = object()
     '''
     NOTICE: Inputlet instance variable should
-            not be used as side channel for infomation
-            passing in game logic code.
+            not be used as a side channel to pass infomation
+            in game logic code.
     '''
-    def __init__(self, initiator, *args, **kwargs):
-        self.initiator = initiator
-        self.init(*args, **kwargs)
+    initiator: GameObject
 
     @classmethod
     def tag(cls):
         clsname = cls.__name__
         assert clsname.endswith('Inputlet')
         return clsname[:-8]
-
-    def init(self):
-        pass
 
     def parse(self, data):
         '''
@@ -640,7 +645,7 @@ class InputTransaction(GameViralContext):
 class Packet(object):
     __slots__ = ('serial', 'tag', 'data', 'consumed')
 
-    def __init__(self, serial, tag, data):
+    def __init__(self, serial: int, tag: str, data: object):
         self.serial = serial
         self.tag = tag
         self.data = data
@@ -657,19 +662,19 @@ class GameData(object):
             return 'NODATA'
 
     def __init__(self):
-        self._send = []
-        self._send_serial = 0
-        self._recv = []
+        self._send: List[Packet] = []
+        self._send_serial: int = 0
+        self._recv: List[Packet] = []
         self._recv_serial = 0
-        self._seen = set()
-        self._pending_recv = []
+        self._seen: Set[str] = set()
+        self._pending_recv: List[Packet] = []
         self._has_data = Event()
         self._live_serial = 0
         self._dead = False
 
         self._in_gexpect = False
 
-    def feed_recv(self, serial, tag, data):
+    def feed_recv(self, serial: int, tag: str, data: object):
         d = self._recv
         if not d or d[-1].serial < serial:
             if tag in self._seen:
@@ -683,30 +688,33 @@ class GameData(object):
         else:
             log.error('Dropping game data with decreasing serial: %s, tag: %s', serial, tag)
 
-    def feed_send(self, tag, data):
+    def feed_send(self, tag: str, data: object):
         serial = self._send_serial
         self._send_serial += 1
         p = Packet(serial, tag, data)
         self._send.append(p)
         return p
 
-    def get_sent(self):
+    def get_sent(self) -> List[Packet]:
         return self._send
 
-    def set_live_serial(self, serial):
+    def set_live_serial(self, serial: int):
         self._live_serial = serial
 
-    def is_live(self):
+    def is_live(self) -> bool:
         return self._recv_serial > self._live_serial
 
-    def gexpect(self, tag, blocking=True):
+    def gexpect(self, tag: str, blocking: bool=True):
         if self._dead:
             raise EndpointDied
 
         try:
             assert not self._in_gexpect, 'NOT REENTRANT'
             self._in_gexpect = True
-            blocking and log.debug('GAME_EXPECT: %s', repr(tag))
+
+            if blocking:
+                log.debug('GAME_EXPECT: %s', repr(tag))
+
             recv = self._pending_recv
             e = self._has_data
             e.clear()
@@ -725,7 +733,7 @@ class GameData(object):
                     if packet.tag == tag or (glob and packet.tag.startswith(tag)):
                         log.debug('GAME_READ: %s', repr(packet))
                         del recv[i]
-                        self._recv_serial = packet.id
+                        self._recv_serial = packet.serial
                         packet.consumed = True
                         return [packet.tag, packet.data]
 
@@ -744,7 +752,7 @@ class GameData(object):
         finally:
             self._in_gexpect = False
 
-    def die(self):
+    def die(self) -> None:
         # Explanation:
         # When sb. exit game in input state,
         # the others must wait until his timeout exceeded.
@@ -752,13 +760,13 @@ class GameData(object):
         self._dead = True
         self._has_data.set()
 
-    def revive(self):
+    def revive(self) -> None:
         self._dead = False
 
-    def archive(self):
+    def archive(self) -> dict:
         return {
-            'send': [(i.id, i.tag, i.data) for i in self._send],
-            'recv': [(i.id, i.tag, i.data) for i in self._recv],
+            'send': [(i.serial, i.tag, i.data) for i in self._send],
+            'recv': [(i.serial, i.tag, i.data) for i in self._recv],
         }
 
 

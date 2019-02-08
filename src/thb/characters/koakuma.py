@@ -5,7 +5,7 @@
 # -- third party --
 # -- own --
 from thb.actions import DrawCards, UserAction, ttags
-from thb.cards import Skill, t_Self
+from thb.cards.classes import Skill, t_Self
 from thb.characters.base import Character, register_character_to
 
 

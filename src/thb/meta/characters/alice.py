@@ -122,7 +122,7 @@ class LittleLegionControlAction:
         if not pl:
             return (False, '控场：请选择2名玩家，视为使用【人型操控】')
 
-        from thb.cards import DollControlCard
+        from thb.cards.classes import DollControlCard
 
         rst, prompt = DollControlCard.ui_meta.is_action_valid(G(), [], pl)
 

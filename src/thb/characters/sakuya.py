@@ -6,7 +6,7 @@
 # -- own --
 from game.autoenv import EventHandler
 from thb.actions import ActionStage, PlayerTurn, PrepareStage
-from thb.cards import AttackCard, Skill, TreatAs, t_None
+from thb.cards.classes import AttackCard, Skill, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 
 

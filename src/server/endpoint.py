@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
+from typing import TYPE_CHECKING
 import logging
 
 # -- third party --
@@ -9,8 +9,12 @@ from gevent import Timeout, getcurrent
 import gevent
 
 # -- own --
-from endpoint import EndpointDied
+from endpoint import Endpoint, EndpointDied
 from utils.misc import log_failure
+
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core
 
 
 # -- code --
@@ -24,11 +28,11 @@ class Pivot(Exception):
 class Client(object):
     __slots__ = ('_ep', '_gr', '_core', '_')
 
-    def __init__(self, core, ep):
+    def __init__(self, core: Core, ep: Endpoint):
         self._ep = ep
         self._core = core
 
-        self._ = {}
+        self._: dict = {}
 
     def _before_serve(self):
         core = self._core

@@ -50,7 +50,7 @@ class Taichi:
     def is_complete(self, g, cl):
         skill = cl[0]
         cl = skill.associated_cards
-        from thb.cards import AttackCard, GrazeCard
+        from thb.cards.classes import AttackCard, GrazeCard
         if len(cl) != 1 or not (cl[0].is_card(AttackCard) or cl[0].is_card(GrazeCard)):
             return (False, '请选择一张【弹幕】或者【擦弹】！')
         return (True, '动之则分，静之则合。无过不及，随曲就伸')

@@ -7,7 +7,7 @@ from __future__ import absolute_import
 from game.autoenv import EventHandler, user_input
 from thb.actions import Damage, GenericAction, LaunchCard, LifeLost, MaxLifeChange, PlayerTurn
 from thb.actions import ttags, user_choose_players
-from thb.cards import Skill, t_None
+from thb.cards.classes import Skill, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 

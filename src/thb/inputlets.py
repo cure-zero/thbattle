@@ -1,20 +1,25 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
+from typing import Any, Dict, Iterable, List, Type
 import logging
 
 # -- third party --
 # -- own --
-from game.base import Inputlet
+from game.base import AbstractPlayer, GameObject, Inputlet
+from thb.cards.base import Card, Skill
+from thb.characters.base import Character
+from thb.common import CharChoice
 from utils.check import CheckFailed, check, check_type
+
 
 # -- code --
 log = logging.getLogger('Inputlets')
 
 
 class ChooseOptionInputlet(Inputlet):
-    def init(self, options):
+    def __init__(self, initiator: GameObject, options: None):
+        self.initiator = initiator
         self.options = options
         self.result = None
 
@@ -33,14 +38,16 @@ class ChooseOptionInputlet(Inputlet):
 
 
 class ActionInputlet(Inputlet):
-    def init(self, categories, candidates):
+    def __init__(self, initiator: GameObject, categories: Iterable[str], candidates: Iterable[AbstractPlayer]):
+        self.initiator = initiator
+
         self.categories = categories
         self.candidates = candidates
 
-        self.skills = []
-        self.cards = []
-        self.players = []
-        self.params = {}
+        self.skills: List[Type[Skill]] = []
+        self.cards: List[Card] = []
+        self.players: List[AbstractPlayer] = []
+        self.params: Dict[str, Any] = {}
 
     def parse(self, data):
         # data = [
@@ -56,13 +63,13 @@ class ActionInputlet(Inputlet):
         categories = [getattr(actor, i) for i in categories] if categories else None
         candidates = self.candidates
 
-        skills = []
-        cards = []
-        players = []
-        params = {}
+        skills: List[Type[Skill]] = []
+        cards: List[Card] = []
+        players: List[AbstractPlayer] = []
+        params: Dict[str, Any] = {}
 
         try:
-            check_type([[int, ...]] * 3 + [dict], data)
+            check_type([[int, ...]] * 3 + [dict], data)  # type: ignore
 
             sid_list, cid_list, pid_list, params = data
 
@@ -110,7 +117,8 @@ class ActionInputlet(Inputlet):
 
 
 class ChooseIndividualCardInputlet(Inputlet):
-    def init(self, cards):
+    def __init__(self, initiator: GameObject, cards: List[Card]):
+        self.initiator = initiator
         self.cards = cards
         self.selected = None
 
@@ -142,7 +150,8 @@ class ChooseIndividualCardInputlet(Inputlet):
 
 
 class ChoosePeerCardInputlet(Inputlet):
-    def init(self, target, categories):
+    def __init__(self, initiator: GameObject, target: Character, categories: List[str]):
+        self.initiator = initiator
         self.target = target
         self.categories = categories
         self.selected = None
@@ -192,10 +201,11 @@ class ChoosePeerCardInputlet(Inputlet):
 
 class ProphetInputlet(Inputlet):
     '''For Ran'''
-    def init(self, cards):
+    def __init__(self, initiator: GameObject, cards: List[Card]):
+        self.initiator = initiator
         self.cards = cards
-        self.upcards = []
-        self.downcards = []
+        self.upcards: List[Card] = []
+        self.downcards: List[Card] = []
 
     def parse(self, data):
         try:
@@ -230,13 +240,10 @@ class ProphetInputlet(Inputlet):
 
 
 class ChooseGirlInputlet(Inputlet):
-    def init(self, mapping):
-        # mapping = {
-        #   Player1: [CharChoice1, ...],
-        #   ...
-        # }
+    def __init__(self, initiator: GameObject, mapping: Dict[Character, List[CharChoice]]):
+        self.initiator = initiator
+
         m = dict(mapping)
-        from .common import CharChoice
         for k in m:
             assert all([isinstance(i, CharChoice) for i in m[k]])
             m[k] = m[k][:]
@@ -273,11 +280,9 @@ class ChooseGirlInputlet(Inputlet):
 
 
 class SortCharacterInputlet(Inputlet):
-    def init(self, mapping, limit=None):
-        # mapping = {
-        #   Player1: [CharChoice1, ...],
-        #   ...
-        # }
+    def __init__(self, initiator: GameObject, mapping: Dict[Character, List[CharChoice]], limit: int=10000):
+        self.initiator = initiator
+
         s = {len(l) for l in list(mapping.values())}
         assert(len(s) == 1)
         self.num = n = s.pop()
@@ -307,10 +312,11 @@ class SortCharacterInputlet(Inputlet):
 
 class HopeMaskInputlet(Inputlet):
     '''For Kokoro'''
-    def init(self, cards):
+    def __init__(self, initiator: GameObject, cards: List[Card]):
+        self.initiator = initiator
         self.cards = cards
-        self.putback = []
-        self.acquire = []
+        self.putback: List[Card] = []
+        self.acquire: List[Card] = []
 
     def parse(self, data):
         try:
@@ -385,7 +391,8 @@ class HopeMaskKOFInputlet(HopeMaskInputlet):
 
 
 class GalgameDialogInputlet(Inputlet):
-    def init(self, character, dialog, voice):
+    def __init__(self, initiator: GameObject, character: Character, dialog: str, voice: str):
+        self.initiator = initiator
         self.character = character
         self.dialog = dialog
         self.result = None

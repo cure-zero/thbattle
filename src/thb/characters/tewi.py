@@ -6,7 +6,7 @@
 # -- own --
 from game.autoenv import EventHandler
 from thb.actions import DrawCards
-from thb.cards import Skill, t_None
+from thb.cards.classes import Skill, t_None
 from thb.characters.base import Character, register_character_to
 
 

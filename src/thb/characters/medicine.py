@@ -7,7 +7,7 @@ from game.autoenv import ActionShootdown, EventHandler, user_input
 from thb.actions import Damage, DrawCards, DropCards, FatetellStage, GenericAction
 from thb.actions import LaunchCard, LifeLost, ShowCards, UseCard, UserAction
 from thb.actions import user_choose_cards
-from thb.cards import Card, Skill, VirtualCard, Wine, t_None
+from thb.cards.classes import Card, Skill, VirtualCard, Wine, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
 

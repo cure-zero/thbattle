@@ -81,7 +81,7 @@ def card_desc(c):
     if isinstance(c, (list, tuple)):
         return '、'.join([card_desc(i) for i in c])
 
-    from thb.cards import Card, HiddenCard
+    from thb.cards.base import Card, HiddenCard
     if c.is_card(HiddenCard): return '一张牌'
 
     if c.suit == Card.SPADE:
@@ -103,7 +103,7 @@ def card_desc(c):
 
 
 def build_handcard(cardcls, p=None):
-    from thb.cards import CardList
+    from thb.cards.base import CardList
     cl = CardList(p or G().me, 'cards')
     c = cardcls()
     c.move_to(cl)
