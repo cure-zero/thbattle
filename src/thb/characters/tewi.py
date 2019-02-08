@@ -44,5 +44,5 @@ class LuckHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Tewi(Character):
     skills = [Luck]
-    eventhandlers_required = [LuckHandler]
+    eventhandlers = [LuckHandler]
     maxlife = 4

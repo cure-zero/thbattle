@@ -72,5 +72,5 @@ class PsychopathHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Rinnosuke(Character):
     skills = [Netoru, Psychopath]
-    eventhandlers_required = [PsychopathHandler]
+    eventhandlers = [PsychopathHandler]
     maxlife = 3

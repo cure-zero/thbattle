@@ -153,12 +153,12 @@ class CheatingHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Rumia(Character):
     skills = [Darkness, Cheating]
-    eventhandlers_required = [CheatingHandler]
+    eventhandlers = [CheatingHandler]
     maxlife = 3
 
 
 @register_character_to('kof')
 class RumiaKOF(Character):
     skills = [DarknessKOF, Cheating]
-    eventhandlers_required = [DarknessKOFHandler, CheatingHandler]
+    eventhandlers = [DarknessKOFHandler, CheatingHandler]
     maxlife = 3

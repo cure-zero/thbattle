@@ -1,37 +1,28 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 from collections import defaultdict
+from enum import IntEnum
 from itertools import cycle
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, get_seed_for
-from game.autoenv import user_input
+from game.autoenv import Game, user_input
+from game.base import EventHandler, InputTransaction, InterruptActionFlow, get_seed_for
 from thb.actions import DistributeCards, GenericAction, MigrateCardsTransaction, PlayerDeath
 from thb.actions import PlayerTurn, RevealIdentity, action_eventhandlers, migrate_cards
-from thb.characters.base import mixin_character
-from thb.common import PlayerIdentity, build_choices, roll
+from thb.characters.base import mixin_character, Character
+from thb.common import PlayerIdentity, build_choices, roll, CharChoice
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet, SortCharacterInputlet
 from utils.misc import BatchList
-from enum import IntEnum
 
 
 # -- code --
 log = logging.getLogger('THBattle')
 
-_game_ehs = {}
 
-
-def game_eh(cls):
-    _game_ehs[cls.__name__] = cls
-    return cls
-
-
-@game_eh
 class DeathHandler(EventHandler):
     interested = ['action_after', 'action_apply']
 
@@ -213,22 +204,17 @@ class THBattleFaithBootstrap(GenericAction):
 
 
 class THBattleFaith(Game):
-    n_persons    = 6
-    game_ehs     = _game_ehs
-    bootstrap    = THBattleFaithBootstrap
-    params_def   = {
+    n_persons  = 6
+    game_ehs   = [DeathHandler]
+    bootstrap  = THBattleFaithBootstrap
+    params_def = {
         'random_seat': (True, False),
     }
 
     def can_leave(g, p):
         return False
 
-    def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
-        ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
-
-    def switch_character(g, p, choice):
+    def switch_character(g, p: Character, choice: CharChoice):
         choice.akari = False
 
         g.players.reveal(choice)
@@ -245,23 +231,10 @@ class THBattleFaith(Game):
         g.forces[0].replace(old, p)
         g.forces[1].replace(old, p)
 
-        ehs = g.ehclasses
-        ehs.extend(p.eventhandlers_required)
-
-        g.update_event_handlers()
+        g.refresh_dispatcher()
         g.emit_event('switch_character', (old, p))
 
         return p
-
-    def decorate(g, p):
-        from thb.cards.classes import CardList
-        p.cards          = CardList(p, 'cards')       # Cards in hand
-        p.showncards     = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
-        p.equips         = CardList(p, 'equips')      # Equipments
-        p.fatetell       = CardList(p, 'fatetell')    # Cards in the Fatetell Zone
-        p.special        = CardList(p, 'special')     # used on special purpose
-        p.showncardlists = [p.showncards, p.fatetell]
-        p.tags           = defaultdict(int)
 
     def get_remaining_characters(g):
         try:
@@ -274,11 +247,3 @@ class THBattleFaith(Game):
             return -1, -1
 
         return h, m
-
-    def get_stats(g):
-        return [{'event': 'pick', 'attributes': {
-            'character': p.__name__,
-            'gamemode': g.__class__.__name__,
-            'identity': '-',
-            'victory': None,
-        }} for p in g.picks]

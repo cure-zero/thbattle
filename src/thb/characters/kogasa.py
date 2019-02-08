@@ -111,5 +111,5 @@ class JollyHandler(EventHandler):
 @register_character_to('common')
 class Kogasa(Character):
     skills = [Surprise, Jolly]
-    eventhandlers_required = [JollyHandler]
+    eventhandlers = [JollyHandler]
     maxlife = 3

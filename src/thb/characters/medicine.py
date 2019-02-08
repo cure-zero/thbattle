@@ -150,5 +150,5 @@ class MelancholyHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Medicine(Character):
     skills = [Ciguatera, Melancholy]
-    eventhandlers_required = [CiguateraHandler, MelancholyHandler]
+    eventhandlers = [CiguateraHandler, MelancholyHandler]
     maxlife = 3

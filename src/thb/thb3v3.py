@@ -13,7 +13,7 @@ import random
 from game.autoenv import Game, user_input
 from game.base import AbstractPlayer, BootstrapAction, EventHandler, GameEnded, GameItem
 from game.base import InputTransaction, InterruptActionFlow, get_seed_for
-from thb.actions import DrawCards, PlayerDeath, PlayerTurn, RevealIdentity, action_eventhandlers
+from thb.actions import DrawCards, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.cards.base import CardList, Deck
 from thb.characters.base import Character, mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
@@ -24,15 +24,7 @@ from utils.misc import BatchList
 # -- code --
 log = logging.getLogger('THBattle')
 
-_game_ehs = {}
 
-
-def game_eh(cls):
-    _game_ehs[cls.__name__] = cls
-    return cls
-
-
-@game_eh
 class DeathHandler(EventHandler):
     interested = ['action_apply']
 
@@ -76,7 +68,6 @@ class THBattleBootstrap(BootstrapAction):
         params = self.params
 
         g.deck = Deck(g)
-        g.ehclasses = []
 
         if params['random_seat']:
             seed = get_seed_for(g, g.players)
@@ -177,9 +168,9 @@ class THBattleBootstrap(BootstrapAction):
         return True
 
 
-class THBattle(Game):
+class THBattle3v3(Game):
     n_persons    = 6
-    game_ehs     = _game_ehs
+    game_ehs     = [DeathHandler]
     bootstrap    = THBattleBootstrap
     params_def   = {
         'random_seat': (False, True),
@@ -196,32 +187,6 @@ class THBattle(Game):
         g.forces[0].replace(p, new)
         g.forces[1].replace(p, new)
         assert not old_cls
-        ehs = g.ehclasses
-        ehs.extend(cls.eventhandlers_required)
-        g.update_event_handlers()
+        g.refresh_dispatcher()
         g.emit_event('switch_character', (p, new))
         return new
-
-    def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
-        ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
-
-    def decorate(g, p):
-        assert isinstance(p, Character)
-
-        p.cards          = CardList(p, 'cards')       # Cards in hand
-        p.showncards     = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
-        p.equips         = CardList(p, 'equips')      # Equipments
-        p.fatetell       = CardList(p, 'fatetell')    # Cards in the Fatetell Zone
-        p.special        = CardList(p, 'special')     # used on special purpose
-        p.showncardlists = [p.showncards, p.fatetell]
-        p.tags           = defaultdict(int)
-
-    def get_stats(g):
-        return [{'event': 'pick', 'attributes': {
-            'character': p.__class__.__name__,
-            'gamemode': g.__class__.__name__,
-            'identity': '-',
-            'victory': p in g.winners,
-        }} for p in g.players]

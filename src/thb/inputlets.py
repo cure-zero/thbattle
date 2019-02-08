@@ -18,7 +18,7 @@ log = logging.getLogger('Inputlets')
 
 
 class ChooseOptionInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, options: None):
+    def __init__(self, initiator: GameObject, options: Iterable):
         self.initiator = initiator
         self.options = options
         self.result = None

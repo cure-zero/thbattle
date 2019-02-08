@@ -260,5 +260,5 @@ class Reimu(Character):
     # skills = [SpiritualAttack, Flight]
     skills = [ReimuExterminate, ReimuClear]
     boss_skills = [TributeTarget]
-    eventhandlers_required = [ReimuExterminateHandler, ReimuClearHandler, TributeHandler]
+    eventhandlers = [ReimuExterminateHandler, ReimuClearHandler, TributeHandler]
     maxlife = 4

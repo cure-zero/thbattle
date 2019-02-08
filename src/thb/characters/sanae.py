@@ -256,12 +256,12 @@ class GodDescendantHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Sanae(Character):
     skills = [Miracle, SanaeFaith, GodDescendant]
-    eventhandlers_required = [GodDescendantHandler]
+    eventhandlers = [GodDescendantHandler]
     maxlife = 3
 
 
 @register_character_to('kof')
 class SanaeKOF(Character):
     skills = [Miracle, SanaeFaithKOF, GodDescendant]
-    eventhandlers_required = [SanaeFaithKOFHandler, GodDescendantHandler]
+    eventhandlers = [SanaeFaithKOFHandler, GodDescendantHandler]
     maxlife = 3

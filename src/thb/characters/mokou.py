@@ -99,5 +99,5 @@ class RebornHandler(EventHandler):
 @register_character_to('common')
 class Mokou(Character):
     skills = [Reborn, Ashes]
-    eventhandlers_required = [AshesHandler, RebornHandler]
+    eventhandlers = [AshesHandler, RebornHandler]
     maxlife = 4

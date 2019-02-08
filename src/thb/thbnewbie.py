@@ -4,18 +4,19 @@
 from collections import defaultdict
 from enum import IntEnum
 from itertools import chain, combinations, cycle
-from typing import Callable
+from typing import Callable, Type
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, NPC, user_input
+from game.autoenv import Game, user_input
+from game.base import AbstractPlayer, EventHandler, InputTransaction, InterruptActionFlow, NPC
 from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCards, FatetellStage
 from thb.actions import GenericAction, LaunchCard, PlayerDeath, PlayerTurn, RevealIdentity
-from thb.actions import ShuffleHandler, action_eventhandlers, ask_for_action, migrate_cards
+from thb.actions import ShuffleHandler, ask_for_action, migrate_cards
 from thb.cards.base import CardList
-from thb.cards.classes import AskForHeal, AttackCard, Card, Demolition, DemolitionCard
+from thb.cards.classes import AskForHeal, AttackCard, Card, Deck, Demolition, DemolitionCard
 from thb.cards.classes import ElementalReactorCard, ExinwanCard, FrozenFrogCard, GrazeCard
 from thb.cards.classes import GreenUFOCard, Heal, HealCard, LaunchGraze, MomijiShieldCard
 from thb.cards.classes import NazrinRodCard, RedUFOCard, Reject, RejectCard, RejectHandler
@@ -27,19 +28,12 @@ from thb.inputlets import ActionInputlet, GalgameDialogInputlet
 
 # -- code --
 log = logging.getLogger('THBattleNewbie')
-_game_ehs = {}
-
-
-def game_eh(cls):
-    _game_ehs[cls.__name__] = cls
-    return cls
 
 
 class OneShotActionStage(ActionStage):
     one_shot = True
 
 
-@game_eh
 class DeathHandler(EventHandler):
     interested = ['action_apply']
 
@@ -168,9 +162,7 @@ class THBattleNewbieBootstrap(GenericAction):
         from thb.characters.sakuya import Sakuya
 
         # ----- Init -----
-        from thb.cards.classes import Deck
         g.deck = Deck(g)
-        g.ehclasses = []
 
         cirno, meirin = g.players
 
@@ -598,42 +590,18 @@ class THBattleNewbieBootstrap(GenericAction):
 
 class THBattleNewbie(Game):
     n_persons   = 1
-    game_ehs    = _game_ehs
+    game_ehs    = [DeathHandler]
     npc_players = [NPC('琪露诺', CirnoAI.ai_main)]
     bootstrap   = THBattleNewbieBootstrap
 
     def can_leave(g, p):
         return True
 
-    def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
-        ehclasses += g.ehclasses
-        ehclasses.remove(ShuffleHandler)  # disable shuffling
-        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
-
-    def set_character(g, p, cls):
+    def set_character(g, p: AbstractPlayer, cls: Type[Character]):
         new, old_cls = mixin_character(g, p, cls)
         g.decorate(new)
         g.players.replace(p, new)
 
-        ehs = g.ehclasses
-        ehs.extend(cls.eventhandlers_required)
-        g.update_event_handlers()
-
+        g.refresh_dispatcher()
         g.emit_event('switch_character', (p, new))
-
         return new
-
-    def decorate(g, p):
-        assert isinstance(p, Character)
-
-        p.cards      = CardList(p, 'cards')       # Cards in hand
-        p.showncards = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
-        p.equips     = CardList(p, 'equips')      # Equipments
-        p.fatetell   = CardList(p, 'fatetell')    # Cards in the Fatetell Zone
-        p.special    = CardList(p, 'special')     # used on special purpose
-        p.showncardlists = [p.showncards, p.fatetell]
-        p.tags = defaultdict(int)
-
-    def get_stats(g):
-        return []

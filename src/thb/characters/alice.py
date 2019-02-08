@@ -274,7 +274,7 @@ class DollBlastDropHandler(DollBlastHandlerCommon, EventHandler):
 @register_character_to('common')
 class Alice(Character):
     skills = [DollBlast, LittleLegion]
-    eventhandlers_required = [
+    eventhandlers = [
         DollBlastMigrationHandler,
         DollBlastDropHandler,
         LittleLegionHandler,

@@ -3,7 +3,8 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, user_input
+from game.autoenv import user_input
+from game.base import EventHandler
 from thb.actions import Damage, DrawCards, ForEach, LaunchCard, PlayerDeath, UserAction
 from thb.actions import user_choose_players
 from thb.cards.classes import AttackCard, Duel, InstantSpellCardAction, Reject, Skill, TreatAs
@@ -182,12 +183,12 @@ class SadistHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Yuuka(Character):
     skills = [ReversedScales, Sadist]
-    eventhandlers_required = [ReversedScalesHandler, SadistHandler]
+    eventhandlers = [ReversedScalesHandler, SadistHandler]
     maxlife = 4
 
 
 @register_character_to('kof')
 class YuukaKOF(Character):
     skills = [ReversedScales, SadistKOF]
-    eventhandlers_required = [ReversedScalesHandler, SadistKOFHandler]
+    eventhandlers = [ReversedScalesHandler, SadistKOFHandler]
     maxlife = 4

@@ -121,5 +121,5 @@ class AkiTributeHandler(EventHandler):
 @register_character_to('common')
 class Minoriko(Character):
     skills = [Foison, AutumnFeast, AkiTribute]
-    eventhandlers_required = [FoisonHandler, AkiTributeHandler]
+    eventhandlers = [FoisonHandler, AkiTributeHandler]
     maxlife = 3

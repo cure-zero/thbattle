@@ -184,5 +184,5 @@ class PerfectCherryBlossom(Skill):
 @register_character_to('common', '-kof')
 class Yuyuko(Character):
     skills = [GuidedDeath, SoulDrain, PerfectCherryBlossom]
-    eventhandlers_required = [GuidedDeathHandler, SoulDrainHandler, PerfectCherryBlossomHandler]
+    eventhandlers = [GuidedDeathHandler, SoulDrainHandler, PerfectCherryBlossomHandler]
     maxlife = 3

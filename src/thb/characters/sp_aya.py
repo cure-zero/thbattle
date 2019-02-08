@@ -196,5 +196,5 @@ class DominanceHandler(EventHandler):
 @register_character_to('imperial')
 class SpAya(Character):
     skills = [WindWalk, Dominance]
-    eventhandlers_required = [WindWalkHandler, DominanceHandler]
+    eventhandlers = [WindWalkHandler, DominanceHandler]
     maxlife = 4

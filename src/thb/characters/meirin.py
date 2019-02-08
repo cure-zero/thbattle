@@ -117,5 +117,5 @@ class RiverBehindHandler(EventHandler):
 @register_character_to('common')
 class Meirin(Character):
     skills = [LoongPunch, RiverBehind]
-    eventhandlers_required = [RiverBehindHandler, LoongPunchHandler]
+    eventhandlers = [RiverBehindHandler, LoongPunchHandler]
     maxlife = 4

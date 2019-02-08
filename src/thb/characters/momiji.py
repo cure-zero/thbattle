@@ -251,6 +251,6 @@ class SolidShield(Skill):
 class Momiji(Character):
     # skills = [Disarm, Sentry, Telegnosis]
     skills = [Disarm, Sentry, SolidShield]
-    # eventhandlers_required = [SentryHandler, DisarmHandler, TelegnosisHandler]
-    eventhandlers_required = [SentryHandler, DisarmHandler, SolidShieldHandler]
+    # eventhandlers = [SentryHandler, DisarmHandler, TelegnosisHandler]
+    eventhandlers = [SentryHandler, DisarmHandler, SolidShieldHandler]
     maxlife = 4

@@ -21,5 +21,5 @@ class AkariSkill(Skill):
 class Akari(Character):
     # dummy player for hidden choices
     skills = [AkariSkill]
-    eventhandlers_required: List[Type[EventHandler]] = []
+    eventhandlers: List[Type[EventHandler]] = []
     maxlife = 0

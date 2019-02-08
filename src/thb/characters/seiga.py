@@ -256,12 +256,12 @@ class SummonKOF(Skill):
 @register_character_to('common', '-kof')
 class Seiga(Character):
     skills = [Heterodoxy, Summon]
-    eventhandlers_required = [HeterodoxyHandler, SummonHandler]
+    eventhandlers = [HeterodoxyHandler, SummonHandler]
     maxlife = 4
 
 
 @register_character_to('kof')
 class SeigaKOF(Character):
     skills = [SummonKOF]
-    eventhandlers_required = [SummonKOFHandler]
+    eventhandlers = [SummonKOFHandler]
     maxlife = 4

@@ -111,12 +111,12 @@ class FreakingPowerHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Yugi(Character):
     skills = [Assault, FreakingPower]
-    eventhandlers_required = [FreakingPowerHandler]
+    eventhandlers = [FreakingPowerHandler]
     maxlife = 4
 
 
 @register_character_to('kof')
 class YugiKOF(Character):
     skills = [AssaultKOF, FreakingPower]
-    eventhandlers_required = [AssaultKOFHandler, FreakingPowerHandler]
+    eventhandlers = [AssaultKOFHandler, FreakingPowerHandler]
     maxlife = 4

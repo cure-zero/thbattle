@@ -142,5 +142,5 @@ class ResonanceHandler(EventHandler):
 @register_character_to('common')
 class Kyouko(Character):
     skills = [Echo, Resonance]
-    eventhandlers_required = [EchoHandler, ResonanceHandler]
+    eventhandlers = [EchoHandler, ResonanceHandler]
     maxlife = 4

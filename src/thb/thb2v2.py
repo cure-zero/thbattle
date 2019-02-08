@@ -2,21 +2,25 @@
 
 # -- stdlib --
 from collections import defaultdict
+from enum import IntEnum
 from itertools import cycle
+from typing import Any, Dict, List, Type
 import logging
 import random
 
 # -- third party --
 # -- own --
-from enum import IntEnum
-from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, get_seed_for
-from game.autoenv import user_input
-from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards, GenericAction
+from game.autoenv import Game, user_input
+from game.base import AbstractPlayer, BootstrapAction, EventHandler, GameItem, InputTransaction
+from game.base import InterruptActionFlow, get_seed_for
+from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards
 from thb.actions import MigrateCardsTransaction, PlayerDeath, PlayerTurn, RevealIdentity, UserAction
-from thb.actions import action_eventhandlers, migrate_cards
-from thb.characters.base import mixin_character
+from thb.actions import migrate_cards
+from thb.cards.base import Deck
+from thb.characters.base import Character, mixin_character
 from thb.common import CharChoice, PlayerIdentity, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
+from thb.mode import THBattle
 from utils.misc import BatchList, partition
 import settings
 
@@ -24,21 +28,7 @@ import settings
 # -- code --
 log = logging.getLogger('THBattle2v2')
 
-_game_ehs = {}
-_game_actions = {}
 
-
-def game_eh(cls):
-    _game_ehs[cls.__name__] = cls
-    return cls
-
-
-def game_action(cls):
-    _game_actions[cls.__name__] = cls
-    return cls
-
-
-@game_eh
 class DeathHandler(EventHandler):
     interested = ['action_apply']
 
@@ -79,7 +69,6 @@ class HeritageAction(UserAction):
         return True
 
 
-@game_eh
 class HeritageHandler(EventHandler):
     interested = ['action_before']
     execute_after = ['DeathHandler', 'SadistHandler']
@@ -108,7 +97,6 @@ class HeritageHandler(EventHandler):
         return act
 
 
-@game_eh
 class ExtraCardHandler(EventHandler):
     interested = ['action_before']
 
@@ -133,8 +121,10 @@ class Identity(PlayerIdentity):
         MORIYA  = 2
 
 
-class THBattle2v2Bootstrap(GenericAction):
-    def __init__(self, params, items):
+class THBattle2v2Bootstrap(BootstrapAction):
+    def __init__(self, params: Dict[str, Any],
+                       items: Dict[AbstractPlayer, List[GameItem]],
+                       players: List[AbstractPlayer]):
         self.source = self.target = None
         self.params = params
         self.items = items
@@ -142,8 +132,6 @@ class THBattle2v2Bootstrap(GenericAction):
     def apply_action(self):
         g = self.game
         params = self.params
-
-        from thb.cards.classes import Deck
 
         g.stats = []
 
@@ -273,58 +261,32 @@ class THBattle2v2Bootstrap(GenericAction):
         return True
 
 
-class THBattle2v2(Game):
+class THBattle2v2(THBattle):
     n_persons    = 4
-    game_ehs     = _game_ehs
-    game_actions = _game_actions
+    game_ehs     = [
+        DeathHandler,
+        HeritageHandler,
+        ExtraCardHandler,
+    ]
     bootstrap    = THBattle2v2Bootstrap
     params_def   = {
         'random_force':    (True, False),
         'draw_extra_card': (False, True),
     }
 
-    def can_leave(g, p):
+    def can_leave(g, p: Character):
         return getattr(p, 'dead', False)
 
-    def set_character(g, p, cls):
+    def set_character(g, p, cls: Type[Character]):
         # mix char class with player -->
-        new, old_cls = mixin_character(p, cls)
+        new, old_cls = mixin_character(g, p, cls)
         g.decorate(new)
         g.players.replace(p, new)
         g.forces[0].replace(p, new)
         g.forces[1].replace(p, new)
         assert not old_cls
-        ehs = g.ehclasses
-        ehs.extend(cls.eventhandlers_required)
 
-        g.update_event_handlers()
+        g.refresh_dispatcher()
+
         g.emit_event('switch_character', (p, new))
         return new
-
-    def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
-        ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
-
-    def decorate(g, p):
-        from .cards import CardList
-        from .characters.baseclasses import Character
-        assert isinstance(p, Character)
-
-        p.cards          = CardList(p, 'cards')       # Cards in hand
-        p.showncards     = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
-        p.equips         = CardList(p, 'equips')      # Equipments
-        p.fatetell       = CardList(p, 'fatetell')    # Cards in the Fatetell Zone
-        p.special        = CardList(p, 'special')     # used on special purpose
-        p.showncardlists = [p.showncards, p.fatetell]
-        p.tags           = defaultdict(int)
-
-    def get_stats(g):
-        stats = g.stats[:]
-        stats.extend([{'event': 'pick', 'attributes': {
-            'character': p.__class__.__name__,
-            'gamemode': g.__class__.__name__,
-            'identity': '-',
-            'victory': p in g.winners,
-        }} for p in g.players])
-        return stats

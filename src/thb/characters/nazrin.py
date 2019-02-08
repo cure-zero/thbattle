@@ -81,12 +81,12 @@ class AgileKOF(TreatAs, Skill):
 @register_character_to('common', '-kof')
 class Nazrin(Character):
     skills = [TreasureHunt, Agile]
-    eventhandlers_required = [TreasureHuntHandler]
+    eventhandlers = [TreasureHuntHandler]
     maxlife = 3
 
 
 @register_character_to('kof')
 class NazrinKOF(Character):
     skills = [TreasureHunt, AgileKOF]
-    eventhandlers_required = [TreasureHuntHandler]
+    eventhandlers = [TreasureHuntHandler]
     maxlife = 3

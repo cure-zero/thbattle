@@ -138,5 +138,5 @@ class ReversalHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Seija(Character):
     skills = [Incite, Reversal]
-    eventhandlers_required = [ReversalHandler]
+    eventhandlers = [ReversalHandler]
     maxlife = 3

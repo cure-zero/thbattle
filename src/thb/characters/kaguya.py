@@ -162,5 +162,5 @@ class ImperishableNightHandler(EventHandler):
 @register_character_to('common')
 class Kaguya(Character):
     skills = [Dilemma, ImperishableNight]
-    eventhandlers_required = [DilemmaHandler, ImperishableNightHandler]
+    eventhandlers = [DilemmaHandler, ImperishableNightHandler]
     maxlife = 3

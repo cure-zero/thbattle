@@ -134,12 +134,12 @@ class MahjongDrugHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Reisen(Character):
     skills = [Lunatic, MahjongDrug]
-    eventhandlers_required = [DiscarderHandler, LunaticHandler, MahjongDrugHandler]
+    eventhandlers = [DiscarderHandler, LunaticHandler, MahjongDrugHandler]
     maxlife = 4
 
 
 @register_character_to('kof')
 class ReisenKOF(Character):
     skills = [Lunatic]
-    eventhandlers_required = [DiscarderHandler, LunaticHandler]
+    eventhandlers = [DiscarderHandler, LunaticHandler]
     maxlife = 4

@@ -162,5 +162,5 @@ class PerfectFreezeHandler(EventHandler):
 @register_character_to('common')
 class Cirno(Character):
     skills = [Bakadesu, PerfectFreeze]
-    eventhandlers_required = [PerfectFreezeHandler]
+    eventhandlers = [PerfectFreezeHandler]
     maxlife = 4

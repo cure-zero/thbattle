@@ -70,5 +70,5 @@ class LunaDialHandler(EventHandler):
 @register_character_to('common')
 class Sakuya(Character):
     skills = [Dagger, LunaDial]
-    eventhandlers_required = [LunaDialHandler]
+    eventhandlers = [LunaDialHandler]
     maxlife = 4

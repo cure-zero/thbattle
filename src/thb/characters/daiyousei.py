@@ -130,12 +130,12 @@ class DaiyouseiHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Daiyousei(Character):
     skills = [Support, Moe]
-    eventhandlers_required = [DaiyouseiHandler]
+    eventhandlers = [DaiyouseiHandler]
     maxlife = 3
 
 
 @register_character_to('kof')
 class DaiyouseiKOF(Character):
     skills = [SupportKOF, Moe]
-    eventhandlers_required = [DaiyouseiHandler, SupportKOFHandler]
+    eventhandlers = [DaiyouseiHandler, SupportKOFHandler]
     maxlife = 3

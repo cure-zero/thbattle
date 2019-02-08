@@ -6,8 +6,8 @@ from typing import Dict, Iterable, List, Set, TYPE_CHECKING, Type
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, GameObject
-from game.base import AbstractPlayer
+from game.autoenv import Game
+from game.base import AbstractPlayer, EventHandler, GameObject
 from utils.misc import partition
 
 # -- typing --
@@ -24,11 +24,11 @@ characters_by_category: Dict[str, Set[Type['Character']]] = defaultdict(set)
 class Character(GameObject):
     # ----- Class Variables -----
     character_classes: Dict[str, Type['Character']] = {}
-    eventhandlers_required: List[Type[EventHandler]] = []
+    eventhandlers: List[Type[EventHandler]] = []
     categories: Iterable[str]
 
     # ----- Instance Variables -----
-    disabled_skills: Dict[str, Set[Type[Skill]]]
+    disabled_skills: Dict[str, Set[Type['Skill']]]
 
     def __init__(self, player: AbstractPlayer):
         self.player = player
@@ -89,7 +89,7 @@ def get_characters(*categories):
     return list(sorted(chars, key=lambda i: i.__name__))
 
 
-def mixin_character(g: Game, player, char_cls: Type[Character]):
+def mixin_character(g: Game, player: AbstractPlayer, char_cls: Type[Character]):
     player.index = g.get_playerid(player)
 
     old = None

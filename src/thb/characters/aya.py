@@ -75,5 +75,5 @@ class UltimateSpeedHandler(EventHandler):
 @register_character_to('common')
 class Aya(Character):
     skills = [UltimateSpeed]
-    eventhandlers_required = [UltimateSpeedHandler]
+    eventhandlers = [UltimateSpeedHandler]
     maxlife = 4

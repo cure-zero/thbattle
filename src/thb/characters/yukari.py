@@ -90,5 +90,5 @@ class SpiritingAwayHandler(EventHandler):
 @register_character_to('common')
 class Yukari(Character):
     skills = [SpiritingAway]
-    eventhandlers_required = [SpiritingAwayHandler]
+    eventhandlers = [SpiritingAwayHandler]
     maxlife = 4

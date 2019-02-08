@@ -149,5 +149,5 @@ class FerryFeeHandler(EventHandler):
 @register_character_to('common')
 class Komachi(Character):
     skills = [Riverside, Returning]
-    eventhandlers_required = [RiversideHandler, ReturningHandler, FerryFeeHandler]
+    eventhandlers = [RiversideHandler, ReturningHandler, FerryFeeHandler]
     maxlife = 4

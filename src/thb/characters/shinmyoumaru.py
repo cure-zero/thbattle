@@ -130,5 +130,5 @@ class VengeOfTsukumogamiHandler(EventHandler):
 @register_character_to('common')
 class Shinmyoumaru(Character):
     skills = [MiracleMallet, VengeOfTsukumogami]
-    eventhandlers_required = [MiracleMalletHandler, VengeOfTsukumogamiHandler]
+    eventhandlers = [MiracleMalletHandler, VengeOfTsukumogamiHandler]
     maxlife = 4

@@ -111,5 +111,5 @@ class MajestyHandler(EventHandler):
 @register_character_to('common')
 class Shikieiki(Character):
     skills = [Trial, Majesty]
-    eventhandlers_required = [TrialHandler, MajestyHandler]
+    eventhandlers = [TrialHandler, MajestyHandler]
     maxlife = 3

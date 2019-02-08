@@ -2,23 +2,23 @@
 
 # -- stdlib --
 from collections import defaultdict
+from enum import IntEnum
 from itertools import cycle
 import logging
 
 # -- third party --
 # -- own --
-from enum import IntEnum
-from game.autoenv import EventHandler, Game, InputTransaction, InterruptActionFlow, list_shuffle
-from game.autoenv import user_input
+from game.autoenv import Game, user_input
+from game.base import EventHandler, InputTransaction, InterruptActionFlow, list_shuffle
 from thb.actions import DistributeCards, GenericAction, PlayerDeath, PlayerTurn, RevealIdentity
-from thb.actions import action_eventhandlers
-from thb.characters.base import Character, mixin_character
+from thb.cards.base import Deck
+from thb.characters.base import mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
 
 
 # -- code --
-log = logging.getLogger('THBattle')
+log = logging.getLogger('THBattleKOF')
 
 
 class DeathHandler(EventHandler):
@@ -102,12 +102,7 @@ class THBattleKOFBootstrap(GenericAction):
     def apply_action(self):
         g = self.game
 
-        from . import cards
-
-        g.pick_history = []
-
-        g.deck = cards.Deck(g, cards.kof_card_definition)
-        g.ehclasses = []
+        g.deck = Deck(g, cards.kof_card_definition)
         g.current_player = None
 
         for i, p in enumerate(g.players):
@@ -201,6 +196,10 @@ class THBattleKOFBootstrap(GenericAction):
 
 class THBattleKOF(Game):
     n_persons  = 2
+    game_ehs = [
+        DeathHandler,
+        KOFCharacterSwitchHandler,
+    ]
     bootstrap  = THBattleKOFBootstrap
 
     def get_opponent(g, p):
@@ -215,15 +214,6 @@ class THBattleKOF(Game):
     def can_leave(g, p):
         return False
 
-    def update_event_handlers(g):
-        game_ehs = [
-            DeathHandler,
-            KOFCharacterSwitchHandler,
-        ]
-        ehclasses = list(action_eventhandlers) + game_ehs
-        ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
-
     def next_character(g, p, choice):
         g.players.reveal(choice)
         cls = choice.char_cls
@@ -233,34 +223,8 @@ class THBattleKOF(Game):
         g.decorate(new)
         g.players.replace(p, new)
 
-        ehs = g.ehclasses
-        ehs.extend(cls.eventhandlers_required)
-        g.update_event_handlers()
+        g.refresh_dispatcher()
 
         g.emit_event('switch_character', (p, new))
 
-        g.pick_history.append([cls, p])
-
         return new
-
-    def decorate(g, p):
-        from .cards import CardList
-        from .characters.baseclasses import Character
-        assert isinstance(p, Character)
-
-        p.cards          = CardList(p, 'cards')       # Cards in hand
-        p.showncards     = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
-        p.equips         = CardList(p, 'equips')      # Equipments
-        p.fatetell       = CardList(p, 'fatetell')    # Cards in the Fatetell Zone
-        p.special        = CardList(p, 'special')     # used on special purpose
-        p.showncardlists = [p.showncards, p.fatetell]
-        p.tags           = defaultdict(int)
-
-    def get_stats(g):
-        to_p = lambda p: p.player if isinstance(p, Character) else p
-        return [{'event': 'pick', 'attributes': {
-            'character': p.__class__.__name__,
-            'gamemode': g.__class__.__name__,
-            'identity': '-',
-            'victory': to_p(p) is g.winners[0].player,
-        }} for p in g.pick_history]

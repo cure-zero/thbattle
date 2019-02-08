@@ -154,5 +154,5 @@ class Nitoryuu(Skill):
 @register_character_to('common')
 class Youmu(Character):
     skills = [Mijincihangzhan, Nitoryuu]
-    eventhandlers_required = [YoumuHandler, NitoryuuWearEquipmentHandler]
+    eventhandlers = [YoumuHandler, NitoryuuWearEquipmentHandler]
     maxlife = 4

@@ -13,7 +13,7 @@ ui_meta = ui_meta_for(thb3v3)
 
 
 @ui_meta
-class THBattle(ModeMeta):
+class THBattle3v3(ModeMeta):
     name = '3v3模式'
     logo = 'thb-modelogo-3v3'
     description = (

@@ -149,5 +149,5 @@ class ShikigamiHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Chen(Character):
     skills = [FlyingSkanda, Shikigami]
-    eventhandlers_required = [FlyingSkandaHandler, ShikigamiHandler]
+    eventhandlers = [FlyingSkandaHandler, ShikigamiHandler]
     maxlife = 4

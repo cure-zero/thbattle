@@ -88,5 +88,5 @@ class CraftsmanHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Nitori(Character):
     skills = [Dismantle, Craftsman]
-    eventhandlers_required = [CraftsmanHandler]
+    eventhandlers = [CraftsmanHandler]
     maxlife = 3

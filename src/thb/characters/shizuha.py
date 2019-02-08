@@ -187,5 +187,5 @@ class Decay(Skill):
 @register_character_to('common')
 class Shizuha(Character):
     skills = [Decay, AutumnWind]
-    eventhandlers_required = [DecayDamageHandler, DecayDrawCardHandler, AutumnWindHandler]
+    eventhandlers = [DecayDamageHandler, DecayDrawCardHandler, AutumnWindHandler]
     maxlife = 3

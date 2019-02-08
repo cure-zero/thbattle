@@ -183,12 +183,12 @@ class DarkNohKOF(BaseDarkNoh):
 @register_character_to('common', '-kof')
 class Kokoro(Character):
     skills = [HopeMask, DarkNoh]
-    eventhandlers_required = [HopeMaskHandler]
+    eventhandlers = [HopeMaskHandler]
     maxlife = 3
 
 
 @register_character_to('kof')
 class KokoroKOF(Character):
     skills = [HopeMaskKOF, DarkNohKOF]
-    eventhandlers_required = [HopeMaskKOFHandler]
+    eventhandlers = [HopeMaskKOFHandler]
     maxlife = 3

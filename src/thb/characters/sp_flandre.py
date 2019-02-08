@@ -141,5 +141,5 @@ class FourOfAKindHandler(EventHandler):
 @register_character_to('common')
 class SpFlandre(Character):
     skills = [DestructionImpulse, FourOfAKind]
-    eventhandlers_required = [DestructionImpulseHandler, FourOfAKindHandler]
+    eventhandlers = [DestructionImpulseHandler, FourOfAKindHandler]
     maxlife = 4

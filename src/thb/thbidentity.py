@@ -10,12 +10,12 @@ import random
 
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, Game, GameEnded, InputTransaction, InterruptActionFlow
-from game.autoenv import get_seed_for, user_input
+from game.autoenv import Game, user_input
+from game.base import EventHandler, GameEnded, InputTransaction, InterruptActionFlow, get_seed_for
 from game.base import sync_primitive
 from thb.actions import ActionStageLaunchCard, AskForCard, DistributeCards, DrawCards, DropCardStage
 from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerTurn, RevealIdentity
-from thb.actions import TryRevive, UserAction, action_eventhandlers, ask_for_action, ttags
+from thb.actions import TryRevive, UserAction, ask_for_action, ttags
 from thb.cards.classes import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, Skill, TreatAs
 from thb.cards.classes import VirtualCard, t_None, t_One
 from thb.characters.base import mixin_character
@@ -29,10 +29,6 @@ from utils.misc import BatchList, classmix
 log = logging.getLogger('THBattleIdentity')
 _game_ehs = {}
 
-
-def game_eh(cls):
-    _game_ehs[cls.__name__] = cls
-    return cls
 
 
 @game_eh
@@ -512,7 +508,15 @@ class THBattleIdentityBootstrap(GenericAction):
 
 class THBattleIdentity(Game):
     n_persons = 8
-    game_ehs = _game_ehs
+    game_ehs = [
+        IdentityRevealHandler,
+        DeathHandler,
+        AssistedAttackHandler,
+        AssistedAttackRangeHandler,
+        AssistedGrazeHandler,
+        AssistedHealHandler,
+        ExtraCardSlotHandler,
+    ]
     bootstrap = THBattleIdentityBootstrap
     params_def = {
         'double_curtain': (False, True),
@@ -524,38 +528,13 @@ class THBattleIdentity(Game):
     def switch_character(g, p, cls):
         # mix char class with player -->
         old = p
-        p, oldcls = mixin_character(p, cls)
+        p, oldcls = mixin_character(g, p, cls)
         g.decorate(p)
         g.players.replace(old, p)
 
-        ehs = g.ehclasses
         assert not oldcls
-        ehs.extend(p.eventhandlers_required)
 
-        g.update_event_handlers()
+        g.refresh_dispatcher()
         g.emit_event('switch_character', (old, p))
 
         return p
-
-    def update_event_handlers(g):
-        ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
-        ehclasses += g.ehclasses
-        g.set_event_handlers(EventHandler.make_list(g, ehclasses))
-
-    def decorate(g, p):
-        from thb.cards.classes import CardList
-        p.cards          = CardList(p, 'cards')       # Cards in hand
-        p.showncards     = CardList(p, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
-        p.equips         = CardList(p, 'equips')      # Equipments
-        p.fatetell       = CardList(p, 'fatetell')    # Cards in the Fatetell Zone
-        p.special        = CardList(p, 'special')     # used on special purpose
-        p.showncardlists = [p.showncards, p.fatetell]    # cardlists should shown to others
-        p.tags           = defaultdict(int)
-
-    def get_stats(g):
-        return [{'event': 'pick', 'attributes': {
-            'character': p.__class__.__name__,
-            'gamemode': g.__class__.__name__,
-            'identity': Identity.TYPE.rlookup(p.identity.type),
-            'victory': p in g.winners,
-        }} for p in g.players]

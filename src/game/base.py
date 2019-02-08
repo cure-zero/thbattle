@@ -132,34 +132,27 @@ class GameViralContext(ViralContext):
 class Game(GameObject, GameViralContext):
     IS_DEBUG = False
 
-    # ----- Class Fields -----
+    # ----- Class Variables -----
     n_persons: int
     npc_players: List[NPC] = []
     params_def: Dict[str, Any] = {}
     bootstrap: Type['BootstrapAction']
+    dispatcher_cls: Type['EventDispatcher']
 
     # ----- Instance Variables -----
     game: 'Game'
-    event_handlers: List['EventHandler']
+    dispatcher: 'EventDispatcher'
+    event_observer: Optional['EventHandler']
     action_stack: List['Action']
     hybrid_stack: List[Union['Action', 'EventHandler']]
     ended: bool
     winners: List[AbstractPlayer]
     random: Random
-    event_observer: Optional['EventHandler']
     _: Dict[Any, dict]
 
-    # ----- Private Variables -----
-    _adhoc_ehs: List['EventHandler']
-    _ehs_cache: Dict[str, List['EventHandler']]
-
     def __init__(self) -> None:
-        self.players = BatchList()
         self.game = self
 
-        self.event_handlers = []
-        self._adhoc_ehs     = []
-        self._ehs_cache     = {}
         self.action_stack   = []
         self.hybrid_stack   = []
         self.ended          = False
@@ -169,101 +162,19 @@ class Game(GameObject, GameViralContext):
 
         self._: Dict[Any, dict] = {}
 
-    def set_event_handlers(self, ehs: List['EventHandler']):
-        self.event_handlers = ehs[:]
-        self._ehs_cache = {}
-        self._adhoc_ehs = []
+        self.refresh_dispatcher()
 
-    def add_adhoc_event_handler(self, eh: 'EventHandler'):
-        self._adhoc_ehs.insert(0, eh)
+    def refresh_dispatcher(self) -> None:
+        self.dispatcher = self.dispatcher_cls(self)
 
-    def remove_adhoc_event_handler(self, eh: 'EventHandler'):
-        try:
-            self._adhoc_ehs.remove(eh)
-        except ValueError:
-            pass
-
-    def players_from(g: 'Game', p: AbstractPlayer):
-        if p is None:
-            id = 0
-        elif p in g.players:
-            id = g.get_playerid(p)
-        else:
-            id = p.index
-
-        n = len(g.players)
-
-        for i in list(range(id, n)) + list(range(id)):
-            yield g.players[i]
-
-    def game_end(self):
-        self.ended = True
-        gevent.sleep(2)
-
-        raise GameEnded
-
-    def _get_relevant_eh(self, tag: str):
-        ehs = self._ehs_cache.get(tag)
-        if ehs is not None:
-            return ehs
-
-        ehs = [
-            eh for eh in self.event_handlers if
-            tag in eh.get_interested()
-        ]
-        self._ehs_cache[tag] = ehs
-
-        return ehs
-
-    def emit_event(self, evt_type: str, data: Any):
-        '''
-        Fire an event, all relevant event handlers will see this,
-        data can be modified.
-        '''
-        random.random() < 0.01 and gevent.sleep(0.00001)  # prevent buggy logic code blocking scheduling
-        if isinstance(data, (list, tuple, str)):
-            s = data
-        else:
-            s = data.__class__.__name__
-        log.debug('emit_event: %s %s' % (evt_type, s))
-
-        if evt_type in ('action_before', 'action_apply', 'action_after'):
-            action_event = True
-            assert isinstance(data, Action)
-        else:
-            action_event = False
-
+    def emit_event(self, evt_type: str, data: Any) -> Any:
         ob = self.event_observer
         if ob:
             data = ob.handle(evt_type, data)
 
-        adhoc = self._adhoc_ehs
-        ehs = self._get_relevant_eh(evt_type)
+        return self.dispatcher.emit(evt_type, data)
 
-        for l in adhoc, ehs:
-            for eh in l:
-                data = self.handle_single_event(eh, evt_type, data)
-                if action_event and data.cancelled:
-                    break
-
-        return data
-
-    def handle_single_event(self, eh, *a, **k):
-        try:
-            self.hybrid_stack.append(eh)
-            data = eh.handle(*a, **k)
-        finally:
-            assert eh is self.hybrid_stack.pop()
-
-        if data is None:
-            raise Exception('EventHandler %s returned None' % eh.__class__.__name__)
-
-        return data
-
-    def process_action(self, action):
-        '''
-        Process an action
-        '''
+    def process_action(self, action: 'Action') -> bool:
         if self.ended:
             return False
 
@@ -331,6 +242,7 @@ class Game(GameObject, GameViralContext):
 
         return rst
 
+    '''
     def get_playerid(self, p):
         return self.players.index(p)
         try:
@@ -345,6 +257,20 @@ class Game(GameObject, GameViralContext):
         except IndexError:
             return None
 
+    def players_from(g: 'Game', p: AbstractPlayer):
+        if p is None:
+            id = 0
+        elif p in g.players:
+            id = g.get_playerid(p)
+        else:
+            id = p.index
+
+        n = len(g.players)
+
+        for i in list(range(id, n)) + list(range(id)):
+            yield g.players[i]
+    '''
+
     def get_synctag(self):
         raise GameError('Abstract')
 
@@ -355,11 +281,11 @@ class ActionShootdown(BaseException, metaclass=GameObjectMeta):
 
 
 class EventHandler(GameObject):
-    interested: List[str]     = []
+    interested: List[str]
     execute_before: List[str] = []
     execute_after: List[str]  = []
 
-    group: Type['EventArbiter']
+    arbiter: Type['EventArbiter']
 
     def __init__(self, g):
         self.game = g
@@ -373,14 +299,14 @@ class EventHandler(GameObject):
         return list(interested)
 
     @staticmethod
-    def make_list(g, eh_classes, fold_group=True):
+    def make_list(g, eh_classes, fold_arbiter=True):
         table = {}
         eh_classes = set(eh_classes)
         arbiters: Any = defaultdict(list)
 
         for cls in eh_classes:
             assert not issubclass(cls, EventArbiter), 'Should not pass arbiters in make_list, %r' % cls
-            grp = cls.group if fold_group else None
+            grp = cls.arbiter if fold_arbiter else None
             if grp is not None:
                 arbiters[grp].append(cls)
                 cls = grp
@@ -389,7 +315,7 @@ class EventHandler(GameObject):
 
         for a, lst in arbiters.items():
             eh = table[a.__name__]
-            eh.set_handlers(EventHandler.make_list(g, lst, fold_group=False))
+            eh.set_handlers(EventHandler.make_list(g, lst, fold_arbiter=False))
 
         allnames = frozenset(table)
 
@@ -456,13 +382,91 @@ class EventArbiter(EventHandler):
 
 
 class EventDispatcher(GameObject):
-    pass
+    game: Game
+    _event_handlers: List[EventHandler]
+    _adhoc_ehs: List[EventHandler]
+    _ehs_cache: Dict[str, List[EventHandler]]
+
+    def __init__(self, g: Game):
+        self.game = g
+
+        self._adhoc_ehs     = []
+        self._ehs_cache     = {}
+        self._event_handlers = self.populate_handlers()
+
+    def add_adhoc(self, eh: EventHandler):
+        self._adhoc_ehs.insert(0, eh)
+
+    def remove_adhoc(self, eh: EventHandler):
+        try:
+            self._adhoc_ehs.remove(eh)
+        except ValueError:
+            pass
+
+    def populate_handlers(self) -> List[EventHandler]:
+        raise Exception('Override this!')
+
+    def emit(self, evt_type: str, data: Any):
+        '''
+        Fire an event, all relevant event handlers will see this,
+        data can be modified.
+        '''
+        random.random() < 0.01 and gevent.sleep(0.00001)  # prevent buggy logic code blocking scheduling
+        if isinstance(data, (list, tuple, str)):
+            s = data
+        else:
+            s = data.__class__.__name__
+        log.debug('emit_event: %s %s' % (evt_type, s))
+
+        if evt_type in ('action_before', 'action_apply', 'action_after'):
+            action_event = True
+            assert isinstance(data, Action)
+        else:
+            action_event = False
+
+        adhoc = self._adhoc_ehs
+        ehs = self._get_relevant_eh(evt_type)
+
+        for l in adhoc, ehs:
+            for eh in l:
+                data = self.handle_single_event(eh, evt_type, data)
+                if action_event and data.cancelled:
+                    break
+
+        return data
+
+    def handle_single_event(self, eh: EventHandler, *a, **k):
+        try:
+            self.game.hybrid_stack.append(eh)
+            data = eh.handle(*a, **k)
+        finally:
+            rst = eh is self.game.hybrid_stack.pop()
+            assert rst
+
+        if data is None:
+            raise Exception('EventHandler %s returned None' % eh.__class__.__name__)
+
+        return data
+
+    def _get_relevant_eh(self, tag: str):
+        ehs = self._ehs_cache.get(tag)
+        if ehs is not None:
+            return ehs
+
+        ehs = [
+            eh for eh in self._event_handlers if
+            tag in eh.get_interested()
+        ]
+        self._ehs_cache[tag] = ehs
+
+        return ehs
 
 
 class Action(GameObject, GameViralContext):
     cancelled = False
     done = False
     invalid = False
+    succeeded: bool
 
     def action_shootdown_exception(self):
         if not self.is_valid():

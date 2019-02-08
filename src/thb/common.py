@@ -3,16 +3,21 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from itertools import cycle
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING, Type
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.autoenv import Action, Game, sync_primitive
-from game.base import GameViralContext, get_seed_for
+from game.autoenv import Game
+from game.base import Action, EventDispatcher, EventHandler, GameViralContext, get_seed_for
+from game.base import sync_primitive
 from utils.misc import partition
 import settings
+
+# -- typing --
+if TYPE_CHECKING:
+    from thb.characters.base import Character
 
 
 # -- code --

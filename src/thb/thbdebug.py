@@ -5,10 +5,10 @@ import logging
 
 # -- third party --
 # -- own --
-from .actions import MaxLifeChange, PlayerRevive, UserAction
-from .cards import Card, DummyCard, Skill, TreatAs, t_One
-from .characters.baseclasses import Character
-from game.autoenv import EventHandler
+from game.base import EventHandler
+from thb.actions import MaxLifeChange, PlayerRevive, UserAction
+from thb.cards.base import Card, DummyCard, Skill, TreatAs, t_One
+from thb.characters.base import Character
 
 
 # -- code --

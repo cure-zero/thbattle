@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import Iterable, List, Optional, TYPE_CHECKING
+from typing import Iterable, List, Optional, Set, TYPE_CHECKING, Type
 import logging
 
 # -- third party --
@@ -11,7 +11,7 @@ import logging
 from game.autoenv import Action, ActionShootdown, EventHandler, EventHandlerGroup, Game
 from game.autoenv import GameException, InputTransaction, sync_primitive, user_input
 from game.base import GameViralContext
-from thb.cards.base import CardList, VirtualCard
+from thb.cards.base import Card, CardList, VirtualCard
 from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check, check_type
@@ -315,11 +315,11 @@ def detach_cards(cards: Iterable[Card], trans=None):
     migrate_cards(cards, MigrateSpecial.DETACHED, trans=trans)
 
 
-action_eventhandlers = set()
+COMMON_EVENT_HANDLERS: Set[Type[EventHandler]] = set()
 
 
 def register_eh(cls):
-    action_eventhandlers.add(cls)
+    COMMON_EVENT_HANDLERS.add(cls)
     return cls
 
 

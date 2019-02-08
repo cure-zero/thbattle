@@ -206,5 +206,5 @@ class ScarletMist(Skill):
 class Remilia(Character):
     skills = [SpearTheGungnir, VampireKiss]
     boss_skills = [ScarletMist]
-    eventhandlers_required = [SpearTheGungnirHandler, VampireKissHandler, ScarletMistHandler]
+    eventhandlers = [SpearTheGungnirHandler, VampireKissHandler, ScarletMistHandler]
     maxlife = 4

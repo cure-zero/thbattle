@@ -81,5 +81,5 @@ class EnvyHandler(EventHandler):
 @register_character_to('common')
 class Parsee(Character):
     skills = [Envy]
-    eventhandlers_required = [EnvyHandler]
+    eventhandlers = [EnvyHandler]
     maxlife = 4

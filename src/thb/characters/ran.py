@@ -236,7 +236,7 @@ class NakedFoxHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Ran(Character):
     skills = [Prophet, ExtremeIntelligence, NakedFox]
-    eventhandlers_required = [
+    eventhandlers = [
         ProphetHandler,
         ExtremeIntelligenceHandler,
         NakedFoxHandler,
@@ -247,7 +247,7 @@ class Ran(Character):
 @register_character_to('kof')
 class RanKOF(Character):
     skills = [Prophet, ExtremeIntelligenceKOF, NakedFox]
-    eventhandlers_required = [
+    eventhandlers = [
         ProphetHandler,
         ExtremeIntelligenceKOFHandler,
         NakedFoxHandler,

@@ -111,7 +111,7 @@ class DrunkenDreamHandler(EventHandler):
 @register_character_to('common')
 class Suika(Character):
     skills = [HeavyDrinker, DrunkenDream]
-    eventhandlers_required = [
+    eventhandlers = [
         HeavyDrinkerHandler,
         DrunkenDreamHandler,
     ]

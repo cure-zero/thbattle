@@ -222,12 +222,12 @@ class Virtue(Skill):
 @register_character_to('common', '-kof')
 class Kanako(Character):
     skills = [Virtue, KanakoFaith]
-    eventhandlers_required = [VirtueHandler]
+    eventhandlers = [VirtueHandler]
     maxlife = 4
 
 
 # @register_character_to('kof')
 class KanakoKOF(Character):
     skills = [KanakoFaithKOF]
-    eventhandlers_required = [KanakoFaithKOFHandler]
+    eventhandlers = [KanakoFaithKOFHandler]
     maxlife = 4

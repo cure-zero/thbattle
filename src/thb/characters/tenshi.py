@@ -124,5 +124,5 @@ class ScarletPerceptionHandler(EventHandler):
 @register_character_to('common')
 class Tenshi(Character):
     skills = [Masochist, ScarletPerception]
-    eventhandlers_required = [MasochistHandler, ScarletPerceptionHandler]
+    eventhandlers = [MasochistHandler, ScarletPerceptionHandler]
     maxlife = 3

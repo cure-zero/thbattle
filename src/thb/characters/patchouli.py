@@ -92,5 +92,5 @@ class LibraryHandler(EventHandler):
 @register_character_to('common')
 class Patchouli(Character):
     skills = [Library, Knowledge]
-    eventhandlers_required = [LibraryHandler, KnowledgeHandler]
+    eventhandlers = [LibraryHandler, KnowledgeHandler]
     maxlife = 3

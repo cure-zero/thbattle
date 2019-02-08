@@ -179,5 +179,5 @@ class ExterminateFadeHandler(EventHandler):
 @register_character_to('common')
 class Flandre(Character):
     skills = [CriticalStrike, Exterminate]
-    eventhandlers_required = [CriticalStrikeHandler, ExterminateHandler]
+    eventhandlers = [CriticalStrikeHandler, ExterminateHandler]
     maxlife = 4

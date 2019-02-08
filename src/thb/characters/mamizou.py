@@ -107,5 +107,5 @@ class MorphingHandler(EventHandler):
 @register_character_to('common', '-kof')
 class Mamizou(Character):
     skills = [Morphing]
-    eventhandlers_required = [MorphingHandler]
+    eventhandlers = [MorphingHandler]
     maxlife = 4
