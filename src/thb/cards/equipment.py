@@ -438,7 +438,7 @@ class RepentanceStick(GenericAction):
             )
 
             if not card:
-                card = random_choose_card(cats)
+                card = random_choose_card(g, cats)
             if card:
                 l.append(card)
                 g.players.exclude(tgt).reveal(card)
@@ -696,7 +696,7 @@ class AyaRoundfan(GenericAction):
         g = self.game
 
         equip = user_input([src], ChoosePeerCardInputlet(self, tgt, ['equips']))
-        equip = equip or random_choose_card([tgt.equips])
+        equip = equip or random_choose_card(g, [tgt.equips])
         g.process_action(DropCards(src, tgt, [equip]))
         self.card = equip
 

@@ -3,9 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import actions, cards
+from thb import actions
 from thb.actions import ttags
+from thb.cards import classes as cards
 from thb.meta.common import G, ui_meta_for
+
 
 # -- code --
 ui_meta = ui_meta_for(cards)

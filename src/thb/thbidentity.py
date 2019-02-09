@@ -10,9 +10,9 @@ import random
 
 # -- third party --
 # -- own --
-from game.autoenv import Game, user_input
-from game.base import EventHandler, GameEnded, InputTransaction, InterruptActionFlow, get_seed_for
-from game.base import sync_primitive
+from game.autoenv import user_input
+from game.base import BootstrapAction, EventHandler, GameEnded, InputTransaction
+from game.base import InterruptActionFlow, get_seed_for, sync_primitive
 from thb.actions import ActionStageLaunchCard, AskForCard, DistributeCards, DrawCards, DropCardStage
 from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.actions import TryRevive, UserAction, ask_for_action, ttags
@@ -23,6 +23,7 @@ from thb.characters.base import mixin_character
 from thb.common import CharChoice, PlayerIdentity, build_choices
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from thb.item import ImperialIdentity
+from thb.mode import THBattle
 from utils.misc import BatchList, classmix
 
 
@@ -343,7 +344,7 @@ class ChooseBossSkillAction(GenericAction):
         return True
 
 
-class THBattleIdentityBootstrap(GenericAction):
+class THBattleIdentityBootstrap(BootstrapAction):
     def __init__(self, params, items):
         self.source = self.target = None
         self.params = params
@@ -381,7 +382,7 @@ class THBattleIdentityBootstrap(GenericAction):
 
         g.random.shuffle(identities)
 
-        if Game.CLIENT_SIDE:
+        if g.CLIENT_SIDE:
             identities = [Identity.TYPE.HIDDEN for _ in identities]
 
         for p, i in imperial_identities + list(zip(pl, identities)):
@@ -444,7 +445,7 @@ class THBattleIdentityBootstrap(GenericAction):
         g.process_action(ChooseBossSkillAction(boss, boss))
 
         # reseat
-        seed = get_seed_for(g.players)
+        seed = get_seed_for(g, g.players)
         random.Random(seed).shuffle(g.players)
         g.emit_event('reseat', None)
 
@@ -496,7 +497,7 @@ class THBattleIdentityBootstrap(GenericAction):
         return True
 
 
-class THBattleIdentity(Game):
+class THBattleIdentity(THBattle):
     n_persons = 8
     game_ehs = [
         IdentityRevealHandler,

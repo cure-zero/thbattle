@@ -17,18 +17,19 @@ U: Callable
 
 
 def user_input(*a, **k):
-    return U(*a, **k)  # noqa
+    return U(*a, **k)
 
 
-def init(place, custom=None):
-    if custom:
-        locals().update(custom)
-    elif place == 'Server':
-        from server.base import Game as G, user_input as U
+def init(place: str):
+    global U
+
+    if place == 'Server':
+        from server.base import Game as ServerGame, user_input as svr_user_input
+        Game.__bases__ = (ServerGame,)
+        U = svr_user_input
     elif place == 'Client':
-        from client.base import Game as G, user_input as U  # noqa
+        from client.base import Game as ClientGame, user_input as cli_user_input
+        Game.__bases__ = (ClientGame,)
+        U = cli_user_input
     else:
         raise Exception('Where am I?')
-
-    Game.__bases__ = (G,)
-    globals().update(locals())

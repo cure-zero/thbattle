@@ -195,7 +195,7 @@ class DollBlastAction(UserAction):
         src, tgt = self.source, self.target
         for c in cl:
             c = user_input([src], ChoosePeerCardInputlet(self, tgt, ('cards', 'showncards', 'equips')))
-            c = c or random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
+            c = c or random_choose_card(g, [tgt.cards, tgt.showncards, tgt.equips])
             if not c: return True
             g.players.reveal(c)
             g.process_action(DollBlastEffect(src, tgt, c, c.track_id in track_ids))

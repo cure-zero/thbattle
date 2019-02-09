@@ -42,7 +42,7 @@ class BakadesuAction(UserAction):
             g.process_action(LaunchCard(tgt, [src], cl[0]))
         else:
             c = user_input([src], ChoosePeerCardInputlet(self, tgt, ('cards', 'showncards', 'equips')))
-            c = c or random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
+            c = c or random_choose_card(g, [tgt.cards, tgt.showncards, tgt.equips])
             c and g.process_action(CirnoDropCards(src, tgt, [c]))
 
         return True
@@ -97,7 +97,7 @@ class PerfectFreezeAction(UserAction):
         src, tgt = self.source, self.target
         g = self.game
         cl = user_choose_cards(self, tgt, ('cards', 'showncards', 'equips'))
-        c = cl[0] if cl else random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
+        c = cl[0] if cl else random_choose_card(g, [tgt.cards, tgt.showncards, tgt.equips])
 
         if c:
             damage = c.resides_in is not tgt.equips

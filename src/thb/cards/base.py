@@ -9,9 +9,9 @@ import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Game
-from game.base import AbstractPlayer, GameError, GameObject, GameViralContext, list_shuffle
+from game.base import GameError, GameObject, GameViralContext, list_shuffle
 from thb.actions import UserAction
+from thb.mode import THBattle
 
 # -- typing --
 if TYPE_CHECKING:
@@ -48,6 +48,9 @@ class Card(GameObject):
     _color = None
     card_classes: Dict[str, Type['PhysicalCard']] = {}
     usage = 'launch'
+
+    associated_action: Optional[Type[UserAction]]
+    category: List[str]
 
     # True means this card's associated cards have already been taken.
     # Only meaningful for virtual cards.
@@ -148,6 +151,9 @@ class Card(GameObject):
     def color(self, val):
         self._color = val
 
+    def target(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
+        raise Exception('Override this')
+
 
 class PhysicalCard(Card):
     def __eq__(self, other):
@@ -162,11 +168,12 @@ class PhysicalCard(Card):
 
 
 class VirtualCard(Card, GameViralContext):
-    sort_index = 0
+    associated_cards: List[Card]
+
     sync_id = 0
     usage = 'none'
 
-    def __init__(self, player):
+    def __init__(self, player: Character):
         self.player           = player
         self.associated_cards = []
         self.resides_in       = player.cards
@@ -278,7 +285,7 @@ class CardList(GameObject, deque):
     SPECIAL = 'special'
     FAITHS = 'faiths'
 
-    def __init__(self, owner: Character, typ: str):
+    def __init__(self, owner: Optional[Character], typ: str):
         self.owner = owner
         self.type = typ
         deque.__init__(self)
@@ -293,15 +300,14 @@ class CardList(GameObject, deque):
 
 
 class Deck(GameObject):
-    def __init__(self, g, card_definition=None):
-        from thb.cards.classes import definition
+    def __init__(self, g: THBattle, card_definition=None):
+        from thb.cards import definition
         self.game = g
         card_definition = card_definition or definition.card_definition
 
         self.cards_record = {}
         self.vcards_record = WeakValueDictionary()
         self.droppedcards = CardList(None, 'droppedcard')
-        self.collected_ppoints = CardList(None, 'collected_ppoints')
         cards = CardList(None, 'deckcard')
         self.cards = cards
         cards.extend(
@@ -340,7 +346,7 @@ class Deck(GameObject):
         vcr = self.vcards_record
         for cid in idlist:
             c = vcr.get(cid, None) or cr.get(cid, None)
-            c and lst.append(c)
+            if c: lst.append(c)
 
         return lst
 
@@ -377,9 +383,7 @@ class Deck(GameObject):
 
 
 class Skill(VirtualCard):
-    associated_action: Optional[Type[UserAction]]
-    associated_cards: List[Card]
-    category: List[str] = ['skill']
+    category = ['skill']
     skill_category: List[str] = []
 
     def __init__(self, player):
@@ -388,9 +392,6 @@ class Skill(VirtualCard):
 
     def check(self):  # override this
         return False
-
-    def target(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
-        raise Exception('Override this')
 
 
 class TreatAs(object):
@@ -421,15 +422,15 @@ class TreatAs(object):
 
 
 # card targets:
-def t_None(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+def t_None(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
     return ([], False)
 
 
-def t_Self(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+def t_Self(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
     return ([src], True)
 
 
-def t_OtherOne(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+def t_OtherOne(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
     tl = [t for t in tl if not t.dead]
     try:
         tl.remove(src)
@@ -438,22 +439,22 @@ def t_OtherOne(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> 
     return (tl[-1:], bool(len(tl)))
 
 
-def t_One(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+def t_One(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
     tl = [t for t in tl if not t.dead]
     return (tl[-1:], bool(len(tl)))
 
 
-def t_All(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+def t_All(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
     return ([t for t in g.players.rotate_to(src)[1:] if not t.dead], True)
 
 
-def t_AllInclusive(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+def t_AllInclusive(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
     pl = g.players.rotate_to(src)
     return ([t for t in pl if not t.dead], True)
 
 
 def t_OtherLessEqThanN(n):
-    def _t_OtherLessEqThanN(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+    def _t_OtherLessEqThanN(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
         tl = [t for t in tl if not t.dead]
         try:
             tl.remove(src)
@@ -463,13 +464,13 @@ def t_OtherLessEqThanN(n):
     return _t_OtherLessEqThanN
 
 
-def t_OneOrNone(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+def t_OneOrNone(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
     tl = [t for t in tl if not t.dead]
     return (tl[-1:], True)
 
 
 def t_OtherN(n):
-    def _t_OtherN(self, g: Game, src: AbstractPlayer, tl: List[AbstractPlayer]) -> Tuple[List[AbstractPlayer], bool]:
+    def _t_OtherN(self, g: THBattle, src: 'Character', tl: List['Character']) -> Tuple[List['Character'], bool]:
         tl = [t for t in tl if not t.dead]
         try:
             tl.remove(src)

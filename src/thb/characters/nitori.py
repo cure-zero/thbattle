@@ -19,7 +19,7 @@ class DismantleAction(UserAction):
 
         g = self.game
         c = user_input([src], ChoosePeerCardInputlet(self, tgt, ('equips', )))
-        c = c or random_choose_card([tgt.equips])
+        c = c or random_choose_card(g, [tgt.equips])
         if not c: return False
 
         g.process_action(Reforge(src, tgt, c))

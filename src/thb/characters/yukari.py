@@ -6,7 +6,7 @@
 from game.autoenv import user_input
 from game.base import EventHandler
 from thb.actions import GenericAction, PlayerTurn, UserAction, migrate_cards, random_choose_card
-from thb.cards.classes import CardList, Skill, t_One
+from thb.cards.base import CardList, Skill, t_One
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChoosePeerCardInputlet
 
@@ -16,11 +16,12 @@ class SpiritingAwayAction(UserAction):
     def apply_action(self):
         tgt = self.target
         src = self.source
+        g = self.game
 
         catnames = ('cards', 'showncards', 'equips', 'fatetell')
         cats = [getattr(tgt, i) for i in catnames]
         card = user_input([src], ChoosePeerCardInputlet(self, tgt, catnames))
-        card = card or random_choose_card(cats)
+        card = card or random_choose_card(g, cats)
         if not card:
             return False
 

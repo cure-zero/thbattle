@@ -34,7 +34,7 @@ class Demolition(InstantSpellCardAction):
         cats = [getattr(tgt, i) for i in catnames]
         card = user_input([src], ChoosePeerCardInputlet(self, tgt, catnames))
         if not card:
-            card = random_choose_card(cats)
+            card = random_choose_card(g, cats)
             if not card:
                 return False
 
@@ -235,7 +235,7 @@ class YukariDimension(InstantSpellCardAction):
         cats = [getattr(tgt, i) for i in catnames]
         card = user_input([src], ChoosePeerCardInputlet(self, tgt, catnames))
         if not card:
-            card = random_choose_card(cats)
+            card = random_choose_card(g, cats)
             if not card:
                 return False
 
@@ -359,7 +359,7 @@ class HarvestEffect(InstantSpellCardAction):
             [tgt],
             ChooseIndividualCardInputlet(self, cards_avail),
             trans=pact.trans,
-        ) or random_choose_card([cards_avail])
+        ) or random_choose_card(g, [cards_avail])
 
         migrate_cards([card], tgt.cards)
 
@@ -462,7 +462,7 @@ class DonationBoxEffect(InstantSpellCardAction):
         cats = [getattr(t, i) for i in catnames]
         cards = user_choose_cards(self, t, catnames)
         if not cards:
-            cards = [random_choose_card(cats)]
+            cards = [random_choose_card(g, cats)]
 
         if cards:
             g.players.exclude(t).reveal(cards)

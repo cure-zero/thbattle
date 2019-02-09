@@ -136,7 +136,7 @@ def build_choices(g, items, candidates, players, num, akaris, shared):
     entities_for_testing = entities[:]
 
     candidates = list(candidates)
-    seed = get_seed_for(g.players)
+    seed = get_seed_for(g, g.players)
     shuffler = random.Random(seed)
     shuffler.shuffle(entities_for_testing)
 

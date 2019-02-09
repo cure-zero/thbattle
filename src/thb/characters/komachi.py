@@ -26,7 +26,7 @@ class RiversideAction(UserAction):
                 self.action = 'drop'
                 catnames = ('cards', 'showncards', 'equips')
                 card = user_input([src], ChoosePeerCardInputlet(self, tgt, catnames))
-                card = card or random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
+                card = card or random_choose_card(g, [tgt.cards, tgt.showncards, tgt.equips])
                 g.players.reveal(card)
                 g.process_action(DropCards(src, tgt, [card]))
             else:
@@ -136,9 +136,10 @@ class FerryFeeHandler(EventHandler):
             dist = LaunchCard.calc_distance(src, FerryFee(src))
             if not dist.get(tgt, 10000) <= 0: return act
             if user_input([src], ChooseOptionInputlet(self, (False, True))):
+                g = self.game
                 catnames = ('cards', 'showncards', 'equips')
                 card = user_input([src], ChoosePeerCardInputlet(self, tgt, catnames))
-                card = card or random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
+                card = card or random_choose_card(g, [tgt.cards, tgt.showncards, tgt.equips])
                 if not card: return act
                 g = self.game
                 g.process_action(FerryFeeEffect(src, tgt, card))

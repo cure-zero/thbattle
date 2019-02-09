@@ -208,7 +208,7 @@ class AskForHeal(AskForCard):
 
     def __init__(self, source, target):
         from thb import cards
-        AskForCard.__init__(self, source, target, cards.HealCard)
+        AskForCard.__init__(self, source, target, cards.definition.HealCard)
 
     def process_card(self, card):
         g = self.game

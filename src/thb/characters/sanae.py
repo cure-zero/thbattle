@@ -67,7 +67,7 @@ class SanaeFaithCollectCardAction(GenericAction):
     def apply_action(self):
         src, tgt = self.source, self.target
         cards = user_choose_cards(self, tgt, ('cards', 'showncards'))
-        c = cards[0] if cards else random_choose_card([tgt.cards, tgt.showncards])
+        c = cards[0] if cards else random_choose_card(g, [tgt.cards, tgt.showncards])
         src.reveal(c)
         migrate_cards([c], src.cards)
 
@@ -86,7 +86,7 @@ class SanaeFaithReturnCardAction(GenericAction):
     def apply_action(self):
         src, tgt = self.source, self.target
         cards = user_choose_cards(self, src, ('cards', 'showncards', 'equips'))
-        c = cards[0] if cards else random_choose_card([src.cards, src.showncards, src.equips])
+        c = cards[0] if cards else random_choose_card(g, [src.cards, src.showncards, src.equips])
         if not c:
             return False
 

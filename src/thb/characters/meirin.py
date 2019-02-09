@@ -59,7 +59,7 @@ class LoongPunchAction(GenericAction):
         g = self.game
         src, tgt = self.source, self.target
         c = user_input([src], ChoosePeerCardInputlet(self, tgt, ('cards', 'showncards')))
-        c = c or random_choose_card([tgt.cards, tgt.showncards])
+        c = c or random_choose_card(g, [tgt.cards, tgt.showncards])
         if not c: return False
         g.players.exclude(tgt).reveal(c)
         g.process_action(DropCards(src, tgt, [c]))

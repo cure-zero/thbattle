@@ -4,7 +4,7 @@
 from collections import deque
 from contextlib import contextmanager
 from functools import wraps
-from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, Type
+from typing import Any, Callable, Dict, Iterable, List, Set, Tuple, Type, TypeVar
 from weakref import WeakSet
 import functools
 import logging
@@ -38,13 +38,16 @@ class ObjectDict(dict):
     def parse(cls, data):
         if isinstance(data, dict):
             return cls({k: cls.parse(v) for k, v in data.items()})
-        elif isinstance(data, (BatchList, list, tuple, set, frozenset)):
+        elif isinstance(data, (list, tuple, set, frozenset)):
             return type(data)([cls.parse(v) for v in data])
 
         return data
 
 
-class BatchList(list):
+T = TypeVar('T')
+
+
+class BatchList(List[T]):
     __slots__ = ()
 
     def __getattribute__(self, name):
@@ -54,38 +57,37 @@ class BatchList(list):
         except AttributeError:
             pass
 
-        return list.__getattribute__(self, '__class__')(
+        return BatchList(
             getattr(i, name) for i in self
         )
 
     def __call__(self, *a, **k):
-        return list.__getattribute__(self, '__class__')(
+        return BatchList(
             f(*a, **k) for f in self
         )
 
-    def exclude(self, *elems):
-        nl = list.__getattribute__(self, '__class__')(self)
-        for e in elems:
-            try:
-                nl.remove(e)
-            except ValueError:
-                pass
+    def exclude(self, elem: T):
+        nl = BatchList(self)
+        try:
+            nl.remove(elem)
+        except ValueError:
+            pass
 
         return nl
 
-    def rotate_to(self, elem):
+    def rotate_to(self, elem: T):
         i = self.index(elem)
         n = len(self)
         return self.__class__((self*2)[i:i+n])
 
-    def replace(self, old, new):
+    def replace(self, old: T, new: T):
         try:
             self[self.index(old)] = new
             return True
         except ValueError:
             return False
 
-    def sibling(self, me, offset=1):
+    def sibling(self, me: T, offset=1):
         i = self.index(me)
         n = len(self)
         return self[(i + offset) % n]

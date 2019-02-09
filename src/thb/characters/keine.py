@@ -19,7 +19,7 @@ class TeachTargetReforgeAction(UserAction):
         g = self.game
         tgt = self.target
         c = user_choose_cards(self, tgt, ('cards', 'showncards', 'equips'))
-        c = c[0] if c else random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
+        c = c[0] if c else random_choose_card(g, [tgt.cards, tgt.showncards, tgt.equips])
         if not c:
             return False
 
@@ -55,7 +55,7 @@ class TeachTargetEffect(GenericAction):
             act = TeachTargetActionStage(tgt)
             g.process_action(act)
             if act.action_count != 1:
-                c = random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
+                c = random_choose_card(g, [tgt.cards, tgt.showncards, tgt.equips])
                 if c:
                     g.players.reveal(c)
                     g.process_action(Reforge(tgt, tgt, c))
@@ -74,7 +74,7 @@ class TeachAction(UserAction):
         ttags(src)['teach_used'] = True
         g.process_action(Reforge(src, src, cl[0]))
         cl = user_choose_cards(self, src, ('cards', 'showncards', 'equips'))
-        c = cl[0] if cl else random_choose_card([src.cards, src.showncards, src.equips])
+        c = cl[0] if cl else random_choose_card(g, [src.cards, src.showncards, src.equips])
         g.process_action(TeachTargetEffect(src, tgt, c))
         return True
 

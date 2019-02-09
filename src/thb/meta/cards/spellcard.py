@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-import random
 import itertools
+import random
 
 # -- third party --
 # -- own --
-from thb import cards
+from thb.cards import classes as cards
 from thb.meta.common import card_desc, ui_meta_for
+
 
 # -- code --
 ui_meta = ui_meta_for(cards)

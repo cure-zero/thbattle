@@ -81,7 +81,7 @@ def card_migration_instructions(g, args):
     if to.owner is g.me and to.type in ('cards', 'showncards'):
         tail += [DUP, UNGRAY, AREA_HAND, MOVE]
     else:
-        if to.type in ('droppedcard', 'detached', 'collected_ppoints'):
+        if to.type in ('droppedcard', 'detached'):
             if isinstance(act, BaseFatetell):
                 if to.type == 'detached':
                     tail += [DUP, DUP, UNGRAY if act.succeeded else GRAY, FATETELL, AREA_DROP, MOVE]

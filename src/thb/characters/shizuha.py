@@ -22,7 +22,7 @@ class AutumnWindEffect(GenericAction):
         catnames = ('cards', 'showncards', 'equips')
         cats = [getattr(tgt, i) for i in catnames]
         card = user_input([src], ChoosePeerCardInputlet(self, tgt, catnames))
-        card = card or random_choose_card(cats)
+        card = card or random_choose_card(g, cats)
         if not card:
             return False
 

@@ -4,6 +4,7 @@
 from collections import OrderedDict
 from copy import copy
 from random import Random
+from typing import List, Optional
 import logging
 
 # -- third party --
@@ -11,7 +12,7 @@ import gevent
 
 # -- own --
 from client.core import Core
-from game.base import AbstractPlayer, GameEnded, InputTransaction, TimeLimitExceeded
+from game.base import AbstractPlayer, GameEnded, InputTransaction, Inputlet, TimeLimitExceeded
 import game.base
 
 
@@ -23,7 +24,7 @@ class ForcedKill(gevent.GreenletExit):
     pass
 
 
-def user_input(players, inputlet, timeout=25, type='single', trans=None):
+def user_input(players: List[AbstractPlayer], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
     '''
     Type can be 'single', 'all' or 'any'
     '''

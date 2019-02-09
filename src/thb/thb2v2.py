@@ -139,7 +139,7 @@ class THBattle2v2Bootstrap(BootstrapAction):
         g.ehclasses = []
 
         if params['random_force']:
-            seed = get_seed_for(g.players)
+            seed = get_seed_for(g, g.players)
             random.Random(seed).shuffle(g.players)
 
         g.draw_extra_card = params['draw_extra_card']
@@ -169,7 +169,7 @@ class THBattle2v2Bootstrap(BootstrapAction):
         from . import characters
         chars = characters.get_characters('common', '2v2')
 
-        seed = get_seed_for(g.players)
+        seed = get_seed_for(g, g.players)
         random.Random(seed).shuffle(chars)
 
         testing = list(settings.TESTING_CHARACTERS)

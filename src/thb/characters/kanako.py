@@ -45,7 +45,7 @@ class KanakoFaithCounteractPart1(UserAction):
         cats = [getattr(tgt, i) for i in catnames]
 
         card = user_input([src], ChoosePeerCardInputlet(self, tgt, catnames))
-        card = card or random_choose_card(cats)
+        card = card or random_choose_card(g, cats)
 
         assert card
         self.card = card
@@ -126,7 +126,7 @@ class VirtueAction(UserAction):
         g.process_action(DrawCards(tgt, 2))
 
         cl = user_choose_cards(self, tgt, ('cards', 'showncards', 'equips'))
-        c = cl[0] if cl else random_choose_card([tgt.cards, tgt.showncards, tgt.equips])
+        c = cl[0] if cl else random_choose_card(g, [tgt.cards, tgt.showncards, tgt.equips])
 
         if not c: return False
 

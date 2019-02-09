@@ -150,7 +150,7 @@ class ChooseIndividualCardInputlet(Inputlet):
 
 
 class ChoosePeerCardInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, target: Character, categories: List[str]):
+    def __init__(self, initiator: GameObject, target: Character, categories: Iterable[str]):
         self.initiator = initiator
         self.target = target
         self.categories = categories

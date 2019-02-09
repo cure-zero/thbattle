@@ -94,7 +94,6 @@ class InterruptActionFlow(GameException):
 class AbstractPlayer(GameObject):
     index = None
     game: 'Game'
-    dead: bool
 
     def reveal(self, obj_list):
         raise GameError('Abstract')
@@ -532,7 +531,7 @@ class SyncPrimitive(GameObject):
         return self.value.__repr__()
 
 
-def sync_primitive(val, to):
+def sync_primitive(val: Union[list, int, str, bool], to: Any):
     if not to:  # sync to nobody
         return val
 
@@ -548,7 +547,7 @@ def sync_primitive(val, to):
         return v.value
 
 
-def get_seed_for(g, p):
+def get_seed_for(g: Game, p: AbstractPlayer):
     from game.autoenv import Game
     if Game.SERVER_SIDE:
         seed = g.random.getrandbits(63)

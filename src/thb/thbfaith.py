@@ -9,13 +9,16 @@ import random
 
 # -- third party --
 # -- own --
-from game.autoenv import Game, user_input
-from game.base import EventHandler, InputTransaction, InterruptActionFlow, get_seed_for
-from thb.actions import DistributeCards, GenericAction, MigrateCardsTransaction, PlayerDeath
-from thb.actions import PlayerTurn, RevealIdentity, action_eventhandlers, migrate_cards
-from thb.characters.base import mixin_character, Character
-from thb.common import PlayerIdentity, build_choices, roll, CharChoice
+from game.autoenv import user_input
+from game.base import BootstrapAction, EventHandler, InputTransaction, InterruptActionFlow
+from game.base import get_seed_for
+from thb.actions import DistributeCards, MigrateCardsTransaction, PlayerDeath, PlayerTurn
+from thb.actions import RevealIdentity, migrate_cards
+from thb.cards.base import Deck
+from thb.characters.base import Character, mixin_character
+from thb.common import CharChoice, PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet, SortCharacterInputlet
+from thb.mode import THBattle
 from utils.misc import BatchList
 
 
@@ -87,32 +90,28 @@ class Identity(PlayerIdentity):
         MORIYA  = 2
 
 
-class THBattleFaithBootstrap(GenericAction):
+class THBattleFaithBootstrap(BootstrapAction):
     def __init__(self, params, items):
         self.source = self.target = None
         self.params = params
         self.items = items
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         g = self.game
         params = self.params
-
-        from thb.cards.classes import Deck
 
         g.picks = []
         g.deck = Deck(g)
 
-        g.ehclasses = list(action_eventhandlers) + list(g.game_ehs.values())
-
         H, M = Identity.TYPE.HAKUREI, Identity.TYPE.MORIYA
         if params['random_seat']:
             # reseat
-            seed = get_seed_for(g.players)
+            seed = get_seed_for(g, g.players)
             random.Random(seed).shuffle(g.players)
             g.emit_event('reseat', None)
 
             L = [[H, H, M, M, H, M], [H, M, H, M, H, M]]
-            rnd = random.Random(get_seed_for(g.players))
+            rnd = random.Random(get_seed_for(g, g.players))
             L = rnd.choice(L) * 2
             s = rnd.randrange(0, 6)
             idlist = L[s:s+6]
@@ -183,7 +182,7 @@ class THBattleFaithBootstrap(GenericAction):
             g.process_action(DistributeCards(p, amount=4))
 
         pl = g.players.rotate_to(first)
-        rst = user_input(pl[1:], ChooseOptionInputlet(DeathHandler(), (False, True)), type='all')
+        rst = user_input(pl[1:], ChooseOptionInputlet(DeathHandler(g), (False, True)), type='all')
 
         for p in pl[1:]:
             rst.get(p) and g.process_action(RedrawCards(p, p))
@@ -203,7 +202,7 @@ class THBattleFaithBootstrap(GenericAction):
         return True
 
 
-class THBattleFaith(Game):
+class THBattleFaith(THBattle):
     n_persons  = 6
     game_ehs   = [DeathHandler]
     bootstrap  = THBattleFaithBootstrap

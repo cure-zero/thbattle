@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import random
 
 # -- third party --
 # -- own --
-from thb import actions, cards
+from thb import actions
 from thb.actions import ttags
-from thb.meta.common import card_desc, ui_meta_for, passive_clickable
-from thb.meta.common import passive_is_action_valid
+from thb.cards import classes as cards
+from thb.meta.common import card_desc, passive_clickable, passive_is_action_valid, ui_meta_for
 from utils.misc import BatchList
 
 

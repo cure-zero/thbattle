@@ -12,7 +12,7 @@ from utils.misc import partition
 
 # -- typing --
 if TYPE_CHECKING:
-    from thb.cards.base import Skill
+    from thb.cards.base import Skill  # noqa: F401
 
 
 # -- code --
@@ -26,18 +26,22 @@ class Character(GameObject):
     character_classes: Dict[str, Type['Character']] = {}
     eventhandlers: List[Type[EventHandler]] = []
     categories: Iterable[str]
+    skills: List[Type['Skill']]
+    maxlife: int
 
     # ----- Instance Variables -----
+    dead: bool
+    life: int
     disabled_skills: Dict[str, Set[Type['Skill']]]
 
     def __init__(self, player: AbstractPlayer):
         self.player = player
         self.disabled_skills = defaultdict(set)
 
-    def get_skills(self, skill):
+    def get_skills(self, skill: Type['Skill']):
         return [s for s in self.skills if issubclass(s, skill)]
 
-    def has_skill(self, skill):
+    def has_skill(self, skill: Type['Skill']):
         if self.dead:
             return False
 
@@ -46,22 +50,19 @@ class Character(GameObject):
 
         return self.get_skills(skill)
 
-    def disable_skill(self, skill: Type[Skill], reason: str):
+    def disable_skill(self, skill: Type['Skill'], reason: str):
         self.disabled_skills[reason].add(skill)
 
-    def reenable_skill(self, reason):
+    def reenable_skill(self, reason: str):
         self.disabled_skills.pop(reason, '')
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<Char: {}>'.format(self.__class__.__name__)
 
-    def __getattr__(self, k):
-        return getattr(self.player, k)
 
-    def __setattr__(self, k, v):
-        GameObject.__setattr__(self, k, v)
-        if not k.startswith('__') and k.endswith('__'):
-            assert not hasattr(self.player, k)
+class StrawMan(Character):
+    def __init__(self):
+        pass
 
 
 def register_character_to(*cats):

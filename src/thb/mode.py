@@ -8,8 +8,9 @@ from typing import List, Type
 # -- own --
 from game.autoenv import Game
 from game.base import EventDispatcher, EventHandler
-from thb.cards.base import CardList
+from thb.cards.base import CardList, Deck
 from thb.characters.base import Character
+from utils.misc import BatchList
 
 
 # -- code --
@@ -29,7 +30,8 @@ class THBEventDispatcher(EventDispatcher):
 class THBattle(Game):
     game: 'THBattle'
     game_ehs: List[Type[EventHandler]]
-    players: List[Character]
+    deck: Deck
+    players: BatchList[Character]
 
     dispatcher_cls = THBEventDispatcher
 

@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import Iterable, List, Optional, Set, TYPE_CHECKING, Type
+from typing import Iterable, List, Optional, Set, Type
 import logging
 
 # -- third party --
@@ -14,6 +14,7 @@ from game.base import GameViralContext, InputTransaction, sync_primitive
 from thb.cards.base import Card, CardList, PhysicalCard, VirtualCard
 from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBattle
 from utils.check import CheckFailed, check, check_type
 from utils.misc import BatchList, group_by
 
@@ -141,7 +142,7 @@ def user_choose_players(initiator, actor, candidates, timeout=None, trans=None):
     return rst[1]  # players
 
 
-def random_choose_card(g: Game, cardlists: List[CardList]):
+def random_choose_card(g: THBattle, cardlists: List[CardList]):
     from itertools import chain
     allcards = list(chain.from_iterable(cardlists))
     if not allcards:
@@ -338,7 +339,8 @@ class GenericAction(THBAction):
 
 
 class UserAction(THBAction):  # card/character skill actions
-    pass
+    target_list: List[Character]
+    associated_card: Card
 
 
 class DeadDropCards(GenericAction):
@@ -347,7 +349,6 @@ class DeadDropCards(GenericAction):
         g = self.game
 
         others = g.players.exclude(tgt)
-        from .actions import DropCards
         lists = [tgt.cards, tgt.showncards, tgt.equips, tgt.fatetell, tgt.special]
         lists.extend(tgt.showncardlists)
         for cl in lists:
@@ -410,7 +411,7 @@ class TryRevive(GenericAction):
             return False
 
         g = self.game
-        from .cards import AskForHeal
+        from thb.cards.basic import AskForHeal
         for p in g.players_from(tgt):
             while True:
                 if p.dead:
@@ -540,12 +541,12 @@ class AskForCard(GenericAction):
         return self.process_card(self.card)
 
     def cond(self, cl):
-        from thb import cards
+        from thb.cards.base import VirtualCard
         t = self.target
         return (
             len(cl) == 1 and
             cl[0].is_card(self.card_cls) and
-            (cl[0].is_card(cards.VirtualCard) or cl[0].resides_in.owner is t)
+            (cl[0].is_card(VirtualCard) or cl[0].resides_in.owner is t)
         )
 
     def process_card(self, card):
@@ -588,7 +589,7 @@ class ActiveDropCards(GenericAction):
         if not all(c.resides_in in (tgt.cards, tgt.showncards) for c in cards):
             return False
 
-        from .cards import Skill
+        from thb.cards.base import Skill
         if any(c.is_card(Skill) for c in cards):
             return False
 
@@ -634,7 +635,11 @@ class DrawCardStage(DrawCards):
 
 
 class LaunchCard(GenericAction):
-    def __init__(self, source, target_list, card, action=None, bypass_check=False):
+    def __init__(self, source: Character,
+                       target_list: List[Character],
+                       card: Card,
+                       action: Optional[UserAction],
+                       bypass_check=False):
         self.force_action = action
         bypass_check = bool(action) or bypass_check
         self.bypass_check = bypass_check
@@ -646,13 +651,13 @@ class LaunchCard(GenericAction):
         self.source, self.target_list, self.card, self.tl_valid = source, tl, card, tl_valid
         self.target = target_list[0] if target_list else source
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         card = self.card
         target_list = self.target_list
         if not card: return False
 
-        action = self.force_action or card.associated_action
-        if not action: return False
+        if not self.force_action or card.associated_action:
+            return False
 
         g = self.game
         src = self.source
@@ -674,13 +679,12 @@ class LaunchCard(GenericAction):
             if not tl:
                 return True
 
-            if isinstance(action, Action):
-                a = action
+            if self.force_action:
+                a = self.force_action
             else:
-                assert issubclass(action, UserAction)
-
                 tgt = tl[0] if tl else src
-                a = action(source=src, target=tgt)
+                assert card.associated_action
+                a = card.associated_action(source=src, target=tgt)
                 a.target_list = tl
 
             a.associated_card = card
@@ -702,13 +706,13 @@ class LaunchCard(GenericAction):
                     migrate_cards([card], g.deck.droppedcards, unwrap=True, is_bh=True)
 
                 else:
-                    from .cards import VirtualCard
+                    from thb.cards.base import VirtualCard
                     for c in VirtualCard.unwrap([card]):
                         if c.detached: c.attach()
 
         return True
 
-    def is_valid(self):
+    def is_valid(self) -> bool:
         if self.bypass_check:
             return True
 
@@ -729,6 +733,8 @@ class LaunchCard(GenericAction):
             return False
 
         cls = card.associated_action
+        if not cls:
+            return False
 
         tl = self.target_list
         target = tl[0] if tl else src
@@ -1171,7 +1177,7 @@ class Pindian(UserAction):
                 if cards:
                     card = cards[0]
                 else:
-                    card = random_choose_card([p.cards, p.showncards])
+                    card = random_choose_card(g, [p.cards, p.showncards])
 
                 pindian_card[p] = card
                 detach_cards([card])
