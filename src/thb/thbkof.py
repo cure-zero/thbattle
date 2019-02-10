@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from collections import defaultdict
 from enum import IntEnum
 from itertools import cycle
 import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Game, user_input
-from game.base import EventHandler, InputTransaction, InterruptActionFlow, list_shuffle
-from thb.actions import DistributeCards, GenericAction, PlayerDeath, PlayerTurn, RevealIdentity
+from game.autoenv import user_input
+from game.base import BootstrapAction, EventHandler, InputTransaction, InterruptActionFlow
+from game.base import list_shuffle
+from thb.actions import DistributeCards, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.cards.base import Deck
 from thb.characters.base import mixin_character
 from thb.common import PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
+from thb.mode import THBattle
 
 
 # -- code --
@@ -93,7 +94,7 @@ class Identity(PlayerIdentity):
         MORIYA  = 2
 
 
-class THBattleKOFBootstrap(GenericAction):
+class THBattleKOFBootstrap(BootstrapAction):
     def __init__(self, params, items):
         self.source = self.target = None
         self.params = params
@@ -194,7 +195,7 @@ class THBattleKOFBootstrap(GenericAction):
                 pass
 
 
-class THBattleKOF(Game):
+class THBattleKOF(THBattle):
     n_persons  = 2
     game_ehs = [
         DeathHandler,

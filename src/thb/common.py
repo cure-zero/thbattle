@@ -36,7 +36,7 @@ class CharChoice(GameViralContext):
 
     def sync(self, data):
         from thb.characters.base import Character
-        self.set(Character.character_classes[data], False)
+        self.set(Character.classes[data], False)
 
     def conceal(self):
         self.char_cls = None
@@ -111,7 +111,7 @@ def build_choices(g, items, candidates, players, num, akaris, shared):
     from thb.characters.base import Character
 
     # ----- testing -----
-    all_characters = Character.character_classes
+    all_characters = Character.classes
     testing = list(all_characters[i] for i in settings.TESTING_CHARACTERS)
     candidates, _ = partition(lambda c: c not in testing, candidates)
 

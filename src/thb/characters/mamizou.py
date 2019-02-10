@@ -47,7 +47,7 @@ class Morphing(TreatAs, Skill):
 
     def get_morph_cls(self):
         params = getattr(self, 'action_params', {})
-        return Card.card_classes.get(params.get('mamizou_morphing'))
+        return PhysicalCard.classes.get(params.get('mamizou_morphing'))
 
     @classmethod
     def list_morph_cards(cls, cl):
@@ -68,7 +68,7 @@ class Morphing(TreatAs, Skill):
             cats.discard('spellcard')
             cats.add('instant_spellcard')
 
-        rst = [c() for c in Card.card_classes.values() if set(c.category) & cats]
+        rst = [c() for c in PhysicalCard.classes.values() if set(c.category) & cats]
 
         def rank(c):
             cat = (set(c.category) & cats).pop()

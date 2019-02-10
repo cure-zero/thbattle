@@ -6,12 +6,12 @@ import random
 
 # -- third party --
 # -- own --
-from thb.cards import classes as cards
+from thb.cards import spellcard
 from thb.meta.common import card_desc, ui_meta_for
 
 
 # -- code --
-ui_meta = ui_meta_for(cards)
+ui_meta = ui_meta_for(spellcard)
 
 
 @ui_meta
@@ -409,9 +409,10 @@ class DollControlCard:
         if n == 1:
             return (False, '请选择被控者的攻击目标')
         elif n == 2:
-            from thb import actions, cards
-            c = cards.AttackCard()
-            lc = actions.LaunchCard(tl[0], [tl[1]], c)
+            from thb.actions import LaunchCard
+            from thb.cards.classes import AttackCard
+            c = AttackCard()
+            lc = LaunchCard(tl[0], [tl[1]], c)
             if not lc.can_fire():
                 return (False, '被控者无法向目标出【弹幕】！')
             return (True, '乖，听话！')

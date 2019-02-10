@@ -2,17 +2,18 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Dict, Iterable, List, Set, TYPE_CHECKING, Type
+from typing import Any, Dict, Iterable, List, Set, TYPE_CHECKING, Type
 
 # -- third party --
 # -- own --
 from game.autoenv import Game
 from game.base import AbstractPlayer, EventHandler, GameObject
+from thb.meta.typing import CharacterMeta
 from utils.misc import partition
 
 # -- typing --
 if TYPE_CHECKING:
-    from thb.cards.base import Skill  # noqa: F401
+    from thb.cards.base import CardList, Skill  # noqa: F401
 
 
 # -- code --
@@ -22,8 +23,10 @@ characters_by_category: Dict[str, Set[Type['Character']]] = defaultdict(set)
 
 
 class Character(GameObject):
+    classes: Dict[str, Type['Character']] = {}
+
     # ----- Class Variables -----
-    character_classes: Dict[str, Type['Character']] = {}
+    ui_meta: CharacterMeta
     eventhandlers: List[Type[EventHandler]] = []
     categories: Iterable[str]
     skills: List[Type['Skill']]
@@ -33,6 +36,12 @@ class Character(GameObject):
     dead: bool
     life: int
     disabled_skills: Dict[str, Set[Type['Skill']]]
+    tags: Dict[str, Any]
+    cards: 'CardList'
+    showncards: 'CardList'
+    equips: 'CardList'
+    fatetell: 'CardList'
+    special: 'CardList'
 
     def __init__(self, player: AbstractPlayer):
         self.player = player
@@ -69,7 +78,7 @@ def register_character_to(*cats):
     sets = [characters_by_category[c] for c in set(cats)]
 
     def register(cls: Type[Character]):
-        Character.character_classes[cls.__name__] = cls
+        Character.classes[cls.__name__] = cls
 
         for s in sets:
             s.add(cls)

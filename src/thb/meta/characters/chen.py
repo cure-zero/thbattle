@@ -3,9 +3,12 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import actions, cards, characters
+from thb import actions, characters
+from thb.cards.classes import AttackCard, DollControlCard, InstantSpellCardAction, RejectCard
 from thb.meta.common import ui_meta_for
+from thb.meta.typing import CharacterMeta
 from utils.misc import BatchList
+
 
 # -- code --
 ui_meta = ui_meta_for(characters.chen)
@@ -39,11 +42,11 @@ class FlyingSkanda:
         c = acards[0]
 
         while True:
-            if c.is_card(cards.AttackCard): break
+            if c.is_card(AttackCard): break
 
-            rst = c.is_card(cards.RejectCard)
-            rst = rst or c.is_card(cards.DollControlCard)
-            rst = (not rst) and issubclass(c.associated_action, cards.InstantSpellCardAction)
+            rst = c.is_card(RejectCard)
+            rst = rst or c.is_card(DollControlCard)
+            rst = (not rst) and issubclass(c.associated_action, InstantSpellCardAction)
             if rst: break
 
             return (False, '请选择一张【弹幕】或者除【人形操控】与【好人卡】之外的非延时符卡！')
@@ -62,7 +65,7 @@ class FlyingSkanda:
         card = act.card.associated_cards[0]
         tl = BatchList(act.target_list)
 
-        if card.is_card(cards.AttackCard):
+        if card.is_card(AttackCard):
             s = '弹幕掺了金坷垃，攻击范围一千八！'
         else:
             s = '符卡掺了金坷垃，一张能顶两张用！'
@@ -119,8 +122,7 @@ class ShikigamiAction:
 
 
 @ui_meta
-class Chen:
-    # Character
+class Chen(CharacterMeta):
     name        = '橙'
     title       = '凶兆的黑喵'
     illustrator = '和茶'

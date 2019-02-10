@@ -192,9 +192,10 @@ class Game(game.base.Game):
         core.events.game_started.emit(g)
         params = core.game.params_of(g)
         items = core.game.items_of(g)
+        players = core.game.users_of(g)
 
         try:
-            g.process_action(g.bootstrap(params, items))
+            g.process_action(g.bootstrap(params, items, players))
         except GameEnded as e:
             g.winners = e.winners
         finally:

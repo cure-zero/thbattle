@@ -3,8 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import cards, characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb import characters
+from thb.cards.base import Card
+from thb.cards.classes import BaseUseGraze
+from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
+
 
 # -- code --
 ui_meta = ui_meta_for(characters.nazrin)
@@ -69,7 +72,7 @@ class Agile:
         except IndexError:
             return False
 
-        if isinstance(act, cards.BaseUseGraze) and (me.cards or me.showncards):
+        if isinstance(act, BaseUseGraze) and (me.cards or me.showncards):
             return True
 
         return False
@@ -83,7 +86,7 @@ class Agile:
             c = cl[0]
             if c.resides_in not in (g.me.cards, g.me.showncards):
                 return (False, '请选择手牌！')
-            if c.suit not in (cards.Card.SPADE, cards.Card.CLUB):
+            if c.suit not in (Card.SPADE, Card.CLUB):
                 return (False, '请选择一张黑色的牌！')
             return (True, '这种三脚猫的弹幕，想要打中我是不可能的啦~')
 
@@ -108,7 +111,7 @@ class AgileKOF:
             c = cl[0]
             if c.resides_in not in (g.me.cards, g.me.showncards):
                 return (False, '请选择手牌！')
-            if c.suit != cards.Card.SPADE:
+            if c.suit != Card.SPADE:
                 return (False, '请选择一张黑桃色手牌牌！')
             return (True, '这种三脚猫的弹幕，想要打中我是不可能的啦~')
 

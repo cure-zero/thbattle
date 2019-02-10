@@ -14,10 +14,6 @@ from utils.events import EventHub
 
 
 # -- code --
-class CorePart(object):
-    core: 'Core'
-
-
 class Options(object):
     def __init__(self, options):
         self.node         = options.get('node', 'localhost')  # Current node name

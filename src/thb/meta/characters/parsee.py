@@ -3,8 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import cards, characters
-from thb.meta.common import ui_meta_for, my_turn
+from thb import characters
+from thb.cards.base import Card
+from thb.cards.classes import DemolitionCard
+from thb.meta.common import my_turn, ui_meta_for
+
 
 # -- code --
 ui_meta = ui_meta_for(characters.parsee)
@@ -45,9 +48,9 @@ class Envy:
             return (False, '请选择一张牌！')
         else:
             c = cl[0]
-            if c.suit not in (cards.Card.SPADE, cards.Card.CLUB):
+            if c.suit not in (Card.SPADE, Card.CLUB):
                 return (False, '请选择一张黑色的牌！')
-            return cards.DemolitionCard.ui_meta.is_action_valid(g, [skill], target_list)
+            return DemolitionCard.ui_meta.is_action_valid(g, [skill], target_list)
 
     def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string

@@ -3,7 +3,9 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import actions, cards, characters
+from thb import actions, characters
+from thb.cards.classes import AskForHeal
+from thb.cards.base import Card
 from thb.meta.common import ui_meta_for, limit1_skill_used
 
 # -- code --
@@ -22,7 +24,7 @@ class FirstAid:
         except IndexError:
             return False
 
-        if isinstance(act, cards.AskForHeal):
+        if isinstance(act, AskForHeal):
             return True
 
         return False
@@ -30,8 +32,7 @@ class FirstAid:
     def is_complete(self, g, cl):
         skill = cl[0]
         acards = skill.associated_cards
-        C = cards.Card
-        if len(acards) != 1 or acards[0].suit not in (C.DIAMOND, C.HEART):
+        if len(acards) != 1 or acards[0].suit not in (Card.DIAMOND, Card.HEART):
             return (False, '请选择一张红色牌！')
 
         return (True, 'k看不到@#@#￥@#￥')

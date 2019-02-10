@@ -3,9 +3,10 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import actions, cards, characters
-from thb.meta.common import build_handcard, ui_meta_for, passive_clickable
-from thb.meta.common import passive_is_action_valid
+from thb import actions, characters
+from thb.cards.classes import AttackCard, GrazeCard
+from thb.meta.common import build_handcard, passive_clickable, passive_is_action_valid, ui_meta_for
+
 
 # -- code --
 ui_meta = ui_meta_for(characters.meirin)
@@ -36,10 +37,10 @@ class Taichi:
             if isinstance(act, actions.ActionStage):
                 return True
 
-            if act.cond([build_handcard(cards.AttackCard)]):
+            if act.cond([build_handcard(AttackCard)]):
                 return True
 
-            if act.cond([build_handcard(cards.GrazeCard)]):
+            if act.cond([build_handcard(GrazeCard)]):
                 return True
 
         except Exception:

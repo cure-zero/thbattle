@@ -162,8 +162,8 @@ class UseAttack(AskForCard):
     card_usage = 'use'
 
     def __init__(self, target):
-        from thb import cards
-        AskForCard.__init__(self, target, target, cards.AttackCard)
+        from thb.cards.definition import AttackCard
+        AskForCard.__init__(self, target, target, AttackCard)
 
     def process_card(self, card):
         g = self.game
@@ -175,8 +175,8 @@ class UseAttack(AskForCard):
 
 class BaseUseGraze(AskForCard):
     def __init__(self, target):
-        from thb import cards
-        AskForCard.__init__(self, target, target, cards.GrazeCard)
+        from thb.cards.definition import GrazeCard
+        AskForCard.__init__(self, target, target, GrazeCard)
 
 
 class UseGraze(BaseUseGraze):
@@ -262,7 +262,7 @@ class WineHandler(EventHandler):
         elif evt_type == 'post_choose_target':
             act, tl = arg = act
 
-            from ..cards import AttackCard
+            from thb.cards.definition import AttackCard
             if act.card.is_card(AttackCard):
                 src = act.source
                 if src.tags['wine']:

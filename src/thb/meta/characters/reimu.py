@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import random
 
 # -- third party --
 # -- own --
-from thb import actions, cards, characters
-from thb.meta.common import card_desc, ui_meta_for, limit1_skill_used, passive_clickable
-from thb.meta.common import passive_is_action_valid
+from thb import actions, characters
+from thb.cards.base import Card
+from thb.cards.classes import ExinwanCard, RejectCard
+from thb.meta.common import card_desc, limit1_skill_used, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta_for
 
 
 # -- code --
@@ -54,7 +55,7 @@ class SpiritualAttack:
 
         if c.resides_in not in (me.cards, me.showncards):
             return (False, '只能使用手牌发动！')
-        elif not c.color == cards.Card.RED:
+        elif not c.color == Card.RED:
             return (False, '请选择红色手牌！')
 
         return (True, '反正这条也看不到，偷个懒~~~')
@@ -66,7 +67,7 @@ class SpiritualAttack:
         return 'thb-cv-reimu_sa'
 
     def effect_string(self, act):
-        return cards.RejectCard.ui_meta.effect_string(act)
+        return RejectCard.ui_meta.effect_string(act)
 
 
 @ui_meta
@@ -129,7 +130,7 @@ class Tribute:
 
     def sound_effect(self, act):
         c = act.card.associated_cards[0]
-        if c.is_card(cards.ExinwanCard):
+        if c.is_card(ExinwanCard):
             return 'thb-cv-reimu_tribute_exinwan'
         else:
             return random.choice([

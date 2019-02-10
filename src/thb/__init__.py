@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from collections import OrderedDict
 from typing import Dict, Type
 
 # -- third party --
 # -- own --
 from game.base import Game
 from thb.thb2v2 import THBattle2v2
-from thb.thb3v3 import THBattle
+from thb.thb3v3 import THBattle3v3
 from thb.thbfaith import THBattleFaith
 from thb.thbidentity import THBattleIdentity
 from thb.thbkof import THBattleKOF
@@ -18,9 +17,9 @@ from thb.thbnewbie import THBattleNewbie
 # -- code --
 import thb.item  # noqa, init it
 
-modes: Dict[str, Type[Game]] = OrderedDict()
+modes: Dict[str, Type[Game]] = {}
 modelst = [
-    THBattle,
+    THBattle3v3,
     THBattleKOF,
     THBattleIdentity,
     THBattleFaith,
@@ -31,7 +30,7 @@ modelst = [
 for g in modelst:
     modes[g.__name__] = g
 
-del modelst, g, OrderedDict
+del modelst, g
 
 modes_kedama = {
     'THBattleNewbie',

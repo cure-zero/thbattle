@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import List
+from typing import Dict, List
 import logging
 
 # -- third party --
@@ -9,6 +9,7 @@ import gevent
 
 # -- own --
 from client.base import ForcedKill, Game as ClientGame, Someone, Theone
+from client.core import Core
 from game.base import GameData
 from utils.events import EventHub
 from utils.misc import BatchList
@@ -20,11 +21,12 @@ STOP = EventHub.STOP_PROPAGATION
 
 
 class Game(object):
-    def __init__(self, core):
+    def __init__(self, core: Core):
         self.core = core
         core.events.server_command += self.handle_server_command
+        core.events.game_started += self.handle_game_started
 
-        self.games = {}
+        self.games: Dict[int, ClientGame] = {}
 
         self._dispatch = {
             'room_users': self._room_users,
@@ -43,7 +45,7 @@ class Game(object):
             return STOP
         return ev
 
-    def handle_room_users(self, args):
+    def _room_users(self, args):
         core = self.core
         gid, pl = args
 

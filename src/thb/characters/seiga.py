@@ -54,8 +54,6 @@ class HeterodoxyAction(UserAction):
         tgts = self.target_list[1:]
 
         g.players.reveal(card)
-        # card.move_to(victim.cards)  # HACK: Silently, no events
-        # migrate_cards([self.associated_card], victim.cards, unwrap=migrate_cards.SINGLE_LAYER)
 
         if card.is_card(AttackCard):
             src.tags['vitality'] -= 1

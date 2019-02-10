@@ -10,8 +10,9 @@ from thb.actions import DropCards, FatetellAction, FatetellStage, FinalizeStage,
 from thb.actions import GenericAction, LaunchCard, MaxLifeChange, MigrateCardsTransaction, Reforge
 from thb.actions import UserAction, VitalityLimitExceeded, detach_cards, migrate_cards
 from thb.actions import random_choose_card, register_eh, ttags, user_choose_cards
-from thb.cards.base import Card, Skill, TreatAs, VirtualCard, t_None, t_OtherLessEqThanN, t_OtherOne
 from thb.cards import basic, spellcard
+from thb.cards.base import Card, PhysicalCard, Skill, TreatAs, VirtualCard, t_None
+from thb.cards.base import t_OtherLessEqThanN, t_OtherOne
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check
 from utils.misc import classmix
@@ -98,7 +99,7 @@ class ShieldSkill(Skill):
 
 
 class OpticalCloakSkill(TreatAs, ShieldSkill):  # just a tag
-    treat_as = Card.card_classes['GrazeCard']
+    treat_as = PhysicalCard.classes['GrazeCard']
     skill_category = ['equip', 'passive']
 
     def check(self):
@@ -270,15 +271,17 @@ class RoukankenEffectHandler(EventHandler):
         'FreakingPowerHandler',
     ]
 
-    def handle(self, evt_type, act):
+    @classmethod
+    def handle(cls, evt_type, act):
         if evt_type == 'action_before' and isinstance(act, basic.BaseAttack):
             if act.cancelled:
                 return act
 
-            if hasattr(act, 'roukanken_tag'):
+            if act._[cls]:
                 return act
 
-            act.roukanken_tag = True
+            act._[cls] = 'roukanken-processed'
+
             source = act.source
             if source.has_skill(RoukankenSkill):
                 act = Roukanken(act)
@@ -361,7 +364,7 @@ class GungnirSkill(TreatAs, WeaponSkill):
     target = t_OtherOne
     skill_category = ['equip', 'active']
     range = 3
-    treat_as = Card.card_classes['AttackCard']  # arghhhhh, nasty circular references!
+    treat_as = PhysicalCard.classes['AttackCard']  # arghhhhh, nasty circular references!
 
     def check(self):
         cl = self.associated_cards
@@ -584,7 +587,7 @@ class UmbrellaHandler(EventHandler):
 
 
 class MaidenCostume(TreatAs, ShieldSkill):
-    treat_as = Card.card_classes['RejectCard']
+    treat_as = PhysicalCard.classes['RejectCard']
     skill_category = ['equip', 'passive']
 
     def check(self):
@@ -1045,14 +1048,12 @@ class IceWingHandler(EventHandler):
 class GrimoireSkill(TreatAs, WeaponSkill):
     skill_category = ['equip', 'active']
     range = 1
-    from .base import Card
     lookup_tbl = {
-        Card.SPADE: Card.card_classes['DemonParadeCard'],  # again...
-        Card.HEART: Card.card_classes['FeastCard'],
-        Card.CLUB: Card.card_classes['MapCannonCard'],
-        Card.DIAMOND: Card.card_classes['HarvestCard'],
+        Card.SPADE: PhysicalCard.classes['DemonParadeCard'],  # again...
+        Card.HEART: PhysicalCard.classes['FeastCard'],
+        Card.CLUB: PhysicalCard.classes['MapCannonCard'],
+        Card.DIAMOND: PhysicalCard.classes['HarvestCard'],
     }
-    del Card
 
     @property
     def treat_as(self):
@@ -1106,7 +1107,6 @@ class SinsackHatAction(FatetellAction):
         self.hat_card = hat_card
         self.fatetell_target = target
 
-        from ..cards import Card
         self.fatetell_cond = lambda c: c.suit == Card.SPADE and 1 <= c.number <= 8
 
     def fatetell_action(self, ft):

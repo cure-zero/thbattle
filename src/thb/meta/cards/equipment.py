@@ -7,13 +7,13 @@ import random
 # -- own --
 from thb import actions
 from thb.actions import ttags
-from thb.cards import classes as cards
+from thb.cards import definition, equipment
 from thb.meta.common import card_desc, passive_clickable, passive_is_action_valid, ui_meta_for
 from utils.misc import BatchList
 
 
 # -- code --
-ui_meta = ui_meta_for(cards)
+ui_meta = ui_meta_for(equipment)
 
 
 def equip_iav(self, g, cl, target_list):
@@ -76,7 +76,7 @@ class OpticalCloakSkill:
         return 'thb-cv-card_opticalcloak'
 
     def effect_string(self, act):
-        return cards.GrazeCard.ui_meta.effect_string(act)
+        return definition.GrazeCard.ui_meta.effect_string(act)
 
 
 @ui_meta
@@ -323,7 +323,7 @@ class GungnirSkill:
     def clickable(self, g):
         try:
             act = g.hybrid_stack[-1]
-            if act.cond([cards.GungnirSkill(g.me)]):
+            if act.cond([equipment.GungnirSkill(g.me)]):
                 return True
 
         except (IndexError, AttributeError):
@@ -334,7 +334,7 @@ class GungnirSkill:
     def is_complete(self, g, cl):
         skill = cl[0]
         me = g.me
-        assert skill.is_card(cards.GungnirSkill)
+        assert skill.is_card(equipment.GungnirSkill)
         acards = skill.associated_cards
         if len(acards) != 2:
             return (False, '请选择2张手牌！')
@@ -344,12 +344,12 @@ class GungnirSkill:
 
     def is_action_valid(self, g, cl, target_list, is_complete=is_complete):
         skill = cl[0]
-        assert skill.is_card(cards.GungnirSkill)
+        assert skill.is_card(equipment.GungnirSkill)
         rst, reason = is_complete(g, cl)
         if not rst:
             return (rst, reason)
         else:
-            return cards.AttackCard.ui_meta.is_action_valid(g, [skill], target_list)
+            return definition.AttackCard.ui_meta.is_action_valid(g, [skill], target_list)
 
     def effect_string(self, act):
         # for LaunchCard.effect_string
@@ -362,7 +362,7 @@ class GungnirSkill:
         return s
 
     def sound_effect(self, act):
-        return cards.AttackCard.ui_meta.sound_effect(act)
+        return definition.AttackCard.ui_meta.sound_effect(act)
 
 
 @ui_meta
@@ -404,7 +404,7 @@ class ScarletRhapsodySkill:
 
     def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
-        assert skill.is_card(cards.ScarletRhapsodySkill)
+        assert skill.is_card(equipment.ScarletRhapsodySkill)
         if not skill.check():
             return (False, '请选择你的最后一张【弹幕】！')
         else:
@@ -1111,7 +1111,7 @@ class GrimoireSkill:
                 if me.tags['vitality'] > 0:
                     return True
 
-                if me.has_skill(cards.ElementalReactorSkill):
+                if me.has_skill(equipment.ElementalReactorSkill):
                     return True
 
         except IndexError:
@@ -1121,7 +1121,7 @@ class GrimoireSkill:
 
     def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
-        assert skill.is_card(cards.GrimoireSkill)
+        assert skill.is_card(equipment.GrimoireSkill)
         acards = skill.associated_cards
         if not (len(acards)) == 1:
             return (False, '请选择一张牌')

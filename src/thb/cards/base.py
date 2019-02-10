@@ -46,7 +46,6 @@ class Card(GameObject):
     }
 
     _color = None
-    card_classes: Dict[str, Type['PhysicalCard']] = {}
     usage = 'launch'
 
     associated_action: Optional[Type[UserAction]]
@@ -90,7 +89,7 @@ class Card(GameObject):
             raise GameError('Card: out of sync')
 
         clsname = data['type']
-        cls = Card.card_classes.get(clsname)
+        cls = PhysicalCard.classes.get(clsname)
 
         if not cls:
             raise GameError('Card: unknown card class')
@@ -156,6 +155,8 @@ class Card(GameObject):
 
 
 class PhysicalCard(Card):
+    classes: Dict[str, Type['PhysicalCard']] = {}
+
     def __eq__(self, other):
         if not isinstance(other, Card): return False
         return self.sync_id == other.sync_id
@@ -283,7 +284,6 @@ class CardList(GameObject, deque):
     EQUIPS = 'equips'
     FATETELL = 'fatetell'
     SPECIAL = 'special'
-    FAITHS = 'faiths'
 
     def __init__(self, owner: Optional[Character], typ: str):
         self.owner = owner

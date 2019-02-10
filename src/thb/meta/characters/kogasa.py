@@ -3,8 +3,9 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import actions, cards, characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb import actions, characters
+from thb.cards.base import Card, VirtualCard
+from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
 
 # -- code --
 ui_meta = ui_meta_for(characters.kogasa)
@@ -80,7 +81,7 @@ class Surprise:
             return (False, '请选择一张手牌！')
 
         c, = cl
-        if c.is_card(cards.VirtualCard) or c.resides_in.type not in ('cards', 'showncards'):
+        if c.is_card(VirtualCard) or c.resides_in.type not in ('cards', 'showncards'):
             return (False, '请选择一张手牌！')
 
         # return (True, u'(´・ω・`)')
@@ -105,18 +106,18 @@ class Surprise:
 class SurpriseAction:
     # choose_option
     choose_option_buttons = (
-        ('黑桃', cards.Card.SPADE),
-        ('红桃', cards.Card.HEART),
-        ('草花', cards.Card.CLUB),
-        ('方片', cards.Card.DIAMOND),
+        ('黑桃', Card.SPADE),
+        ('红桃', Card.HEART),
+        ('草花', Card.CLUB),
+        ('方片', Card.DIAMOND),
     )
 
     # choose_option
     choose_option_buttons = (
-        ('♠', cards.Card.SPADE),
-        ('♥', cards.Card.HEART),
-        ('♣', cards.Card.CLUB),
-        ('♦', cards.Card.DIAMOND),
+        ('♠', Card.SPADE),
+        ('♥', Card.HEART),
+        ('♣', Card.CLUB),
+        ('♦', Card.DIAMOND),
     )
 
     choose_option_prompt = '请选择一个花色…'

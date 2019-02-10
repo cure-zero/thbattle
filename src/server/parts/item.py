@@ -2,24 +2,24 @@
 
 # -- stdlib --
 from collections import defaultdict
+from typing import Dict, List, Tuple
 import logging
-import sys
 
 # -- third party --
 # -- own --
 from game.base import GameItem
-from server.core import Core
 from server.base import Game
+from server.core import Core
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BusinessException
 
 
 # -- code --
-log = logging.getLogger('server.parts.items')
+log = logging.getLogger('server.parts.item')
 
 
-class Items(object):
+class Item(object):
     def __init__(self, core: Core):
         self.core = core
         core.events.game_created += self.handle_game_created
@@ -59,10 +59,10 @@ class Items(object):
         }
         return g
 
-    def handle_game_left(self, ev: T):
+    def handle_game_left(self, ev: Tuple[Game, Client]):
         g, u = ev
         core = self.core
-        if not g.greenlet and not g.ended:
+        if not core.room.is_started(g) and not g.ended:
             g._[self]['items'].pop(core.auth.uid_of(u), None)
 
         return ev
@@ -77,7 +77,8 @@ class Items(object):
         try:
             i = GameItem.from_sku(sku)
             i.should_usable(g, u)
-            g._[self]['items'].append(sku)
+            uid = core.auth.uid_of(u)
+            g._[self]['items'][uid].append(i)
             u.write(['info', 'use_item_success'])
         except BusinessException as e:
             uid = core.auth.uid_of(u)
@@ -85,3 +86,6 @@ class Items(object):
             u.write(['error', e.snake_case])
 
     # ----- Methods ------
+    # ----- Public Methods -----
+    def items_of(self, g: Game) -> Dict[int, List[GameItem]]:
+        return g._[self]['items']

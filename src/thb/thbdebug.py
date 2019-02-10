@@ -36,7 +36,7 @@ class DebugUseCard(TreatAs, Skill):
     def get_card_cls(self):
         params = getattr(self, 'action_params', {})
         print(params)
-        return Card.card_classes.get(params.get('debug_card'))
+        return PhysicalCard.classes.get(params.get('debug_card'))
 
 
 class DebugDecMaxLife(Skill):

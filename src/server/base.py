@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict
 from copy import copy
-from typing import Any, Callable, List, Optional
+from typing import Any, Callable, Dict, List, Optional
 import logging
 
 # -- third party --
@@ -18,7 +18,6 @@ from game.base import AbstractPlayer, GameEnded, GameViralContext, InputTransact
 from game.base import TimeLimitExceeded
 from server.core import Core
 from utils.misc import log_failure
-from utils.stats import stats
 import game.base
 
 
@@ -65,9 +64,9 @@ def user_input(players: List[AbstractPlayer], inputlet: Inputlet, timeout=25, ty
 
     timeout = max(0, timeout)
 
+    inputlet.timeout = timeout
     g = trans.game
 
-    inputlet.timeout = timeout
     players = list(players)
 
     t = {'single': '', 'all': '&', 'any': '|'}[type]
@@ -201,7 +200,6 @@ class Game(game.base.Game):
     def __init__(self, core: Core):
         game.base.Game.__init__(self)
         self.core = core
-        self.greenlet = None
 
     @log_failure(log)
     def run(g) -> None:
@@ -212,12 +210,18 @@ class Game(game.base.Game):
         core.events.game_started.emit(g)
 
         params = core.game.params_of(g)
-        items = core.item.items_of(g)
-        m = {core.auth.uid_of(p.client) for p in g.players}
-        items = {m[k]: v for k, v in items.items()}
+        users = core.room.users_of(g)
+        players = core.game.build_players(g, users)
+
+        m: Dict[int, AbstractPlayer] = {
+            core.auth.uid_of(p.client): p
+            for p in players if isinstance(p, Player)
+        }
+
+        items = {m[k]: v for k, v in core.item.items_of(g).items()}
 
         try:
-            g.process_action(g.bootstrap(params, items))
+            g.process_action(g.bootstrap(params, items, players))
         except GameEnded as e:
             g.winners = e.winners
         except Exception:
@@ -226,9 +230,6 @@ class Game(game.base.Game):
         finally:
             g.ended = True
             core.events.game_ended.emit(g)
-
-        # XXX stats
-        stats(*g.get_stats())
 
     def __repr__(self):
         try:

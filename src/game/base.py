@@ -576,6 +576,8 @@ class Inputlet(GameObject):
             in game logic code.
     '''
     initiator: GameObject
+    timeout: int
+    actor: AbstractPlayer
 
     @classmethod
     def tag(cls):

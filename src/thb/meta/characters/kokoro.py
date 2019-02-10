@@ -3,9 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import cards, characters
-from thb.meta.common import card_desc, ui_meta_for, limit1_skill_used, my_turn
-from thb.meta.common import passive_clickable, passive_is_action_valid
+from thb import characters
+from thb.cards.base import Card, Skill
+from thb.meta.common import card_desc, limit1_skill_used, my_turn, passive_clickable
+from thb.meta.common import passive_is_action_valid, ui_meta_for
+
 
 # -- code --
 ui_meta = ui_meta_for(characters.kokoro)
@@ -101,11 +103,11 @@ class BaseDarkNoh:
     def is_action_valid(self, g, cl, target_list):
         skill = cl[0]
         cl = skill.associated_cards
-        if len(cl) != 1 or cl[0].suit not in (cards.Card.SPADE, cards.Card.CLUB):
+        if len(cl) != 1 or cl[0].suit not in (Card.SPADE, Card.CLUB):
             return (False, '请选择一张黑色的牌！')
 
         c = cl[0]
-        if c.is_card(cards.Skill):
+        if c.is_card(Skill):
             return (False, '你不能像这样组合技能')
 
         return (True, '发动暗黑能乐')

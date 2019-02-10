@@ -9,6 +9,7 @@ from thb.actions import ActionStage, Damage, DrawCardStage, DrawCards, DropCards
 from thb.actions import ForEach, LaunchCard, PlayerTurn, UserAction, ask_for_action, detach_cards
 from thb.actions import migrate_cards, random_choose_card, register_eh, user_choose_cards
 from thb.cards import basic
+from thb.cards.base import Card
 from thb.inputlets import ChooseIndividualCardInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check
 from utils.misc import BatchList, flatten
@@ -115,10 +116,10 @@ class RejectHandler(EventHandler):
         return act
 
     def cond(self, cardlist):
-        from thb import cards
+        from thb.cards.definition import RejectCard
         try:
             check(len(cardlist) == 1)
-            check(cardlist[0].is_card(cards.RejectCard))
+            check(cardlist[0].is_card(RejectCard))
             return True
         except CheckFailed:
             return False
@@ -155,7 +156,7 @@ class SealingArray(DelayedSpellCardAction, FatetellAction):
         self.target = target
         self.fatetell_target = target
 
-        from ..cards import Card
+        from thb.cards.base import Card
         self.fatetell_cond = lambda card: card.suit != Card.HEART
 
     def fatetell_action(self, ft):
@@ -197,7 +198,7 @@ class Sinsack(DelayedSpellCardAction, FatetellAction):
         self.target = target
         self.fatetell_target = target
 
-        from ..cards import Card
+        from thb.cards.base import Card
         self.fatetell_cond = lambda c: c.suit == Card.SPADE and 1 <= c.number <= 8
 
     def fatetell_action(self, ft):
@@ -230,6 +231,7 @@ class YukariDimension(InstantSpellCardAction):
     def apply_action(self):
         src = self.source
         tgt = self.target
+        g = self.game
 
         catnames = ('cards', 'showncards', 'equips', 'fatetell')
         cats = [getattr(tgt, i) for i in catnames]
@@ -349,6 +351,7 @@ class Feast(ForEach):
 class HarvestEffect(InstantSpellCardAction):
     # 五谷丰登 效果
     def apply_action(self):
+        g = self.game
         pact = ForEach.get_actual_action(self)
         cards = pact.cards
         cards_avail = [c for c in cards if c.detached]
@@ -505,7 +508,6 @@ class FrozenFrog(DelayedSpellCardAction, FatetellAction):
         self.target = target
         self.fatetell_target = target
 
-        from ..cards import Card
         self.fatetell_cond = lambda c: c.suit != Card.SPADE
 
     def fatetell_action(self, ft):

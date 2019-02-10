@@ -3,7 +3,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from .common import ModeMeta
+from thb.meta.typing import ModeMeta
 from thb import thbkof
 from thb.meta.common import ui_meta_for
 

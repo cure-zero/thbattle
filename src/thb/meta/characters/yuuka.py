@@ -3,9 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import cards, characters
-from thb.meta.common import build_handcard, ui_meta_for, my_turn, passive_clickable
-from thb.meta.common import passive_is_action_valid
+from thb import characters
+from thb.cards.classes import AttackCard
+from thb.meta.common import build_handcard, my_turn, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta_for
+
 
 # -- code --
 ui_meta = ui_meta_for(characters.yuuka)
@@ -27,7 +29,7 @@ class ReversedScales:
 
         try:
             act = g.action_stack[-1]
-            return act.cond([build_handcard(cards.AttackCard)])
+            return act.cond([build_handcard(AttackCard)])
         except Exception:
             pass
 
@@ -47,7 +49,7 @@ class ReversedScales:
         if not rst:
             return (rst, reason)
         else:
-            return cards.AttackCard.ui_meta.is_action_valid(g, [skill], target_list)
+            return AttackCard.ui_meta.is_action_valid(g, [skill], target_list)
 
     def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string

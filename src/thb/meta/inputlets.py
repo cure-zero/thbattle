@@ -6,7 +6,8 @@ import logging
 
 # -- third party --
 # -- own --
-from thb import actions as thbactions, cards as thbcards, inputlets
+from thb import actions, inputlets
+from thb.cards.base import Skill
 from thb.meta.common import ui_meta_for
 
 # -- code --
@@ -36,7 +37,7 @@ class ActionDisplayResult(Exception):
 
 def walk_wrapped(g, cl, check_is_complete):
     for c in cl:
-        if not isinstance(c, thbcards.Skill):
+        if not isinstance(c, Skill):
             continue
 
         if check_is_complete:
@@ -70,7 +71,7 @@ def pasv_handle_card_selection(g, ilet, cards):
 
         from thb.cards.classes import Skill
 
-        if cards[0].is_card(Skill) and not thbactions.skill_check(cards[0]):
+        if cards[0].is_card(Skill) and not actions.skill_check(cards[0]):
             raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])
 
     c = ilet.initiator.cond(cards)
@@ -129,7 +130,6 @@ def actv_handle_target_selection(g, stage, card, players):
     target_list, tl_valid = card.target(g, g.me, players)
     if target_list is not None:
         selected = target_list[:]
-        # if card.target in (thbcards.t_One, thbcards.t_OtherOne):
         if card.target.__name__ in ('t_One', 't_OtherOne'):
             for p in g.players:
                 act = stage.launch_card_cls(g.me, [p], card)
@@ -192,7 +192,7 @@ class ActionInputlet:
         if skills:
             if any(not g.me.has_skill(s) for s in skills):
                 raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])
-            cards = [thbactions.skill_wrap(g.me, skills, rawcards, params)]
+            cards = [actions.skill_wrap(g.me, skills, rawcards, params)]
             usage = cards[0].usage if usage == 'launch' else usage
         else:
             cards = rawcards
@@ -234,7 +234,7 @@ class ActionInputlet:
         if skills:
             if any(not g.me.has_skill(s) for s in skills):
                 raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])
-            cards = [thbactions.skill_wrap(g.me, skills, rawcards, params)]
+            cards = [actions.skill_wrap(g.me, skills, rawcards, params)]
             usage = cards[0].usage if usage == 'launch' else usage
         else:
             cards = rawcards

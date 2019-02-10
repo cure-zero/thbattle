@@ -5,9 +5,10 @@ import random
 
 # -- third party --
 # -- own --
-from thb import actions, cards, characters
+from thb import actions, characters
 from thb.actions import ttags
-from thb.meta.common import build_handcard, ui_meta_for, my_turn
+from thb.cards.classes import AttackCard, GrazeCard
+from thb.meta.common import build_handcard, my_turn, ui_meta_for
 
 
 # -- code --
@@ -90,14 +91,14 @@ class Craftsman:
 
     def sound_effect(self, act):
         if isinstance(act, actions.LaunchCard):
-            if act.card.is_card(cards.AttackCard):
+            if act.card.is_card(AttackCard):
                 l = ['1', '2']
             else:
                 l = ['_graze']
 
         elif isinstance(act, actions.AskForCard):
-            atk = act.cond([build_handcard(cards.AttackCard, act.target)])
-            graze = act.cond([build_handcard(cards.GrazeCard, act.target)])
+            atk = act.cond([build_handcard(AttackCard, act.target)])
+            graze = act.cond([build_handcard(GrazeCard, act.target)])
             if atk and not graze:
                 l = ['1', '2']
             else:

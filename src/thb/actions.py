@@ -142,7 +142,7 @@ def user_choose_players(initiator, actor, candidates, timeout=None, trans=None):
     return rst[1]  # players
 
 
-def random_choose_card(g: THBattle, cardlists: List[CardList]):
+def random_choose_card(g: THBattle, cardlists: Iterable[Iterable]):
     from itertools import chain
     allcards = list(chain.from_iterable(cardlists))
     if not allcards:
@@ -638,7 +638,7 @@ class LaunchCard(GenericAction):
     def __init__(self, source: Character,
                        target_list: List[Character],
                        card: Card,
-                       action: Optional[UserAction],
+                       action: Optional[UserAction]=None,
                        bypass_check=False):
         self.force_action = action
         bypass_check = bool(action) or bypass_check

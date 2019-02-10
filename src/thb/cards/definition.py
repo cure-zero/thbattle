@@ -12,7 +12,7 @@ def physical_card(cls):
     assert issubclass(cls, PhysicalCard)
     for a in ('associated_action', 'target', 'category'):
         assert hasattr(cls, a)
-    Card.card_classes[cls.__name__] = cls
+    PhysicalCard.classes[cls.__name__] = cls
     return cls
 
 

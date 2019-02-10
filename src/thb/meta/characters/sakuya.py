@@ -5,8 +5,10 @@ import random
 
 # -- third party --
 # -- own --
-from thb import cards, characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb import characters
+from thb.cards.classes import AttackCard
+from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
+
 
 # -- code --
 ui_meta = ui_meta_for(characters.sakuya)
@@ -59,7 +61,7 @@ class Dagger:
         if not rst:
             return rst, reason
         else:
-            return cards.AttackCard.ui_meta.is_action_valid(g, cl, target_list)
+            return AttackCard.ui_meta.is_action_valid(g, cl, target_list)
 
     def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string

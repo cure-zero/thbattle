@@ -3,11 +3,12 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from .common import ModeMeta
-from thb import cards, thbidentity
+from thb import thbidentity
 from thb.actions import ttags
+from thb.cards.classes import AttackCard
 from thb.meta.common import card_desc, my_turn, passive_clickable, passive_is_action_valid
 from thb.meta.common import ui_meta_for
+from thb.meta.typing import ModeMeta
 
 
 # -- code --
@@ -84,7 +85,7 @@ class AssistedAttack:
         if len(cl):
             return (False, '请不要选择牌！')
 
-        return cards.AttackCard.ui_meta.is_action_valid(g, [s], tl)
+        return AttackCard.ui_meta.is_action_valid(g, [s], tl)
 
     def effect_string(self, act):
         # for LaunchCard.ui_meta.effect_string

@@ -3,10 +3,10 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import cards, characters
-from thb.meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
-from thb.meta.common import passive_is_action_valid
-
+from thb import characters
+from thb.cards.base import Skill
+from thb.meta.common import card_desc, my_turn, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta_for
 
 # -- code --
 ui_meta = ui_meta_for(characters.sp_aya)
@@ -35,7 +35,7 @@ class WindWalk:
         if card.resides_in.type not in ('cards', 'showncards', 'equips'):
             return (False, '请选择一张牌!')
 
-        if card.is_card(cards.Skill):
+        if card.is_card(Skill):
             return (False, '你不可以像这样组合技能')
 
         return (True, '疾走')

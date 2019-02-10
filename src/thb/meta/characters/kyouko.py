@@ -3,9 +3,9 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import cards as thbcards, characters
-from thb.meta.common import card_desc, ui_meta_for, passive_clickable
-from thb.meta.common import passive_is_action_valid
+from thb import characters
+from thb.cards.base import VirtualCard
+from thb.meta.common import card_desc, passive_clickable, passive_is_action_valid, ui_meta_for
 
 
 # -- code --
@@ -90,7 +90,7 @@ class EchoAction:
         return '|G【%s】|r发动了|G回响|r，|G【%s】|r获得了%s' % (
             act.source.ui_meta.name,
             act.target.ui_meta.name,
-            card_desc(thbcards.VirtualCard.unwrap([act.card])),
+            card_desc(VirtualCard.unwrap([act.card])),
         )
 
     def sound_effect(self, act):

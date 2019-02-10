@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Dict
+from typing import Dict, Optional, Type, Union
 
 # -- third party --
 # -- own --
 from game.base import GameViralContext
+from thb.characters.base import Character
+from thb.meta.typing import UIMeta
 
 
 # -- code --
-UI_META: Dict[type, type] = {}
+UI_META: Dict[type, UIMeta] = {}
 
 
 def G():
@@ -110,13 +112,16 @@ def build_handcard(cardcls, p=None):
     return c
 
 
-def char_desc(ch):
+def char_desc(ch: Union[Character, Type[Character]]):
     m = ch.ui_meta
 
-    if isinstance(ch, type):
-        cls, obj = ch, None
-    else:
+    cls: Type[Character]
+    obj: Optional[Character]
+
+    if isinstance(ch, Character):
         cls, obj = ch.__class__, ch
+    else:
+        cls, obj = ch, None
 
     rst = []
     rst.append('|DB%s %s 体力：%s|r' % (m.title, m.name, cls.maxlife))
@@ -138,13 +143,12 @@ def char_desc(ch):
     if notes:
         rst.append(notes)
 
-    tail = [
-        ('画师',     getattr(m, 'illustrator', '')),
-        ('CV',       getattr(m, 'cv', '')),
-        ('人物设计', getattr(m, 'designer', '')),
-    ]
+    tail = ['%s：%s' % i for i in [
+        ('画师',     m.illustrator),
+        ('CV',       m.cv),
+        ('人物设计', m.designer),
+    ] if i[1]]
 
-    tail = ['%s：%s' % i for i in tail if i[1]]
     if tail:
         rst.append('|DB（%s）|r' % '，'.join(tail))
 

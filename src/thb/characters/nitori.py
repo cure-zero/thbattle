@@ -46,7 +46,7 @@ class Craftsman(TreatAs, Skill):
     @property
     def treat_as(self):
         params = getattr(self, 'action_params', {})
-        return Card.card_classes.get(params.get('treat_as'), AttackCard)
+        return PhysicalCard.classes.get(params.get('treat_as'), AttackCard)
 
     def check(self):
         cl = self.associated_cards
@@ -62,7 +62,7 @@ class Craftsman(TreatAs, Skill):
 
     @classmethod
     def list_treat_as(cls):
-        return [c() for c in Card.card_classes.values() if 'basic' in c.category]
+        return [c() for c in PhysicalCard.classes.values() if 'basic' in c.category]
 
 
 class CraftsmanHandler(EventHandler):

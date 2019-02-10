@@ -16,9 +16,24 @@ class ParamDisplayItem(TypedDict):
     options: List[Tuple[str, object]]
 
 
-class ModeMeta:
+class UIMeta:
+    pass
+
+
+class ModeMeta(UIMeta):
     name: str
     logo: str
     description: str
     params_disp: Dict[str, ParamDisplayItem] = {}
     identities: Type[Enum]
+
+
+class CharacterMeta(UIMeta):
+    name: str
+    title: str
+    designer: str = ''
+    illustrator: str = ''
+    cv: str = ''
+    port_image: str = ''
+    figure_image: str = ''
+    miss_sound_effect: str = ''
