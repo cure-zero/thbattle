@@ -87,7 +87,7 @@ class CriticalStrikeHandler(EventHandler):
                 return act
 
             if act.card.is_card(AttackCard):
-                act.vitality_consumed = True
+                act._[self.__class__] = 'vitality-consumed'
                 src.tags['vitality'] -= 1
 
         elif evt_type == 'action_shootdown':
@@ -99,7 +99,7 @@ class CriticalStrikeHandler(EventHandler):
             if not c.is_card(AttackCard): return act
             if src.has_skill(ElementalReactorSkill): return act
             if src.tags['vitality'] > 0: return act
-            if getattr(act, 'vitality_consumed', False): return act
+            if act._[self.__class__]: return act
             if set(act.target_list) & set(tags['flan_targets']):
                 raise CriticalStrikeLimit
 

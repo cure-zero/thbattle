@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from collections import defaultdict
-from enum import IntEnum
+from enum import Enum
 from itertools import cycle
 import logging
+from typing import Any
 import random
 
 # -- third party --
@@ -34,7 +34,7 @@ class DeathHandler(EventHandler):
             g = self.game
 
             tgt = act.target
-            force = tgt.force
+            force = tgt.tags['force']
             if len(force.pool) <= 1:
                 forces = g.forces[:]
                 forces.remove(force)
@@ -45,7 +45,7 @@ class DeathHandler(EventHandler):
             g = self.game
 
             tgt = act.target
-            pool = tgt.force.pool
+            pool = tgt.tags['force'].pool
             assert pool
 
             mapping = {tgt: pool}
@@ -84,13 +84,15 @@ class RedrawCards(DistributeCards):
 
 
 class Identity(PlayerIdentity):
-    class TYPE(IntEnum):
+    class TYPE(Enum):
         HIDDEN  = 0
         HAKUREI = 1
         MORIYA  = 2
 
 
 class THBattleFaithBootstrap(BootstrapAction):
+    game: 'THBattleFaith'
+
     def __init__(self, params, items):
         self.source = self.target = None
         self.params = params
@@ -100,7 +102,6 @@ class THBattleFaithBootstrap(BootstrapAction):
         g = self.game
         params = self.params
 
-        g.picks = []
         g.deck = Deck(g)
 
         H, M = Identity.TYPE.HAKUREI, Identity.TYPE.MORIYA
@@ -108,7 +109,7 @@ class THBattleFaithBootstrap(BootstrapAction):
             # reseat
             seed = get_seed_for(g, g.players)
             random.Random(seed).shuffle(g.players)
-            g.emit_event('reseat', None)
+            g.emit_event('reseat', (FROM, TO))
 
             L = [[H, H, M, M, H, M], [H, M, H, M, H, M]]
             rnd = random.Random(get_seed_for(g, g.players))
@@ -126,20 +127,20 @@ class THBattleFaithBootstrap(BootstrapAction):
             p.identity.type = identity
             g.process_action(RevealIdentity(p, g.players))
 
-        force_hakurei      = BatchList()
-        force_moriya       = BatchList()
-        force_hakurei.pool = []
-        force_moriya.pool  = []
+        hakureis      = BatchList()
+        moriyas       = BatchList()
+        hakureis.pool = []
+        moriyas.pool  = []
 
         for p in g.players:
             if p.identity.type == Identity.TYPE.HAKUREI:
-                force_hakurei.append(p)
-                p.force = force_hakurei
+                hakureis.append(p)
+                p.force = hakureis
             elif p.identity.type == Identity.TYPE.MORIYA:
-                force_moriya.append(p)
-                p.force = force_moriya
+                moriyas.append(p)
+                p.force = moriyas
 
-        g.forces = BatchList([force_hakurei, force_moriya])
+        g.forces = BatchList([hakureis, moriyas])
 
         roll_rst = roll(g, self.items)
         first = roll_rst[0]
@@ -210,7 +211,7 @@ class THBattleFaith(THBattle):
         'random_seat': (True, False),
     }
 
-    def can_leave(g, p):
+    def can_leave(g: 'THBattleFaith', p: Any):
         return False
 
     def switch_character(g, p: Character, choice: CharChoice):
@@ -219,8 +220,7 @@ class THBattleFaith(THBattle):
         g.players.reveal(choice)
         cls = choice.char_cls
 
-        g.picks.append(cls)
-        log.info('>> NewCharacter: %s %s', Identity.TYPE.rlookup(p.identity.type), cls.__name__)
+        log.info('>> NewCharacter: %s %s', Identity.TYPE(p.identity.type).name, cls.__name__)
 
         # mix char class with player -->
         old = p

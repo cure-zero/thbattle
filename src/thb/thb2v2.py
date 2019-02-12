@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from collections import defaultdict
-from enum import IntEnum
+from enum import Enum
 from itertools import cycle
 from typing import Any, Dict, List, Type
 import logging
@@ -11,12 +10,13 @@ import random
 # -- third party --
 # -- own --
 from game.autoenv import Game, user_input
-from game.base import AbstractPlayer, BootstrapAction, EventHandler, GameItem, InputTransaction
-from game.base import InterruptActionFlow, get_seed_for
+from game.base import BootstrapAction, EventHandler, GameEnded, GameItem, InputTransaction
+from game.base import InterruptActionFlow, get_seed_for, AbstractPlayer
 from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards
 from thb.actions import MigrateCardsTransaction, PlayerDeath, PlayerTurn, RevealIdentity, UserAction
 from thb.actions import migrate_cards
 from thb.cards.base import Deck
+from thb.characters.akari import Akari
 from thb.characters.base import Character, mixin_character
 from thb.common import CharChoice, PlayerIdentity, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
@@ -45,21 +45,19 @@ class DeathHandler(EventHandler):
         # see if game ended
         force1, force2 = g.forces
         if all(dead(p) for p in force1):
-            g.winners = force2[:]
-            g.game_end()
+            raise GameEnded(force2)
 
         if all(dead(p) for p in force2):
-            g.winners = force1[:]
-            g.game_end()
+            raise GameEnded(force1)
 
         return act
 
 
 class HeritageAction(UserAction):
     def apply_action(self):
-        g, src, tgt = self.game, self.source, self.target
+        src, tgt = self.source, self.target
         lists = [tgt.cards, tgt.showncards, tgt.equips]
-        with MigrateCardsTransaction(g, self) as trans:
+        with MigrateCardsTransaction(self) as trans:
             for cl in lists:
                 if not cl: continue
                 cl = list(cl)
@@ -114,65 +112,66 @@ class ExtraCardHandler(EventHandler):
         return act
 
 
-class Identity(PlayerIdentity):
-    class TYPE(IntEnum):
-        HIDDEN  = 0
-        HAKUREI = 1
-        MORIYA  = 2
+class THB2v2Identity(Enum):
+    HIDDEN  = 0
+    HAKUREI = 1
+    MORIYA  = 2
 
 
 class THBattle2v2Bootstrap(BootstrapAction):
+    game: 'THBattle2v2'
+
     def __init__(self, params: Dict[str, Any],
                        items: Dict[AbstractPlayer, List[GameItem]],
-                       players: List[AbstractPlayer]):
+                       players: BatchList[AbstractPlayer]):
         self.source = self.target = None
-        self.params = params
-        self.items = items
+        self.params  = params
+        self.items   = items
+        self.players = players
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         g = self.game
         params = self.params
+        items = self.items
 
-        g.stats = []
+        pl = self.players
 
         g.deck = Deck(g)
-        g.ehclasses = []
+        g.id = {}
 
         if params['random_force']:
-            seed = get_seed_for(g, g.players)
-            random.Random(seed).shuffle(g.players)
+            seed = get_seed_for(g, pl)
+            random.Random(seed).shuffle(pl)
 
         g.draw_extra_card = params['draw_extra_card']
 
-        f1 = BatchList()
-        f2 = BatchList()
-        g.forces = BatchList([f1, f2])
+        H, M = THB2v2Identity.HAKUREI, THB2v2Identity.MORIYA
+        g.forces = {H: BatchList(), M: BatchList()}
 
-        H, M = Identity.TYPE.HAKUREI, Identity.TYPE.MORIYA
-        for p, id, f in zip(g.players, [H, H, M, M], [f1, f1, f2, f2]):
-            p.identity = Identity()
-            p.identity.type = id
-            p.force = f
-            f.append(p)
+        for p, id in zip(pl, [H, H, M, M]):
+            g.id[p] = PlayerIdentity(THB2v2Identity)
+            g.id[p].value = id
 
-        pl = g.players
         for p in pl:
             g.process_action(RevealIdentity(p, pl))
 
-        roll_rst = roll(g, self.items)
-        f1, f2 = partition(lambda p: p.force is roll_rst[0].force, roll_rst)
+        roll_rst = roll(g, pl, items)
+        '''
+        winner = g.forces[roll_rst[0].identity.value]
+        f1, f2 = partition(lambda ch: g.forces[ch.identity.value] is winner, roll_rst)
         final_order = [f1[0], f2[0], f2[1], f1[1]]
-        g.players[:] = final_order
-        g.emit_event('reseat', None)
+        '''
+        g.emit_event('reseat', (pl, roll_rst))
+        pl = roll_rst
 
         # ban / choose girls -->
         from . import characters
         chars = characters.get_characters('common', '2v2')
 
-        seed = get_seed_for(g, g.players)
+        seed = get_seed_for(g, pl)
         random.Random(seed).shuffle(chars)
 
-        testing = list(settings.TESTING_CHARACTERS)
+        testing: List[str] = list(settings.TESTING_CHARACTERS)
         testing, chars = partition(lambda c: c.__name__ in testing, chars)
         chars.extend(testing)
 
@@ -180,35 +179,28 @@ class THBattle2v2Bootstrap(BootstrapAction):
         choices = [CharChoice(cls) for cls in chars]
 
         banned = set()
-        mapping = {p: choices for p in g.players}
-        with InputTransaction('BanGirl', g.players, mapping=mapping) as trans:
-            for p in g.players:
-                c = user_input([p], ChooseGirlInputlet(g, mapping), timeout=30, trans=trans)
-                c = c or [_c for _c in choices if not _c.chosen][0]
+        mapping = {p: choices for p in pl}
+        with InputTransaction('BanGirl', pl, mapping=mapping) as trans:
+            for p in pl:
+                c: CharChoice
+                c = user_input([p], ChooseGirlInputlet(self, mapping), timeout=30, trans=trans)
+                c = c or next(_c for _c in choices if not _c.chosen)
                 c.chosen = p
                 banned.add(c.char_cls)
                 trans.notify('girl_chosen', (p, c))
 
         assert len(banned) == 4
 
-        g.stats.extend([
-            {'event': 'ban', 'attributes': {
-                'gamemode': g.__class__.__name__,
-                'character': i.__name__
-            }}
-            for i in banned
-        ])
-
         chars = [_c for _c in chars if _c not in banned]
 
         g.random.shuffle(chars)
 
-        if Game.CLIENT_SIDE:
+        if Game.CLIENT:
             chars = [None] * len(chars)
 
-        for p in g.players:
-            p.choices = [CharChoice(cls) for cls in chars[-4:]]
-            p.choices[-1].akari = True
+        for ch in g.players:
+            ch.choices = [CharChoice(cls) for cls in chars[-4:]]
+            ch.choices[-1].akari = True
 
             del chars[-4:]
 
@@ -244,6 +236,9 @@ class THBattle2v2Bootstrap(BootstrapAction):
             )
         # -------
 
+        if True:
+            g.forces[id].append(p)
+
         g.emit_event('game_begin', g)
 
         for p in g.players:
@@ -274,19 +269,16 @@ class THBattle2v2(THBattle):
         'draw_extra_card': (False, True),
     }
 
-    def can_leave(g, p: Character):
-        return getattr(p, 'dead', False)
+    forces: Dict[THB2v2Identity, BatchList[Character]]
 
-    def set_character(g, p, cls: Type[Character]):
+    def can_leave(g, p: Character):
+        return p.dead
+
+    def set_character(g, p: Character, cls: Type[Character]) -> Character:
         # mix char class with player -->
         new, old_cls = mixin_character(g, p, cls)
         g.decorate(new)
-        g.players.replace(p, new)
-        g.forces[0].replace(p, new)
-        g.forces[1].replace(p, new)
         assert not old_cls
-
         g.refresh_dispatcher()
-
         g.emit_event('switch_character', (p, new))
         return new

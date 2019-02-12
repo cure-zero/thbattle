@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
 import sys
-import functools
 
 # -- third party --
 # -- own --
-
 
 # -- code --
 class ViralContext(object):
@@ -40,22 +37,8 @@ class ViralContext(object):
 
         return None
 
-    @classmethod
-    def with_viral(cls, f):
-        @functools.wraps(f)
-        def wrapper(*a, **k):
-            that = cls.viral_search(start=2)
-            env = that and that.viral_export()
-            return cls.viral_apply(f, env, *a, **k)
-
-        return wrapper
-
     def viral_import(self, env):
         raise Exception('Override this!')
 
     def viral_export(self):
-        raise Exception('Override this!')
-
-    @staticmethod
-    def viral_apply(f, env, *a, **k):
         raise Exception('Override this!')

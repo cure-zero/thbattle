@@ -49,7 +49,7 @@ class InputWaiterGroup(GreenletGroup):
     greenlet_class = InputWaiter
 
 
-def user_input(players: List[AbstractPlayer], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
+def user_input(players: List[object], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
     '''
     Type can be 'single', 'all' or 'any'
     '''
@@ -86,7 +86,7 @@ def user_input(players: List[AbstractPlayer], inputlet: Inputlet, timeout=25, ty
         inputany_player = None
 
         for p in players:
-            if p.is_npc:
+            if isinstance(p, NPCPlayer):
                 ilet = ilets[p]
                 p.handle_user_input(trans, ilet)
                 waiters.add(gevent.spawn(lambda v: v, ilet.data()))
@@ -97,7 +97,7 @@ def user_input(players: List[AbstractPlayer], inputlet: Inputlet, timeout=25, ty
         for p in players:
             g.emit_event('user_input_start', (trans, ilets[p]))
 
-        bottom_halves = []
+        bottom_halves: Any = []  # FIXME: proper typing
 
         def flush():
             core = g.core
@@ -121,7 +121,7 @@ def user_input(players: List[AbstractPlayer], inputlet: Inputlet, timeout=25, ty
             try:
                 rst = my.parse(data)
             except Exception:
-                log.error('user_input: exception in .process()', exc_info=1)
+                log.exception('user_input: exception in .process()')
                 # ----- FOR DEBUG -----
                 if g.IS_DEBUG:
                     raise
@@ -192,8 +192,8 @@ class Game(game.base.Game):
         and all game related vars, eg. tags used by [EventHandler]s and [Action]s
     '''
 
-    CLIENT_SIDE = False
-    SERVER_SIDE = True
+    CLIENT = False
+    SERVER = True
 
     core: Core
 
@@ -215,7 +215,7 @@ class Game(game.base.Game):
 
         m: Dict[int, AbstractPlayer] = {
             core.auth.uid_of(p.client): p
-            for p in players if isinstance(p, Player)
+            for p in players if isinstance(p, HumanPlayer)
         }
 
         items = {m[k]: v for k, v in core.item.items_of(g).items()}
@@ -251,8 +251,7 @@ class Game(game.base.Game):
         gevent.sleep(time)
 
 
-class Player(AbstractPlayer):
-    is_npc = False
+class HumanPlayer(AbstractPlayer):
     client: Client
 
     def __init__(self, g: Game, client: Client):
@@ -267,7 +266,6 @@ class Player(AbstractPlayer):
 
 
 class NPCPlayer(AbstractPlayer):
-    is_npc  = True
 
     def __init__(self, g: Game, name: str, handler: Callable[[InputTransaction, Inputlet], Any]):
         self.game = g

@@ -58,10 +58,6 @@ class Events(object):
         # ev = (g: Game, users: [server.core.view.User(u), ...])
         self.room_users = EventHub[Tuple[Game, List[dict]]]()
 
-        # Server side game started, and client core has finished preparing the game,
-        # ready to launch
-        self.game_prepared = EventHub[Game]()
-
         # Game is up and running
         # ev = (g: Game)
         self.game_started = EventHub[Game]()

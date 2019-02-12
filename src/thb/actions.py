@@ -3,16 +3,16 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import Iterable, List, Optional, Set, Type
+from typing import Iterable, List, Optional, Set, Tuple, Type, Union
 import logging
 
 # -- third party --
 # -- own --
-from game.autoenv import Game, user_input
+from game.autoenv import user_input
 from game.base import Action, ActionShootdown, EventArbiter, EventHandler, GameException
 from game.base import GameViralContext, InputTransaction, sync_primitive
-from thb.cards.base import Card, CardList, PhysicalCard, VirtualCard
-from thb.characters.base import Character
+from thb.cards.base import Card, CardList, PhysicalCard, Skill, VirtualCard
+from thb.characters.base import Character, Entity
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from thb.mode import THBattle
 from utils.check import CheckFailed, check, check_type
@@ -25,13 +25,6 @@ log = logging.getLogger('THBattle_Actions')
 
 # ------------------------------------------
 # aux functions
-def mark(act, tag, v=True):
-    setattr(act, '_tag_' + tag, v)
-
-
-def marked(act, tag):
-    return getattr(act, '_tag_' + tag, None)
-
 
 def ttags(actor):
     tags = actor.tags
@@ -39,7 +32,13 @@ def ttags(actor):
     return tags.setdefault('turn_tags:%s' % tc, defaultdict(int))
 
 
-def ask_for_action(initiator, actors, categories, candidates, timeout=None, trans=None):
+def ask_for_action(initiator: Union[Action, EventHandler],
+                   actors: List[Entity],
+                   categories: Iterable[str],
+                   candidates: List[Entity],
+                   timeout: Optional[int]=None,
+                   trans: Optional[InputTransaction]=None,
+                   ) -> Tuple[Optional[Entity], Optional[Tuple[List[Card], List[Entity]]]]:
     # initiator: Action or EH requesting this
     # actors: players involved
     # categories: card categories, eg: ['cards', 'showncards']
@@ -124,7 +123,12 @@ def ask_for_action(initiator, actors, categories, candidates, timeout=None, tran
         return None, None
 
 
-def user_choose_cards(initiator, actor, categories, timeout=None, trans=None):
+def user_choose_cards(initiator: Union[Action, EventHandler],
+                      actor: object,
+                      categories: Iterable[str],
+                      timeout: Optional[int]=None,
+                      trans: Optional[InputTransaction]=None,
+                      ) -> Optional[List[Card]]:
     check_type([str, ...], categories)
 
     _, rst = ask_for_action(initiator, [actor], categories, (), timeout=timeout, trans=trans)
@@ -134,7 +138,12 @@ def user_choose_cards(initiator, actor, categories, timeout=None, trans=None):
     return rst[0]  # cards
 
 
-def user_choose_players(initiator, actor, candidates, timeout=None, trans=None):
+def user_choose_players(initiator: Union[Action, EventHandler],
+                        actor: object,
+                        candidates: List[Entity],
+                        timeout: Optional[int]=None,
+                        trans: Optional[InputTransaction]=None,
+                        ) -> Optional[List[Character]]:
     _, rst = ask_for_action(initiator, [actor], (), candidates, timeout=timeout, trans=trans)
     if not rst:
         return None
@@ -185,12 +194,14 @@ def skill_check(wrapped):
 
 
 class MigrateCardsTransaction(GameViralContext):
-    def __init__(self, action=None):
+    movements: List[Tuple[List[Card], Optional[CardList], Optional[CardList], bool]]
+
+    def __init__(self, action: Optional[Action]=None):
         self.action = action or self.game.action_stack[-1]
         self.cancelled = False
         self.movements = []
 
-    def move(self, cards, _from, to, is_bh):
+    def move(self, cards, _from, to, is_bh) -> None:
         self.movements.append((cards, _from, to, is_bh))
 
     def __enter__(self):
@@ -361,12 +372,13 @@ class DeadDropCards(GenericAction):
 
 
 class PlayerDeath(GenericAction):
-    def apply_action(self):
+    # FIXME: should be `CharacterDeath`
+    def apply_action(self) -> bool:
         tgt = self.target
         tgt.dead = True
         g = self.game
         g.process_action(DeadDropCards(tgt, tgt))
-        tgt.skills[:] = []
+        tgt.skills[:] = []  # FIXME: should be here now?
         tgt.tags.clear()
         return True
 
@@ -843,7 +855,6 @@ class BaseActionStage(GenericAction):
                 break
 
     def cond(self, cl):
-        from .cards import Skill
         if not cl: return False
 
         tgt = self.target
@@ -894,8 +905,6 @@ class ShuffleHandler(EventHandler):
 
     @staticmethod
     def do_shuffle(g, pl):
-        from .cards import VirtualCard
-
         for p in pl:
             if not p.cards: continue
             if any([c.is_card(VirtualCard) for c in p.cards]):
@@ -956,7 +965,7 @@ class TurnOverCard(BaseFatetell):
     type = 'turnover'
 
 
-class FatetellMalleateHandler(EventHandlerGroup):
+class FatetellMalleateHandler(EventArbiter):
     interested = ['fatetell']
 
     def handle(self, evt_type, data):
@@ -1191,7 +1200,6 @@ class Pindian(UserAction):
 
     @staticmethod
     def cond(cl):
-        from .cards import Skill
         return len(cl) == 1 and \
             (not cl[0].is_card(Skill)) and \
             cl[0].resides_in.type in ('cards', 'showncards')

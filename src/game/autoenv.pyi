@@ -1,7 +1,8 @@
 from game.base import AbstractPlayer, Inputlet, InputTransaction, Game as BaseGame
+from typing import List, Optional
 
 def user_input(
-    players: List[AbstractPlayer],
+    players: List[object],
     inputlet: Inputlet,
     timeout: int=25,
     type: str='single',

@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Any, Dict, Iterable, List, Set, TYPE_CHECKING, Type
+from typing import Any, Dict, Iterable, List, Optional, Set, TYPE_CHECKING, Tuple, Type, Union
 
 # -- third party --
 # -- own --
@@ -33,7 +33,7 @@ class Character(GameObject):
     maxlife: int
 
     # ----- Instance Variables -----
-    dead: bool
+    dead: bool = False
     life: int
     disabled_skills: Dict[str, Set[Type['Skill']]]
     tags: Dict[str, Any]
@@ -42,10 +42,19 @@ class Character(GameObject):
     equips: 'CardList'
     fatetell: 'CardList'
     special: 'CardList'
+    showncardlists: List['CardList']
 
     def __init__(self, player: AbstractPlayer):
         self.player = player
         self.disabled_skills = defaultdict(set)
+
+        self.cards          = CardList(self, 'cards')       # Cards in hand
+        self.showncards     = CardList(self, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
+        self.equips         = CardList(self, 'equips')      # Equipments
+        self.fatetell       = CardList(self, 'fatetell')    # Cards in the Fatetell Zone
+        self.special        = CardList(self, 'special')     # used on special purpose
+        self.showncardlists = [self.showncards, self.fatetell]
+        self.tags           = defaultdict(int)
 
     def get_skills(self, skill: Type['Skill']):
         return [s for s in self.skills if issubclass(s, skill)]
@@ -69,9 +78,7 @@ class Character(GameObject):
         return '<Char: {}>'.format(self.__class__.__name__)
 
 
-class StrawMan(Character):
-    def __init__(self):
-        pass
+Entity = Union[AbstractPlayer, Character]
 
 
 def register_character_to(*cats):
@@ -99,7 +106,7 @@ def get_characters(*categories):
     return list(sorted(chars, key=lambda i: i.__name__))
 
 
-def mixin_character(g: Game, player: AbstractPlayer, char_cls: Type[Character]):
+def mixin_character(g: Game, player: Entity, char_cls: Type[Character]) -> Tuple[Character, Optional[Type[Character]]]:
     player.index = g.get_playerid(player)
 
     old = None

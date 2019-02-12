@@ -382,7 +382,7 @@ class THBattleIdentityBootstrap(BootstrapAction):
 
         g.random.shuffle(identities)
 
-        if g.CLIENT_SIDE:
+        if g.CLIENT:
             identities = [Identity.TYPE.HIDDEN for _ in identities]
 
         for p, i in imperial_identities + list(zip(pl, identities)):
@@ -447,7 +447,7 @@ class THBattleIdentityBootstrap(BootstrapAction):
         # reseat
         seed = get_seed_for(g, g.players)
         random.Random(seed).shuffle(g.players)
-        g.emit_event('reseat', None)
+        g.emit_event('reseat', (FROM, TO))
 
         # others choose girls
         pl = g.players.exclude(boss)

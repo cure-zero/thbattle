@@ -45,6 +45,7 @@ class ObjectDict(dict):
 
 
 T = TypeVar('T')
+U = TypeVar('U')
 
 
 class BatchList(List[T]):
@@ -80,14 +81,14 @@ class BatchList(List[T]):
         n = len(self)
         return self.__class__((self*2)[i:i+n])
 
-    def replace(self, old: T, new: T):
+    def replace(self, old: T, new: T) -> bool:
         try:
             self[self.index(old)] = new
             return True
         except ValueError:
             return False
 
-    def sibling(self, me: T, offset=1):
+    def sibling(self, me: T, offset=1) -> T:
         i = self.index(me)
         n = len(self)
         return self[(i + offset) % n]
@@ -143,7 +144,7 @@ def extendclass(clsname, bases, _dict):
             setattr(cls, key, value)
 
 
-def partition(pred: Callable[[Any], bool], lst: Iterable[Any]):
+def partition(pred: Callable[[Any], bool], lst: Iterable[Any]) -> Tuple[List[Any], List[Any]]:
     f: List[Any]
     t: List[Any]
     f, t = [], []

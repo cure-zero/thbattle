@@ -54,6 +54,5 @@ class Replay(object):
             rep['params'],
             rep['items'],
         )
-        core.game.prepare_game(g)
         core.game.gamedata_of(g).feed_archive(rep['data'])
-        core.events.game_prepared.emit(g)
+        core.events.game_started.emit(g)

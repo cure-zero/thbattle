@@ -3,17 +3,19 @@
 # -- stdlib --
 from enum import IntEnum
 from itertools import cycle
+from typing import Dict, List
 import logging
 
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import BootstrapAction, EventHandler, InputTransaction, InterruptActionFlow
-from game.base import list_shuffle
+from game.base import AbstractPlayer, BootstrapAction, EventHandler, InputTransaction
+from game.base import InterruptActionFlow, list_shuffle
 from thb.actions import DistributeCards, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.cards.base import Deck
+from thb.cards.definition import kof_card_definition
 from thb.characters.base import mixin_character
-from thb.common import PlayerIdentity, build_choices, roll
+from thb.common import CharChoice, PlayerIdentity, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
 from thb.mode import THBattle
 
@@ -32,13 +34,13 @@ class DeathHandler(EventHandler):
 
         g = self.game
 
-        if tgt.remaining[0] <= 0:
+        if tgt.tags['remaining'] <= 0:
             pl = g.players[:]
             pl.remove(tgt)
             g.winners = pl
             g.game_end()
 
-        tgt.remaining[0] -= 1
+        tgt.tags['remaining'] -= 1
 
         pl = g.players
         if pl[0].dropped:
@@ -55,7 +57,7 @@ class DeathHandler(EventHandler):
 class KOFCharacterSwitchHandler(EventHandler):
     interested = ['action_after', 'action_before', 'action_stage_action']
 
-    def __init__(self, g):
+    def __init__(self, g: 'THBattleKOF'):
         EventHandler.__init__(self, g)
         g.switch_handler = self
 
@@ -103,7 +105,7 @@ class THBattleKOFBootstrap(BootstrapAction):
     def apply_action(self):
         g = self.game
 
-        g.deck = Deck(g, cards.kof_card_definition)
+        g.deck = Deck(g, kof_card_definition)
         g.current_player = None
 
         for i, p in enumerate(g.players):
@@ -123,7 +125,7 @@ class THBattleKOFBootstrap(BootstrapAction):
             num=10, akaris=4, shared=True,
         )
 
-        chosen = {A: [], B: []}
+        chosen: Dict[AbstractPlayer, List[CharChoice]] = {A: [], B: []}
 
         with InputTransaction('ChooseGirl', g.players, mapping=choices) as trans:
             for p, c in imperial_choices:
@@ -134,7 +136,8 @@ class THBattleKOFBootstrap(BootstrapAction):
 
             for p in order:
                 c = user_input([p], ChooseGirlInputlet(g, choices), 10, 'single', trans)
-                c = c or next(choices[p], lambda c: not c.chosen, None)
+                # c = c or next(choices[p], lambda c: not c.chosen, None)
+                c = c or next(iter([c for c in choices[p] if not c.chosen]), None)
 
                 c.chosen = p
                 chosen[p].append(c)
@@ -160,7 +163,7 @@ class THBattleKOFBootstrap(BootstrapAction):
             c = rst[p] or chosen[p][0]
             chosen[p].remove(c)
             p.choices = chosen[p]
-            p.remaining = [2]
+            p.tags['remaining'] = 2
             p = g.next_character(p, c)
             return p
 
@@ -220,7 +223,7 @@ class THBattleKOF(THBattle):
         cls = choice.char_cls
 
         # mix char class with player -->
-        new, old_cls = mixin_character(p, cls)
+        new, old_cls = mixin_character(g, p, cls)
         g.decorate(new)
         g.players.replace(p, new)
 

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Any, Dict, Iterable, List, Type
+from typing import Any, Dict, Iterable, List, Type, Union
 import logging
 
 # -- third party --
 # -- own --
-from game.base import AbstractPlayer, GameObject, Inputlet
+from game.base import AbstractPlayer, Action, EventHandler, GameObject, Inputlet
 from thb.cards.base import Card, Skill
 from thb.characters.base import Character
 from thb.common import CharChoice
@@ -38,7 +38,7 @@ class ChooseOptionInputlet(Inputlet):
 
 
 class ActionInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, categories: Iterable[str], candidates: Iterable[AbstractPlayer]):
+    def __init__(self, initiator: GameObject, categories: Iterable[str], candidates: Iterable[object]):
         self.initiator = initiator
 
         self.categories = categories
@@ -96,7 +96,7 @@ class ActionInputlet(Inputlet):
                 else:
                     check(all(c.resides_in in categories for c in cards))  # Cards in desired categories?
 
-            return [skills, cards, players, params]
+            return (skills, cards, players, params)
 
         except CheckFailed:
             return None
@@ -240,7 +240,7 @@ class ProphetInputlet(Inputlet):
 
 
 class ChooseGirlInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, mapping: Dict[Character, List[CharChoice]]):
+    def __init__(self, initiator: Union[Action, EventHandler], mapping: Dict[AbstractPlayer, List[CharChoice]]):
         self.initiator = initiator
 
         m = dict(mapping)

@@ -2,9 +2,9 @@
 
 # -- stdlib --
 from collections import defaultdict
-from enum import IntEnum
+from enum import Enum
 from itertools import chain, combinations, cycle
-from typing import Callable, Type
+from typing import Callable, Type, Any
 import logging
 import random
 
@@ -54,7 +54,7 @@ class DeathHandler(EventHandler):
 
 
 class Identity(PlayerIdentity):
-    class TYPE(IntEnum):
+    class TYPE(Enum):
         HIDDEN = 0
         HAKUREI = 1
         MORIYA = 2
@@ -121,8 +121,8 @@ class CirnoAI(object):
 
 
 class AdhocEventHandler(EventHandler):
-    def __init__(self, g: Game, hook: Callable):
-        self.handle = hook
+    def __init__(self, g: Game, hook: Callable[str, Any]):
+        self.handle = hook  # typing: ignore
 
 
 class DrawShownCards(DrawCards):
@@ -188,9 +188,8 @@ class THBattleNewbieBootstrap(BootstrapAction):
 
             user_input([meirin], GalgameDialogInputlet(g, character, dialog, voice), timeout=60)
 
-        def inject_eh(hook):
-            eh = AdhocEventHandler(g)
-            eh.handle = hook
+        def inject_eh(hook: Callable[str, Any]):
+            eh = AdhocEventHandler(g, hook)
             g.add_adhoc_event_handler(eh)
             return eh
 
@@ -284,7 +283,7 @@ class THBattleNewbieBootstrap(BootstrapAction):
             lc = LaunchCard(cirno, [meirin], atkcard)
 
             @inject_eh
-            def resp(evt_type, act):
+            def resp(evt_type: str, act: Any):
                 if evt_type == 'choose_target' and act[0] is lc:
                     g.pause(1)
                     dialog(Meirin, '来的正好！', 13)
@@ -382,7 +381,7 @@ class THBattleNewbieBootstrap(BootstrapAction):
             dialog(Meirin, '我这辈子还没听过这么欠扁的要求！吃我一弹！', 28)
 
             @inject_eh
-            def resp(evt_type, act):
+            def resp(evt_type: str, act: Any):
                 if evt_type == 'action_after' and isinstance(act, LaunchGraze) and act.target is cirno:
                     g.pause(1)
                     dialog(Cirno, '你以为只有你会闪开吗！', 11)
@@ -452,7 +451,7 @@ class THBattleNewbieBootstrap(BootstrapAction):
             dialog(Sakuya, '用用看就知道了。快去卸掉她的|G天狗盾|r吧。', 18)
 
             @inject_eh
-            def resp(evt_type, act):
+            def resp(evt_type: str, act: Any):
                 if evt_type == 'action_before' and isinstance(act, Demolition):
                     g.pause(1.5)
                     dialog(Cirno, '哈哈，早知道你会用这一招，怎能让你轻易得逞！', 17)

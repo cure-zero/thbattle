@@ -80,7 +80,7 @@ class RejectHandler(EventHandler):
             g = self.game
 
             has_reject = False
-            while g.SERVER_SIDE:
+            while g.SERVER:
                 # from thb.characters.base import Character
                 # from thb.characters.reimu import SpiritualAttack
                 # for p in g.players:

@@ -62,10 +62,6 @@ class Events(object):
         # ev = (old: Game, g: Game)
         self.game_successive_create = EventHub[Tuple[Game, Game]]()
 
-        # All the things are ready, waiting UI to prepare and ignite
-        # ev = (g: Game)
-        self.game_prepared = EventHub[Game]()
-
         # Game started running
         # ev = (g: Game)
         self.game_started = EventHub[Game]()

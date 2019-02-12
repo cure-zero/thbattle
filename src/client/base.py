@@ -24,7 +24,7 @@ class ForcedKill(gevent.GreenletExit):
     pass
 
 
-def user_input(players: List[AbstractPlayer], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
+def user_input(players: List[object], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
     '''
     Type can be 'single', 'all' or 'any'
     '''
@@ -175,8 +175,8 @@ class Someone(AbstractPlayer):
 
 
 class Game(game.base.Game):
-    CLIENT_SIDE = True
-    SERVER_SIDE = False
+    CLIENT = True
+    SERVER = False
     is_observe = False
 
     random = Random()
@@ -192,7 +192,7 @@ class Game(game.base.Game):
         core.events.game_started.emit(g)
         params = core.game.params_of(g)
         items = core.game.items_of(g)
-        players = core.game.users_of(g)
+        players = core.game.build_players(g)
 
         try:
             g.process_action(g.bootstrap(params, items, players))

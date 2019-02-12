@@ -9,7 +9,7 @@ import random
 # -- third party --
 # -- own --
 from game.base import AbstractPlayer, GameData
-from server.base import Game as ServerGame, NPCPlayer, Player
+from server.base import Game as ServerGame, NPCPlayer, HumanPlayer
 from server.core import Core
 from server.endpoint import Client
 from server.utils import command
@@ -159,7 +159,6 @@ class Game(object):
 
         seed = random.getrandbits(63)
         g.random = random.Random(seed)
-        g.players = BatchList()
 
         g._[self] = {
             'params': {k: v[0] for k, v in cls.params_def.items()},
@@ -209,7 +208,7 @@ class Game(object):
         }
 
     def build_players(self, g: ServerGame, users: List[Client]) -> BatchList[AbstractPlayer]:
-        pl: BatchList[AbstractPlayer] = BatchList([Player(g, u) for u in users])
+        pl: BatchList[AbstractPlayer] = BatchList([HumanPlayer(g, u) for u in users])
         pl[:0] = [NPCPlayer(g, i.name, i.input_handler) for i in g.npc_players]
 
         return pl

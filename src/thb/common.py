@@ -2,22 +2,21 @@
 
 # -- stdlib --
 from collections import OrderedDict, defaultdict
+from enum import Enum
 from itertools import cycle
-from typing import List, Optional, TYPE_CHECKING, Type
+from typing import Any, Dict, Iterable, List, Type
 import logging
 import random
 
 # -- third party --
 # -- own --
 from game.autoenv import Game
-from game.base import Action, EventDispatcher, EventHandler, GameViralContext, get_seed_for
-from game.base import sync_primitive
-from utils.misc import partition
+from game.base import AbstractPlayer, GameViralContext, get_seed_for, sync_primitive
+from thb.characters.base import Character
+from thb.item import GameItem
+from thb.mode import THBattle
+from utils.misc import BatchList, partition
 import settings
-
-# -- typing --
-if TYPE_CHECKING:
-    from thb.characters.base import Character
 
 
 # -- code --
@@ -48,7 +47,7 @@ class CharChoice(GameViralContext):
 
         if akari:
             self.akari = True
-            if self.game.CLIENT_SIDE:
+            if self.game.CLIENT:
                 from thb import characters
                 self.char_cls = characters.akari.Akari
 
@@ -59,40 +58,43 @@ class CharChoice(GameViralContext):
         )
 
 
-class PlayerIdentity(object):
-    def __init__(self):
-        self._type = self.TYPE.HIDDEN
+class PlayerIdentity(GameViralContext):
+    game: THBattle
 
-    def __data__(self):
-        return ['identity', self.type]
+    def __init__(self, e: Type[Enum]):
+        self._idtype = e
+        self._value = e(0)
 
-    def __str__(self):
-        return self.TYPE.rlookup(self.type)
+    def __data__(self) -> Any:
+        return self._value.value
 
-    def sync(self, data):
-        assert data[0] == 'identity'
-        self._type = data[1]
+    def __str__(self) -> str:
+        return self._value.name
 
-    def is_type(self, t):
+    def sync(self, data) -> None:
+        self._value = self._idtype(data)
+
+    '''
+    def is_type(self, t: Enum) -> bool:
         g = self.game
         pl = g.players
-        return sync_primitive(self.type == t, pl)
+        return sync_primitive(self.value == t, pl)
+    '''
 
-    def set_type(self, t):
-        if Game.SERVER_SIDE:
-            self._type = t
+    def set_value(self, t: int) -> None:
+        if Game.SERVER:
+            self._value = self._idtype(t)
 
-    def get_type(self):
-        return self._type
+    def get_value(self) -> Enum:
+        return self._value
 
-    type = property(get_type, set_type)
+    value = property(get_value, set_value)
 
 
-def roll(g, items):
+def roll(g: THBattle, pl: List[AbstractPlayer], items: Dict[AbstractPlayer, List[GameItem]]) -> BatchList[AbstractPlayer]:
     from thb.item import European
-    roll = list(range(len(g.players)))
+    roll = list(range(len(pl)))
     g.random.shuffle(roll)
-    pl = g.players
     for i, p in enumerate(pl):
         if European.is_european(g, items, p):
             g.emit_event('european', p)
@@ -101,21 +103,21 @@ def roll(g, items):
             break
 
     roll = sync_primitive(roll, pl)
-    roll = [pl[i] for i in roll]
+    roll = BatchList(pl[i] for i in roll)
     g.emit_event('game_roll', roll)
     return roll
 
 
 def build_choices(g, items, candidates, players, num, akaris, shared):
     from thb.item import ImperialChoice
-    from thb.characters.base import Character
 
     # ----- testing -----
     all_characters = Character.classes
-    testing = list(all_characters[i] for i in settings.TESTING_CHARACTERS)
+    testing_lst: Iterable[str] = settings.TESTING_CHARACTERS
+    testing = list(all_characters[i] for i in testing_lst)
     candidates, _ = partition(lambda c: c not in testing, candidates)
 
-    if g.SERVER_SIDE:
+    if g.SERVER:
         candidates = list(candidates)
         g.random.shuffle(candidates)
     else:
@@ -131,7 +133,7 @@ def build_choices(g, items, candidates, players, num, akaris, shared):
     assert len(num) == len(akaris) == len(entities), 'Uneven configuration'
     assert sum(num) <= len(candidates) + len(testing), 'Insufficient choices'
 
-    result = defaultdict(list)
+    result: Dict[Any, List[CharChoice]] = defaultdict(list)
 
     entities_for_testing = entities[:]
 
@@ -156,7 +158,7 @@ def build_choices(g, items, candidates, players, num, akaris, shared):
             result[e].append(CharChoice(candidates.pop()))
 
     # ----- akaris -----
-    if g.SERVER_SIDE:
+    if g.SERVER:
         rest = candidates
     else:
         rest = [None] * len(candidates)

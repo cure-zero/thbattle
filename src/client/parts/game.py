@@ -10,7 +10,7 @@ import gevent
 # -- own --
 from client.base import ForcedKill, Game as ClientGame, Someone, Theone
 from client.core import Core
-from game.base import GameData
+from game.base import AbstractPlayer, GameData
 from utils.events import EventHub
 from utils.misc import BatchList
 
@@ -24,7 +24,6 @@ class Game(object):
     def __init__(self, core: Core):
         self.core = core
         core.events.server_command += self.handle_server_command
-        core.events.game_started += self.handle_game_started
 
         self.games: Dict[int, ClientGame] = {}
 
@@ -56,15 +55,14 @@ class Game(object):
         g._[self]['users'] = pl
         core.events.room_users.emit((g, pl))
 
-    def handle_game_started(self, g: ClientGame):
+    def _game_started(self, gv: dict):
         core = self.core
-        self.prepare_game(g)
-        core.events.game_prepared.emit(g)
+        core.events.game_started.emit(g)
 
-    def handle_observe_started(self, gv: dict):
+    def _observe_started(self, gv: dict):
         g = self.games[gv['gid']]
         g._[self]['observe'] = True
-        return self.handle_game_started(gv)
+        return self._game_started(gv)
 
     def handle_game_joined(self, gv: dict):
         gid = gv['gid']
@@ -100,12 +98,12 @@ class Game(object):
         core.events.game_ended.emit(g)
 
     # ----- Public Methods -----
-    def is_observe(self, g: ClientGame):
+    def is_observe(self, g: ClientGame) -> bool:
         return g._[self]['observe']
 
-    def create_game(self, gid: int, mode: str, name: str, users: List[dict], params: dict, items: dict):
+    def create_game(self, gid: int, mode: str, name: str, users: List[dict], params: dict, items: dict) -> ClientGame:
         from thb import modes
-        g = modes[mode]()
+        g: ClientGame = modes[mode]()  # type: ignore
 
         g._[self] = {
             'gid':     gid,
@@ -116,26 +114,29 @@ class Game(object):
             'data':    GameData(),
             'observe': False,
         }
+
         return g
 
-    def prepare_game(self, g: ClientGame):
+    def build_players(self, g: ClientGame) -> BatchList[AbstractPlayer]:
         core = self.core
 
-        me_uid = core.auth.uid()
+        me_uid = core.auth.uid
 
         uvl = g._[self]['users']
         assert me_uid in [uv['id'] for uv in uvl]
 
-        me = Theone(g, me_uid, core.auth.name())
-        pl = [
+        me = Theone(g, me_uid, core.auth.name)
+
+        pl: BatchList[AbstractPlayer] = BatchList([
             me if uv['uid'] == me_uid else Someone(g, uv['uid'], uv['name'])
             for uv in uvl
-        ]
+        ])
 
-        g.me = me
-        g.players = BatchList(pl)
+        pl[:0] = [Someone(g, i.name, i.input_handler) for i in g.npc_players]
 
-    def start_game(self, g: ClientGame):
+        return pl
+
+    def start_game(self, g: ClientGame) -> None:
         core = self.core
         gr = gevent.spawn(g.run)
         g._[self]['greenlet'] = gr
@@ -146,23 +147,20 @@ class Game(object):
 
         log.info('----- GAME STARTED: %d -----' % g._[self]['gid'])
 
-    def kill_game(self, g: ClientGame):
+    def kill_game(self, g: ClientGame) -> None:
         g._[self]['greenlet'].kill(ForcedKill)
 
-    def gid_of(self, g: ClientGame):
+    def gid_of(self, g: ClientGame) -> int:
         return g._[self]['gid']
 
-    def name_of(self, g: ClientGame):
+    def name_of(self, g: ClientGame) -> str:
         return g._[self]['name']
 
-    def gamedata_of(self, g: ClientGame):
+    def gamedata_of(self, g: ClientGame) -> GameData:
         return g._[self]['data']
 
-    def items_of(self, g: ClientGame):
+    def items_of(self, g: ClientGame) -> None:
         return g._[self]['items']
 
-    def params_of(self, g: ClientGame):
+    def params_of(self, g: ClientGame) -> dict:
         return g._[self]['params']
-
-    def users_of(self, g: ClientGame):
-        return g._[self]['users']

@@ -72,7 +72,7 @@ class THBattleBootstrap(BootstrapAction):
         if params['random_seat']:
             seed = get_seed_for(g, g.players)
             random.Random(seed).shuffle(g.players)
-            g.emit_event('reseat', None)
+            g.emit_event('reseat', (FROM, TO))
 
         for i, p in enumerate(g.players):
             p.identity = Identity()

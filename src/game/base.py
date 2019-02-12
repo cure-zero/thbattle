@@ -38,6 +38,7 @@ class GameObjectMeta(type):
 
         return cls
 
+    '''
     def __getattribute__(cls, name):
         value = type.__getattribute__(cls, name)
         if isinstance(value, classmethod):
@@ -48,6 +49,7 @@ class GameObjectMeta(type):
                 pass
 
         return value
+    '''
 
     @staticmethod
     def _dump_gameobject_hierarchy():
@@ -58,13 +60,6 @@ class GameObjectMeta(type):
                 for a, b in game_objects_hierarchy
             ]))
             f.write('}')
-
-    # def __setattr__(cls, field, v):
-    #     type.__setattr__(cls, field, v)
-    #     if field in ('ui_meta', ):
-    #         return
-    #
-    #     log.warning('SetAttr: %s.%s = %s' % (cls.__name__, field, repr(v)))
 
 
 class GameObject(object, metaclass=GameObjectMeta):
@@ -91,9 +86,17 @@ class InterruptActionFlow(GameException):
         self.unwind_to = unwind_to
 
 
-class AbstractPlayer(GameObject):
-    index = None
-    game: 'Game'
+class AssociatedDataViralContext(ViralContext):
+    VIRAL_SEARCH: List[str] = []
+    _: dict
+
+    def viral_import(self, _):
+        self._ = defaultdict(bool)
+
+
+class AbstractPlayer(GameObject, AssociatedDataViralContext):
+    # index = None
+    # game: 'Game'
 
     def reveal(self, obj_list):
         raise GameError('Abstract')
@@ -120,6 +123,7 @@ class GameEnded(GameException):
 
 class GameViralContext(ViralContext):
     VIRAL_SEARCH = ['g', 'self']
+    game: 'Game'
 
     def viral_import(self, g):
         self.game = g
@@ -132,6 +136,8 @@ class Game(GameObject, GameViralContext):
     IS_DEBUG = False
 
     # ----- Class Variables -----
+    CLIENT: bool
+    SERVER: bool
     n_persons: int
     npc_players: List[NPC] = []
     params_def: Dict[str, Any] = {}
@@ -461,15 +467,7 @@ class EventDispatcher(GameObject):
         return ehs
 
 
-class ActionViralContext(ViralContext):
-    VIRAL_SEARCH: List[str] = []
-    _: dict
-
-    def viral_import(self, _):
-        self._ = defaultdict(bool)
-
-
-class Action(GameObject, GameViralContext, ActionViralContext):
+class Action(GameObject, GameViralContext, AssociatedDataViralContext):
     cancelled = False
     done = False
     invalid = False
@@ -513,7 +511,7 @@ class Action(GameObject, GameViralContext, ActionViralContext):
 class BootstrapAction(Action):
     def __init__(self, params: Dict[str, Any],
                        items: Dict[AbstractPlayer, List['GameItem']],
-                       players: List[AbstractPlayer]):
+                       players: BatchList[AbstractPlayer]):
         raise Exception('Override this!')
 
 
@@ -531,7 +529,7 @@ class SyncPrimitive(GameObject):
         return self.value.__repr__()
 
 
-def sync_primitive(val: Union[list, int, str, bool], to: Any):
+def sync_primitive(val: Union[list, int, str, bool], to: Union[AbstractPlayer, BatchList[AbstractPlayer]]):
     if not to:  # sync to nobody
         return val
 
@@ -547,9 +545,9 @@ def sync_primitive(val: Union[list, int, str, bool], to: Any):
         return v.value
 
 
-def get_seed_for(g: Game, p: AbstractPlayer):
+def get_seed_for(g: Game, p: Union[AbstractPlayer, BatchList[AbstractPlayer]]):
     from game.autoenv import Game
-    if Game.SERVER_SIDE:
+    if Game.SERVER:
         seed = g.random.getrandbits(63)
     else:
         seed = 0
@@ -577,7 +575,7 @@ class Inputlet(GameObject):
     '''
     initiator: GameObject
     timeout: int
-    actor: AbstractPlayer
+    actor: object
 
     @classmethod
     def tag(cls):
