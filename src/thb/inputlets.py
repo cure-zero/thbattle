@@ -6,7 +6,7 @@ import logging
 
 # -- third party --
 # -- own --
-from game.base import AbstractPlayer, Action, EventHandler, GameObject, Inputlet
+from game.base import Player, Action, EventHandler, GameObject, Inputlet
 from thb.cards.base import Card, Skill
 from thb.characters.base import Character
 from thb.common import CharChoice
@@ -46,7 +46,7 @@ class ActionInputlet(Inputlet):
 
         self.skills: List[Type[Skill]] = []
         self.cards: List[Card] = []
-        self.players: List[AbstractPlayer] = []
+        self.players: List[Player] = []
         self.params: Dict[str, Any] = {}
 
     def parse(self, data):
@@ -65,7 +65,7 @@ class ActionInputlet(Inputlet):
 
         skills: List[Type[Skill]] = []
         cards: List[Card] = []
-        players: List[AbstractPlayer] = []
+        players: List[Player] = []
         params: Dict[str, Any] = {}
 
         try:
@@ -240,7 +240,7 @@ class ProphetInputlet(Inputlet):
 
 
 class ChooseGirlInputlet(Inputlet):
-    def __init__(self, initiator: Union[Action, EventHandler], mapping: Dict[AbstractPlayer, List[CharChoice]]):
+    def __init__(self, initiator: Union[Action, EventHandler], mapping: Dict[Player, List[CharChoice]]):
         self.initiator = initiator
 
         m = dict(mapping)

@@ -10,7 +10,7 @@ import gevent
 # -- own --
 from client.base import ForcedKill, Game as ClientGame, Someone, Theone
 from client.core import Core
-from game.base import AbstractPlayer, GameData
+from game.base import Player, GameData
 from utils.events import EventHub
 from utils.misc import BatchList
 
@@ -117,7 +117,7 @@ class Game(object):
 
         return g
 
-    def build_players(self, g: ClientGame) -> BatchList[AbstractPlayer]:
+    def build_players(self, g: ClientGame) -> BatchList[Player]:
         core = self.core
 
         me_uid = core.auth.uid
@@ -127,7 +127,7 @@ class Game(object):
 
         me = Theone(g, me_uid, core.auth.name)
 
-        pl: BatchList[AbstractPlayer] = BatchList([
+        pl: BatchList[Player] = BatchList([
             me if uv['uid'] == me_uid else Someone(g, uv['uid'], uv['name'])
             for uv in uvl
         ])

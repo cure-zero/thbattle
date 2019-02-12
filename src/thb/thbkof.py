@@ -9,7 +9,7 @@ import logging
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import AbstractPlayer, BootstrapAction, EventHandler, InputTransaction
+from game.base import Player, BootstrapAction, EventHandler, InputTransaction
 from game.base import InterruptActionFlow, list_shuffle
 from thb.actions import DistributeCards, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.cards.base import Deck
@@ -125,7 +125,7 @@ class THBattleKOFBootstrap(BootstrapAction):
             num=10, akaris=4, shared=True,
         )
 
-        chosen: Dict[AbstractPlayer, List[CharChoice]] = {A: [], B: []}
+        chosen: Dict[Player, List[CharChoice]] = {A: [], B: []}
 
         with InputTransaction('ChooseGirl', g.players, mapping=choices) as trans:
             for p, c in imperial_choices:

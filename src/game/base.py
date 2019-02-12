@@ -94,7 +94,7 @@ class AssociatedDataViralContext(ViralContext):
         self._ = defaultdict(bool)
 
 
-class AbstractPlayer(GameObject, AssociatedDataViralContext):
+class Player(GameObject, AssociatedDataViralContext):
     # index = None
     # game: 'Game'
 
@@ -114,9 +114,9 @@ class NPC(object):
 
 
 class GameEnded(GameException):
-    winners: List[AbstractPlayer]
+    winners: List[Player]
 
-    def __init__(self, winners: List[AbstractPlayer]):
+    def __init__(self, winners: List[Player]):
         GameException.__init__(self)
         self.winners = winners
 
@@ -151,7 +151,7 @@ class Game(GameObject, GameViralContext):
     action_stack: List['Action']
     hybrid_stack: List[Union['Action', 'EventHandler']]
     ended: bool
-    winners: List[AbstractPlayer]
+    winners: List[Player]
     random: Random
     _: Dict[Any, dict]
 
@@ -262,7 +262,7 @@ class Game(GameObject, GameViralContext):
         except IndexError:
             return None
 
-    def players_from(g: 'Game', p: AbstractPlayer):
+    def players_from(g: 'Game', p: Player):
         if p is None:
             id = 0
         elif p in g.players:
@@ -510,8 +510,8 @@ class Action(GameObject, GameViralContext, AssociatedDataViralContext):
 
 class BootstrapAction(Action):
     def __init__(self, params: Dict[str, Any],
-                       items: Dict[AbstractPlayer, List['GameItem']],
-                       players: BatchList[AbstractPlayer]):
+                       items: Dict[Player, List['GameItem']],
+                       players: BatchList[Player]):
         raise Exception('Override this!')
 
 
@@ -529,7 +529,7 @@ class SyncPrimitive(GameObject):
         return self.value.__repr__()
 
 
-def sync_primitive(val: Union[list, int, str, bool], to: Union[AbstractPlayer, BatchList[AbstractPlayer]]):
+def sync_primitive(val: Union[list, int, str, bool], to: Union[Player, BatchList[Player]]):
     if not to:  # sync to nobody
         return val
 
@@ -545,7 +545,7 @@ def sync_primitive(val: Union[list, int, str, bool], to: Union[AbstractPlayer, B
         return v.value
 
 
-def get_seed_for(g: Game, p: Union[AbstractPlayer, BatchList[AbstractPlayer]]):
+def get_seed_for(g: Game, p: Union[Player, BatchList[Player]]):
     from game.autoenv import Game
     if Game.SERVER:
         seed = g.random.getrandbits(63)

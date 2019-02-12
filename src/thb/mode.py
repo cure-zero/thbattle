@@ -7,7 +7,7 @@ from typing import Dict, List, TYPE_CHECKING, Type
 # -- third party --
 # -- own --
 from game.autoenv import Game
-from game.base import AbstractPlayer, EventDispatcher, EventHandler
+from game.base import Player, EventDispatcher, EventHandler
 from thb.cards.base import CardList, Deck
 from thb.characters.base import Character
 from utils.misc import BatchList
@@ -36,6 +36,6 @@ class THBattle(Game):
     game_ehs: List[Type[EventHandler]]
     deck: Deck
     players: BatchList[Character]
-    id: Dict[AbstractPlayer, 'PlayerIdentity']
+    id: Dict[Player, 'PlayerIdentity']
 
     dispatcher_cls = THBEventDispatcher

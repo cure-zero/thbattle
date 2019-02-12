@@ -11,7 +11,7 @@ import random
 # -- third party --
 # -- own --
 from game.autoenv import Game, user_input
-from game.base import AbstractPlayer, BootstrapAction, EventHandler, InputTransaction
+from game.base import Player, BootstrapAction, EventHandler, InputTransaction
 from game.base import InterruptActionFlow, NPC
 from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCards, FatetellStage
 from thb.actions import GenericAction, LaunchCard, PlayerDeath, PlayerTurn, RevealIdentity
@@ -598,7 +598,7 @@ class THBattleNewbie(THBattle):
     def can_leave(g, p):
         return True
 
-    def set_character(g, p: AbstractPlayer, cls: Type[Character]):
+    def set_character(g, p: Player, cls: Type[Character]):
         new, old_cls = mixin_character(g, p, cls)
         g.decorate(new)
         g.players.replace(p, new)

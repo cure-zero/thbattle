@@ -11,7 +11,7 @@ import random
 # -- own --
 from game.autoenv import Game, user_input
 from game.base import BootstrapAction, EventHandler, GameEnded, GameItem, InputTransaction
-from game.base import InterruptActionFlow, get_seed_for, AbstractPlayer
+from game.base import InterruptActionFlow, get_seed_for, Player
 from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards
 from thb.actions import MigrateCardsTransaction, PlayerDeath, PlayerTurn, RevealIdentity, UserAction
 from thb.actions import migrate_cards
@@ -122,8 +122,8 @@ class THBattle2v2Bootstrap(BootstrapAction):
     game: 'THBattle2v2'
 
     def __init__(self, params: Dict[str, Any],
-                       items: Dict[AbstractPlayer, List[GameItem]],
-                       players: BatchList[AbstractPlayer]):
+                       items: Dict[Player, List[GameItem]],
+                       players: BatchList[Player]):
         self.source = self.target = None
         self.params  = params
         self.items   = items

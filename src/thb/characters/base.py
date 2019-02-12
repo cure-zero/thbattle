@@ -7,7 +7,7 @@ from typing import Any, Dict, Iterable, List, Optional, Set, TYPE_CHECKING, Tupl
 # -- third party --
 # -- own --
 from game.autoenv import Game
-from game.base import AbstractPlayer, EventHandler, GameObject
+from game.base import Player, EventHandler, GameObject
 from thb.meta.typing import CharacterMeta
 from utils.misc import partition
 
@@ -44,7 +44,7 @@ class Character(GameObject):
     special: 'CardList'
     showncardlists: List['CardList']
 
-    def __init__(self, player: AbstractPlayer):
+    def __init__(self, player: Player):
         self.player = player
         self.disabled_skills = defaultdict(set)
 
@@ -78,7 +78,7 @@ class Character(GameObject):
         return '<Char: {}>'.format(self.__class__.__name__)
 
 
-Entity = Union[AbstractPlayer, Character]
+Entity = Union[Player, Character]
 
 
 def register_character_to(*cats):

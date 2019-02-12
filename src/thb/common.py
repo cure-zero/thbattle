@@ -11,7 +11,7 @@ import random
 # -- third party --
 # -- own --
 from game.autoenv import Game
-from game.base import AbstractPlayer, GameViralContext, get_seed_for, sync_primitive
+from game.base import Player, GameViralContext, get_seed_for, sync_primitive
 from thb.characters.base import Character
 from thb.item import GameItem
 from thb.mode import THBattle
@@ -91,7 +91,7 @@ class PlayerIdentity(GameViralContext):
     value = property(get_value, set_value)
 
 
-def roll(g: THBattle, pl: List[AbstractPlayer], items: Dict[AbstractPlayer, List[GameItem]]) -> BatchList[AbstractPlayer]:
+def roll(g: THBattle, pl: List[Player], items: Dict[Player, List[GameItem]]) -> BatchList[Player]:
     from thb.item import European
     roll = list(range(len(pl)))
     g.random.shuffle(roll)

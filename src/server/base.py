@@ -14,7 +14,7 @@ import gevent
 # -- own --
 from .endpoint import Client
 from endpoint import EndpointDied
-from game.base import AbstractPlayer, GameEnded, GameViralContext, InputTransaction, Inputlet
+from game.base import Player, GameEnded, GameViralContext, InputTransaction, Inputlet
 from game.base import TimeLimitExceeded
 from server.core import Core
 from utils.misc import log_failure
@@ -213,7 +213,7 @@ class Game(game.base.Game):
         users = core.room.users_of(g)
         players = core.game.build_players(g, users)
 
-        m: Dict[int, AbstractPlayer] = {
+        m: Dict[int, Player] = {
             core.auth.uid_of(p.client): p
             for p in players if isinstance(p, HumanPlayer)
         }
@@ -251,7 +251,7 @@ class Game(game.base.Game):
         gevent.sleep(time)
 
 
-class HumanPlayer(AbstractPlayer):
+class HumanPlayer(Player):
     client: Client
 
     def __init__(self, g: Game, client: Client):
@@ -265,7 +265,7 @@ class HumanPlayer(AbstractPlayer):
         core.game.write(g, self.client, 'Sync:%d' % st, obj_list)  # XXX encode?
 
 
-class NPCPlayer(AbstractPlayer):
+class NPCPlayer(Player):
 
     def __init__(self, g: Game, name: str, handler: Callable[[InputTransaction, Inputlet], Any]):
         self.game = g

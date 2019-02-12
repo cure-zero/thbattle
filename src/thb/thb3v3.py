@@ -11,7 +11,7 @@ import random
 # -- third party --
 # -- own --
 from game.autoenv import Game, user_input
-from game.base import AbstractPlayer, BootstrapAction, EventHandler, GameEnded, GameItem
+from game.base import Player, BootstrapAction, EventHandler, GameEnded, GameItem
 from game.base import InputTransaction, InterruptActionFlow, get_seed_for
 from thb.actions import DrawCards, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.cards.base import CardList, Deck
@@ -57,8 +57,8 @@ class Identity(PlayerIdentity):
 
 class THBattleBootstrap(BootstrapAction):
     def __init__(self, params: Dict[str, Any],
-                       items: Dict[AbstractPlayer, List[GameItem]],
-                       players: List[AbstractPlayer]):
+                       items: Dict[Player, List[GameItem]],
+                       players: List[Player]):
         self.source = self.target = None
         self.params = params
         self.items = items

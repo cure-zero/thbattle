@@ -12,7 +12,7 @@ import gevent
 
 # -- own --
 from client.core import Core
-from game.base import AbstractPlayer, GameEnded, InputTransaction, Inputlet, TimeLimitExceeded
+from game.base import Player, GameEnded, InputTransaction, Inputlet, TimeLimitExceeded
 import game.base
 
 
@@ -140,10 +140,10 @@ def user_input(players: List[object], inputlet: Inputlet, timeout=25, type='sing
     assert False, 'WTF?!'
 
 
-class Theone(game.base.AbstractPlayer):
+class Theone(game.base.Player):
 
     def __init__(self, game, uid, name):
-        AbstractPlayer.__init__(self)
+        Player.__init__(self)
         self.game = game
         self.uid = uid
         self.name = name
@@ -161,10 +161,10 @@ class Theone(game.base.AbstractPlayer):
             obj_list.sync(raw_data)  # it's single obj actually
 
 
-class Someone(AbstractPlayer):
+class Someone(Player):
 
     def __init__(self, game, uid, name):
-        AbstractPlayer.__init__(self)
+        Player.__init__(self)
         self.game = game
         self.uid = uid
         self.name = name

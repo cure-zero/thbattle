@@ -8,7 +8,7 @@ import random
 
 # -- third party --
 # -- own --
-from game.base import AbstractPlayer, GameData
+from game.base import Player, GameData
 from server.base import Game as ServerGame, NPCPlayer, HumanPlayer
 from server.core import Core
 from server.endpoint import Client
@@ -207,8 +207,8 @@ class Game(object):
             for u in users
         }
 
-    def build_players(self, g: ServerGame, users: List[Client]) -> BatchList[AbstractPlayer]:
-        pl: BatchList[AbstractPlayer] = BatchList([HumanPlayer(g, u) for u in users])
+    def build_players(self, g: ServerGame, users: List[Client]) -> BatchList[Player]:
+        pl: BatchList[Player] = BatchList([HumanPlayer(g, u) for u in users])
         pl[:0] = [NPCPlayer(g, i.name, i.input_handler) for i in g.npc_players]
 
         return pl
