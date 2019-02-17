@@ -48,5 +48,7 @@ class View(object):
         rst.update(self.Game(g))
         return rst
 
+    '''
     def Player(self, p: ServerPlayer):
         return self.User(p.client)
+    '''

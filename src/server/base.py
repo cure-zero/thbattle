@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict
 from copy import copy
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, cast
 import logging
 
 # -- third party --
@@ -65,7 +65,7 @@ def user_input(players: List[object], inputlet: Inputlet, timeout=25, type='sing
     timeout = max(0, timeout)
 
     inputlet.timeout = timeout
-    g = trans.game
+    g = cast(Game, trans.game)
 
     players = list(players)
 
@@ -102,7 +102,8 @@ def user_input(players: List[object], inputlet: Inputlet, timeout=25, type='sing
         def flush():
             core = g.core
             for t, data, trans, my, rst in bottom_halves:
-                for u in g.players.client:
+                # for u in g.players.client:
+                for u in core.room.users_of(g):
                     core.game.write(g, u, t, data)
 
                 g.emit_event('user_input_finish', (trans, my, rst))
@@ -162,7 +163,8 @@ def user_input(players: List[object], inputlet: Inputlet, timeout=25, type='sing
         g.emit_event('user_input_finish', (trans, my, rst))
         core = g.core
         t = 'R{}{}'.format(tag, synctags[p])
-        for u in g.players.client:
+        # for u in g.players.client:
+        for u in core.room.users_of(g):
             core.game.write(g, u, t, None)
 
     if type == 'single':

@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from collections import defaultdict
 from typing import Dict, List, TYPE_CHECKING, Type
 
 # -- third party --
 # -- own --
 from game.autoenv import Game
-from game.base import Player, EventDispatcher, EventHandler
-from thb.cards.base import CardList, Deck
+from game.base import EventDispatcher, EventHandler, Player
+from thb.cards.base import Deck
 from thb.characters.base import Character
 from utils.misc import BatchList
 
@@ -36,6 +35,7 @@ class THBattle(Game):
     game_ehs: List[Type[EventHandler]]
     deck: Deck
     players: BatchList[Character]
-    id: Dict[Player, 'PlayerIdentity']
+    identity: Dict[Player, 'PlayerIdentity']
+    dispatcher: THBEventDispatcher
 
     dispatcher_cls = THBEventDispatcher

@@ -3,7 +3,7 @@
 # -- stdlib --
 from enum import Enum
 from itertools import cycle
-from typing import Any, Dict, List, Type
+from typing import Any, Dict, List, Type, Set
 import logging
 import random
 
@@ -137,7 +137,7 @@ class THBattle2v2Bootstrap(BootstrapAction):
         pl = self.players
 
         g.deck = Deck(g)
-        g.id = {}
+        g.identity = {}
 
         if params['random_force']:
             seed = get_seed_for(g, pl)
@@ -149,8 +149,8 @@ class THBattle2v2Bootstrap(BootstrapAction):
         g.forces = {H: BatchList(), M: BatchList()}
 
         for p, id in zip(pl, [H, H, M, M]):
-            g.id[p] = PlayerIdentity(THB2v2Identity)
-            g.id[p].value = id
+            g.identity[p] = PlayerIdentity(THB2v2Identity)
+            g.identity[p].value = id
 
         for p in pl:
             g.process_action(RevealIdentity(p, pl))
@@ -178,7 +178,7 @@ class THBattle2v2Bootstrap(BootstrapAction):
         chars = chars[-20:]
         choices = [CharChoice(cls) for cls in chars]
 
-        banned = set()
+        banned: Set[Type[Character]] = set()
         mapping = {p: choices for p in pl}
         with InputTransaction('BanGirl', pl, mapping=mapping) as trans:
             for p in pl:
@@ -186,7 +186,9 @@ class THBattle2v2Bootstrap(BootstrapAction):
                 c = user_input([p], ChooseGirlInputlet(self, mapping), timeout=30, trans=trans)
                 c = c or next(_c for _c in choices if not _c.chosen)
                 c.chosen = p
-                banned.add(c.char_cls)
+                cls = c.char_cls
+                assert cls
+                banned.add(cls)
                 trans.notify('girl_chosen', (p, c))
 
         assert len(banned) == 4
@@ -198,56 +200,68 @@ class THBattle2v2Bootstrap(BootstrapAction):
         if Game.CLIENT:
             chars = [None] * len(chars)
 
-        for ch in g.players:
-            ch.choices = [CharChoice(cls) for cls in chars[-4:]]
-            ch.choices[-1].akari = True
+        mapping: Dict[Player, List[CharChoice]] = {}
+
+        for p in pl:
+            mapping[p] = [CharChoice(cls) for cls in chars[-4:]]
+            mapping[p][-1].akari = True
 
             del chars[-4:]
 
-            p.reveal(p.choices)
+            p.reveal(mapping[p])
 
         g.pause(1)
 
-        mapping = {p: p.choices for p in g.players}
-        with InputTransaction('ChooseGirl', g.players, mapping=mapping) as trans:
+        with InputTransaction('ChooseGirl', pl, mapping=mapping) as trans:
             ilet = ChooseGirlInputlet(g, mapping)
 
             @ilet.with_post_process
             def process(p, c):
-                c = c or p.choices[0]
+                c = c or mapping[p][0]
                 trans.notify('girl_chosen', (p, c))
                 return c
 
-            rst = user_input(g.players, ilet, timeout=30, type='all', trans=trans)
+            rst = user_input(pl, ilet, timeout=30, type='all', trans=trans)
 
         # reveal
-        for p, c in rst.items():
+        g.players = BatchList()
+
+        for p in pl:
+            c = rst[p]
             c.akari = False
-            g.players.reveal(c)
-            g.set_character(p, c.char_cls)
+            pl.reveal(c)
+            assert c.char_cls
+            ch = c.char_cls(p)
+            g.players.append(ch)
+
+        g.refresh_dispatcher()
+
+        for p, ch in zip(pl, g.players):
+            assert p is ch.player
+            g.emit_event('switch_character', (p, ch))
 
         # -------
-        for p in g.players:
+        for ch in g.players:
             log.info(
-                '>> Player: %s:%s %s',
-                p.__class__.__name__,
-                Identity.TYPE.rlookup(p.identity.type),
-                p.account.username,
+                '>> Player: %s:%s',
+                ch.__class__.__name__,
+                g.identity[ch.player].identity.name,
             )
         # -------
 
-        if True:
-            g.forces[id].append(p)
+        g.forces = {}
+        for ch in g.players:
+            g.forces.setdefault(g.identity[ch.player].identity, BatchList()).append(ch)
 
         g.emit_event('game_begin', g)
 
-        for p in g.players:
-            g.process_action(DistributeCards(p, amount=4))
+        for ch in g.players:
+            g.process_action(DistributeCards(ch, amount=4))
 
-        for i, p in enumerate(cycle(pl)):
+        for i, ch in enumerate(cycle(g.players)):
             if i >= 6000: break
-            if not p.dead:
-                g.emit_event('player_turn', p)
+            if not ch.dead:
+                g.emit_event('player_turn', ch)
                 try:
                     g.process_action(PlayerTurn(p))
                 except InterruptActionFlow:
@@ -273,12 +287,3 @@ class THBattle2v2(THBattle):
 
     def can_leave(g, p: Character):
         return p.dead
-
-    def set_character(g, p: Character, cls: Type[Character]) -> Character:
-        # mix char class with player -->
-        new, old_cls = mixin_character(g, p, cls)
-        g.decorate(new)
-        assert not old_cls
-        g.refresh_dispatcher()
-        g.emit_event('switch_character', (p, new))
-        return new

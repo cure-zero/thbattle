@@ -127,22 +127,22 @@ class Match(object):
 
         @gevent.spawn
         def pull():
-            while core.room.get_by_gid(gid) is g:
+            while core.room.get(gid) is g:
                 users = core.room.online_users_of(g)
                 uids = {core.auth.uid_of(u) for u in users}
                 match_uids = set(g._[self]['match_uids'])
 
                 for uid in match_uids - uids:
-                    u = core.lobby.get_by_uid(uid)
+                    u = core.lobby.get(uid)
                     if not u:
                         continue
 
                     if core.lobby.state_of(u) == 'lobby':
-                        core.room.join_game(g, u, None)
+                        core.room.join_game(g, u)
                     elif core.lobby.state_of(u) in ('ob', 'ready', 'room'):
                         core.room.exit_game(u)
                         gevent.sleep(1)
-                        core.room.join_game(g, u, None)
+                        core.room.join_game(g, u)
                     elif core.lobby.state_of(u) == 'game':
                         gevent.spawn(u.write, ['system_msg', [None, '你有比赛房间，请尽快结束游戏参与比赛']])
 

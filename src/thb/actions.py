@@ -3,16 +3,18 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import Iterable, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, Union, cast
 import logging
 
 # -- third party --
+from typing_extensions import Protocol
+
 # -- own --
 from game.autoenv import user_input
 from game.base import Action, ActionShootdown, EventArbiter, EventHandler, GameException
 from game.base import GameViralContext, InputTransaction, sync_primitive
 from thb.cards.base import Card, CardList, PhysicalCard, Skill, VirtualCard
-from thb.characters.base import Character, Entity
+from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from thb.mode import THBattle
 from utils.check import CheckFailed, check, check_type
@@ -32,13 +34,26 @@ def ttags(actor):
     return tags.setdefault('turn_tags:%s' % tc, defaultdict(int))
 
 
-def ask_for_action(initiator: Union[Action, EventHandler],
-                   actors: List[Entity],
+class CardChooser(Protocol):
+    game: THBattle
+    card_usage: str
+
+    def cond(self, cards: List[Card]) -> bool: ...
+
+
+class CharacterChooser(Protocol):
+    game: THBattle
+
+    def choose_player_target(self, pl: List[Character]) -> Tuple[List[Character], bool]: ...
+
+
+def ask_for_action(initiator: Union[CardChooser, CharacterChooser],
+                   actors: List[Character],
                    categories: Iterable[str],
-                   candidates: List[Entity],
+                   candidates: Iterable[Character],
                    timeout: Optional[int]=None,
                    trans: Optional[InputTransaction]=None,
-                   ) -> Tuple[Optional[Entity], Optional[Tuple[List[Card], List[Entity]]]]:
+                   ) -> Tuple[Optional[Character], Optional[Tuple[List[Card], List[Character]]]]:
     # initiator: Action or EH requesting this
     # actors: players involved
     # categories: card categories, eg: ['cards', 'showncards']
@@ -51,14 +66,21 @@ def ask_for_action(initiator: Union[Action, EventHandler],
 
     from thb.cards.base import VirtualCard
 
+    g = cast(THBattle, initiator.game)
+
     ilet = ActionInputlet(initiator, categories, candidates)
 
     @ilet.with_post_process
-    def process(actor, rst):
-        g = initiator.game
+    def process(actor: Character, rst):
         usage = getattr(initiator, 'card_usage', 'none')
         try:
             check(rst)
+
+            skills: List[Type[Skill]]
+            rawcards: List[Card]
+            players: List[Character]
+            params: Dict[str, Any]
+
             skills, rawcards, players, params = rst
             [check(not c.detached) for c in rawcards]
             [check(actor.has_skill(s)) for s in skills]  # has_skill may be hooked
@@ -72,9 +94,11 @@ def ask_for_action(initiator: Union[Action, EventHandler],
 
             if categories:
                 if len(cards) == 1 and cards[0].is_card(VirtualCard):
-                    def walk(c):
+                    def walk(c: Card):
                         if not c.is_card(VirtualCard): return
                         if getattr(c, 'no_reveal', False): return
+
+                        c = cast(VirtualCard, c)
 
                         g.players.reveal(c.associated_cards)
                         for c1 in c.associated_cards:
@@ -87,13 +111,13 @@ def ask_for_action(initiator: Union[Action, EventHandler],
                     if not getattr(initiator, 'no_reveal', False):
                         g.players.reveal(cards)
 
-                check(initiator.cond(cards))
+                check(cast(CardChooser, initiator).cond(cards))
                 assert not (usage == 'none' and rawcards)  # should not pass check
             else:
                 cards = []
 
             if candidates:
-                players, valid = initiator.choose_player_target(players)
+                players, valid = cast(CharacterChooser, initiator).choose_player_target(players)
                 check(valid)
 
             ask_for_action_verify = getattr(initiator, 'ask_for_action_verify', None)
@@ -111,7 +135,7 @@ def ask_for_action(initiator: Union[Action, EventHandler],
         cards, players, params = rst
 
         if len(cards) == 1 and cards[0].is_card(VirtualCard):
-            initiator.game.deck.register_vcard(cards[0])
+            g.deck.register_vcard(cards[0])
 
         if not cards and not players:
             return p, None
@@ -123,8 +147,8 @@ def ask_for_action(initiator: Union[Action, EventHandler],
         return None, None
 
 
-def user_choose_cards(initiator: Union[Action, EventHandler],
-                      actor: object,
+def user_choose_cards(initiator: CardChooser,
+                      actor: Character,
                       categories: Iterable[str],
                       timeout: Optional[int]=None,
                       trans: Optional[InputTransaction]=None,
@@ -138,9 +162,9 @@ def user_choose_cards(initiator: Union[Action, EventHandler],
     return rst[0]  # cards
 
 
-def user_choose_players(initiator: Union[Action, EventHandler],
-                        actor: object,
-                        candidates: List[Entity],
+def user_choose_players(initiator: CharacterChooser,
+                        actor: Character,
+                        candidates: List[Character],
                         timeout: Optional[int]=None,
                         trans: Optional[InputTransaction]=None,
                         ) -> Optional[List[Character]]:
@@ -158,7 +182,7 @@ def random_choose_card(g: THBattle, cardlists: Iterable[Iterable]):
         return None
 
     c = g.random.choice(allcards)
-    v = sync_primitive(c.sync_id, g.players)
+    v = sync_primitive(c.sync_id, g.players.player)
     cl = g.deck.lookupcards([v])
     assert len(cl) == 1
     c = cl[0]
@@ -166,7 +190,7 @@ def random_choose_card(g: THBattle, cardlists: Iterable[Iterable]):
     return c
 
 
-def skill_wrap(actor, skills, cards, params):
+def skill_wrap(actor: Character, skills: List[Type[Skill]], cards: List[Card], params: Dict[str, Any]):
     assert skills
     for skill_cls in skills:
         card = skill_cls.wrap(cards, actor, params)
@@ -339,6 +363,7 @@ def register_eh(cls):
 class THBAction(Action):
     source: Character
     target: Character
+    game: THBattle
 
     def __init__(self, source: Character, target: Character):
         self.source = source
@@ -568,13 +593,13 @@ class AskForCard(GenericAction):
 class ActiveDropCards(GenericAction):
     card_usage = 'drop'
 
-    def __init__(self, source, target, dropn):
+    def __init__(self, source: Character, target: Character, dropn: int) -> None:
         self.source = source
         self.target = target
         self.dropn = dropn
-        self.cards = []
+        self.cards: List[Card] = []
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         tgt = self.target
         if tgt.dead: return False
         n = self.dropn
@@ -593,7 +618,7 @@ class ActiveDropCards(GenericAction):
         self.cards = cards
         return True
 
-    def cond(self, cards):
+    def cond(self, cards) -> bool:
         tgt = self.target
         if not len(cards) == self.dropn:
             return False
@@ -824,6 +849,7 @@ class BaseActionStage(GenericAction):
                             self, [target], ('cards', 'showncards'), g.players, trans=trans
                         )
                     check(p is target)
+                    assert rst
                 finally:
                     self.in_user_input = False
 
@@ -1093,7 +1119,7 @@ class FinalizeStage(GenericAction):
 
 
 class PlayerTurn(GenericAction):
-    def __init__(self, target):
+    def __init__(self, target: Character):
         self.source = self.target = target
         self.pending_stages = [
             PrepareStage,
@@ -1104,7 +1130,7 @@ class PlayerTurn(GenericAction):
             FinalizeStage,
         ]
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         g = self.game
         p = self.target
         p.tags['turn_count'] += 1
@@ -1172,13 +1198,13 @@ class Pindian(UserAction):
         self.source = source
         self.target = target
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         src = self.source
         tgt = self.target
         g = self.game
 
         pl = BatchList([tgt, src])
-        pindian_card = {src: None, tgt: None}
+        pindian_card: Dict[Character, Card] = {}
 
         with InputTransaction('Pindian', pl) as trans:
             for p in pl:

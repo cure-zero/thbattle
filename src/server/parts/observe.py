@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import TYPE_CHECKING, List
 import logging
 
 # -- third party --
@@ -12,13 +13,17 @@ from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList, throttle
 
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
+
 
 # -- code --
 log = logging.getLogger('Observe')
 
 
 class Observe(object):
-    def __init__(self, core):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.user_state_transition += self.handle_ust_observee
@@ -32,7 +37,7 @@ class Observe(object):
         _['ob:leave'] += self._leave
         _['ob:kick'] += self._kick
 
-        self._bigbrothers = []
+        self._bigbrothers: List[int] = []
 
     def handle_ust_observee(self, ev):
         c, f, t = ev
@@ -89,12 +94,13 @@ class Observe(object):
     def _observe(self, u: Client, uid: int):
         core = self.core
 
-        observee = core.lobby.get_user(uid)
-        if not observee:
+        observee = core.lobby.get(uid)
+        if observee is None:
             return
 
         if core.lobby.state_of(observee) == 'ob':
             observee = observee._[self]['ob']
+            assert observee
 
         if core.lobby.state_of(observee) not in ('game', 'room', 'ready'):
             return
@@ -122,7 +128,7 @@ class Observe(object):
             return
 
         core = self.core
-        ob = core.lobby.get_user(uid)
+        ob = core.lobby.get(uid)
 
         if core.lobby.state_of(ob) != 'lobby':
             return
@@ -135,7 +141,7 @@ class Observe(object):
     @command('room', 'ready', 'game')
     def _kick(self, c: Client, uid: int):
         core = self.core
-        ob = core.lobby.get_user(uid)
+        ob = core.lobby.get(uid)
         if not ob:
             return
 

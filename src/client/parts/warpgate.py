@@ -14,7 +14,7 @@ import gevent
 import gevent.hub
 
 # -- own --
-from game.autoenv import EventHandler
+from game.base import EventHandler
 from utils.misc import instantiate
 import settings
 

@@ -18,7 +18,7 @@ log = logging.getLogger('Inputlets')
 
 
 class ChooseOptionInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, options: Iterable):
+    def __init__(self, initiator: Any, options: Iterable):
         self.initiator = initiator
         self.options = options
         self.result = None
@@ -38,7 +38,7 @@ class ChooseOptionInputlet(Inputlet):
 
 
 class ActionInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, categories: Iterable[str], candidates: Iterable[object]):
+    def __init__(self, initiator: Any, categories: Iterable[str], candidates: Iterable[object]):
         self.initiator = initiator
 
         self.categories = categories
@@ -117,7 +117,7 @@ class ActionInputlet(Inputlet):
 
 
 class ChooseIndividualCardInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, cards: List[Card]):
+    def __init__(self, initiator: Any, cards: List[Card]):
         self.initiator = initiator
         self.cards = cards
         self.selected = None
@@ -150,7 +150,7 @@ class ChooseIndividualCardInputlet(Inputlet):
 
 
 class ChoosePeerCardInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, target: Character, categories: Iterable[str]):
+    def __init__(self, initiator: Any, target: Character, categories: Iterable[str]):
         self.initiator = initiator
         self.target = target
         self.categories = categories
@@ -201,7 +201,7 @@ class ChoosePeerCardInputlet(Inputlet):
 
 class ProphetInputlet(Inputlet):
     '''For Ran'''
-    def __init__(self, initiator: GameObject, cards: List[Card]):
+    def __init__(self, initiator: Any, cards: List[Card]):
         self.initiator = initiator
         self.cards = cards
         self.upcards: List[Card] = []
@@ -240,7 +240,7 @@ class ProphetInputlet(Inputlet):
 
 
 class ChooseGirlInputlet(Inputlet):
-    def __init__(self, initiator: Union[Action, EventHandler], mapping: Dict[Player, List[CharChoice]]):
+    def __init__(self, initiator: Any, mapping: Dict[Player, List[CharChoice]]):
         self.initiator = initiator
 
         m = dict(mapping)
@@ -280,7 +280,7 @@ class ChooseGirlInputlet(Inputlet):
 
 
 class SortCharacterInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, mapping: Dict[Character, List[CharChoice]], limit: int=10000):
+    def __init__(self, initiator: Any, mapping: Dict[Character, List[CharChoice]], limit: int=10000):
         self.initiator = initiator
 
         s = {len(l) for l in list(mapping.values())}
@@ -312,7 +312,7 @@ class SortCharacterInputlet(Inputlet):
 
 class HopeMaskInputlet(Inputlet):
     '''For Kokoro'''
-    def __init__(self, initiator: GameObject, cards: List[Card]):
+    def __init__(self, initiator: Any, cards: List[Card]):
         self.initiator = initiator
         self.cards = cards
         self.putback: List[Card] = []
@@ -391,7 +391,7 @@ class HopeMaskKOFInputlet(HopeMaskInputlet):
 
 
 class GalgameDialogInputlet(Inputlet):
-    def __init__(self, initiator: GameObject, character: Character, dialog: str, voice: str):
+    def __init__(self, initiator: Any, character: Character, dialog: str, voice: str):
         self.initiator = initiator
         self.character = character
         self.dialog = dialog

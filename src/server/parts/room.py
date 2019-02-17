@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import List
+from typing import Dict, List, Optional, TYPE_CHECKING
 import logging
 import time
 
@@ -16,6 +16,10 @@ from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList, throttle
 
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
+
 
 # -- code --
 log = logging.getLogger('Room')
@@ -23,7 +27,7 @@ log = logging.getLogger('Room')
 
 class Room(object):
 
-    def __init__(self, core):
+    def __init__(self, core: 'Core'):
         self.core = core
 
         core.events.user_state_transition += self.handle_user_state_transition
@@ -41,7 +45,7 @@ class Room(object):
         _['room:change-location'] += self._change_location
         _['room:cancel-ready'] += self._cancel_ready
 
-        self.games = {}
+        self.games: Dict[int, Game] = {}
 
     def handle_user_state_transition(self, ev):
         c, f, t = ev
@@ -122,8 +126,8 @@ class Room(object):
             return
 
         g = self.create_game(modes[typ], name, flags)
-        core.invite.add_invited(u)
-        core.room.join_game(g, u)
+        core.invite.add_invited(g, u)
+        core.room.join_game(g, u, 0)
 
     @command('lobby', 'ob')
     def _join(self, u, gid: int, slot: int):
@@ -157,7 +161,7 @@ class Room(object):
         if u not in users:
             return
 
-        core.lobby.state_of(u).transfer('ready')
+        core.lobby.state_of(u).transit('ready')
 
         if all(core.lobby.state_of(u) == 'ready' for u in users):
             # prevent double starting
@@ -245,12 +249,12 @@ class Room(object):
         assert ev
         return g
 
-    def join_game(self, g: Game, u: Client, slot: int):
+    def join_game(self, g: Game, u: Client, slot: Optional[int]=None):
         core = self.core
 
         assert core.lobby.state_of(u) == 'lobby'
 
-        slot = slot and self._next_slot(g)
+        slot = slot if slot is not None else self._next_slot(g)
         if not (0 <= slot < g.n_persons and g._[self]['users'][slot] is None):
             return
 
@@ -269,7 +273,7 @@ class Room(object):
         assert rst
         u.write(['game_left', None])
 
-        gid = core.game.gid_of(g),
+        gid = core.room.gid_of(g),
 
         log.info(
             'Player %s left game [%s]',
@@ -314,7 +318,10 @@ class Room(object):
             log.error('User not in player list')
             return
 
-        core.lobby.state_of(u).transfer('room')
+        core.lobby.state_of(u).transit('room')
+
+    def get(self, gid: int) -> Optional[Game]:
+        return self.games.get(gid)
 
     # ----- Methods -----
     def _notify(self, g: Game):

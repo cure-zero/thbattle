@@ -2,7 +2,7 @@ from game.base import AbstractPlayer, Inputlet, InputTransaction, Game as BaseGa
 from typing import List, Optional
 
 def user_input(
-    players: List[object],
+    players: List,
     inputlet: Inputlet,
     timeout: int=25,
     type: str='single',

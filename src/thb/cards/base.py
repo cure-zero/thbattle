@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import deque
-from typing import Dict, List, Optional, TYPE_CHECKING, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type
 from weakref import WeakValueDictionary
 import itertools
 import logging
@@ -15,7 +15,7 @@ from thb.mode import THBattle
 
 # -- typing --
 if TYPE_CHECKING:
-    from thb.characters.base import Character
+    from thb.characters.base import Character  # noqa: F401
 
 
 # -- code --
@@ -170,11 +170,12 @@ class PhysicalCard(Card):
 
 class VirtualCard(Card, GameViralContext):
     associated_cards: List[Card]
+    no_reveal: bool
 
     sync_id = 0
     usage = 'none'
 
-    def __init__(self, player: Character):
+    def __init__(self, player: 'Character'):
         self.player           = player
         self.associated_cards = []
         self.resides_in       = player.cards
@@ -196,21 +197,22 @@ class VirtualCard(Card, GameViralContext):
         return False
 
     @classmethod
-    def unwrap(cls, vcards):
-        lst = []
-        sl = vcards[:]
+    def unwrap(cls, vcards: Iterable[Card]) -> List[PhysicalCard]:
+        lst: List[PhysicalCard] = []
+        sl = list(vcards)
 
         while sl:
             s = sl.pop()
-            try:
+            if isinstance(s, VirtualCard):
                 sl.extend(s.associated_cards)
-            except AttributeError:
+            else:
+                assert isinstance(s, PhysicalCard)
                 lst.append(s)
 
         return lst
 
     @classmethod
-    def wrap(cls, cl, player, params=None):
+    def wrap(cls, cl: List[Card], player: 'Character', params: Dict[str, Any]=None):
         vc = cls(player)
         vc.action_params = params or {}
         vc.associated_cards = cl[:]
@@ -285,7 +287,7 @@ class CardList(GameObject, deque):
     FATETELL = 'fatetell'
     SPECIAL = 'special'
 
-    def __init__(self, owner: Optional[Character], typ: str):
+    def __init__(self, owner: Optional['Character'], typ: str):
         self.owner = owner
         self.type = typ
         deque.__init__(self)

@@ -4,7 +4,7 @@
 from collections import OrderedDict, defaultdict
 from enum import Enum
 from itertools import cycle
-from typing import Any, Dict, Iterable, List, Type
+from typing import Any, Dict, Iterable, List, Type, Optional
 import logging
 import random
 
@@ -24,25 +24,26 @@ log = logging.getLogger('thb.common')
 
 
 class CharChoice(GameViralContext):
-    chosen = False
-    akari = False
+    chosen: Any = None
+    char_cls: Optional[Type[Character]]
+    akari: bool = False
 
-    def __init__(self, char_cls=None, akari=False):
+    def __init__(self, char_cls=None, akari=False) -> None:
         self.set(char_cls, akari)
 
     def __data__(self):
         return self.char_cls.__name__ if not self.akari else 'Akari'
 
-    def sync(self, data):
+    def sync(self, data) -> None:
         from thb.characters.base import Character
         self.set(Character.classes[data], False)
 
-    def conceal(self):
+    def conceal(self) -> None:
         self.char_cls = None
-        self.chosen = False
+        self.chosen = None
         self.akari = False
 
-    def set(self, char_cls, akari=False):
+    def set(self, char_cls, akari=False) -> None:
         self.char_cls = char_cls
 
         if akari:
@@ -63,35 +64,35 @@ class PlayerIdentity(GameViralContext):
 
     def __init__(self, e: Type[Enum]):
         self._idtype = e
-        self._value = e(0)
+        self._identity = e(0)
 
     def __data__(self) -> Any:
-        return self._value.value
+        return self._identity.value
 
     def __str__(self) -> str:
-        return self._value.name
+        return self._identity.name
 
     def sync(self, data) -> None:
-        self._value = self._idtype(data)
+        self._identity = self._idtype(data)
 
     '''
     def is_type(self, t: Enum) -> bool:
         g = self.game
         pl = g.players
-        return sync_primitive(self.value == t, pl)
+        return sync_primitive(self.identity == t, pl)
     '''
 
-    def set_value(self, t: int) -> None:
+    def set_identity(self, t: int) -> None:
         if Game.SERVER:
-            self._value = self._idtype(t)
+            self._identity = self._idtype(t)
 
-    def get_value(self) -> Enum:
-        return self._value
+    def get_identity(self) -> Enum:
+        return self._identity
 
-    value = property(get_value, set_value)
+    identity = property(get_identity, set_identity)
 
 
-def roll(g: THBattle, pl: List[Player], items: Dict[Player, List[GameItem]]) -> BatchList[Player]:
+def roll(g: THBattle, pl: BatchList[Player], items: Dict[Player, List[GameItem]]) -> BatchList[Player]:
     from thb.item import European
     roll = list(range(len(pl)))
     g.random.shuffle(roll)

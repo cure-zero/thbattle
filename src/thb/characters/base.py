@@ -33,7 +33,7 @@ class Character(GameObject):
     maxlife: int
 
     # ----- Instance Variables -----
-    dead: bool = False
+    dead: bool
     life: int
     disabled_skills: Dict[str, Set[Type['Skill']]]
     tags: Dict[str, Any]
@@ -47,6 +47,13 @@ class Character(GameObject):
     def __init__(self, player: Player):
         self.player = player
         self.disabled_skills = defaultdict(set)
+
+        cls = self.__class__
+
+        self.skills = list(cls.skills)
+        self.maxlife = cls.maxlife
+        self.life = cls.maxlife
+        self.dead = False
 
         self.cards          = CardList(self, 'cards')       # Cards in hand
         self.showncards     = CardList(self, 'showncards')  # Cards which are shown to the others, treated as 'Cards in hand'
@@ -104,19 +111,3 @@ def get_characters(*categories):
     chars.difference_update(*[characters_by_category['-' + c] for c in pos])
     chars.difference_update(*[characters_by_category[c.strip('-')] for c in neg])
     return list(sorted(chars, key=lambda i: i.__name__))
-
-
-def mixin_character(g: Game, player: Entity, char_cls: Type[Character]) -> Tuple[Character, Optional[Type[Character]]]:
-    player.index = g.get_playerid(player)
-
-    old = None
-    if isinstance(player, Character):
-        old = player.__class__
-        player = player.player
-
-    new = char_cls(player)
-    new.skills = list(char_cls.skills)
-    new.maxlife = char_cls.maxlife
-    new.life = char_cls.maxlife
-    new.dead = False
-    return new, old

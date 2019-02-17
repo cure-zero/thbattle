@@ -30,6 +30,7 @@ cc
 client_log.txt
 client_log.txt.gz
 components
+.dmypy.json
 current_version
 d
 dd

@@ -247,6 +247,9 @@ class Game(GameObject, GameViralContext):
 
         return rst
 
+    def pause(self, t: float) -> None:
+        pass
+
     '''
     def get_playerid(self, p):
         return self.players.index(p)
@@ -292,7 +295,7 @@ class EventHandler(GameObject):
 
     arbiter: Type['EventArbiter']
 
-    def __init__(self, g):
+    def __init__(self, g: Game):
         self.game = g
 
     def handle(self, evt_type: str, data: Any):

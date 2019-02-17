@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Dict, List, TYPE_CHECKING, Tuple
+from typing import Dict, List, TYPE_CHECKING, Tuple, Optional
 import logging
 
 # -- third party --
@@ -88,6 +88,9 @@ class Lobby(object):
 
     def all_users(self) -> List[Client]:
         return BatchList(self.users.values())
+
+    def get(self, uid: int) -> Optional[Client]:
+        return self.users.get(uid)
 
     # ----- Methods -----
     def _user_join(self, u: Client):
