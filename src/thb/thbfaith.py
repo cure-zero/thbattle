@@ -3,20 +3,21 @@
 # -- stdlib --
 from enum import Enum
 from itertools import cycle
+from typing import Any, Dict, List
 import logging
-from typing import Any
 import random
 
 # -- third party --
 # -- own --
+# -- errord --
 from game.autoenv import user_input
-from game.base import BootstrapAction, EventHandler, InputTransaction, InterruptActionFlow
+from game.base import BootstrapAction, EventHandler, InputTransaction, InterruptActionFlow, Player, GameItem
 from game.base import get_seed_for
 from thb.actions import DistributeCards, MigrateCardsTransaction, PlayerDeath, PlayerTurn
 from thb.actions import RevealIdentity, migrate_cards
 from thb.cards.base import Deck
-from thb.characters.base import Character, mixin_character
-from thb.common import CharChoice, PlayerIdentity, build_choices, roll
+from thb.characters.base import Character
+from thb.common import CharChoice, PlayerRole, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet, SortCharacterInputlet
 from thb.mode import THBattle
 from utils.misc import BatchList
@@ -83,36 +84,41 @@ class RedrawCards(DistributeCards):
         return True
 
 
-class Identity(PlayerIdentity):
-    class TYPE(Enum):
-        HIDDEN  = 0
-        HAKUREI = 1
-        MORIYA  = 2
+class THBFaithIdentity(Enum):
+    HIDDEN  = 0
+    HAKUREI = 1
+    MORIYA  = 2
 
 
 class THBattleFaithBootstrap(BootstrapAction):
     game: 'THBattleFaith'
 
-    def __init__(self, params, items):
+    def __init__(self, params: Dict[str, Any],
+                       items: Dict[Player, List[GameItem]],
+                       players: BatchList[Player]):
         self.source = self.target = None
         self.params = params
         self.items = items
+        self.players = players
 
     def apply_action(self) -> bool:
         g = self.game
         params = self.params
+        pl = self.players
 
         g.deck = Deck(g)
+        g.identity = {}
 
-        H, M = Identity.TYPE.HAKUREI, Identity.TYPE.MORIYA
+        H, M = THBFaithIdentity.HAKUREI, THBFaithIdentity.MORIYA
         if params['random_seat']:
             # reseat
-            seed = get_seed_for(g, g.players)
-            random.Random(seed).shuffle(g.players)
-            g.emit_event('reseat', (FROM, TO))
+            orig_pl = BatchList(pl)
+            seed = get_seed_for(g, pl)
+            random.Random(seed).shuffle(pl)
+            g.emit_event('reseat', (orig_pl, pl))
 
             L = [[H, H, M, M, H, M], [H, M, H, M, H, M]]
-            rnd = random.Random(get_seed_for(g, g.players))
+            rnd = random.Random(get_seed_for(g, pl))
             L = rnd.choice(L) * 2
             s = rnd.randrange(0, 6)
             idlist = L[s:s+6]
@@ -122,9 +128,9 @@ class THBattleFaithBootstrap(BootstrapAction):
 
         del H, M
 
-        for p, identity in zip(g.players, idlist):
-            p.identity = Identity()
-            p.identity.type = identity
+        for p, identity in zip(pl, idlist):
+            g.identity[p] = PlayerRole(THBFaithIdentity)
+            g.identity[p].set(identity)
             g.process_action(RevealIdentity(p, g.players))
 
         hakureis      = BatchList()
@@ -133,10 +139,10 @@ class THBattleFaithBootstrap(BootstrapAction):
         moriyas.pool  = []
 
         for p in g.players:
-            if p.identity.type == Identity.TYPE.HAKUREI:
+            if p.identity.type == THBFaithIdentity.HAKUREI:
                 hakureis.append(p)
                 p.force = hakureis
-            elif p.identity.type == Identity.TYPE.MORIYA:
+            elif p.identity.type == THBFaithIdentity.MORIYA:
                 moriyas.append(p)
                 p.force = moriyas
 
@@ -220,7 +226,7 @@ class THBattleFaith(THBattle):
         g.players.reveal(choice)
         cls = choice.char_cls
 
-        log.info('>> NewCharacter: %s %s', Identity.TYPE(p.identity.type).name, cls.__name__)
+        log.info('>> NewCharacter: %s %s', THBFaithIdentity(p.identity.type).name, cls.__name__)
 
         # mix char class with player -->
         old = p

@@ -80,7 +80,7 @@ class ActionInputlet(Inputlet):
                 players = pl
 
             if categories:
-                cards = g.deck.lookupcards(cid_list)
+                cards = [g.deck.lookup(i) for i in cid_list]
                 check(len(cards) == len(cid_list))  # Invalid id
 
                 cs = set(cards)
@@ -170,10 +170,8 @@ class ChoosePeerCardInputlet(Inputlet):
 
             check(isinstance(cid, int))
 
-            cards = g.deck.lookupcards((cid,))
-
-            check(len(cards) == 1)  # Invalid id
-            card = cards[0]
+            card = g.deck.lookup(cid)
+            check(card)  # Invalid id
 
             check(card.resides_in.owner is target)
             check(card.resides_in in categories)

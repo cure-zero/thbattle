@@ -1,4 +1,4 @@
-from game.base import AbstractPlayer, Inputlet, InputTransaction, Game as BaseGame
+from game.base import Player, Inputlet, InputTransaction, Game as BaseGame
 from typing import List, Optional
 
 def user_input(

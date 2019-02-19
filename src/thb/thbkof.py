@@ -15,7 +15,7 @@ from thb.actions import DistributeCards, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.cards.base import Deck
 from thb.cards.definition import kof_card_definition
 from thb.characters.base import mixin_character
-from thb.common import CharChoice, PlayerIdentity, build_choices, roll
+from thb.common import CharChoice, PlayerRole, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
 from thb.mode import THBattle
 
@@ -89,7 +89,7 @@ class KOFCharacterSwitchHandler(EventHandler):
         return p
 
 
-class Identity(PlayerIdentity):
+class Identity(PlayerRole):
     class TYPE(IntEnum):
         HIDDEN  = 0
         HAKUREI = 1

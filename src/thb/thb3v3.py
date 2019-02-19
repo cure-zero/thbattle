@@ -16,7 +16,7 @@ from game.base import InputTransaction, InterruptActionFlow, get_seed_for
 from thb.actions import DrawCards, PlayerDeath, PlayerTurn, RevealIdentity
 from thb.cards.base import CardList, Deck
 from thb.characters.base import Character, mixin_character
-from thb.common import PlayerIdentity, build_choices, roll
+from thb.common import PlayerRole, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet
 from utils.misc import BatchList
 
@@ -48,7 +48,7 @@ class DeathHandler(EventHandler):
         return act
 
 
-class Identity(PlayerIdentity):
+class Identity(PlayerRole):
     class TYPE(IntEnum):
         HIDDEN  = 0
         HAKUREI = 1

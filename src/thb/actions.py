@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, Union, cast, Sequence
 import logging
 
 # -- third party --
@@ -183,9 +183,8 @@ def random_choose_card(g: THBattle, cardlists: Iterable[Iterable]):
 
     c = g.random.choice(allcards)
     v = sync_primitive(c.sync_id, g.players.player)
-    cl = g.deck.lookupcards([v])
-    assert len(cl) == 1
-    c = cl[0]
+    c = g.deck.lookup(v)
+    assert c
     c.detach()
     return c
 
@@ -217,16 +216,47 @@ def skill_check(wrapped):
         return False
 
 
-class MigrateCardsTransaction(GameViralContext):
-    movements: List[Tuple[List[Card], Optional[CardList], Optional[CardList], bool]]
+COMMON_EVENT_HANDLERS: Set[Type[EventHandler]] = set()
 
-    def __init__(self, action: Optional[Action]=None):
-        self.action = action or self.game.action_stack[-1]
+
+def register_eh(cls):
+    COMMON_EVENT_HANDLERS.add(cls)
+    return cls
+
+
+# ------------------------------------------
+class THBAction(Action):
+    source: Character
+    target: Character
+    game: THBattle
+
+    def __init__(self, source: Character, target: Character):
+        self.source = source
+        self.target = target
+
+
+class GenericAction(THBAction):
+    pass
+
+
+class UserAction(THBAction):  # card/character skill actions
+    target_list: List[Character]
+    associated_card: Card
+
+
+CardMovement = Tuple[THBAction, List[Card], Optional[CardList], Optional[CardList], bool]
+
+
+class MigrateCardsTransaction(GameViralContext):
+    movements: List[CardMovement]
+
+    def __init__(self, action: Optional[THBAction]=None):
+        self.action = cast(THBAction, action or self.game.action_stack[-1])
         self.cancelled = False
         self.movements = []
 
-    def move(self, cards, _from, to, is_bh) -> None:
-        self.movements.append((cards, _from, to, is_bh))
+    def move(self, cards: List[Card], _from: Optional[CardList], to: Optional[CardList], is_bh: bool) -> None:
+        self.movements.append((self.action, cards, _from, to, is_bh))
 
     def __enter__(self):
         return self
@@ -272,18 +302,23 @@ class MigrateCardsTransaction(GameViralContext):
             return (m for m in self.movements if m[2] is not MigrateSpecial.DETACHED)
 
 
-def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
+def migrate_cards(cards: Sequence[Card],
+                  to: CardList,
+                  unwrap: bool=False,
+                  is_bh: bool=False,
+                  trans: Optional[MigrateCardsTransaction]=None,
+                  ):
     '''
     cards: cards to move around
     to: destination card list
-    unwrap: drop all VirtualCard wrapping, preserve PhysicalCard only
+    unwrap: tear down VirtualCard wrapping, preserve PhysicalCard only, at most X layers
     is_bh: indicates this operation is bottom half of a complete migration (pairing with detach_cards)
     trans: associated MigrateCardsTransaction
     '''
     if not trans:
-        with MigrateCardsTransaction() as trans:
-            migrate_cards(cards, to, unwrap, is_bh, trans)
-            return not trans.cancelled
+        with MigrateCardsTransaction() as t:
+            migrate_cards(cards, to, unwrap, is_bh, t)
+            return not t.cancelled
 
     if to.owner and to.owner.dead:
         # do not migrate cards to dead character
@@ -301,6 +336,7 @@ def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
 
         if l[0].is_card(VirtualCard):
             assert len(l) == 1
+            assert to.owner
             trans.move(l, cl, UNWRAPPED if unwrap else to, is_bh)
             l[0].unwrapped or migrate_cards(
                 l[0].associated_cards,
@@ -315,18 +351,8 @@ def migrate_cards(cards, to, unwrap=False, is_bh=False, trans=None):
 
 
 class MigrateSpecial(object):
-
-    class _SPECIAL(object):
-        owner = None
-
-        def __init__(self, name):
-            self.type = name.lower()
-
-        def __repr__(self):
-            return self.name.upper()
-
-    DETACHED     = _SPECIAL('DETACHED')
-    UNWRAPPED    = _SPECIAL('UNWRAPPED')
+    DETACHED     = CardList(None, 'DETACHED')
+    UNWRAPPED    = CardList(None, 'UNWRAPPED')
     SINGLE_LAYER = 1
 
 
@@ -347,36 +373,8 @@ class PostCardMigrationHandler(EventArbiter):
         return arg
 
 
-def detach_cards(cards: Iterable[Card], trans=None):
+def detach_cards(cards: Sequence[Card], trans=None):
     migrate_cards(cards, MigrateSpecial.DETACHED, trans=trans)
-
-
-COMMON_EVENT_HANDLERS: Set[Type[EventHandler]] = set()
-
-
-def register_eh(cls):
-    COMMON_EVENT_HANDLERS.add(cls)
-    return cls
-
-
-# ------------------------------------------
-class THBAction(Action):
-    source: Character
-    target: Character
-    game: THBattle
-
-    def __init__(self, source: Character, target: Character):
-        self.source = source
-        self.target = target
-
-
-class GenericAction(THBAction):
-    pass
-
-
-class UserAction(THBAction):  # card/character skill actions
-    target_list: List[Character]
-    associated_card: Card
 
 
 class DeadDropCards(GenericAction):
@@ -1134,18 +1132,16 @@ class PlayerTurn(GenericAction):
         g = self.game
         p = self.target
         p.tags['turn_count'] += 1
+        '''
         g.turn_count += 1
         g.current_turn = self
         g.current_player = p
+        '''
 
-        try:
-            while self.pending_stages:
-                stage = self.pending_stages.pop(0)
-                self.current_stage = cs = stage(p)
-                g.process_action(cs)
-
-        finally:
-            g.current_turn = None
+        while self.pending_stages:
+            stage = self.pending_stages.pop(0)
+            self.current_stage = cs = stage(p)
+            g.process_action(cs)
 
         return True
 

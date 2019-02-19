@@ -18,7 +18,7 @@ from thb.actions import migrate_cards
 from thb.cards.base import Deck
 from thb.characters.akari import Akari
 from thb.characters.base import Character, mixin_character
-from thb.common import CharChoice, PlayerIdentity, roll
+from thb.common import CharChoice, PlayerRole, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from thb.mode import THBattle
 from utils.misc import BatchList, partition
@@ -137,7 +137,7 @@ class THBattle2v2Bootstrap(BootstrapAction):
         pl = self.players
 
         g.deck = Deck(g)
-        g.identity = {}
+        g.identities = {}
 
         if params['random_force']:
             seed = get_seed_for(g, pl)
@@ -149,8 +149,8 @@ class THBattle2v2Bootstrap(BootstrapAction):
         g.forces = {H: BatchList(), M: BatchList()}
 
         for p, id in zip(pl, [H, H, M, M]):
-            g.identity[p] = PlayerIdentity(THB2v2Identity)
-            g.identity[p].value = id
+            g.identities[p] = PlayerRole[THB2v2Identity]()
+            g.identities[p].set(id)
 
         for p in pl:
             g.process_action(RevealIdentity(p, pl))
@@ -245,13 +245,13 @@ class THBattle2v2Bootstrap(BootstrapAction):
             log.info(
                 '>> Player: %s:%s',
                 ch.__class__.__name__,
-                g.identity[ch.player].identity.name,
+                g.identities[ch.player].get().name,
             )
         # -------
 
         g.forces = {}
         for ch in g.players:
-            g.forces.setdefault(g.identity[ch.player].identity, BatchList()).append(ch)
+            g.forces.setdefault(g.identities[ch.player].get(), BatchList()).append(ch)
 
         g.emit_event('game_begin', g)
 
@@ -263,7 +263,7 @@ class THBattle2v2Bootstrap(BootstrapAction):
             if not ch.dead:
                 g.emit_event('player_turn', ch)
                 try:
-                    g.process_action(PlayerTurn(p))
+                    g.process_action(PlayerTurn(ch.player))
                 except InterruptActionFlow:
                     pass
 

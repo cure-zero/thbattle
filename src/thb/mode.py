@@ -13,7 +13,8 @@ from utils.misc import BatchList
 
 # -- typing --
 if TYPE_CHECKING:
-    from thb.common import PlayerIdentity  # noqa: F401
+    from thb.actions import THBAction  # noqa: F401
+    from thb.common import PlayerRole  # noqa: F401
 
 
 # -- code --
@@ -35,7 +36,7 @@ class THBattle(Game):
     game_ehs: List[Type[EventHandler]]
     deck: Deck
     players: BatchList[Character]
-    identity: Dict[Player, 'PlayerIdentity']
+    identities: Dict[Player, 'PlayerRole']
     dispatcher: THBEventDispatcher
 
     dispatcher_cls = THBEventDispatcher

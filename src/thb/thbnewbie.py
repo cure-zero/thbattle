@@ -23,7 +23,7 @@ from thb.cards.classes import GreenUFOCard, Heal, HealCard, LaunchGraze, MomijiS
 from thb.cards.classes import NazrinRodCard, RedUFOCard, Reject, RejectCard, RejectHandler
 from thb.cards.classes import SinsackCard, WineCard
 from thb.characters.base import Character, mixin_character
-from thb.common import PlayerIdentity
+from thb.common import PlayerRole
 from thb.inputlets import ActionInputlet, GalgameDialogInputlet
 from thb.mode import THBattle
 
@@ -53,7 +53,7 @@ class DeathHandler(EventHandler):
         return act
 
 
-class Identity(PlayerIdentity):
+class Identity(PlayerRole):
     class TYPE(Enum):
         HIDDEN = 0
         HAKUREI = 1

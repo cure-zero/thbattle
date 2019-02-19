@@ -20,7 +20,7 @@ from thb.cards.base import Deck
 from thb.cards.classes import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, Skill, TreatAs
 from thb.cards.classes import VirtualCard, t_None, t_One
 from thb.characters.base import mixin_character
-from thb.common import CharChoice, PlayerIdentity, build_choices
+from thb.common import CharChoice, PlayerRole, build_choices
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from thb.item import ImperialIdentity
 from thb.mode import THBattle
@@ -311,7 +311,7 @@ class ExtraCardSlot(Skill):
     skill_category = ['character', 'passive', 'boss']
 
 
-class Identity(PlayerIdentity):
+class Identity(PlayerRole):
     # 城管 BOSS 道中 黑幕
     class TYPE(IntEnum):
         HIDDEN     = 0

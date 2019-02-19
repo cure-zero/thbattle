@@ -45,7 +45,7 @@ class Card(GameObject):
         10: '10', 11: 'J', 12: 'Q', 13: 'K',
     }
 
-    _color = None
+    _color: Optional[int] = None
     usage = 'launch'
 
     associated_action: Optional[Type[UserAction]]
@@ -157,6 +157,8 @@ class Card(GameObject):
 class PhysicalCard(Card):
     classes: Dict[str, Type['PhysicalCard']] = {}
 
+    exinwan_target: Optional['Character']  # HACK, for ExinwanCard
+
     def __eq__(self, other):
         if not isinstance(other, Card): return False
         return self.sync_id == other.sync_id
@@ -170,10 +172,12 @@ class PhysicalCard(Card):
 
 class VirtualCard(Card, GameViralContext):
     associated_cards: List[Card]
-    no_reveal: bool
+    action_params: dict
+    no_reveal: bool = False
 
-    sync_id = 0
-    usage = 'none'
+    _suit: Optional[int]
+    _number: Optional[int]
+    _color: Optional[int]
 
     def __init__(self, player: 'Character'):
         self.player           = player
@@ -181,6 +185,8 @@ class VirtualCard(Card, GameViralContext):
         self.resides_in       = player.cards
         self.action_params    = {}
         self.unwrapped        = False
+        self.sync_id          = 0
+        self.usage            = 'none'
         self._suit            = None
         self._number          = None
         self._color           = None
@@ -244,7 +250,7 @@ class VirtualCard(Card, GameViralContext):
 
     number = property(get_number, set_number)
 
-    def get_suit(self):
+    def get_suit(self) -> int:
         if self._suit is not None:
             return self._suit
 
@@ -252,7 +258,7 @@ class VirtualCard(Card, GameViralContext):
         suit = cl[0].suit if len(cl) == 1 else Card.NOTSET
         return suit
 
-    def set_suit(self, v):
+    def set_suit(self, v: int):
         self._suit = v
 
     suit = property(get_suit, set_suit)
@@ -307,8 +313,8 @@ class Deck(GameObject):
         self.game = g
         card_definition = card_definition or definition.card_definition
 
-        self.cards_record = {}
-        self.vcards_record = WeakValueDictionary()
+        self.cards_record: Dict[int, PhysicalCard] = {}
+        self.vcards_record = WeakValueDictionary[int, VirtualCard]()
         self.droppedcards = CardList(None, 'droppedcard')
         cards = CardList(None, 'deckcard')
         self.cards = cards
@@ -318,7 +324,7 @@ class Deck(GameObject):
         )
         self.shuffle(cards)
 
-    def getcards(self, num):
+    def getcards(self, num: int) -> List[Card]:
         cl = self.cards
         if len(self.cards) <= num:
             dcl = self.droppedcards
@@ -342,17 +348,11 @@ class Deck(GameObject):
 
         return rst
 
-    def lookupcards(self, idlist):
-        lst = []
-        cr = self.cards_record
-        vcr = self.vcards_record
-        for cid in idlist:
-            c = vcr.get(cid, None) or cr.get(cid, None)
-            if c: lst.append(c)
+    def lookup(self, sync_id: int) -> Optional[Card]:
+        return self.vcards_record.get(sync_id, None) or \
+            self.cards_record.get(sync_id, None)
 
-        return lst
-
-    def register_card(self, card):
+    def register_card(self, card: PhysicalCard):
         assert not card.sync_id
         g = self.game
         sid = g.get_synctag()
@@ -360,14 +360,14 @@ class Deck(GameObject):
         self.cards_record[sid] = card
         return sid
 
-    def register_vcard(self, vc):
+    def register_vcard(self, vc: VirtualCard):
         g = self.game
         sid = g.get_synctag()
         vc.sync_id = sid
         self.vcards_record[sid] = vc
         return sid
 
-    def shuffle(self, cl):
+    def shuffle(self, cl: CardList):
         owner = cl.owner
         g = self.game
         list_shuffle(g, cl, owner)
@@ -376,7 +376,7 @@ class Deck(GameObject):
             c.sync_id = 0
             self.register_card(c)
 
-    def inject(self, cls, suit, rank):
+    def inject(self, cls: Type[PhysicalCard], suit: int, rank: int) -> PhysicalCard:
         cl = self.cards
         c = cls(suit, rank, cl)
         self.register_card(c)

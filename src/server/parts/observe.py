@@ -130,6 +130,9 @@ class Observe(object):
         core = self.core
         ob = core.lobby.get(uid)
 
+        if ob is None:
+            return
+
         if core.lobby.state_of(ob) != 'lobby':
             return
 
@@ -279,7 +282,7 @@ class Observe(object):
         @throttle(0.5)
         def _notifier():
             pl = core.room.users_of(g)
-            obs = []
+            obs: List[Client] = []
             for u in pl:
                 obs.extend(u._[self]['obs'])
 

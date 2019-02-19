@@ -4,7 +4,7 @@
 from collections import OrderedDict, defaultdict
 from enum import Enum
 from itertools import cycle
-from typing import Any, Dict, Iterable, List, Type, Optional
+from typing import Any, Dict, Iterable, List, Type, Optional, TypeVar, Generic
 import logging
 import random
 
@@ -59,21 +59,31 @@ class CharChoice(GameViralContext):
         )
 
 
-class PlayerIdentity(GameViralContext):
-    game: THBattle
+T = TypeVar('T', bound=Enum)
 
-    def __init__(self, e: Type[Enum]):
-        self._idtype = e
-        self._identity = e(0)
+
+class PlayerRole(Generic[T], GameViralContext):
+    game: THBattle
+    _role: T
+
+    def __init__(self):
+        self._typ = self.__class__.__args__[0]
+        self._role = self._typ(0)
 
     def __data__(self) -> Any:
-        return self._identity.value
+        return self._role.value
 
     def __str__(self) -> str:
-        return self._identity.name
+        return self._role.name
+
+    def __eq__(self, other: Any) -> bool:
+        if not isinstance(other, self._typ):
+            return False
+
+        return self._role == other
 
     def sync(self, data) -> None:
-        self._identity = self._idtype(data)
+        self._role = self._typ(data)
 
     '''
     def is_type(self, t: Enum) -> bool:
@@ -82,14 +92,13 @@ class PlayerIdentity(GameViralContext):
         return sync_primitive(self.identity == t, pl)
     '''
 
-    def set_identity(self, t: int) -> None:
+    def set(self, t: Any) -> None:
+        assert isinstance(t, self._typ)
         if Game.SERVER:
             self._identity = self._idtype(t)
 
-    def get_identity(self) -> Enum:
-        return self._identity
-
-    identity = property(get_identity, set_identity)
+    def get(self) -> T:
+        return self._role
 
 
 def roll(g: THBattle, pl: BatchList[Player], items: Dict[Player, List[GameItem]]) -> BatchList[Player]:

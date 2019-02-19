@@ -98,7 +98,7 @@ class Player(GameObject, AssociatedDataViralContext):
     # index = None
     # game: 'Game'
 
-    def reveal(self, obj_list):
+    def reveal(self, obj_list: Any) -> None:
         raise GameError('Abstract')
 
     def __repr__(self):
@@ -511,13 +511,6 @@ class Action(GameObject, GameViralContext, AssociatedDataViralContext):
         return self.__class__.__name__
 
 
-class BootstrapAction(Action):
-    def __init__(self, params: Dict[str, Any],
-                       items: Dict[Player, List['GameItem']],
-                       players: BatchList[Player]):
-        raise Exception('Override this!')
-
-
 class SyncPrimitive(GameObject):
     def __init__(self, value):
         self.value = value
@@ -829,3 +822,10 @@ class GameItem(object):
             raise exceptions.InvalidItemSKU
 
         return cls(sku, *args)
+
+
+class BootstrapAction(Action):
+    def __init__(self, params: Dict[str, Any],
+                       items: Dict[Player, List[GameItem]],
+                       players: BatchList[Player]):
+        raise Exception('Override this!')

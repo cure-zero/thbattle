@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import cast
 # -- third party --
 # -- own --
 from game.base import EventHandler
-from thb.actions import ActionStage, ActionStageLaunchCard, AskForCard, Damage, DistributeCards
-from thb.actions import DropCards, ForEach, GenericAction, LaunchCard, PlayerTurn, UseCard
-from thb.actions import UserAction, VitalityLimitExceeded, register_eh, user_choose_cards
+from thb.actions import ActionStage, ActionStageLaunchCard, AskForCard, CardMovement, Damage
+from thb.actions import DistributeCards, DropCards, ForEach, GenericAction, LaunchCard, PlayerTurn
+from thb.actions import UseCard, UserAction, VitalityLimitExceeded, register_eh, user_choose_cards
 
 
 # -- code --
@@ -196,11 +197,11 @@ class LaunchGraze(BaseUseGraze):
     def process_card(self, card):
         g = self.game
         tgt = self.target
-        return g.process_action(LaunchCard(tgt, [tgt], card, GrazeAction))
+        return g.process_action(LaunchCard(tgt, [tgt], card, GrazeAction(tgt, tgt)))
 
     def ask_for_action_verify(self, p, cl, tl):
         tgt = self.target
-        return LaunchCard(tgt, [tgt], cl[0], GrazeAction).can_fire()
+        return LaunchCard(tgt, [tgt], cl[0], GrazeAction(tgt, tgt)).can_fire()
 
 
 class AskForHeal(AskForCard):
@@ -213,12 +214,14 @@ class AskForHeal(AskForCard):
     def process_card(self, card):
         g = self.game
         src, tgt = self.source, self.target
-        return g.process_action(LaunchCard(tgt, [src], card, card.associated_action or Heal))
+        heal_cls = card.associated_action or Heal
+        return g.process_action(LaunchCard(tgt, [src], card, heal_cls(tgt, src)))
 
     def ask_for_action_verify(self, p, cl, tl):
         src, tgt = self.source, self.target
         card = cl[0]
-        return LaunchCard(tgt, [src], card, card.associated_action or Heal).can_fire()
+        heal_cls = card.associated_action or Heal
+        return LaunchCard(tgt, [src], card, heal_cls(tgt, src)).can_fire()
 
 
 class Wine(BasicAction):
@@ -314,7 +317,7 @@ class ExinwanEffect(GenericAction):
 
     def cond(self, cards):
         if len(cards) != 2: return False
-        from .base import Skill
+        from thb.cards.base import Skill
         if any(isinstance(c, Skill) for c in cards): return False
         return True
 
@@ -328,11 +331,12 @@ class ExinwanHandler(EventHandler):
 
     interested = ['card_migration', 'post_card_migration']
 
-    def handle(self, evt_type, arg):
-        from .base import VirtualCard, HiddenCard
-        from .definition import ExinwanCard
+    def handle(self, evt_type, arg) -> None:
+        from thb.cards.base import VirtualCard, HiddenCard
+        from thb.cards.definition import ExinwanCard
 
         if evt_type == 'card_migration':
+            arg = cast(CardMovement, arg)
             act, cards, _from, to, is_bh = arg
 
             # someone is getting the ExinwanCard
