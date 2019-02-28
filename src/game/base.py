@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import defaultdict
 from random import Random
-from typing import Any, Dict, List, Optional, Set, Type, Union
+from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, Sequence
 import logging
 import random
 
@@ -389,6 +389,9 @@ class EventArbiter(EventHandler):
         self.handlers = handlers[:]
 
 
+T = TypeVar('T', bound=EventHandler)
+
+
 class EventDispatcher(GameObject):
     game: Game
     _event_handlers: List[EventHandler]
@@ -455,6 +458,13 @@ class EventDispatcher(GameObject):
             raise Exception('EventHandler %s returned None' % eh.__class__.__name__)
 
         return data
+
+    def find_by_cls(self, cls: Type[T]) -> Optional[T]:
+        for c in self._event_handlers:
+            if isinstance(c, cls):
+                return c
+
+        return None
 
     def _get_relevant_eh(self, tag: str):
         ehs = self._ehs_cache.get(tag)
@@ -618,7 +628,7 @@ class Inputlet(GameObject):
 
 
 class InputTransaction(GameViralContext):
-    def __init__(self, name, involved, **kwargs):
+    def __init__(self, name: str, involved: Sequence[Player], **kwargs):
         self.name = name
         self.involved = involved[:]
         self.__dict__.update(kwargs)
@@ -778,8 +788,9 @@ class GameData(object):
 
 
 class GameItem(object):
-    inventory: Dict[str, type] = {}
+    inventory: Dict[str, Type['GameItem']] = {}
 
+    # --- class ---
     key: str  = ''
     args: List[type] = []
     usable = False
@@ -787,12 +798,14 @@ class GameItem(object):
     title = 'ITEM-TITLE'
     description = 'ITEM-DESC'
 
-    def __init__(self, sku, *args):
-        self.sku = sku
-        self.init(*args)
+    # --- instance ---
+    sku: str
 
-    def init(self, *args):
-        pass
+    # --- poison ---
+    init: None
+
+    def __init__(self, *args):
+        raise Exception('Should not instantiate plain GameItem!')
 
     @classmethod
     def register(cls, item_cls):
@@ -801,7 +814,7 @@ class GameItem(object):
         return item_cls
 
     @classmethod
-    def from_sku(cls, sku):
+    def from_sku(cls, sku) -> 'GameItem':
         if ':' in sku:
             key, args = sku.split(':')
             args = args.split(',')
@@ -821,7 +834,9 @@ class GameItem(object):
         except Exception:
             raise exceptions.InvalidItemSKU
 
-        return cls(sku, *args)
+        o = cls(*args)
+        o.sku = sku
+        return o
 
 
 class BootstrapAction(Action):

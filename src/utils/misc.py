@@ -45,7 +45,6 @@ class ObjectDict(dict):
 
 
 T = TypeVar('T')
-U = TypeVar('U')
 
 
 class BatchList(List[T]):
@@ -67,7 +66,7 @@ class BatchList(List[T]):
             f(*a, **k) for f in self
         )
 
-    def exclude(self, elem: T):
+    def exclude(self, elem: T) -> 'BatchList[T]':
         nl = BatchList(self)
         try:
             nl.remove(elem)
@@ -76,7 +75,7 @@ class BatchList(List[T]):
 
         return nl
 
-    def rotate_to(self, elem: T):
+    def rotate_to(self, elem: T) -> 'BatchList[T]':
         i = self.index(elem)
         n = len(self)
         return self.__class__((self*2)[i:i+n])
@@ -86,6 +85,14 @@ class BatchList(List[T]):
             self[self.index(old)] = new
             return True
         except ValueError:
+            return False
+
+    def find_replace(self, pred: Callable[[T], bool], new: T) -> bool:
+        for i, v in enumerate(self):
+            if pred(v):
+                self[i] = new
+                return True
+        else:
             return False
 
     def sibling(self, me: T, offset=1) -> T:

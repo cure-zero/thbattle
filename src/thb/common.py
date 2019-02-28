@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from collections import OrderedDict, defaultdict
 from enum import Enum
 from itertools import cycle
-from typing import Any, Dict, Iterable, List, Type, Optional, TypeVar, Generic
+from typing import Any, Dict, Generic, Iterable, List, Optional, Tuple, Type, TypeVar
 import logging
 import random
 
 # -- third party --
+from mypy_extensions import TypedDict
+
 # -- own --
 from game.autoenv import Game
-from game.base import Player, GameViralContext, get_seed_for, sync_primitive
+from game.base import GameViralContext, Player, get_seed_for, sync_primitive
 from thb.characters.base import Character
 from thb.item import GameItem
 from thb.mode import THBattle
@@ -62,8 +63,7 @@ class CharChoice(GameViralContext):
 T = TypeVar('T', bound=Enum)
 
 
-class PlayerRole(Generic[T], GameViralContext):
-    game: THBattle
+class PlayerRole(Generic[T]):
     _role: T
 
     def __init__(self):
@@ -76,7 +76,7 @@ class PlayerRole(Generic[T], GameViralContext):
     def __str__(self) -> str:
         return self._role.name
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, self._typ):
             return False
 
@@ -92,10 +92,10 @@ class PlayerRole(Generic[T], GameViralContext):
         return sync_primitive(self.identity == t, pl)
     '''
 
-    def set(self, t: Any) -> None:
+    def set(self, t: T) -> None:
         assert isinstance(t, self._typ)
         if Game.SERVER:
-            self._identity = self._idtype(t)
+            self._role = self._typ(t)
 
     def get(self) -> T:
         return self._role
@@ -118,13 +118,34 @@ def roll(g: THBattle, pl: BatchList[Player], items: Dict[Player, List[GameItem]]
     return roll
 
 
-def build_choices(g, items, candidates, players, num, akaris, shared):
+class BuildChoicesSpec(TypedDict):
+    num: int
+    akaris: int
+
+
+def build_choices_shared(g: THBattle,
+                         players: BatchList[Player],
+                         items: Dict[Player, List[GameItem]],
+                         candidates: List[Type[Character]],
+                         spec: BuildChoicesSpec,
+                         ) -> Tuple[List[CharChoice], Dict[Player, CharChoice]]:
+    p = Player()
+    choices, imperial = build_choices(g, players, items, candidates, {p: spec})
+    return choices[p], imperial
+
+
+def build_choices(g: THBattle,
+                  players: BatchList[Player],
+                  items: Dict[Player, List[GameItem]],
+                  candidates: List[Type[Character]],
+                  spec: Dict[Player, BuildChoicesSpec],
+                  ) -> Tuple[Dict[Player, List[CharChoice]], Dict[Player, CharChoice]]:
+
     from thb.item import ImperialChoice
 
     # ----- testing -----
-    all_characters = Character.classes
     testing_lst: Iterable[str] = settings.TESTING_CHARACTERS
-    testing = list(all_characters[i] for i in testing_lst)
+    testing = list(Character.classes[i] for i in testing_lst)
     candidates, _ = partition(lambda c: c not in testing, candidates)
 
     if g.SERVER:
@@ -133,39 +154,31 @@ def build_choices(g, items, candidates, players, num, akaris, shared):
     else:
         candidates = [None] * len(candidates)
 
-    if shared:
-        entities = ['shared']
-        num = [num]
-        akaris = [akaris]
-    else:
-        entities = players
+    assert sum(s['num'] for p, s in spec.items()) <= len(candidates) + len(testing), 'Insufficient choices'
 
-    assert len(num) == len(akaris) == len(entities), 'Uneven configuration'
-    assert sum(num) <= len(candidates) + len(testing), 'Insufficient choices'
+    result: Dict[Player, List[CharChoice]] = {p: [] for p in spec}
 
-    result: Dict[Any, List[CharChoice]] = defaultdict(list)
-
-    entities_for_testing = entities[:]
+    players_for_testing = players[:]
 
     candidates = list(candidates)
-    seed = get_seed_for(g, g.players)
+    seed = get_seed_for(g, players)
     shuffler = random.Random(seed)
-    shuffler.shuffle(entities_for_testing)
+    shuffler.shuffle(players_for_testing)
 
-    for e, cls in zip(cycle(entities_for_testing), testing):
+    for e, cls in zip(cycle(players_for_testing), testing):
         result[e].append(CharChoice(cls))
 
     # ----- imperial (force chosen by ImperialChoice) -----
     imperial = ImperialChoice.get_chosen(items, players)
-    imperial = [(p, CharChoice(cls)) for p, cls in imperial]
+    imperial = {p: CharChoice(cls) for p, cls in imperial.items()}
 
-    for p, c in imperial:
-        result['shared' if shared else p].append(c)
+    for p, c in imperial.items():
+        result[p].append(c)
 
     # ----- normal -----
-    for e, n in zip(entities, num):
-        for _ in range(len(result[e]), n):
-            result[e].append(CharChoice(candidates.pop()))
+    for p, s in spec.items():
+        for _ in range(len(result[e]), s['num']):
+            result[p].append(CharChoice(candidates.pop()))
 
     # ----- akaris -----
     if g.SERVER:
@@ -175,16 +188,11 @@ def build_choices(g, items, candidates, players, num, akaris, shared):
 
     g.random.shuffle(rest)
 
-    for e, n in zip(entities, akaris):
-        for i in range(-n, 0):
+    for p, s in spec.items():
+        for i in range(-s['akaris'], 0):
             result[e][i].set(rest.pop(), True)
 
     # ----- compose final result, reveal, and return -----
-    if shared:
-        result = OrderedDict([(p, result['shared']) for p in players])
-    else:
-        result = OrderedDict([(p, result[p]) for p in players])
-
     for p, l in result.items():
         p.reveal(l)
 

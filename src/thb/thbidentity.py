@@ -14,7 +14,7 @@ from game.autoenv import user_input
 from game.base import BootstrapAction, EventHandler, GameEnded, InputTransaction
 from game.base import InterruptActionFlow, get_seed_for, sync_primitive
 from thb.actions import ActionStageLaunchCard, AskForCard, DistributeCards, DrawCards, DropCardStage
-from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerTurn, RevealIdentity
+from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerTurn, RevealRole
 from thb.actions import TryRevive, UserAction, ask_for_action, ttags
 from thb.cards.base import Deck
 from thb.cards.classes import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, Skill, TreatAs
@@ -40,7 +40,7 @@ class IdentityRevealHandler(EventHandler):
             g = self.game
             tgt = act.target
 
-            g.process_action(RevealIdentity(tgt, g.players))
+            g.process_action(RevealRole(tgt, g.players))
 
         return act
 
@@ -388,7 +388,7 @@ class THBattleIdentityBootstrap(BootstrapAction):
         for p, i in imperial_identities + list(zip(pl, identities)):
             p.identity = Identity()
             p.identity.type = i
-            g.process_action(RevealIdentity(p, p))
+            g.process_action(RevealRole(p, p))
 
         del identities
 
@@ -398,7 +398,7 @@ class THBattleIdentityBootstrap(BootstrapAction):
 
         boss.identity = Identity()
         boss.identity.type = Identity.TYPE.BOSS
-        g.process_action(RevealIdentity(boss, g.players))
+        g.process_action(RevealRole(boss, g.players))
 
         # choose girls init -->
         from .characters import get_characters

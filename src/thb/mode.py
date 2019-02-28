@@ -36,7 +36,7 @@ class THBattle(Game):
     game_ehs: List[Type[EventHandler]]
     deck: Deck
     players: BatchList[Character]
-    identities: Dict[Player, 'PlayerRole']
+    roles: Dict[Player, 'PlayerRole']
     dispatcher: THBEventDispatcher
 
     dispatcher_cls = THBEventDispatcher

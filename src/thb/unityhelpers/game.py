@@ -14,7 +14,7 @@ def get_identity_def(g):
 
 
 def get_revealed_identity_def(g, act, p, ch):
-    if not isinstance(act, actions.RevealIdentity):
+    if not isinstance(act, actions.RevealRole):
         return
 
     if act.target not in (p, ch):

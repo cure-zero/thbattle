@@ -158,7 +158,7 @@ class TurnOverCard:
 
 
 @ui_meta
-class RevealIdentity:
+class RevealRole:
     def effect_string(self, act):
         g = G()
         me = g.me

@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import Dict, List, TYPE_CHECKING, Type
+
 # -- third party --
 # -- own --
-from game.base import GameItem
+from game.base import GameItem, Player
 from server.base import Client, Game as ServerGame
 from thb.characters.base import Character
-from utils.misc import exceptions
+from utils.misc import BatchList, exceptions
 
 
 # -- code --
@@ -15,7 +17,7 @@ class ImperialChoice(GameItem):
     key = 'imperial-choice'
     args = [str]
 
-    def init(self, char):
+    def __init__(self, char):
         if char == 'Akari' or char not in Character.classes:
             raise exceptions.CharacterNotFound
 
@@ -42,19 +44,18 @@ class ImperialChoice(GameItem):
                 raise exceptions.ChooseCharacterConflict
 
     @classmethod
-    def get_chosen(cls, items, pl):
-        chosen = []
+    def get_chosen(cls, items: Dict[Player, List[GameItem]], pl: BatchList[Player]) -> Dict[Player, Type[Character]]:
+        chosen: Dict[Player, Type[Character]] = {}
+
         for p in pl:
-            uid = p.account.userid
-            if uid not in items:
+            if p not in items:
                 continue
 
-            for i in items[uid]:
-                i = GameItem.from_sku(i)
+            for i in items[p]:
                 if not isinstance(i, cls):
                     continue
 
-                chosen.append((p, i.char_cls))
+                chosen[p] = i.char_cls
                 break
 
         return chosen

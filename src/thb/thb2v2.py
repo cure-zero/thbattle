@@ -13,7 +13,7 @@ from game.autoenv import Game, user_input
 from game.base import BootstrapAction, EventHandler, GameEnded, GameItem, InputTransaction
 from game.base import InterruptActionFlow, get_seed_for, Player
 from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards
-from thb.actions import MigrateCardsTransaction, PlayerDeath, PlayerTurn, RevealIdentity, UserAction
+from thb.actions import MigrateCardsTransaction, PlayerDeath, PlayerTurn, RevealRole, UserAction
 from thb.actions import migrate_cards
 from thb.cards.base import Deck
 from thb.characters.akari import Akari
@@ -112,7 +112,7 @@ class ExtraCardHandler(EventHandler):
         return act
 
 
-class THB2v2Identity(Enum):
+class THB2v2Role(Enum):
     HIDDEN  = 0
     HAKUREI = 1
     MORIYA  = 2
@@ -137,7 +137,7 @@ class THBattle2v2Bootstrap(BootstrapAction):
         pl = self.players
 
         g.deck = Deck(g)
-        g.identities = {}
+        g.roles = {}
 
         if params['random_force']:
             seed = get_seed_for(g, pl)
@@ -145,15 +145,15 @@ class THBattle2v2Bootstrap(BootstrapAction):
 
         g.draw_extra_card = params['draw_extra_card']
 
-        H, M = THB2v2Identity.HAKUREI, THB2v2Identity.MORIYA
+        H, M = THB2v2Role.HAKUREI, THB2v2Role.MORIYA
         g.forces = {H: BatchList(), M: BatchList()}
 
         for p, id in zip(pl, [H, H, M, M]):
-            g.identities[p] = PlayerRole[THB2v2Identity]()
-            g.identities[p].set(id)
+            g.roles[p] = PlayerRole[THB2v2Role]()
+            g.roles[p].set(id)
 
         for p in pl:
-            g.process_action(RevealIdentity(p, pl))
+            g.process_action(RevealRole(p, pl))
 
         roll_rst = roll(g, pl, items)
         '''
@@ -245,13 +245,13 @@ class THBattle2v2Bootstrap(BootstrapAction):
             log.info(
                 '>> Player: %s:%s',
                 ch.__class__.__name__,
-                g.identities[ch.player].get().name,
+                g.roles[ch.player].get().name,
             )
         # -------
 
         g.forces = {}
         for ch in g.players:
-            g.forces.setdefault(g.identities[ch.player].get(), BatchList()).append(ch)
+            g.forces.setdefault(g.roles[ch.player].get(), BatchList()).append(ch)
 
         g.emit_event('game_begin', g)
 
@@ -283,7 +283,7 @@ class THBattle2v2(THBattle):
         'draw_extra_card': (False, True),
     }
 
-    forces: Dict[THB2v2Identity, BatchList[Character]]
+    forces: Dict[THB2v2Role, BatchList[Character]]
 
     def can_leave(g, p: Character):
         return p.dead

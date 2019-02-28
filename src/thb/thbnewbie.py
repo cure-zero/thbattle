@@ -14,7 +14,7 @@ from game.autoenv import Game, user_input
 from game.base import Player, BootstrapAction, EventHandler, InputTransaction
 from game.base import InterruptActionFlow, NPC
 from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCards, FatetellStage
-from thb.actions import GenericAction, LaunchCard, PlayerDeath, PlayerTurn, RevealIdentity
+from thb.actions import GenericAction, LaunchCard, PlayerDeath, PlayerTurn, RevealRole
 from thb.actions import ShuffleHandler, ask_for_action, migrate_cards
 from thb.cards.base import Card, CardList, Deck
 from thb.cards.classes import AskForHeal, AttackCard, Demolition, DemolitionCard
@@ -177,7 +177,7 @@ class THBattleNewbieBootstrap(BootstrapAction):
 
         pl = g.players
         for p in pl:
-            g.process_action(RevealIdentity(p, pl))
+            g.process_action(RevealRole(p, pl))
 
         g.emit_event('game_begin', g)
         # ----- End Init -----

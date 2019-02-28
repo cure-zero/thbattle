@@ -7,7 +7,6 @@ from typing import Dict, Type
 # -- own --
 from game.base import Game
 from thb.thb2v2 import THBattle2v2
-from thb.thb3v3 import THBattle3v3
 from thb.thbfaith import THBattleFaith
 from thb.thbidentity import THBattleIdentity
 from thb.thbkof import THBattleKOF
@@ -19,7 +18,6 @@ import thb.item  # noqa, init it
 
 modes: Dict[str, Type[Game]] = {}
 modelst = [
-    THBattle3v3,
     THBattleKOF,
     THBattleIdentity,
     THBattleFaith,

@@ -1166,7 +1166,7 @@ class DummyAction(GenericAction):
         return self.result
 
 
-class RevealIdentity(GenericAction):
+class RevealRole(GenericAction):
     def __init__(self, target, to):
         self.target = target
         self.to = to
