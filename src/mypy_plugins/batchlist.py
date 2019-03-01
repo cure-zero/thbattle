@@ -4,15 +4,15 @@
 from typing import Callable, Optional, cast
 
 # -- third party --
-from mypy.nodes import MemberExpr
+# -- own --
+# -- errord --
+from mypy.checkmember import bind_self
+from mypy.nodes import Decorator, MemberExpr, SYMBOL_FUNCBASE_TYPES
 from mypy.plugin import AttributeContext, MethodSigContext, Plugin
 from mypy.types import AnyType, CallableType, Instance, Type, TypeOfAny, UnionType
 
-# -- own --
 
 # -- code --
-
-
 class BatchListPlugin(Plugin):
 
     def get_method_signature_hook(self, fullname: str
@@ -60,7 +60,7 @@ def batchlist_attribute_hook(ctx: AttributeContext) -> Type:
         ctx.api.fail('BatchList[{}] not supported by checker'.format(typeparam), expr)
         return Instance(typeinfo, [AnyType(TypeOfAny.from_error)])
 
-    names = cast(Instance, typeparam).type.names
+    names = typeparam.type.names
 
     if field not in names:
         ctx.api.fail(
@@ -70,8 +70,29 @@ def batchlist_attribute_hook(ctx: AttributeContext) -> Type:
         )
         return Instance(typeinfo, [AnyType(TypeOfAny.from_error)])
 
-    t = names[field].type
-    assert t
+    stnode = typeparam.type.get(field)
+    assert stnode
+    node = stnode.node
+    typ = stnode.type
+
+    if isinstance(node, SYMBOL_FUNCBASE_TYPES):
+        assert isinstance(typ, CallableType)
+        t = bind_self(typ)
+    elif isinstance(node, Decorator) and node.var.is_classmethod:
+        assert isinstance(typ, CallableType)
+        t = bind_self(typ, is_classmethod=True)
+    elif isinstance(node, Decorator) and node.var.is_staticmethod:
+        assert isinstance(typ, CallableType)
+        t = typ
+    elif isinstance(node, Decorator) and node.var.is_property:
+        assert isinstance(typ, CallableType)
+        t = typ.ret_type
+    elif isinstance(node, Decorator) and isinstance(typ, CallableType):
+        t = bind_self(typ)
+    else:
+        t = typ
+        assert t
+
     return Instance(typeinfo, [t])
 
 
@@ -85,6 +106,11 @@ def batchlist_method_signature_hook(ctx: MethodSigContext) -> CallableType:
     if isinstance(c, CallableType):
         return c.copy_modified(
             ret_type=Instance(typeinfo, [c.ret_type])
+        )
+
+    elif isinstance(c, AnyType):
+        return ctx.default_signature.copy_modified(
+            ret_type=Instance(typeinfo, [AnyType(TypeOfAny.from_another_any, source_any=c)])
         )
     else:
         ctx.api.fail("BatchList item {} is not callable".format(instance.args[0]), expr)

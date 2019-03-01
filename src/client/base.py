@@ -4,7 +4,7 @@
 from collections import OrderedDict
 from copy import copy
 from random import Random
-from typing import List, Optional
+from typing import List, Optional, Sequence
 import logging
 
 # -- third party --
@@ -24,7 +24,7 @@ class ForcedKill(gevent.GreenletExit):
     pass
 
 
-def user_input(players: List[object], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
+def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
     '''
     Type can be 'single', 'all' or 'any'
     '''

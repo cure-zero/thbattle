@@ -1,8 +1,8 @@
 from game.base import Player, Inputlet, InputTransaction, Game as BaseGame
-from typing import List, Optional
+from typing import List, Optional, Sequence
 
 def user_input(
-    players: List,
+    players: Sequence[Any],
     inputlet: Inputlet,
     timeout: int=25,
     type: str='single',

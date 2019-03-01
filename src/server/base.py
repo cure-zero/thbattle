@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict
 from copy import copy
-from typing import Any, Callable, Dict, List, Optional, cast
+from typing import Any, Callable, Dict, List, Optional, cast, Sequence
 import logging
 
 # -- third party --
@@ -49,7 +49,7 @@ class InputWaiterGroup(GreenletGroup):
     greenlet_class = InputWaiter
 
 
-def user_input(players: List[object], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
+def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
     '''
     Type can be 'single', 'all' or 'any'
     '''
