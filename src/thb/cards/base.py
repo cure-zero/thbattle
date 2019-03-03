@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import deque
-from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type
+from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, Sequence
 from weakref import WeakValueDictionary
 import itertools
 import logging
@@ -49,7 +49,7 @@ class Card(GameObject):
     usage = 'launch'
 
     associated_action: Optional[Type[UserAction]]
-    category: List[str]
+    category: Sequence[str]
 
     # True means this card's associated cards have already been taken.
     # Only meaningful for virtual cards.
@@ -171,7 +171,7 @@ class PhysicalCard(Card):
 
 
 class VirtualCard(Card, GameViralContext):
-    associated_cards: List[Card]
+    associated_cards: Sequence[Card]
     action_params: dict
     no_reveal: bool = False
 

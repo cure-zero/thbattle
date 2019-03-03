@@ -58,7 +58,8 @@ class WeaponReforgeHandler(EventHandler):
             tgt = act.target
 
             if c.is_card(VirtualCard): return act
-            if 'equipment' not in c.category: return act
+            from thb.cards.definition import EquipmentCard
+            if not isinstance(c, EquipmentCard): return act
             if c.equipment_category != 'weapon': return act
             if tgt.tags['vitality'] <= 0: return act
 

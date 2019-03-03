@@ -28,6 +28,8 @@ class THBattleNewbie(ModeMeta):
     T = thbnewbie.Identity.TYPE
     identity_table = {
         T.HIDDEN:  '？',
+        T.HAKUREI: '博丽',
+        T.BAKA:    '马鹿',
     }
 
     identity_color = {

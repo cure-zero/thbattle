@@ -16,8 +16,7 @@ from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards
 from thb.actions import MigrateCardsTransaction, PlayerDeath, PlayerTurn, RevealRole, UserAction
 from thb.actions import migrate_cards
 from thb.cards.base import Deck
-from thb.characters.akari import Akari
-from thb.characters.base import Character, mixin_character
+from thb.characters.base import Character
 from thb.common import CharChoice, PlayerRole, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
 from thb.mode import THBattle
@@ -106,7 +105,7 @@ class ExtraCardHandler(EventHandler):
             return act
 
         g = self.game
-        if g.draw_extra_card:
+        if g._[g]['draw_extra_card']:
             act.amount += 1
 
         return act
@@ -143,7 +142,7 @@ class THBattle2v2Bootstrap(BootstrapAction):
             seed = get_seed_for(g, pl)
             random.Random(seed).shuffle(pl)
 
-        g.draw_extra_card = params['draw_extra_card']
+        g._[g]['draw_extra_card'] = params['draw_extra_card']
 
         H, M = THB2v2Role.HAKUREI, THB2v2Role.MORIYA
         g.forces = {H: BatchList(), M: BatchList()}
@@ -261,9 +260,8 @@ class THBattle2v2Bootstrap(BootstrapAction):
         for i, ch in enumerate(cycle(g.players)):
             if i >= 6000: break
             if not ch.dead:
-                g.emit_event('player_turn', ch)
                 try:
-                    g.process_action(PlayerTurn(ch.player))
+                    g.process_action(PlayerTurn(ch))
                 except InterruptActionFlow:
                     pass
 
@@ -285,5 +283,9 @@ class THBattle2v2(THBattle):
 
     forces: Dict[THB2v2Role, BatchList[Character]]
 
-    def can_leave(g, p: Character):
-        return p.dead
+    def can_leave(g, p: Player):
+        for ch in g.players:
+            if ch.player is p:
+                return ch.dead
+        else:
+            return False

@@ -241,13 +241,23 @@ class Game(game.base.Game):
 
         return '%s:%s' % (self.__class__.__name__, gid)
 
-    def get_synctag(self) -> int:
-        core = self.core
-        if core.game.is_aborted(self):
+    def get_synctag(g) -> int:
+        core = g.core
+        assert gevent.getcurrent() is core.room.greenlet_of(g)
+        if core.game.is_aborted(g):
             raise GreenletExit
 
-        self.synctag += 1
-        return self.synctag
+        g.synctag += 1
+        return g.synctag
+
+    def is_dropped(g, p: Player) -> bool:
+        core = g.core
+        if isinstance(p, HumanPlayer):
+            return not core.room.is_online(g, p.client)
+        elif isinstance(p, NPCPlayer):
+            return False
+        else:
+            assert False, 'WTF!'
 
     def pause(self, time: float):
         gevent.sleep(time)

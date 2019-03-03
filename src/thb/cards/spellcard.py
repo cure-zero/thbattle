@@ -13,6 +13,7 @@ from thb.cards.base import Card
 from thb.inputlets import ChooseIndividualCardInputlet, ChoosePeerCardInputlet
 from utils.check import CheckFailed, check
 from utils.misc import BatchList, flatten
+from typing import Sequence
 
 
 # -- code --
@@ -109,17 +110,18 @@ class RejectHandler(EventHandler):
                 p, rst = ask_for_action(self, pl, ('cards', 'showncards'), [], trans=trans)
 
             if not p: return act
+            assert rst
             cards, _ = rst
             assert cards and self.cond(cards)
             g.process_action(LaunchCard(p, [act.target], cards[0], Reject(p, act)))
 
         return act
 
-    def cond(self, cardlist):
+    def cond(self, cards: Sequence[Card]) -> bool:
         from thb.cards.definition import RejectCard
         try:
-            check(len(cardlist) == 1)
-            check(cardlist[0].is_card(RejectCard))
+            check(len(cards) == 1)
+            check(cards[0].is_card(RejectCard))
             return True
         except CheckFailed:
             return False
@@ -162,7 +164,8 @@ class SealingArray(DelayedSpellCardAction, FatetellAction):
     def fatetell_action(self, ft):
         g = self.game
         if ft.succeeded:
-            turn = PlayerTurn.get_current(g, self.target)
+            turn = PlayerTurn.get_current(g)
+            assert turn is self.target
             try:
                 turn.pending_stages.remove(ActionStage)
             except Exception:
@@ -513,7 +516,8 @@ class FrozenFrog(DelayedSpellCardAction, FatetellAction):
     def fatetell_action(self, ft):
         g = self.game
         if ft.succeeded:
-            turn = PlayerTurn.get_current(g, self.target)
+            turn = PlayerTurn.get_current(g)
+            assert turn is self.target
             try:
                 turn.pending_stages.remove(DrawCardStage)
             except Exception:

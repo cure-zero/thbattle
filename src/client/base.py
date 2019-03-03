@@ -4,7 +4,7 @@
 from collections import OrderedDict
 from copy import copy
 from random import Random
-from typing import List, Optional, Sequence
+from typing import Any, Optional, Sequence
 import logging
 
 # -- third party --
@@ -12,7 +12,7 @@ import gevent
 
 # -- own --
 from client.core import Core
-from game.base import Player, GameEnded, InputTransaction, Inputlet, TimeLimitExceeded
+from game.base import GameEnded, InputTransaction, Inputlet, Player, TimeLimitExceeded
 import game.base
 
 
@@ -209,6 +209,10 @@ class Game(game.base.Game):
 
     def pause(self, time):
         gevent.sleep(time)
+
+    def is_dropped(g, p: Player):
+        core = g.core
+        return core.game.is_dropped(g, p)
 
     def _get_me(self):
         me = self._me

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from abc import abstractmethod
 from collections import defaultdict
 from random import Random
 from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, Sequence
@@ -250,6 +251,18 @@ class Game(GameObject, GameViralContext):
     def pause(self, t: float) -> None:
         pass
 
+    @abstractmethod
+    def get_synctag(self):
+        raise GameError('Abstract')
+
+    @abstractmethod
+    def is_dropped(self, p: Player) -> bool:
+        raise GameError('Abstract')
+
+    @abstractmethod
+    def can_leave(self, p: Player) -> bool:
+        raise GameError('Abstract')
+
     '''
     def get_playerid(self, p):
         return self.players.index(p)
@@ -278,9 +291,6 @@ class Game(GameObject, GameViralContext):
         for i in list(range(id, n)) + list(range(id)):
             yield g.players[i]
     '''
-
-    def get_synctag(self):
-        raise GameError('Abstract')
 
 
 class ActionShootdown(BaseException, metaclass=GameObjectMeta):
@@ -579,7 +589,7 @@ class Inputlet(GameObject):
             not be used as a side channel to pass infomation
             in game logic code.
     '''
-    initiator: GameObject
+    initiator: Any
     timeout: int
     actor: object
 
@@ -628,7 +638,7 @@ class Inputlet(GameObject):
 
 
 class InputTransaction(GameViralContext):
-    def __init__(self, name: str, involved: Sequence[Player], **kwargs):
+    def __init__(self, name: str, involved: Sequence[Any], **kwargs):
         self.name = name
         self.involved = involved[:]
         self.__dict__.update(kwargs)

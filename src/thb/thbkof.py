@@ -15,6 +15,7 @@ from thb.actions import DistributeCards, PlayerDeath, PlayerTurn, RevealRole
 from thb.cards.base import Deck
 from thb.cards.definition import kof_card_definition
 from thb.common import CharChoice, PlayerRole, build_choices_shared, roll
+from thb.characters.base import Character
 from thb.inputlets import ChooseGirlInputlet
 from thb.mode import THBattle
 from utils.misc import BatchList
@@ -44,11 +45,10 @@ class DeathHandler(EventHandler):
             pl.remove(p)
             raise GameEnded(pl)
 
-        if pl[0].dropped:
-            reveal_type(pl[0])
+        if g.is_dropped(pl[0]):
             raise GameEnded([pl[1]])
 
-        if pl[1].dropped:
+        if g.is_dropped(pl[1]):
             raise GameEnded([pl[0]])
 
         return act
@@ -165,41 +165,47 @@ class THBattleKOFBootstrap(BootstrapAction):
         def s(p):
             c = rst[p] or g.chosen[p][0]
             g.chosen[p].remove(c)
-            p.tags['remaining'] = 2
-            p = g.next_character(p, c)
-            return p
 
-        A, B = s(A), s(B)
+            c.akari = False
+            pl.reveal(c)
+            cls = c.char_cls
+            assert cls
+            ch = cls(p)
+            g.refresh_dispatcher()
+            g.emit_event('switch_character', (None, ch))
 
-        order = [1, 0] if A is g.players[0] else [0, 1]
+            return ch
 
-        for p in [A, B]:
-            g.process_action(RevealRole(p, g.players))
+        cA, cB = g.players = BatchList([s(A), s(B)])
+
+        for p in pl:
+            g.process_action(RevealRole(p, pl))
 
         g.emit_event('game_begin', g)
 
-        g.process_action(DistributeCards(A, amount=4))
-        g.process_action(DistributeCards(B, amount=3))
+        g.process_action(DistributeCards(cA, amount=4))
+        g.process_action(DistributeCards(cB, amount=3))
 
-        for i in order:
-            g.emit_event('character_debut', (None, g.players[i]))
+        for ch in g.players:
+            g.emit_event('character_debut', (None, ch))
 
-        for i, idx in enumerate(cycle(order)):
-            p = g.players[idx]
+        for i in cycle([0, 1]):
+            ch = g.players[i]
             if i >= 6000: break
-            if p.dead:
+            if ch.dead:
                 handler = g.dispatcher.find_by_cls(KOFCharacterSwitchHandler)
                 assert handler, 'WTF?!'
                 handler.do_switch_dead()
-                p = g.players[idx]  # player changed
+                ch = g.players[i]  # player changed
 
-            assert not p.dead
+            assert not ch.dead
 
             try:
-                g.emit_event('player_turn', p)
-                g.process_action(PlayerTurn(p))
+                g.process_action(PlayerTurn(ch))
             except InterruptActionFlow:
                 pass
+
+        return True
 
 
 class THBattleKOF(THBattle):
@@ -212,29 +218,9 @@ class THBattleKOF(THBattle):
 
     chosen: Dict[Player, List[CharChoice]]
 
-    def get_opponent(g, p):
+    def get_opponent(g: 'THBattleKOF', ch: Character):
         a, b = g.players
-        if p is a:
-            return b
-        elif p is b:
-            return a
-        else:
-            raise Exception('WTF?!')
+        return {a: b, b: a}[ch]
 
-    def can_leave(g, p):
+    def can_leave(g: THBattle, p: Player) -> bool:
         return False
-
-    def next_character(g, p, choice):
-        g.players.reveal(choice)
-        cls = choice.char_cls
-
-        # mix char class with player -->
-        new, old_cls = mixin_character(g, p, cls)
-        g.decorate(new)
-        g.players.replace(p, new)
-
-        g.refresh_dispatcher()
-
-        g.emit_event('switch_character', (p, new))
-
-        return new

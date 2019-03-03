@@ -1,31 +1,30 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from collections import defaultdict
 from enum import Enum
 from itertools import chain, combinations, cycle
-from typing import Callable, Type, Any
+from typing import Any, Callable, Dict, List, cast
 import logging
 import random
 
 # -- third party --
 # -- own --
 from game.autoenv import Game, user_input
-from game.base import Player, BootstrapAction, EventHandler, InputTransaction
-from game.base import InterruptActionFlow, NPC
-from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCards, FatetellStage
-from thb.actions import GenericAction, LaunchCard, PlayerDeath, PlayerTurn, RevealRole
-from thb.actions import ShuffleHandler, ask_for_action, migrate_cards
-from thb.cards.base import Card, CardList, Deck
+from game.base import BootstrapAction, EventHandler, GameItem, InputTransaction, InterruptActionFlow
+from game.base import NPC, Player
+from thb.actions import ActionStage, ActionStageLaunchCard, CardChooser, DrawCards, DropCards
+from thb.actions import FatetellStage, LaunchCard, PlayerDeath, PlayerTurn, RevealRole
+from thb.actions import ask_for_action, migrate_cards
+from thb.cards.base import Card, Deck
 from thb.cards.classes import AskForHeal, AttackCard, Demolition, DemolitionCard
 from thb.cards.classes import ElementalReactorCard, ExinwanCard, FrozenFrogCard, GrazeCard
 from thb.cards.classes import GreenUFOCard, Heal, HealCard, LaunchGraze, MomijiShieldCard
 from thb.cards.classes import NazrinRodCard, RedUFOCard, Reject, RejectCard, RejectHandler
 from thb.cards.classes import SinsackCard, WineCard
-from thb.characters.base import Character, mixin_character
 from thb.common import PlayerRole
 from thb.inputlets import ActionInputlet, GalgameDialogInputlet
 from thb.mode import THBattle
+from utils.misc import BatchList
 
 
 # -- code --
@@ -53,11 +52,10 @@ class DeathHandler(EventHandler):
         return act
 
 
-class Identity(PlayerRole):
-    class TYPE(Enum):
-        HIDDEN = 0
-        HAKUREI = 1
-        MORIYA = 2
+class THBNewbieRole(Enum):
+    HIDDEN = 0
+    HAKUREI = 1
+    BAKA = 2
 
 
 class CirnoAI(object):
@@ -91,7 +89,7 @@ class CirnoAI(object):
             if isinstance(ilet.initiator, AskForHeal):
                 return False
 
-            cond = ilet.initiator.cond
+            cond = cast(CardChooser, ilet.initiator).cond
             cl = list(p.showncards) + list(p.cards)
             _, C = chain, lambda r: combinations(cl, r)
             for c in _(C(1), C(2)):
@@ -121,8 +119,11 @@ class CirnoAI(object):
 
 
 class AdhocEventHandler(EventHandler):
-    def __init__(self, g: Game, hook: Callable[str, Any]):
-        self.handle = hook  # typing: ignore
+    def __init__(self, g: Game, hook: Callable[[str, Any], Any]):
+        self._handle = hook  # typing: ignore
+
+    def handle(self, evt_type: str, arg: Any) -> Any:
+        return self._handle(evt_type, arg)
 
 
 class DrawShownCards(DrawCards):
@@ -151,13 +152,17 @@ class DummyPlayerTurn(PlayerTurn):
 
 
 class THBattleNewbieBootstrap(BootstrapAction):
-    def __init__(self, params, items):
+    def __init__(self, params: Dict[str, Any],
+                       items: Dict[Player, List[GameItem]],
+                       players: BatchList[Player]):
         self.source = self.target = None
+        self.players = players
         self.params = params
         self.items = items
 
     def apply_action(self):
         g = self.game
+        pl = self.players
 
         from thb.characters.meirin import Meirin
         from thb.characters.cirno import Cirno
@@ -166,18 +171,26 @@ class THBattleNewbieBootstrap(BootstrapAction):
         # ----- Init -----
         g.deck = Deck(g)
 
-        cirno, meirin = g.players
+        cirno_p, meirin_p = g.players
 
-        for i, p in enumerate(g.players):
-            p.identity = Identity()
-            p.identity.type = Identity.TYPE.HIDDEN
+        g.roles = {
+            cirno_p: PlayerRole[THBNewbieRole](),
+            meirin_p: PlayerRole[THBNewbieRole](),
+        }
+        cirno_p.set(THBNewbieRole.BAKA)
+        meirin_p.set(THBNewbieRole.HAKUREI)
 
-        g.set_character(cirno, Cirno)
-        g.set_character(meirin, Meirin)
+        g.process_action(RevealRole(cirno_p, pl))
+        g.process_action(RevealRole(meirin_p, pl))
 
-        pl = g.players
-        for p in pl:
-            g.process_action(RevealRole(p, pl))
+        cirno = Cirno(cirno_p)
+        meirin = Meirin(meirin_p)
+
+        g.players = BatchList([cirno, meirin])
+
+        g.refresh_dispatcher()
+        g.emit_event('switch_character', (None, cirno))
+        g.emit_event('switch_character', (None, meirin))
 
         g.emit_event('game_begin', g)
         # ----- End Init -----
@@ -188,7 +201,7 @@ class THBattleNewbieBootstrap(BootstrapAction):
 
             user_input([meirin], GalgameDialogInputlet(g, character, dialog, voice), timeout=60)
 
-        def inject_eh(hook: Callable[str, Any]):
+        def inject_eh(hook: Callable[[str, Any], Any]):
             eh = AdhocEventHandler(g, hook)
             g.add_adhoc_event_handler(eh)
             return eh
@@ -381,7 +394,7 @@ class THBattleNewbieBootstrap(BootstrapAction):
             dialog(Meirin, '我这辈子还没听过这么欠扁的要求！吃我一弹！', 28)
 
             @inject_eh
-            def resp(evt_type: str, act: Any):
+            def handle_longquan(evt_type: str, act: Any):
                 if evt_type == 'action_after' and isinstance(act, LaunchGraze) and act.target is cirno:
                     g.pause(1)
                     dialog(Cirno, '你以为只有你会闪开吗！', 11)
@@ -451,7 +464,7 @@ class THBattleNewbieBootstrap(BootstrapAction):
             dialog(Sakuya, '用用看就知道了。快去卸掉她的|G天狗盾|r吧。', 18)
 
             @inject_eh
-            def resp(evt_type: str, act: Any):
+            def handle_rejectcard(evt_type: str, act: Any):
                 if evt_type == 'action_before' and isinstance(act, Demolition):
                     g.pause(1.5)
                     dialog(Cirno, '哈哈，早知道你会用这一招，怎能让你轻易得逞！', 17)
@@ -475,12 +488,13 @@ class THBattleNewbieBootstrap(BootstrapAction):
                     while not act.cancelled:
                         dialog(Meirin, '我知道了，我也用|G好人卡|r去抵消她的|G好人卡|r效果就好了！', 39)
 
-                        rej = RejectHandler()
+                        rej = RejectHandler(g)
                         rej.target_act = act
                         with InputTransaction('AskForRejectAction', [meirin]) as trans:
                             p, rst = ask_for_action(rej, [meirin], ('cards', 'showncards'), [], trans=trans)
 
                         if not p: continue
+                        assert rst
                         cards, _ = rst
                         assert cards[0] is meirinreject
                         g.process_action(LaunchCard(meirin, [cirno], meirinreject, Reject(meirin, act)))
@@ -581,7 +595,6 @@ class THBattleNewbieBootstrap(BootstrapAction):
             p = g.players[idx]
             if i >= 6000: break
             try:
-                g.emit_event('player_turn', p)
                 g.process_action(PlayerTurn(p))
             except InterruptActionFlow:
                 pass
@@ -597,12 +610,3 @@ class THBattleNewbie(THBattle):
 
     def can_leave(g, p):
         return True
-
-    def set_character(g, p: Player, cls: Type[Character]):
-        new, old_cls = mixin_character(g, p, cls)
-        g.decorate(new)
-        g.players.replace(p, new)
-
-        g.refresh_dispatcher()
-        g.emit_event('switch_character', (p, new))
-        return new

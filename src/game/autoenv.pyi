@@ -1,6 +1,14 @@
-from game.base import Player, Inputlet, InputTransaction, Game as BaseGame
-from typing import List, Optional, Sequence
+# -*- coding: utf-8 -*-
 
+# -- stdlib --
+from typing import Any, Optional, Sequence
+
+# -- third party --
+# -- own --
+from game.base import Game as BaseGame, InputTransaction, Inputlet
+
+
+# -- code --
 def user_input(
     players: Sequence[Any],
     inputlet: Inputlet,

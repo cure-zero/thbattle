@@ -85,9 +85,6 @@ class Character(GameObject):
         return '<Char: {}>'.format(self.__class__.__name__)
 
 
-Entity = Union[Player, Character]
-
-
 def register_character_to(*cats):
     sets = [characters_by_category[c] for c in set(cats)]
 

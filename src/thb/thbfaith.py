@@ -125,7 +125,7 @@ class THBattleFaithBootstrap(BootstrapAction):
         for p, role in zip(pl, rl):
             g.roles[p] = PlayerRole[THBFaithRole]()
             g.roles[p].set(role)
-            g.process_action(RevealRole(p, g.players))
+            g.process_action(RevealRole(p, pl))
 
         g.forces[H] = BatchList()
         g.forces[M] = BatchList()
@@ -183,7 +183,6 @@ class THBattleFaithBootstrap(BootstrapAction):
             ch = g.players[idx]
             if ch.dead: continue
 
-            g.emit_event('player_turn', ch.player)
             try:
                 g.process_action(PlayerTurn(ch))
             except InterruptActionFlow:

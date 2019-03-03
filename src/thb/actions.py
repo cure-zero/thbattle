@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple, Type, Union, cast, Sequence
+from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
 import logging
 
 # -- third party --
@@ -11,8 +11,8 @@ from typing_extensions import Protocol
 
 # -- own --
 from game.autoenv import user_input
-from game.base import Action, ActionShootdown, EventArbiter, EventHandler, GameException
-from game.base import GameViralContext, InputTransaction, sync_primitive
+from game.base import Action, ActionShootdown, EventArbiter, EventHandler, GameViralContext
+from game.base import InputTransaction, Player, sync_primitive, Game
 from thb.cards.base import Card, CardList, PhysicalCard, Skill, VirtualCard
 from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
@@ -35,22 +35,22 @@ def ttags(actor):
 
 
 class CardChooser(Protocol):
-    game: THBattle
+    game: Game
     card_usage: str
 
-    def cond(self, cards: List[Card]) -> bool: ...
+    def cond(self, cards: Sequence[Card]) -> bool: ...
 
 
 class CharacterChooser(Protocol):
-    game: THBattle
+    game: Game
 
     def choose_player_target(self, pl: List[Character]) -> Tuple[List[Character], bool]: ...
 
 
 def ask_for_action(initiator: Union[CardChooser, CharacterChooser],
                    actors: List[Character],
-                   categories: Iterable[str],
-                   candidates: Iterable[Character],
+                   categories: Sequence[str],
+                   candidates: Sequence[Character],
                    timeout: Optional[int]=None,
                    trans: Optional[InputTransaction]=None,
                    ) -> Tuple[Optional[Character], Optional[Tuple[List[Card], List[Character]]]]:
@@ -100,7 +100,7 @@ def ask_for_action(initiator: Union[CardChooser, CharacterChooser],
 
                         c = cast(VirtualCard, c)
 
-                        g.players.reveal(c.associated_cards)
+                        g.players.player.reveal(c.associated_cards)
                         for c1 in c.associated_cards:
                             walk(c1)
 
@@ -109,7 +109,7 @@ def ask_for_action(initiator: Union[CardChooser, CharacterChooser],
 
                 else:
                     if not getattr(initiator, 'no_reveal', False):
-                        g.players.reveal(cards)
+                        g.players.player.reveal(cards)
 
                 check(cast(CardChooser, initiator).cond(cards))
                 assert not (usage == 'none' and rawcards)  # should not pass check
@@ -149,7 +149,7 @@ def ask_for_action(initiator: Union[CardChooser, CharacterChooser],
 
 def user_choose_cards(initiator: CardChooser,
                       actor: Character,
-                      categories: Iterable[str],
+                      categories: Sequence[str],
                       timeout: Optional[int]=None,
                       trans: Optional[InputTransaction]=None,
                       ) -> Optional[List[Card]]:
@@ -175,7 +175,7 @@ def user_choose_players(initiator: CharacterChooser,
     return rst[1]  # players
 
 
-def random_choose_card(g: THBattle, cardlists: Iterable[Iterable]):
+def random_choose_card(g: THBattle, cardlists: Sequence[Sequence]):
     from itertools import chain
     allcards = list(chain.from_iterable(cardlists))
     if not allcards:
@@ -231,6 +231,16 @@ class THBAction(Action):
     game: THBattle
 
     def __init__(self, source: Character, target: Character):
+        self.source = source
+        self.target = target
+
+
+class PlayerAction(Action):
+    source: Player
+    target: Player
+    game: THBattle
+
+    def __init__(self, source: Player, target: Player):
         self.source = source
         self.target = target
 
@@ -554,7 +564,7 @@ class UseCard(GenericAction):
 
 class AskForCard(GenericAction):
 
-    def __init__(self, source: Character, target: Character, card_cls: Type[PhysicalCard], categories: Iterable[str]=('cards', 'showncards')):
+    def __init__(self, source: Character, target: Character, card_cls: Type[PhysicalCard], categories: Sequence[str]=('cards', 'showncards')):
         self.source = source
         self.target = target
         self.card_cls = card_cls
@@ -610,7 +620,7 @@ class ActiveDropCards(GenericAction):
         else:
             from itertools import chain
             cards = list(chain(tgt.cards, tgt.showncards))[min(-n, 0):]
-            g.players.reveal(cards)
+            g.players.player.reveal(cards)
             g.process_action(DropCards(tgt, tgt, cards=cards))
 
         self.cards = cards
@@ -1146,15 +1156,12 @@ class PlayerTurn(GenericAction):
         return True
 
     @staticmethod
-    def get_current(g, p=None):
-        act = getattr(g, 'current_turn', None)
-        if act:
-            assert isinstance(act, PlayerTurn)
+    def get_current(g: THBattle) -> 'PlayerTurn':
+        for act in g.action_stack:
+            if isinstance(act, PlayerTurn):
+                return act
 
-            if p is not None and act.target is not p:
-                raise GameException('Got unexpected PlayerTurn!')
-
-        return act
+        raise Exception('Could not find current turn!')
 
 
 class DummyAction(GenericAction):
@@ -1166,18 +1173,19 @@ class DummyAction(GenericAction):
         return self.result
 
 
-class RevealRole(GenericAction):
-    def __init__(self, target, to):
+class RevealRole(PlayerAction):
+
+    def __init__(self, target: Player, to: Union[Player, BatchList[Player]]):
         self.target = target
         self.to = to
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         tgt = self.target
         self.to.reveal(tgt.identity)
         return True
 
-    def can_be_seen_by(self, ch):
-        if isinstance(self.to, (tuple, list)):
+    def can_be_seen_by(self, ch: Character) -> bool:
+        if isinstance(self.to, BatchList):
             return ch in self.to
         else:
             return ch is self.to
@@ -1214,7 +1222,7 @@ class Pindian(UserAction):
                 detach_cards([card])
                 g.emit_event('pindian_card_chosen', (p, card))
 
-        g.players.reveal([pindian_card[src], pindian_card[tgt]])
+        g.players.player.reveal([pindian_card[src], pindian_card[tgt]])
         g.emit_event('pindian_card_revealed', self)  # for ui.
         migrate_cards([pindian_card[src], pindian_card[tgt]], g.deck.droppedcards, unwrap=True, is_bh=True)
 
