@@ -10,8 +10,7 @@ import random
 # -- third party --
 # -- own --
 from game.autoenv import Game, user_input
-from game.base import BootstrapAction, EventHandler, GameItem, InputTransaction, InterruptActionFlow
-from game.base import NPC, Player
+from game.base import BootstrapAction, GameItem, InputTransaction, InterruptActionFlow, NPC, Player
 from thb.actions import ActionStage, ActionStageLaunchCard, CardChooser, DrawCards, DropCards
 from thb.actions import FatetellStage, LaunchCard, PlayerDeath, PlayerTurn, RevealRole
 from thb.actions import ask_for_action, migrate_cards
@@ -23,7 +22,7 @@ from thb.cards.classes import NazrinRodCard, RedUFOCard, Reject, RejectCard, Rej
 from thb.cards.classes import SinsackCard, WineCard
 from thb.common import PlayerRole
 from thb.inputlets import ActionInputlet, GalgameDialogInputlet
-from thb.mode import THBattle
+from thb.mode import THBEventHandler, THBattle
 from utils.misc import BatchList
 
 
@@ -35,7 +34,7 @@ class OneShotActionStage(ActionStage):
     one_shot = True
 
 
-class DeathHandler(EventHandler):
+class DeathHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):
@@ -118,7 +117,7 @@ class CirnoAI(object):
         cls(trans, ilet).entry()
 
 
-class AdhocEventHandler(EventHandler):
+class AdhocEventHandler(THBEventHandler):
     def __init__(self, g: Game, hook: Callable[[str, Any], Any]):
         self._handle = hook  # typing: ignore
 

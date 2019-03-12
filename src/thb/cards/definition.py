@@ -10,10 +10,10 @@ from thb.cards.base import t_OtherLessEqThanN, t_OtherOne, t_Self
 
 
 # -- code --
-def physical_card(cls):
+def physical_card(cls: Type[PhysicalCard]):
     assert issubclass(cls, PhysicalCard)
     for a in ('associated_action', 'target', 'category'):
-        assert hasattr(cls, a)
+        assert hasattr(cls, a), (cls, a)
     PhysicalCard.classes[cls.__name__] = cls
     return cls
 

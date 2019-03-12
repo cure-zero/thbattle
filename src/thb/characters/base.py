@@ -2,13 +2,13 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Any, Dict, Iterable, List, Optional, Set, TYPE_CHECKING, Tuple, Type, Union
+from typing import Any, ClassVar, Dict, Iterable, List, Set, TYPE_CHECKING, Type
 
 # -- third party --
 # -- own --
-from game.autoenv import Game
-from game.base import Player, EventHandler, GameObject
+from game.base import GameObject, Player
 from thb.meta.typing import CharacterMeta
+from thb.mode import THBEventHandler
 from utils.misc import partition
 
 # -- typing --
@@ -23,12 +23,14 @@ characters_by_category: Dict[str, Set[Type['Character']]] = defaultdict(set)
 
 
 class Character(GameObject):
-    classes: Dict[str, Type['Character']] = {}
+    classes: ClassVar[Dict[str, Type['Character']]] = {}
 
     # ----- Class Variables -----
-    ui_meta: CharacterMeta
-    eventhandlers: List[Type[EventHandler]] = []
-    categories: Iterable[str]
+    ui_meta: ClassVar[CharacterMeta]
+    eventhandlers: ClassVar[List[Type[THBEventHandler]]] = []
+    categories: ClassVar[Iterable[str]]
+    boss_skills: ClassVar[List[Type['Skill']]]
+
     skills: List[Type['Skill']]
     maxlife: int
 
@@ -43,6 +45,7 @@ class Character(GameObject):
     fatetell: 'CardList'
     special: 'CardList'
     showncardlists: List['CardList']
+    player: Player
 
     def __init__(self, player: Player):
         self.player = player

@@ -3,7 +3,6 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb.meta.typing import ModeMeta
 from thb import thbnewbie
 from thb.meta.common import ui_meta_for
 
@@ -13,7 +12,7 @@ ui_meta = ui_meta_for(thbnewbie)
 
 
 @ui_meta
-class THBattleNewbie(ModeMeta):
+class THBattleNewbie:
     name = '琪露诺的完美THB教室'
     logo = 'thb-modelogo-newbie'
     description = (

@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import deque
-from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, Sequence
+from typing import Any, Dict, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, Sequence, ClassVar
 from weakref import WeakValueDictionary
 import itertools
 import logging
@@ -47,6 +47,8 @@ class Card(GameObject):
 
     _color: Optional[int] = None
     usage = 'launch'
+
+    ui_meta: ClassVar[Any]
 
     associated_action: Optional[Type[UserAction]]
     category: Sequence[str]
@@ -155,7 +157,7 @@ class Card(GameObject):
 
 
 class PhysicalCard(Card):
-    classes: Dict[str, Type['PhysicalCard']] = {}
+    classes: ClassVar[Dict[str, Type['PhysicalCard']]] = {}
 
     exinwan_target: Optional['Character']  # HACK, for ExinwanCard
 
@@ -173,7 +175,7 @@ class PhysicalCard(Card):
 class VirtualCard(Card, GameViralContext):
     associated_cards: Sequence[Card]
     action_params: dict
-    no_reveal: bool = False
+    no_reveal: ClassVar[bool] = False
 
     _suit: Optional[int]
     _number: Optional[int]
@@ -218,7 +220,7 @@ class VirtualCard(Card, GameViralContext):
         return lst
 
     @classmethod
-    def wrap(cls, cl: List[Card], player: 'Character', params: Dict[str, Any]=None):
+    def wrap(cls, cl: List[Card], player: 'Character', params: Dict[str, Any] = None):
         vc = cls(player)
         vc.action_params = params or {}
         vc.associated_cards = cl[:]
@@ -385,8 +387,8 @@ class Deck(GameObject):
 
 
 class Skill(VirtualCard):
-    category = ['skill']
-    skill_category: List[str] = []
+    category: Sequence[str] = ['skill']
+    skill_category: Sequence[str] = []
 
     def __init__(self, player):
         assert player is not None
@@ -401,10 +403,10 @@ class TreatAs(object):
     usage = 'launch'
 
     if TYPE_CHECKING:
-        category = ['skill', 'treat_as']
+        category: Sequence[str] = ['skill', 'treat_as']
     else:
         @property
-        def category(self):
+        def category(self) -> Sequence[str]:
             return ['skill', 'treat_as'] + self.treat_as.category
 
     def check(self):

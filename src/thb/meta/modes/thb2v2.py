@@ -3,7 +3,6 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb.meta.typing import ModeMeta
 from thb import thb2v2
 from thb.meta.common import ui_meta_for
 
@@ -13,7 +12,7 @@ ui_meta = ui_meta_for(thb2v2)
 
 
 @ui_meta
-class THBattle2v2(ModeMeta):
+class THBattle2v2:
     name = '2v2模式'
     logo = 'thb-modelogo-2v2'
     description = (
@@ -45,7 +44,7 @@ class THBattle2v2(ModeMeta):
         }
     }
 
-    identities = thb2v2.Identity.TYPE
+    roles = thb2v2.THB2v2Role
 
 
 @ui_meta

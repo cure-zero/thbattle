@@ -3,20 +3,19 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import thbidentity
+from thb import thbrole
 from thb.actions import ttags
 from thb.cards.classes import AttackCard
 from thb.meta.common import card_desc, my_turn, passive_clickable, passive_is_action_valid
 from thb.meta.common import ui_meta_for
-from thb.meta.typing import ModeMeta
 
 
 # -- code --
-ui_meta = ui_meta_for(thbidentity)
+ui_meta = ui_meta_for(thbrole)
 
 
 @ui_meta
-class THBattleIdentity(ModeMeta):
+class THBattleRole:
     name = '8人身份场'
     logo = 'thb-modelogo-8id'
     description = (
@@ -60,7 +59,7 @@ class THBattleIdentity(ModeMeta):
         },
     }
 
-    identities = thbidentity.Identity.TYPE
+    roles = thbrole.THBRoleRole
 
 
 @ui_meta

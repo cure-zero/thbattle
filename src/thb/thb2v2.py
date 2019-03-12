@@ -10,7 +10,7 @@ import random
 # -- third party --
 # -- own --
 from game.autoenv import Game, user_input
-from game.base import BootstrapAction, EventHandler, GameEnded, GameItem, InputTransaction
+from game.base import BootstrapAction, GameEnded, GameItem, InputTransaction
 from game.base import InterruptActionFlow, get_seed_for, Player
 from thb.actions import DeadDropCards, DistributeCards, DrawCardStage, DrawCards
 from thb.actions import MigrateCardsTransaction, PlayerDeath, PlayerTurn, RevealRole, UserAction
@@ -19,7 +19,7 @@ from thb.cards.base import Deck
 from thb.characters.base import Character
 from thb.common import CharChoice, PlayerRole, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
-from thb.mode import THBattle
+from thb.mode import THBattle, THBEventHandler
 from utils.misc import BatchList, partition
 import settings
 
@@ -28,7 +28,7 @@ import settings
 log = logging.getLogger('THBattle2v2')
 
 
-class DeathHandler(EventHandler):
+class DeathHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):
@@ -66,7 +66,7 @@ class HeritageAction(UserAction):
         return True
 
 
-class HeritageHandler(EventHandler):
+class HeritageHandler(THBEventHandler):
     interested = ['action_before']
     execute_after = ['DeathHandler', 'SadistHandler']
 
@@ -94,7 +94,7 @@ class HeritageHandler(EventHandler):
         return act
 
 
-class ExtraCardHandler(EventHandler):
+class ExtraCardHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):

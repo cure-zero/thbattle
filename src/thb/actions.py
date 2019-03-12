@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-, Sequence
 
 # -- stdlib --
 from collections import OrderedDict, defaultdict
@@ -11,12 +11,12 @@ from typing_extensions import Protocol
 
 # -- own --
 from game.autoenv import user_input
-from game.base import Action, ActionShootdown, EventArbiter, EventHandler, GameViralContext
+from game.base import Action, ActionShootdown, EventArbiter, GameViralContext
 from game.base import InputTransaction, Player, sync_primitive, Game
 from thb.cards.base import Card, CardList, PhysicalCard, Skill, VirtualCard
 from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
-from thb.mode import THBattle
+from thb.mode import THBattle, THBAction, THBEventHandler
 from utils.check import CheckFailed, check, check_type
 from utils.misc import BatchList, group_by
 
@@ -35,7 +35,7 @@ def ttags(actor):
 
 
 class CardChooser(Protocol):
-    game: Game
+    game: THBattle
     card_usage: str
 
     def cond(self, cards: Sequence[Card]) -> bool: ...
@@ -51,8 +51,8 @@ def ask_for_action(initiator: Union[CardChooser, CharacterChooser],
                    actors: List[Character],
                    categories: Sequence[str],
                    candidates: Sequence[Character],
-                   timeout: Optional[int]=None,
-                   trans: Optional[InputTransaction]=None,
+                   timeout: Optional[int] = None,
+                   trans: Optional[InputTransaction] = None,
                    ) -> Tuple[Optional[Character], Optional[Tuple[List[Card], List[Character]]]]:
     # initiator: Action or EH requesting this
     # actors: players involved
@@ -150,8 +150,8 @@ def ask_for_action(initiator: Union[CardChooser, CharacterChooser],
 def user_choose_cards(initiator: CardChooser,
                       actor: Character,
                       categories: Sequence[str],
-                      timeout: Optional[int]=None,
-                      trans: Optional[InputTransaction]=None,
+                      timeout: Optional[int] = None,
+                      trans: Optional[InputTransaction] = None,
                       ) -> Optional[List[Card]]:
     check_type([str, ...], categories)
 
@@ -165,8 +165,8 @@ def user_choose_cards(initiator: CardChooser,
 def user_choose_players(initiator: CharacterChooser,
                         actor: Character,
                         candidates: List[Character],
-                        timeout: Optional[int]=None,
-                        trans: Optional[InputTransaction]=None,
+                        timeout: Optional[int] = None,
+                        trans: Optional[InputTransaction] = None,
                         ) -> Optional[List[Character]]:
     _, rst = ask_for_action(initiator, [actor], (), candidates, timeout=timeout, trans=trans)
     if not rst:
@@ -216,7 +216,7 @@ def skill_check(wrapped):
         return False
 
 
-COMMON_EVENT_HANDLERS: Set[Type[EventHandler]] = set()
+COMMON_EVENT_HANDLERS: Set[Type[THBEventHandler]] = set()
 
 
 def register_eh(cls):
@@ -225,26 +225,6 @@ def register_eh(cls):
 
 
 # ------------------------------------------
-class THBAction(Action):
-    source: Character
-    target: Character
-    game: THBattle
-
-    def __init__(self, source: Character, target: Character):
-        self.source = source
-        self.target = target
-
-
-class PlayerAction(Action):
-    source: Player
-    target: Player
-    game: THBattle
-
-    def __init__(self, source: Player, target: Player):
-        self.source = source
-        self.target = target
-
-
 class GenericAction(THBAction):
     pass
 
@@ -438,15 +418,15 @@ class PlayerRevive(GenericAction):
 
 
 class TryRevive(GenericAction):
-    def __init__(self, target, dmgact):
+    def __init__(self, target: Character, dmgact: 'BaseDamage'):
         self.source = self.target = target
         self.dmgact = dmgact
-        self.revived_by = None
+        self.revived_by: Optional[Character] = None
         if target.dead:
             log.error('TryRevive buggy condition, __init__')
             return
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         tgt = self.target
 
         if tgt.dead:
@@ -457,7 +437,7 @@ class TryRevive(GenericAction):
 
         g = self.game
         from thb.cards.basic import AskForHeal
-        for p in g.players_from(tgt):
+        for p in g.players.rotate_to(tgt):
             while True:
                 if p.dead:
                     break
@@ -626,7 +606,7 @@ class ActiveDropCards(GenericAction):
         self.cards = cards
         return True
 
-    def cond(self, cards) -> bool:
+    def cond(self, cards: Sequence[Card]) -> bool:
         tgt = self.target
         if not len(cards) == self.dropn:
             return False
@@ -914,7 +894,7 @@ class ActionStage(BaseActionStage):
 
 
 @register_eh
-class ShuffleHandler(EventHandler):
+class ShuffleHandler(THBEventHandler):
     interested = ['action_after', 'action_before', 'action_stage_action', 'card_migration', 'user_input_start']
 
     def handle(self, evt_type, arg):
@@ -1263,7 +1243,7 @@ class Reforge(GenericAction):
 
 
 @register_eh
-class DyingHandler(EventHandler):
+class DyingHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):

@@ -3,7 +3,6 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb.meta.typing import ModeMeta
 from thb import thbkof
 from thb.meta.common import ui_meta_for
 
@@ -13,7 +12,7 @@ ui_meta = ui_meta_for(thbkof)
 
 
 @ui_meta
-class THBattleKOF(ModeMeta):
+class THBattleKOF:
     name = 'KOF模式'
     logo = 'thb-modelogo-kof'
     description = (

@@ -5,12 +5,12 @@
 # -- own --
 from thb import actions
 from thb.actions import ttags
-from thb.cards import classes as cards
+from thb.cards import classes
 from thb.meta.common import G, ui_meta_for
 
 
 # -- code --
-ui_meta = ui_meta_for(cards)
+ui_meta = ui_meta_for(classes)
 
 
 @ui_meta
@@ -27,8 +27,8 @@ class AttackCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(self, g, cl, target_list):
-        if not target_list:
+    def is_action_valid(self, g, cl, tl):
+        if not tl:
             return (False, '请选择弹幕的目标')
 
         return (True, '来一发！')
@@ -64,7 +64,7 @@ class GrazeCard:
         '|DB（画师：霏茶，CV：小羽）|r'
     )
 
-    def is_action_valid(self, g, cl, target_list):
+    def is_action_valid(self, g, cl, tl):
         return (False, '你不能主动使用擦弹')
 
     def effect_string(self, act):
@@ -104,7 +104,7 @@ class WineCard:
         '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
-    def is_action_valid(self, g, cl, target_list):
+    def is_action_valid(self, g, cl, tl):
         if g.me.tags.get('wine', False):
             return (True, '你已经醉了，还要再喝吗？')
         return (True, '青岛啤酒，神主也爱喝！')
@@ -142,7 +142,7 @@ class ExinwanCard:
         '|DB（画师：霏茶，CV：shourei小N）|r'
     )
 
-    def is_action_valid(self, g, cl, target_list):
+    def is_action_valid(self, g, cl, tl):
         return (True, '哼，哼，哼哼……')
 
 
@@ -225,8 +225,8 @@ class HealCard:
         '|DB（画师：霏茶，CV：VV）|r'
     )
 
-    def is_action_valid(self, g, cl, target_list):
-        target = target_list[0]
+    def is_action_valid(self, g, cl, tl):
+        target = tl[0]
 
         if target.life >= target.maxlife:
             return (False, '您已经吃饱了')

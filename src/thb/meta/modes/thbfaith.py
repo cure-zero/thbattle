@@ -3,7 +3,6 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb.meta.typing import ModeMeta
 from thb import thbfaith
 from thb.meta.common import ui_meta_for
 
@@ -13,7 +12,7 @@ ui_meta = ui_meta_for(thbfaith)
 
 
 @ui_meta
-class THBattleFaith(ModeMeta):
+class THBattleFaith:
     name = '信仰争夺战'
     logo = 'thb-modelogo-faith'
     description = (
@@ -39,7 +38,7 @@ class THBattleFaith(ModeMeta):
         },
     }
 
-    identities = thbfaith.Identity.TYPE
+    roles = thbfaith.THBFaithRole
 
 
 @ui_meta

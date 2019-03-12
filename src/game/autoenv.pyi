@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from abc import ABCMeta
 from typing import Any, Optional, Sequence
 
 # -- third party --
@@ -18,8 +19,7 @@ def user_input(
 ):
     ...
 
-class Game(BaseGame):
-    ...
+Game = BaseGame
 
 
 def init(place: str):

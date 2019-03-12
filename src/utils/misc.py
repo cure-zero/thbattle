@@ -66,6 +66,20 @@ class BatchList(List[T]):
             f(*a, **k) for f in self
         )
 
+    '''
+    @typing.overload
+    def __getitem__(self, i: int) -> T: ...
+
+    @typing.overload
+    def __getitem__(self, s: slice) -> 'BatchList[T]': ...
+
+    def __getitem__(self, a):
+        if isinstance(a, slice):
+            return BatchList(list.__getitem__(self, a))
+        else:
+            return list.__getitem__(self, a)
+    '''
+
     def exclude(self, elem: T) -> 'BatchList[T]':
         nl = BatchList(self)
         try:

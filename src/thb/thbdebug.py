@@ -4,11 +4,11 @@
 import logging
 
 # -- third party --
-# -- own --
-from game.base import EventHandler
+# -- own --, PhysicalCard
 from thb.actions import MaxLifeChange, PlayerRevive, UserAction
-from thb.cards.base import Card, DummyCard, Skill, TreatAs, t_One
+from thb.cards.base import Card, DummyCard, Skill, TreatAs, t_One, PhysicalCard
 from thb.characters.base import Character
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -52,7 +52,7 @@ class DebugDecMaxLife(Skill):
         return not self.associated_cards
 
 
-class DebugHandler(EventHandler):
+class DebugHandler(THBEventHandler):
     interested = ['action_after', 'game_begin', 'switch_character']
     '''
     Add this handler to game_eh to active debug skills

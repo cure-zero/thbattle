@@ -9,9 +9,8 @@ import random
 
 # -- third party --
 # -- own --
-# -- errord --
 from game.autoenv import user_input
-from game.base import BootstrapAction, EventHandler, GameItem, InputTransaction, InterruptActionFlow, GameEnded
+from game.base import BootstrapAction, GameEnded, GameItem, InputTransaction, InterruptActionFlow
 from game.base import Player, get_seed_for
 from thb.actions import DistributeCards, MigrateCardsTransaction, PlayerDeath, PlayerTurn
 from thb.actions import RevealRole, migrate_cards
@@ -19,7 +18,7 @@ from thb.cards.base import Deck
 from thb.characters.base import Character
 from thb.common import CharChoice, PlayerRole, build_choices, roll
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet, SortCharacterInputlet
-from thb.mode import THBattle
+from thb.mode import THBEventHandler, THBattle
 from utils.misc import BatchList
 
 
@@ -27,7 +26,7 @@ from utils.misc import BatchList
 log = logging.getLogger('THBattle')
 
 
-class DeathHandler(EventHandler):
+class DeathHandler(THBEventHandler):
     interested = ['action_after', 'action_apply']
     game: 'THBattleFaith'
 

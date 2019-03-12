@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Dict, List, TYPE_CHECKING, Type
+from typing import Dict, List, Sequence, TYPE_CHECKING, Type, Tuple
 
 # -- third party --
 # -- own --
@@ -9,6 +9,10 @@ from game.base import GameItem, Player
 from server.base import Client, Game as ServerGame
 from thb.characters.base import Character
 from utils.misc import BatchList, exceptions
+
+# -- typing --
+if TYPE_CHECKING:
+    from thb.thbrole import THBRoleRole  # noqa: F401
 
 
 # -- code --
@@ -62,22 +66,22 @@ class ImperialChoice(GameItem):
 
 
 @GameItem.register
-class ImperialIdentity(GameItem):
-    key = 'imperial-id'
+class ImperialRole(GameItem):
+    key = 'imperial-role'
     args = [str]
 
-    def init(self, id):
-        if id not in ('attacker', 'accomplice', 'curtain', 'boss'):
+    def __init__(self, role: str):
+        if role not in ('attacker', 'accomplice', 'curtain', 'boss'):
             raise exceptions.InvalidIdentity
 
-        self.id = id
+        self.role = role
         mapping = {
             'attacker':   '城管',
             'boss':       'BOSS',
             'accomplice': '道中',
             'curtain':    '黑幕',
         }
-        self.disp_name = mapping[id]
+        self.disp_name = mapping[role]
 
     @property
     def title(self):
@@ -88,8 +92,8 @@ class ImperialIdentity(GameItem):
         return '你可以选择%s身份。身份场可用。' % self.disp_name
 
     def should_usable(self, g: ServerGame, u: Client):
-        from thb.thbidentity import THBattleIdentity
-        if not isinstance(g, THBattleIdentity):
+        from thb.thbrole import THBattleRole
+        if not isinstance(g, THBattleRole):
             raise exceptions.IncorrectGameMode
 
         threshold = {
@@ -125,14 +129,14 @@ class ImperialIdentity(GameItem):
             raise exceptions.ChooseIdentityConflict
 
     @classmethod
-    def get_chosen(cls, items, pl):
-        from thb.thbidentity import Identity
+    def get_chosen(cls, items: Dict[Player, List[GameItem]], pl: Sequence[Player]) -> List[Tuple[Player, 'THBRoleRole']]:
+        from thb.thbrole import THBRoleRole as T
 
         mapping = {
-            'boss':       Identity.TYPE.BOSS,
-            'attacker':   Identity.TYPE.ATTACKER,
-            'accomplice': Identity.TYPE.ACCOMPLICE,
-            'curtain':    Identity.TYPE.CURTAIN,
+            'boss':       T.BOSS,
+            'attacker':   T.ATTACKER,
+            'accomplice': T.ACCOMPLICE,
+            'curtain':    T.CURTAIN,
         }
 
         rst = []
@@ -159,8 +163,8 @@ class European(GameItem):
     description = 'Roll点保证第一。身份场不可用。'
 
     def should_usable(self, g: ServerGame, u: Client):
-        from thb.thbidentity import THBattleIdentity
-        if isinstance(g, THBattleIdentity):
+        from thb.thbrole import THBattleRole
+        if isinstance(g, THBattleRole):
             raise exceptions.IncorrectGameMode
 
         core = g.core

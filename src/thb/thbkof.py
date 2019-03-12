@@ -9,7 +9,7 @@ import logging
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import Player, BootstrapAction, EventHandler, InputTransaction
+from game.base import Player, BootstrapAction, InputTransaction
 from game.base import InterruptActionFlow, list_shuffle, GameEnded
 from thb.actions import DistributeCards, PlayerDeath, PlayerTurn, RevealRole
 from thb.cards.base import Deck
@@ -17,7 +17,7 @@ from thb.cards.definition import kof_card_definition
 from thb.common import CharChoice, PlayerRole, build_choices_shared, roll
 from thb.characters.base import Character
 from thb.inputlets import ChooseGirlInputlet
-from thb.mode import THBattle
+from thb.mode import THBattle, THBEventHandler
 from utils.misc import BatchList
 from thb.item import GameItem
 from typing import Any
@@ -27,7 +27,7 @@ from typing import Any
 log = logging.getLogger('THBattleKOF')
 
 
-class DeathHandler(EventHandler):
+class DeathHandler(THBEventHandler):
     interested = ['action_apply']
 
     game: 'THBattleKOF'
@@ -54,7 +54,7 @@ class DeathHandler(EventHandler):
         return act
 
 
-class KOFCharacterSwitchHandler(EventHandler):
+class KOFCharacterSwitchHandler(THBEventHandler):
     interested = ['action_after', 'action_before', 'action_stage_action']
     game: 'THBattleKOF'
 

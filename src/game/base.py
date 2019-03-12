@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from abc import abstractmethod
+from abc import abstractmethod, ABCMeta
 from collections import defaultdict
 from random import Random
 from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, Sequence
@@ -27,12 +27,12 @@ game_objects_hierarchy = set()
 
 
 class GameObjectMeta(type):
-    def __new__(mcls, clsname, bases, _dict):
-        for k, v in _dict.items():
+    def __new__(mcls, clsname, bases, kw):
+        for k, v in kw.items():
             if isinstance(v, (list, set)):
-                _dict[k] = tuple(v)  # mutable obj not allowed
+                kw[k] = tuple(v)  # mutable obj not allowed
 
-        cls = type.__new__(mcls, clsname, bases, _dict)
+        cls = super().__new__(mcls, clsname, bases, kw)
         all_gameobjects.add(cls)
         for b in bases:
             game_objects_hierarchy.add((b, cls))
@@ -115,9 +115,9 @@ class NPC(object):
 
 
 class GameEnded(GameException):
-    winners: List[Player]
+    winners: Sequence[Player]
 
-    def __init__(self, winners: List[Player]):
+    def __init__(self, winners: Sequence[Player]):
         GameException.__init__(self)
         self.winners = winners
 
@@ -152,7 +152,7 @@ class Game(GameObject, GameViralContext):
     action_stack: List['Action']
     hybrid_stack: List[Union['Action', 'EventHandler']]
     ended: bool
-    winners: List[Player]
+    winners: Sequence[Player]
     random: Random
     _: Dict[Any, dict]
 
@@ -252,11 +252,15 @@ class Game(GameObject, GameViralContext):
         pass
 
     @abstractmethod
-    def get_synctag(self):
+    def get_synctag(self) -> int:
         raise GameError('Abstract')
 
     @abstractmethod
     def is_dropped(self, p: Player) -> bool:
+        raise GameError('Abstract')
+
+    @abstractmethod
+    def name_of(self, p: Player) -> str:
         raise GameError('Abstract')
 
     @abstractmethod
@@ -404,7 +408,7 @@ T = TypeVar('T', bound=EventHandler)
 
 class EventDispatcher(GameObject):
     game: Game
-    _event_handlers: List[EventHandler]
+    _event_handlers: Sequence[EventHandler]
     _adhoc_ehs: List[EventHandler]
     _ehs_cache: Dict[str, List[EventHandler]]
 
@@ -545,20 +549,26 @@ class SyncPrimitive(GameObject):
         return self.value.__repr__()
 
 
-def sync_primitive(val: Union[list, int, str, bool], to: Union[Player, BatchList[Player]]):
+T_sync = TypeVar('T_sync', bound=Union[list, int, str, bool])
+
+
+def sync_primitive(val: T_sync, to: Union[Player, BatchList[Player]]) -> T_sync:
     if not to:  # sync to nobody
         return val
 
+    rst: Any = None
     if isinstance(val, list):
         lst = [SyncPrimitive(i) for i in val]
         to.reveal(lst)
-        return val.__class__(
+        rst = val.__class__(
             i.value for i in lst
         )
     else:
         v = SyncPrimitive(val)
         to.reveal(v)
-        return v.value
+        rst = v.value
+
+    return rst
 
 
 def get_seed_for(g: Game, p: Union[Player, BatchList[Player]]):

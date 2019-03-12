@@ -3,27 +3,27 @@
 # -- stdlib --
 from collections import defaultdict
 from copy import copy
-from enum import IntEnum
+from enum import Enum
 from itertools import cycle
+from typing import Any, Dict, List
 import logging
 import random
 
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import BootstrapAction, EventHandler, GameEnded, InputTransaction
-from game.base import InterruptActionFlow, get_seed_for, sync_primitive
+from game.base import BootstrapAction, GameEnded, GameItem, InputTransaction, InterruptActionFlow
+from game.base import Player, get_seed_for, sync_primitive
 from thb.actions import ActionStageLaunchCard, AskForCard, DistributeCards, DrawCards, DropCardStage
 from thb.actions import DropCards, GenericAction, LifeLost, PlayerDeath, PlayerTurn, RevealRole
 from thb.actions import TryRevive, UserAction, ask_for_action, ttags
-from thb.cards.base import Deck
-from thb.cards.classes import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, Skill, TreatAs
-from thb.cards.classes import VirtualCard, t_None, t_One
-from thb.characters.base import mixin_character
+from thb.cards.base import Card, Deck, Skill, VirtualCard
+from thb.cards.classes import AttackCard, AttackCardRangeHandler, GrazeCard, Heal, TreatAs, t_None
+from thb.cards.classes import t_One
 from thb.common import CharChoice, PlayerRole, build_choices
 from thb.inputlets import ChooseGirlInputlet, ChooseOptionInputlet
-from thb.item import ImperialIdentity
-from thb.mode import THBattle
+from thb.item import ImperialRole
+from thb.mode import THBEventHandler, THBattle
 from utils.misc import BatchList, classmix
 
 
@@ -31,7 +31,7 @@ from utils.misc import BatchList, classmix
 log = logging.getLogger('THBattleIdentity')
 
 
-class IdentityRevealHandler(EventHandler):
+class RoleRevealHandler(THBEventHandler):
     interested = ['action_apply']
     execute_before = ['DeathHandler']
 
@@ -40,18 +40,20 @@ class IdentityRevealHandler(EventHandler):
             g = self.game
             tgt = act.target
 
-            g.process_action(RevealRole(tgt, g.players))
+            g.process_action(RevealRole(tgt.player, g.players.player))
 
         return act
 
 
-class DeathHandler(EventHandler):
+class DeathHandler(THBEventHandler):
     interested = ['action_apply', 'action_after']
+    game: 'THBattleRole'
 
-    def handle(self, evt_type, act):
+    def handle(self, evt_type: str, act) -> Any:
         if evt_type == 'action_apply' and isinstance(act, PlayerDeath):
             g = self.game
-            T = Identity.TYPE
+            T = THBRoleRole
+            pl = g.players.player
 
             tgt = act.target
             dead = lambda p: p.dead or p is tgt
@@ -59,68 +61,66 @@ class DeathHandler(EventHandler):
             # curtain's win
             survivors = [p for p in g.players if not dead(p)]
             if len(survivors) == 1:
-                pl = g.players
-                pl.reveal([p.identity for p in g.players])
+                pl.reveal([g.roles[p] for p in pl])
 
-                if survivors[0].identity.type == T.CURTAIN:
-                    raise GameEnded(survivors[:])
+                if g.roles[survivors[0].player] == T.CURTAIN:
+                    raise GameEnded([survivors[0].player])
 
-            deads = defaultdict(list)
+            deads: Dict[THBRoleRole, int] = defaultdict(int)
             for p in g.players:
                 if dead(p):
-                    deads[p.identity.type].append(p)
+                    deads[g.roles[p.player].get()] += 1
 
-            def winner(*identities):
-                pl = g.players
-                pl.reveal([p.identity for p in g.players])
+            def winner(*roles: THBRoleRole):
+                pl.reveal([g.roles[p] for p in pl])
 
                 raise GameEnded([
                     p for p in pl
-                    if p.identity.type in identities
+                    if g.roles[p].get() in roles
                 ])
 
-            def no(identity):
-                return len(deads[identity]) == g.identities.count(identity)
+            def has_no(i: THBRoleRole):
+                return deads[i] == g.roles_config.count(i)
 
             # attackers' & curtain's win
-            if len(deads[T.BOSS]):
+            if deads[T.BOSS]:
                 if g.double_curtain:
                     winner(T.ATTACKER)
                 else:
-                    if no(T.ATTACKER):
+                    if has_no(T.ATTACKER):
                         winner(T.CURTAIN)
                     else:
                         winner(T.ATTACKER)
 
             # boss & accomplices' win
-            if no(T.ATTACKER) and no(T.CURTAIN):
+            if has_no(T.ATTACKER) and has_no(T.CURTAIN):
                 winner(T.BOSS, T.ACCOMPLICE)
 
             # all survivors dropped
-            if all([p.dropped for p in survivors]):
-                pl = g.players
-                pl.reveal([p.identity for p in pl])
-                g.winners = []
-                g.game_end()
+            if all([g.is_dropped(ch.player) for ch in survivors]):
+                pl.reveal([g.roles[p] for p in pl])
+                raise GameEnded([])
 
         elif evt_type == 'action_after' and isinstance(act, PlayerDeath):
-            T = Identity.TYPE
+            T = THBRoleRole
             g = self.game
             tgt = act.target
             src = act.source
 
-            if src:
-                if tgt.identity.type == T.ATTACKER:
-                    g.process_action(DrawCards(src, 3))
-                elif tgt.identity.type == T.ACCOMPLICE:
-                    if src.identity.type == T.BOSS:
-                        g.players.exclude(src).reveal(list(src.cards))
+            if not src:
+                return act
 
-                        cards = []
-                        cards.extend(src.cards)
-                        cards.extend(src.showncards)
-                        cards.extend(src.equips)
-                        cards and g.process_action(DropCards(src, src, cards))
+            if g.roles[tgt.player] == T.ATTACKER:
+                g.process_action(DrawCards(src, 3))
+            elif g.roles[tgt.player] == T.ACCOMPLICE:
+                if g.roles[src.player] == T.BOSS:
+                    pl.exclude(src.player).reveal(list(src.cards))
+
+                    cards: List[Card] = []
+                    cards.extend(src.cards)
+                    cards.extend(src.showncards)
+                    cards.extend(src.equips)
+                    cards and g.process_action(DropCards(src, src, cards))
 
         return act
 
@@ -140,6 +140,8 @@ class AssistedAttackAction(UserAction):
         if not p:
             ttags(src)['assisted_attack_disable'] = True
             return False
+
+        assert rst
 
         (c,), _ = rst
         g.process_action(ActionStageLaunchCard(src, [tgt], AssistedAttackCard.wrap([c], src)))
@@ -206,7 +208,7 @@ class AssistedUseAction(UserAction):
         return True
 
 
-class AssistedUseHandler(EventHandler):
+class AssistedUseHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):
@@ -259,13 +261,15 @@ class AssistedHealAction(UserAction):
         return True
 
 
-class AssistedHealHandler(EventHandler):
+class AssistedHealHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):
         if evt_type == 'action_after' and isinstance(act, TryRevive):
             if not act.succeeded:
                 return act
+
+            assert act.revived_by
 
             tgt = act.target
             if not tgt.has_skill(AssistedHeal):
@@ -288,7 +292,7 @@ class AssistedHeal(Skill):
     skill_category = ['character', 'passive', 'boss']
 
 
-class ExtraCardSlotHandler(EventHandler):
+class ExtraCardSlotHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):
@@ -298,8 +302,8 @@ class ExtraCardSlotHandler(EventHandler):
                 return act
 
             g = self.game
-            n = sum(i == Identity.TYPE.ACCOMPLICE for i in g.identities)
-            n -= sum(p.dead and p.identity.type == Identity.TYPE.ACCOMPLICE for p in g.players)
+            n = sum(i == THBRoleRole.ACCOMPLICE for i in g.roles)
+            n -= sum(p.dead and p.identity.type == THBRoleRole.ACCOMPLICE for p in g.players)
             act.dropn = max(act.dropn - n, 0)
 
         return act
@@ -311,20 +315,19 @@ class ExtraCardSlot(Skill):
     skill_category = ['character', 'passive', 'boss']
 
 
-class Identity(PlayerRole):
-    # 城管 BOSS 道中 黑幕
-    class TYPE(IntEnum):
-        HIDDEN     = 0
-        ATTACKER   = 1
-        BOSS       = 4
-        ACCOMPLICE = 2
-        CURTAIN    = 3
+class THBRoleRole(Enum):
+    HIDDEN     = 0
+    ATTACKER   = 1
+    BOSS       = 4
+    ACCOMPLICE = 2
+    CURTAIN    = 3
 
 
 class ChooseBossSkillAction(GenericAction):
-    def apply_action(self):
+    def apply_action(self) -> bool:
         tgt = self.target
-        if hasattr(tgt, 'boss_skills'):
+
+        if tgt.boss_skills:
             bs = tgt.boss_skills
             assert len(bs) == 1
             tgt.skills.extend(bs)
@@ -338,90 +341,93 @@ class ChooseBossSkillAction(GenericAction):
             ExtraCardSlot,
         ]
         rst = user_input([tgt], ChooseOptionInputlet(self, [i.__name__ for i in lst]))
-        rst = next((i for i in lst if i.__name__ == rst), None) or next(lst)
+        rst = next((i for i in lst if i.__name__ == rst), None) or next(iter(lst))
         tgt.skills.append(rst)
         self.skill_chosen = rst  # for ui
         return True
 
 
-class THBattleIdentityBootstrap(BootstrapAction):
-    def __init__(self, params, items):
+class THBattleRoleBootstrap(BootstrapAction):
+    game: 'THBattleRole'
+
+    def __init__(self, params: Dict[str, Any],
+                       items: Dict[Player, List[GameItem]],
+                       players: BatchList[Player]):
         self.source = self.target = None
         self.params = params
         self.items = items
+        self.players = players
 
-    def apply_action(self):
+    def apply_action(self) -> bool:
         g = self.game
         params = self.params
 
         g.deck = Deck(g)
-        g.ehclasses = []
 
-        # arrange identities -->
+        # arrange roles -->
         g.double_curtain = params['double_curtain']
 
-        mapping = {
-            'B': Identity.TYPE.BOSS,
-            '!': Identity.TYPE.ATTACKER,
-            '&': Identity.TYPE.ACCOMPLICE,
-            '?': Identity.TYPE.CURTAIN,
-        }
+        B = THBRoleRole.BOSS
+        T = THBRoleRole.ATTACKER
+        A = THBRoleRole.ACCOMPLICE
+        C = THBRoleRole.CURTAIN
 
         if g.double_curtain:
-            identities = 'B!!!&&??'
+            roles = [B, T, T, T, A, A, C, C]
         else:
-            identities = 'B!!!!&&?'
+            roles = [B, T, T, T, T, A, A, C]
 
-        pl = g.players[:]
-        identities = [mapping[i] for i in identities]
-        g.identities = identities[:]
-        imperial_identities = ImperialIdentity.get_chosen(self.items, pl)
-        for p, i in imperial_identities:
+        orig_pl = self.players
+        pl = BatchList[Player](orig_pl)
+
+        g.roles_config = roles[:]
+
+        imperial_roles = ImperialRole.get_chosen(self.items, pl)
+        for p, i in imperial_roles:
             pl.remove(p)
-            identities.remove(i)
+            roles.remove(i)
 
-        g.random.shuffle(identities)
+        g.random.shuffle(roles)
 
         if g.CLIENT:
-            identities = [Identity.TYPE.HIDDEN for _ in identities]
+            roles = [THBRoleRole.HIDDEN for _ in roles]
 
-        for p, i in imperial_identities + list(zip(pl, identities)):
-            p.identity = Identity()
-            p.identity.type = i
+        g.roles = {}
+
+        for p, i in imperial_roles + list(zip(pl, roles)):
+            g.roles[p] = PlayerRole[THBRoleRole]()
+            g.roles[p].set(i)
             g.process_action(RevealRole(p, p))
 
-        del identities
+        del roles
 
-        is_boss = sync_primitive([p.identity.type == Identity.TYPE.BOSS for p in g.players], g.players)
+        is_boss = sync_primitive([g.roles[p] == THBRoleRole.BOSS for p in pl], pl)
         boss_idx = is_boss.index(True)
-        boss = g.boss = g.players[boss_idx]
+        boss = g.boss = pl[boss_idx]
 
-        boss.identity = Identity()
-        boss.identity.type = Identity.TYPE.BOSS
-        g.process_action(RevealRole(boss, g.players))
+        g.process_action(RevealRole(boss, pl))
 
         # choose girls init -->
         from .characters import get_characters
-        pl = g.players.rotate_to(boss)
+        pl = pl.rotate_to(boss)
 
         choices, _ = build_choices(
-            g, self.items,
+            g, pl, self.items,
             candidates=get_characters('common', 'id', 'id8', '-boss'),
-            players=[boss],
-            num=[5], akaris=[1],
-            shared=False,
+            spec={boss: {'num': 5, 'akaris': 1}},
         )
 
         choices[boss][:0] = [CharChoice(cls) for cls in get_characters('boss')]
 
         with InputTransaction('ChooseGirl', [boss], mapping=choices) as trans:
-            c = user_input([boss], ChooseGirlInputlet(g, choices), 30, 'single', trans)
+            c: CharChoice = user_input([boss], ChooseGirlInputlet(g, choices), 30, 'single', trans)
 
             c = c or choices[boss][-1]
             c.chosen = boss
             c.akari = False
-            g.players.reveal(c)
+            pl.reveal(c)
             trans.notify('girl_chosen', (boss, c))
+            assert c.char_cls
 
         chars = get_characters('common', 'id', 'id8')
 
@@ -430,63 +436,70 @@ class THBattleIdentityBootstrap(BootstrapAction):
         except Exception:
             pass
 
+        g.players = BatchList()
+
         # mix it in advance
         # so the others could see it
 
-        boss = g.switch_character(boss, c.char_cls)
+        boss_ch = c.char_cls(boss)
+        g.players.append(boss_ch)
+        g.emit_event('switch_character', (None, boss_ch))
 
         # boss's hp bonus
-        if g.n_persons > 5:
-            boss.maxlife += 1
-
-        boss.life = boss.maxlife
+        boss_ch.maxlife += 1
+        boss_ch.life = boss_ch.maxlife
 
         # choose boss dedicated skill
-        g.process_action(ChooseBossSkillAction(boss, boss))
+        g.process_action(ChooseBossSkillAction(boss_ch, boss_ch))
 
         # reseat
-        seed = get_seed_for(g, g.players)
-        random.Random(seed).shuffle(g.players)
-        g.emit_event('reseat', (FROM, TO))
+        seed = get_seed_for(g, pl)
+        random.Random(seed).shuffle(pl)
+        g.emit_event('reseat', (orig_pl, pl))
 
         # others choose girls
-        pl = g.players.exclude(boss)
+        pl_wo_boss = pl.exclude(boss)
 
         choices, _ = build_choices(
-            g, self.items,
-            candidates=chars, players=pl,
-            num=[4] * len(pl), akaris=[1] * len(pl),
-            shared=False,
+            g, pl, self.items,
+            candidates=chars,
+            spec={p: {'num': 4, 'akaris': 1} for p in pl_wo_boss},
         )
 
-        with InputTransaction('ChooseGirl', pl, mapping=choices) as trans:
+        with InputTransaction('ChooseGirl', pl_wo_boss, mapping=choices) as trans:
             ilet = ChooseGirlInputlet(g, choices)
             ilet.with_post_process(lambda p, rst: trans.notify('girl_chosen', (p, rst)) or rst)
-            result = user_input(pl, ilet, type='all', trans=trans)
+            result = user_input(pl_wo_boss, ilet, type='all', trans=trans)
 
         # mix char class with player -->
-        for p in pl:
+        for p in pl_wo_boss:
             c = result[p] or choices[p][-1]
             c.akari = False
-            g.players.reveal(c)
-            p = g.switch_character(p, c.char_cls)
+            pl.reveal(c)
+            assert c.char_cls
+            ch = c.char_cls(p)
+            g.players.append(ch)
+            g.emit_event('switch_character', (None, ch))
+
+        assert g.players.player == pl
 
         # -------
-        for p in g.players:
+        for ch in g.players:
             log.info(
                 '>> Player: %s:%s %s',
-                p.__class__.__name__,
-                Identity.TYPE.rlookup(p.identity.type),
-                p.account.username,
+                ch.__class__.__name__,
+                g.roles[ch.player].get().name,
+                g.name_of(ch.player),
             )
         # -------
 
+        g.refresh_dispatcher()
         g.emit_event('game_begin', g)
 
         for p in g.players:
             g.process_action(DistributeCards(p, amount=4))
 
-        for i, p in enumerate(cycle(g.players.rotate_to(boss))):
+        for i, p in enumerate(cycle(g.players.rotate_to(boss_ch))):
             if i >= 6000: break
             if not p.dead:
                 try:
@@ -497,10 +510,10 @@ class THBattleIdentityBootstrap(BootstrapAction):
         return True
 
 
-class THBattleIdentity(THBattle):
+class THBattleRole(THBattle):
     n_persons = 8
     game_ehs = [
-        IdentityRevealHandler,
+        RoleRevealHandler,
         DeathHandler,
         AssistedAttackHandler,
         AssistedAttackRangeHandler,
@@ -508,24 +521,15 @@ class THBattleIdentity(THBattle):
         AssistedHealHandler,
         ExtraCardSlotHandler,
     ]
-    bootstrap = THBattleIdentityBootstrap
+    bootstrap = THBattleRoleBootstrap
     params_def = {
         'double_curtain': (False, True),
     }
 
+    # ----- instance vars -----
+    boss: Player
+    roles_config: List[THBRoleRole]
+    double_curtain: bool
+
     def can_leave(self, p):
-        return getattr(p, 'dead', False)
-
-    def switch_character(g, p, cls):
-        # mix char class with player -->
-        old = p
-        p, oldcls = mixin_character(g, p, cls)
-        g.decorate(p)
-        g.players.replace(old, p)
-
-        assert not oldcls
-
-        g.refresh_dispatcher()
-        g.emit_event('switch_character', (old, p))
-
-        return p
+        return p.dead

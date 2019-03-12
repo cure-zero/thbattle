@@ -5,9 +5,8 @@ from typing import Dict, Optional, Type, Union
 
 # -- third party --
 # -- own --
-from game.base import GameViralContext
+from game.base import GameObject, GameViralContext
 from thb.characters.base import Character
-from thb.meta.typing import UIMeta
 
 
 # -- code --
@@ -34,16 +33,17 @@ class UIMetaAccessor(object):
         raise AttributeError('%s.%s' % (self.cls.__name__, name))
 
 
-def ui_meta_for(for_module):
-    def ui_meta(cls):
+def ui_meta(for_cls: Type[GameObject]):
+    def decorate(cls: type):
         name = cls.__name__
         if name in UI_META:
             raise Exception('%s ui_meta redefinition!' % name)
-        for_cls = getattr(for_module, name)
-        for_cls.ui_meta = UIMetaAccessor(for_cls)
+
+        # Type info is handled by plugin
+        for_cls.ui_meta = UIMetaAccessor(for_cls)  # type: ignore
         UI_META[for_cls] = cls()
         return cls
-    return ui_meta
+    return decorate
 
 
 # -----BEGIN COMMON FUNCTIONS-----

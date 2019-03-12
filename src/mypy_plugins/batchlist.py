@@ -91,7 +91,13 @@ def batchlist_attribute_hook(ctx: AttributeContext) -> Type:
         t = bind_self(typ)
     else:
         t = typ
-        assert t
+        if not t:
+            ctx.api.fail(
+                'BatchList item {} has attribute "{}" with no annotation'.format(
+                    instance.args[0], field,
+                ), expr
+            )
+            t = Instance(typeinfo, [AnyType(TypeOfAny.from_error)])
 
     return Instance(typeinfo, [t])
 
