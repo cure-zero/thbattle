@@ -3,14 +3,13 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from thb import cards
-from thb.meta.common import ui_meta_for
+from thb.cards import definition
+from thb.meta.common import ui_meta
 
 # -- code --
-ui_meta = ui_meta_for(cards)
 
 
-@ui_meta
+@ui_meta(definition.MassiveDamageCard)
 class MassiveDamageCard:
     # action_stage meta
     image = 'thb-card-question'

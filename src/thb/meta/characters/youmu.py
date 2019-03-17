@@ -5,14 +5,13 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, passive_clickable, passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.youmu)
 
 
-@ui_meta
+@ui_meta(characters.youmu.Youmu)
 class Youmu:
     # Character
     name        = '魂魄妖梦'
@@ -25,7 +24,7 @@ class Youmu:
     miss_sound_effect = 'thb-cv-youmu_miss'
 
 
-@ui_meta
+@ui_meta(characters.youmu.Mijincihangzhan)
 class Mijincihangzhan:
     # Skill
     name = '迷津慈航斩'
@@ -35,7 +34,7 @@ class Mijincihangzhan:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.youmu.MijincihangzhanAttack)
 class MijincihangzhanAttack:
     def effect_string_apply(self, act):
         src = act.source
@@ -47,7 +46,7 @@ class MijincihangzhanAttack:
         return 'thb-cv-youmu_mjchz'
 
 
-@ui_meta
+@ui_meta(characters.youmu.NitoryuuWearEquipmentAction)
 class NitoryuuWearEquipmentAction:
     def sound_effect(self, act):
         card = act.card
@@ -58,7 +57,7 @@ class NitoryuuWearEquipmentAction:
             return 'thb-cv-youmu_nitoryuu'
 
 
-@ui_meta
+@ui_meta(characters.youmu.Nitoryuu)
 class Nitoryuu:
     # Skill
     name = '二刀流'

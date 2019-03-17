@@ -5,14 +5,13 @@
 # -- own --
 from thb import characters
 from thb.cards.base import Skill
-from thb.meta.common import G, my_turn, passive_clickable, passive_is_action_valid, ui_meta_for
+from thb.meta.common import G, my_turn, passive_clickable, passive_is_action_valid, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.seiga)
 
 
-@ui_meta
+@ui_meta(characters.seiga.Seiga)
 class Seiga:
     # Character
     name        = '霍青娥'
@@ -25,7 +24,7 @@ class Seiga:
     miss_sound_effect = 'thb-cv-seiga_miss'
 
 
-@ui_meta
+@ui_meta(characters.seiga.SeigaKOF)
 class SeigaKOF:
     # Character
     name        = '霍青娥'
@@ -40,14 +39,14 @@ class SeigaKOF:
     notes = '|RKOF修正角色'
 
 
-@ui_meta
+@ui_meta(characters.seiga.HeterodoxyHandler)
 class HeterodoxyHandler:
     # choose_option meta
     choose_option_buttons = (('跳过结算', True), ('正常结算', False))
     choose_option_prompt = '你要跳过当前的卡牌结算吗？'
 
 
-@ui_meta
+@ui_meta(characters.seiga.HeterodoxySkipAction)
 class HeterodoxySkipAction:
     def effect_string(self, act):
         return '|G【%s】|r跳过了卡牌效果的结算' % (
@@ -55,13 +54,13 @@ class HeterodoxySkipAction:
         )
 
 
-@ui_meta
+@ui_meta(characters.seiga.HeterodoxyAction)
 class HeterodoxyAction:
     def ray(self, act):
         return [(act.source, act.target_list[0])]
 
 
-@ui_meta
+@ui_meta(characters.seiga.Heterodoxy)
 class Heterodoxy:
     # Skill
     name = '邪仙'
@@ -115,7 +114,7 @@ class Heterodoxy:
         return 'thb-cv-seiga_heterodoxy'
 
 
-@ui_meta
+@ui_meta(characters.seiga.Summon)
 class Summon:
     # Skill
     name = '通灵'
@@ -125,7 +124,7 @@ class Summon:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.seiga.SummonAction)
 class SummonAction:
     # choose_option meta
     choose_option_prompt = '请选择想要获得的技能：'
@@ -147,14 +146,14 @@ class SummonAction:
         )
 
 
-@ui_meta
+@ui_meta(characters.seiga.SummonHandler)
 class SummonHandler:
     # choose_option meta
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【通灵】吗？'
 
 
-@ui_meta
+@ui_meta(characters.seiga.SummonKOF)
 class SummonKOF:
     # Skill
     name = '通灵'
@@ -180,7 +179,7 @@ class SummonKOF:
         )
 
 
-@ui_meta
+@ui_meta(characters.seiga.SummonKOFAction)
 class SummonKOFAction:
 
     def effect_string(self, act):
@@ -191,7 +190,7 @@ class SummonKOFAction:
         )
 
 
-@ui_meta
+@ui_meta(characters.seiga.SummonKOFCollect)
 class SummonKOFCollect:
 
     def effect_string_before(self, act):

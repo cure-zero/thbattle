@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import ActionStage, DropCards, ShowCards, UserAction, migrate_cards
 from thb.actions import user_choose_cards
-from thb.cards.classes import Card, Skill, t_None, t_OtherOne
+from thb.cards.base import Card, Skill
+from thb.cards.classes import t_None, t_OtherOne
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, HopeMaskInputlet, HopeMaskKOFInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -51,7 +52,7 @@ class HopeMaskKOFAction(BaseHopeMaskAction):
     inputlet_cls = HopeMaskKOFInputlet
 
 
-class BaseHopeMaskHandler(EventHandler):
+class BaseHopeMaskHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):

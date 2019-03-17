@@ -237,7 +237,7 @@ class Observe(object):
             users.write(info)
             users._[self]['obs'].write(info)
 
-        if g.greenlet:
+        if core.room.is_started(g):
             self._observe_start(ob, observee)
             core.game.replay(observee, to=ob)
 

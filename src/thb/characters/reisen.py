@@ -4,11 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import ActionShootdown, EventHandler
+from game.base import ActionShootdown
 from thb.actions import ActionStageLaunchCard, Damage, LaunchCard, PlayerTurn, UserAction
-from thb.cards.classes import AttackCard, DuelCard, Heal, HealCard, PhysicalCard, Skill, t_None
+from thb.cards.base import Skill
+from thb.cards.classes import AttackCard, DuelCard, Heal, HealCard, PhysicalCard, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -38,7 +40,7 @@ class LunaticAction(UserAction):
         return True
 
 
-class LunaticHandler(EventHandler):
+class LunaticHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):
@@ -75,7 +77,7 @@ class DiscarderDistanceLimit(ActionShootdown):
     pass
 
 
-class DiscarderHandler(EventHandler):
+class DiscarderHandler(THBEventHandler):
     interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):
@@ -115,7 +117,7 @@ class MahjongDrugAction(UserAction):
         return not self.target.dead
 
 
-class MahjongDrugHandler(EventHandler):
+class MahjongDrugHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):

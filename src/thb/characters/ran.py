@@ -4,13 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import ActionLimitExceeded, ActionStageLaunchCard, Damage, DropCards, GenericAction
 from thb.actions import PlayerTurn, ttags, user_choose_cards
-from thb.cards.classes import DummyCard, InstantSpellCardAction, Reject, Skill, SpellCardAction
-from thb.cards.classes import TreatAs, VirtualCard, t_None
+from thb.cards.base import DummyCard, Skill, VirtualCard, t_None
+from thb.cards.classes import InstantSpellCardAction, Reject, SpellCardAction, TreatAs
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ProphetInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -52,7 +52,7 @@ class ProphetAction(GenericAction):
         return True
 
 
-class ProphetHandler(EventHandler):
+class ProphetHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):
@@ -113,7 +113,7 @@ class ExtremeIntelligenceAction(GenericAction):
         return len(cl) == 1 and not cl[0].is_card(Skill)
 
 
-class ExtremeIntelligenceHandler(EventHandler):
+class ExtremeIntelligenceHandler(THBEventHandler):
     interested = ['action_after', 'game_begin']
 
     def handle(self, evt_type, act):
@@ -173,7 +173,7 @@ class ExtremeIntelligenceKOF(TreatAs, Skill):
         return True
 
 
-class ExtremeIntelligenceKOFHandler(EventHandler):
+class ExtremeIntelligenceKOFHandler(THBEventHandler):
     interested = ['action_apply', 'action_shootdown']
 
     def handle(self, evt_type, act):
@@ -215,7 +215,7 @@ class NakedFoxAction(GenericAction):
         return True
 
 
-class NakedFoxHandler(EventHandler):
+class NakedFoxHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):

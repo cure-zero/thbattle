@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 
+# -- stdlib --
+from typing import Optional
 import random
 
+# -- third party --
+# -- own --
 from thb import actions
+from thb.meta.common import G, card_desc, ui_meta
 from utils.misc import BatchList
 
-from .common import ui_meta_for, card_desc, G
 
-# -----BEGIN ACTIONS UI META-----
-ui_meta = ui_meta_for(actions)
-
-
-@ui_meta
+# -- code --
+@ui_meta(actions.DrawCards)
 class DrawCards:
     def effect_string(self, act):
         return '|G【%s】|r摸了%d张牌。' % (
@@ -19,7 +20,7 @@ class DrawCards:
         )
 
 
-@ui_meta
+@ui_meta(actions.ActiveDropCards)
 class ActiveDropCards:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -35,7 +36,7 @@ class ActiveDropCards:
             )
 
 
-@ui_meta
+@ui_meta(actions.Damage)
 class Damage:
     update_portrait = True
     play_sound_at_target = True
@@ -55,7 +56,7 @@ class Damage:
         return 'thb-sound-hit'
 
 
-@ui_meta
+@ui_meta(actions.LifeLost)
 class LifeLost:
     update_portrait = True
     play_sound_at_target = True
@@ -66,13 +67,13 @@ class LifeLost:
         )
 
 
-@ui_meta
+@ui_meta(actions.LaunchCard)
 class LaunchCard:
-    def effect_string_before(self, act):
+    def effect_string_before(self, act: actions.LaunchCard) -> Optional[str]:
         s, tl = act.source, BatchList(act.target_list)
         c = act.card
         if not c:
-            return
+            return None
 
         meta = getattr(c, 'ui_meta', None)
         effect_string = getattr(meta, 'effect_string', None)
@@ -102,7 +103,7 @@ class LaunchCard:
         return [(s, t) for t in act.target_list]
 
 
-@ui_meta
+@ui_meta(actions.AskForCard)
 class AskForCard:
     def sound_effect_after(self, act):
         c = act.card
@@ -117,7 +118,7 @@ class AskForCard:
         return se and se(act)
 
 
-@ui_meta
+@ui_meta(actions.PlayerDeath)
 class PlayerDeath:
     update_portrait = True
 
@@ -136,7 +137,7 @@ class PlayerDeath:
             return se
 
 
-@ui_meta
+@ui_meta(actions.PlayerRevive)
 class PlayerRevive:
     update_portrait = True
 
@@ -147,7 +148,7 @@ class PlayerRevive:
         )
 
 
-@ui_meta
+@ui_meta(actions.TurnOverCard)
 class TurnOverCard:
     def effect_string(self, act):
         tgt = act.target
@@ -157,7 +158,7 @@ class TurnOverCard:
         )
 
 
-@ui_meta
+@ui_meta(actions.RevealRole)
 class RevealRole:
     def effect_string(self, act):
         g = G()
@@ -178,7 +179,7 @@ class RevealRole:
         )
 
 
-@ui_meta
+@ui_meta(actions.Pindian)
 class Pindian:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -200,7 +201,7 @@ class Pindian:
         )
 
 
-@ui_meta
+@ui_meta(actions.Fatetell)
 class Fatetell:
 
     def fatetell_prompt_string(self, act):
@@ -234,13 +235,13 @@ class Fatetell:
         return prompt
 
 
-@ui_meta
+@ui_meta(actions.ActionShootdown)
 class ActionShootdown:
     target_independent = False
     shootdown_message = '您不能这样出牌'
 
 
-@ui_meta
+@ui_meta(actions.BaseActionStage)
 class BaseActionStage:
     idle_prompt = '请出牌…'
 
@@ -251,9 +252,7 @@ class BaseActionStage:
             return True, '不会显示'
 
 
-@ui_meta
+@ui_meta(actions.VitalityLimitExceeded)
 class VitalityLimitExceeded:
     target_independent = True
     shootdown_message = '你没有干劲了'
-
-# -----END ACTIONS UI META-----

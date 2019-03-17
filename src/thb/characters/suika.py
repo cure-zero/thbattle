@@ -3,11 +3,12 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import EventHandler
 from thb.actions import ActionLimitExceeded, ActionShootdown, ActionStage, DrawCards, LaunchCard
 from thb.actions import Pindian, PlayerTurn, UserAction
-from thb.cards.classes import AttackCard, Skill, TreatAs, VirtualCard, WineCard, t_None, t_OtherOne
+from thb.cards.base import Skill, VirtualCard
+from thb.cards.classes import AttackCard, TreatAs, WineCard, t_None, t_OtherOne
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -55,7 +56,7 @@ class HeavyDrinker(Skill):
         return not self.associated_cards
 
 
-class HeavyDrinkerHandler(EventHandler):
+class HeavyDrinkerHandler(THBEventHandler):
     interested = ['action_apply']
     execute_before = ['WineHandler']
 
@@ -76,7 +77,7 @@ class DrunkenDreamDrawCards(DrawCards):
     pass
 
 
-class DrunkenDreamHandler(EventHandler):
+class DrunkenDreamHandler(THBEventHandler):
     interested = ['action_apply', 'calcdistance']
     execute_before = ['WineHandler']
 

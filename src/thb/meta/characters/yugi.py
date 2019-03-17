@@ -4,13 +4,12 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, passive_clickable, passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.yugi)
 
 
-@ui_meta
+@ui_meta(characters.yugi.Yugi)
 class Yugi:
     # Character
     name        = '星熊勇仪'
@@ -23,7 +22,7 @@ class Yugi:
     miss_sound_effect = 'thb-cv-yugi_miss'
 
 
-@ui_meta
+@ui_meta(characters.yugi.YugiKOF)
 class YugiKOF:
     # Character
     name        = '星熊勇仪'
@@ -38,7 +37,7 @@ class YugiKOF:
     notes = '|RKOF修正角色|r'
 
 
-@ui_meta
+@ui_meta(characters.yugi.Assault)
 class Assault:
     # Skill
     name = '强袭'
@@ -49,7 +48,7 @@ class Assault:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.yugi.AssaultAttack)
 class AssaultAttack:
     name = '强袭'
 
@@ -57,13 +56,13 @@ class AssaultAttack:
         return 'thb-cv-yugi_assaultkof'
 
 
-@ui_meta
+@ui_meta(characters.yugi.AssaultKOFHandler)
 class AssaultKOFHandler:
     choose_option_prompt = '你要发动【强袭】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
-@ui_meta
+@ui_meta(characters.yugi.AssaultKOF)
 class AssaultKOF:
     # Skill
     name = '强袭'
@@ -74,7 +73,7 @@ class AssaultKOF:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.yugi.FreakingPower)
 class FreakingPower:
     # Skill
     name = '怪力'
@@ -84,7 +83,7 @@ class FreakingPower:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.yugi.FreakingPowerAction)
 class FreakingPowerAction:
     fatetell_display_name = '怪力'
 
@@ -98,7 +97,7 @@ class FreakingPowerAction:
         return 'thb-cv-yugi_fp'
 
 
-@ui_meta
+@ui_meta(characters.yugi.FreakingPowerHandler)
 class FreakingPowerHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))

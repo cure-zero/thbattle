@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import Sequence, List
 from functools import wraps
 import logging
 
 # -- third party --
 # -- own --
-from thb import actions, inputlets
-from thb.cards.base import Skill
-from thb.meta.common import ui_meta_for
+from client.base import Game as ClientGame
+from thb import actions
+from thb.actions import BaseActionStage
+from thb.cards.base import Skill, Card
+from thb.characters.base import Character
+from thb.mode import THBattle
+from thb.meta.common import ui_meta
+
 
 # -- code --
 log = logging.getLogger('Inputlets UI Meta')
-
-# -----BEGIN INPUTLETS UI META-----
-ui_meta = ui_meta_for(inputlets)
 
 
 class ActionDisplayResult(Exception):
@@ -44,14 +47,11 @@ def walk_wrapped(g, cl, check_is_complete):
             try:
                 is_complete = c.ui_meta.is_complete
             except Exception:
-                is_complete = None
-
-            if not is_complete:
                 # skills that cannot combined with other skill
                 raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])
 
             try:
-                rst, reason = is_complete(g, [c])
+                rst, reason = is_complete(g, c)
             except Exception:
                 log.exception('card.ui_meta.is_complete error')
                 raise ActionDisplayResult(False, '[card.ui_meta.is_complete错误]', False, [], [])
@@ -122,17 +122,18 @@ def actv_handle_card_selection(g, act, cards):
     return card
 
 
-def actv_handle_target_selection(g, stage, card, players):
+def actv_handle_target_selection(g: THBattle, stage: BaseActionStage, card: Card, players: Sequence[Character]):
     plsel = False
-    selected = []
-    disables = []
+    selected: List[Character] = []
+    disables: List[Character] = []
 
-    target_list, tl_valid = card.target(g, g.me, players)
-    if target_list is not None:
-        selected = target_list[:]
+    me = g.find_character(ClientGame.me(g))
+    tl, tl_valid = card.target(g, me, players)
+    if tl is not None:
+        selected = list(tl)
         if card.target.__name__ in ('t_One', 't_OtherOne'):
             for p in g.players:
-                act = stage.launch_card_cls(g.me, [p], card)
+                act = stage.launch_card_cls(me, [p], card)
                 shootdown = act.action_shootdown()
                 if shootdown is not None:
                     if shootdown.ui_meta.target_independent:
@@ -144,12 +145,12 @@ def actv_handle_target_selection(g, stage, card, players):
         plsel = True
         for i in disables:
             try:
-                target_list.remove(i)
+                tl.remove(i)
             except ValueError:
                 pass
 
     try:
-        rst, reason = card.ui_meta.is_action_valid(g, [card], target_list)
+        rst, reason = card.ui_meta.is_action_valid(g, [card], tl)
     except Exception:
         log.exception('card.ui_meta.is_action_valid error')
         raise ActionDisplayResult(False, '[card.ui_meta.is_action_valid错误]', False, [], [])
@@ -160,7 +161,7 @@ def actv_handle_target_selection(g, stage, card, players):
     if not tl_valid:  # honor result of game logic
         raise ActionDisplayResult(False, '您选择的目标不符合规则', plsel, disables, selected)
 
-    return target_list, disables, reason
+    return tl, disables, reason
 
 
 def action_disp_func(f):
@@ -168,7 +169,7 @@ def action_disp_func(f):
     def wrapper(*a, **k):
         try:
             f(*a, **k)
-            raise Exception('Not raising ActionDisplayResult!')
+            raise Exception("Didn't raise ActionDisplayResult!")
         except ActionDisplayResult as e:
             return e
 
@@ -181,7 +182,7 @@ def action_disp_func(f):
     return wrapper
 
 
-@ui_meta
+@ui_meta(actions.ActionInputlet)
 class ActionInputlet:
     @action_disp_func
     def passive_action_disp(self, ilet, skills, rawcards, params, players):

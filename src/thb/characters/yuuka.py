@@ -4,13 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, DrawCards, ForEach, LaunchCard, PlayerDeath, UserAction
 from thb.actions import user_choose_players
-from thb.cards.classes import AttackCard, Duel, InstantSpellCardAction, Reject, Skill, TreatAs
-from thb.cards.classes import t_None
+from thb.cards.base import Skill
+from thb.cards.classes import AttackCard, Duel, InstantSpellCardAction, Reject, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -52,7 +52,7 @@ class SadistKOFDamageAction(UserAction):
         return g.process_action(Damage(src, tgt, 1))
 
 
-class SadistKOFHandler(EventHandler):
+class SadistKOFHandler(THBEventHandler):
     interested = ['action_after', 'character_debut']
     execute_after = ['DeathHandler']
 
@@ -90,7 +90,7 @@ class ReversedScalesAction(UserAction):
         return True
 
 
-class ReversedScalesHandler(EventHandler):
+class ReversedScalesHandler(THBEventHandler):
     interested = ['action_before']
     execute_before = ['MaidenCostumeHandler']
 
@@ -139,7 +139,7 @@ class SadistAction(UserAction):
         return True
 
 
-class SadistHandler(EventHandler):
+class SadistHandler(THBEventHandler):
     interested = ['action_after', 'action_before']
     card_usage = 'drop'
     execute_before = ['WineHandler']

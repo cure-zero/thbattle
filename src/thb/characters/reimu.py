@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler, InterruptActionFlow
+from game.base import InterruptActionFlow
 from thb.actions import ActionStage, AskForCard, Damage, DrawCards, FinalizeStage, LaunchCard
 from thb.actions import PlayerRevive, UserAction, migrate_cards, ttags
-from thb.cards.classes import AttackCard, Card, GreenUFOSkill, RejectCard, Skill, TreatAs, UFOSkill
-from thb.cards.classes import t_None
+from thb.cards.base import Card, Skill
+from thb.cards.classes import AttackCard, GreenUFOSkill, RejectCard, TreatAs, UFOSkill, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -94,7 +95,7 @@ class Tribute(Skill):
         return (tl[-1:], bool(len(tl)))
 
 
-class TributeHandler(EventHandler):
+class TributeHandler(THBEventHandler):
     interested = ['action_after', 'game_begin', 'switch_character']
 
     def handle(self, evt_type, arg):
@@ -159,7 +160,7 @@ class ReimuExterminateAction(AskForCard):
         return g.process_action(ReimuExterminateLaunchCard(self.source, self.victim, c, self.cause))
 
 
-class ReimuExterminateHandler(EventHandler):
+class ReimuExterminateHandler(THBEventHandler):
     interested = ['action_apply', 'action_after']
     execute_after = ['DyingHandler', 'CheatingHandler', 'IbukiGourdHandler']
 
@@ -226,7 +227,7 @@ class ReimuClearAction(UserAction):
                 return True
 
 
-class ReimuClearHandler(EventHandler):
+class ReimuClearHandler(THBEventHandler):
     interested = ['action_after']
     execute_before = [
         'MasochistHandler',

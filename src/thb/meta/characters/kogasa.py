@@ -5,13 +5,12 @@
 # -- own --
 from thb import actions, characters
 from thb.cards.base import Card, VirtualCard
-from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
+from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta
 
 # -- code --
-ui_meta = ui_meta_for(characters.kogasa)
 
 
-@ui_meta
+@ui_meta(characters.kogasa.Jolly)
 class Jolly:
     # Skill
     name = '愉快'
@@ -21,7 +20,7 @@ class Jolly:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.kogasa.JollyDrawCard)
 class JollyDrawCard:
     def effect_string(self, act):
         return '|G【%s】|r高兴地让|G【%s】|r摸了%d张牌~' % (
@@ -34,7 +33,7 @@ class JollyDrawCard:
         return 'thb-cv-kogasa_jolly'
 
 
-@ui_meta
+@ui_meta(characters.kogasa.JollyHandler)
 class JollyHandler:
     def choose_card_text(self, g, act, cards):
         if cards:
@@ -50,7 +49,7 @@ class JollyHandler:
         return (True, '(～￣▽￣)～')
 
 
-@ui_meta
+@ui_meta(characters.kogasa.Surprise)
 class Surprise:
     # Skill
     name = '惊吓'
@@ -102,7 +101,7 @@ class Surprise:
         return 'thb-cv-kogasa_surprise'
 
 
-@ui_meta
+@ui_meta(characters.kogasa.SurpriseAction)
 class SurpriseAction:
     # choose_option
     choose_option_buttons = (
@@ -129,7 +128,7 @@ class SurpriseAction:
             return '似乎没有什么效果'
 
 
-@ui_meta
+@ui_meta(characters.kogasa.Kogasa)
 class Kogasa:
     # Character
     name        = '多多良小伞'

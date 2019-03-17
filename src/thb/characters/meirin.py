@@ -4,12 +4,12 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import DropCards, GenericAction, MaxLifeChange, PlayerTurn, random_choose_card
-from thb.cards.classes import AttackCard, BaseAttack, DummyCard, GrazeCard, LaunchGraze, Skill
-from thb.cards.classes import TreatAs, t_None
+from thb.cards.base import DummyCard, Skill, t_None
+from thb.cards.classes import AttackCard, BaseAttack, GrazeCard, LaunchGraze, TreatAs
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -66,7 +66,7 @@ class LoongPunchAction(GenericAction):
         return True
 
 
-class LoongPunchHandler(EventHandler):
+class LoongPunchHandler(THBEventHandler):
     interested = ['action_after']
     execute_after = ['DeathSickleHandler']
 
@@ -101,7 +101,7 @@ class RiverBehindAwake(GenericAction):
         return True
 
 
-class RiverBehindHandler(EventHandler):
+class RiverBehindHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):

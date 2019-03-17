@@ -6,14 +6,13 @@
 from thb import characters
 from thb.cards.base import Card
 from thb.cards.classes import BaseUseGraze
-from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
+from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.nazrin)
 
 
-@ui_meta
+@ui_meta(characters.nazrin.Nazrin)
 class Nazrin:
     # Character
     name        = '纳兹琳'
@@ -26,7 +25,7 @@ class Nazrin:
     miss_sound_effect = 'thb-cv-nazrin_miss'
 
 
-@ui_meta
+@ui_meta(characters.nazrin.NazrinKOF)
 class NazrinKOF:
     # Character
     name        = '纳兹琳'
@@ -41,7 +40,7 @@ class NazrinKOF:
     notes = '|RKOF修正角色|r'
 
 
-@ui_meta
+@ui_meta(characters.nazrin.TreasureHunt)
 class TreasureHunt:
     # Skill
     name = '探宝'
@@ -51,14 +50,14 @@ class TreasureHunt:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.nazrin.TreasureHuntHandler)
 class TreasureHuntHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【探宝】吗？'
 
 
-@ui_meta
+@ui_meta(characters.nazrin.Agile)
 class Agile:
     # Skill
     name = '轻敏'
@@ -77,8 +76,7 @@ class Agile:
 
         return False
 
-    def is_complete(self, g, cl):
-        skill = cl[0]
+    def is_complete(self, g, skill):
         cl = skill.associated_cards
         if len(cl) != 1:
             return (False, '请选择一张牌！')
@@ -94,7 +92,7 @@ class Agile:
         return 'thb-cv-nazrin_agile'
 
 
-@ui_meta
+@ui_meta(characters.nazrin.AgileKOF)
 class AgileKOF:
     # Skill
     name = '轻敏'
@@ -102,8 +100,7 @@ class AgileKOF:
 
     clickable = Agile.clickable
 
-    def is_complete(self, g, cl):
-        skill = cl[0]
+    def is_complete(self, g, skill):
         cl = skill.associated_cards
         if len(cl) != 1:
             return (False, '请选择一张牌！')
@@ -118,7 +115,7 @@ class AgileKOF:
     sound_effect = Agile.sound_effect
 
 
-@ui_meta
+@ui_meta(characters.nazrin.TreasureHuntAction)
 class TreasureHuntAction:
     fatetell_display_name = '探宝'
 

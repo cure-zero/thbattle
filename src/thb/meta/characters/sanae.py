@@ -8,14 +8,13 @@ import random
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.meta.common import ui_meta_for, my_turn, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, my_turn, passive_clickable, passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.sanae)
 
 
-@ui_meta
+@ui_meta(characters.sanae.Sanae)
 class Sanae:
     # Character
     name        = '东风谷早苗'
@@ -28,7 +27,7 @@ class Sanae:
     miss_sound_effect = 'thb-cv-sanae_miss'
 
 
-@ui_meta
+@ui_meta(characters.sanae.SanaeKOF)
 class SanaeKOF:
     # Character
     name        = '东风谷早苗'
@@ -43,7 +42,7 @@ class SanaeKOF:
     notes = '|RKOF修正角色|r'
 
 
-@ui_meta
+@ui_meta(characters.sanae.Miracle)
 class Miracle:
     name = '奇迹'
     description = '出牌阶段，你可以弃置X张牌并摸一张牌；若X为3，你可以令一名角色回复1点体力。（X为你此阶段使用奇迹的次数）'
@@ -70,7 +69,7 @@ class Miracle:
         return 'thb-cv-sanae_miracle'
 
 
-@ui_meta
+@ui_meta(characters.sanae.MiracleAction)
 class MiracleAction:
 
     def target(self, pl):
@@ -80,7 +79,7 @@ class MiracleAction:
         return (True, '奇迹：回复1点体力')
 
 
-@ui_meta
+@ui_meta(characters.sanae.SanaeFaith)
 class SanaeFaith:
     name = '信仰'
     description = '出牌阶段限一次，你可以令至多两名其他角色各交给你一张手牌，然后你交给其各一张牌。'
@@ -105,7 +104,7 @@ class SanaeFaith:
         return 'thb-cv-sanae_faith'
 
 
-@ui_meta
+@ui_meta(characters.sanae.SanaeFaithKOF)
 class SanaeFaithKOF:
     name = '信仰'
     description = '|B锁定技|r，对方的出牌阶段，每当其获得牌时，你摸一张牌。'
@@ -114,7 +113,7 @@ class SanaeFaithKOF:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.sanae.SanaeFaithKOFDrawCards)
 class SanaeFaithKOFDrawCards:
     def effect_string(self, act):
         return '|G【%s】|r向牌堆收集了1点|G信仰|r。' % (
@@ -125,7 +124,7 @@ class SanaeFaithKOFDrawCards:
         return 'thb-cv-sanae_faith'
 
 
-@ui_meta
+@ui_meta(characters.sanae.SanaeFaithCollectCardAction)
 class SanaeFaithCollectCardAction:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -135,7 +134,7 @@ class SanaeFaithCollectCardAction:
             return (False, '信仰：请交出一张手牌')
 
 
-@ui_meta
+@ui_meta(characters.sanae.SanaeFaithReturnCardAction)
 class SanaeFaithReturnCardAction:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -145,7 +144,7 @@ class SanaeFaithReturnCardAction:
             return (False, '信仰：选择一张牌返还给%s' % act.target.ui_meta.name)
 
 
-@ui_meta
+@ui_meta(characters.sanae.GodDescendant)
 class GodDescendant:
     name = '神裔'
     description = '每当你成为群体符卡的目标后，你可以重铸一张牌并跳过此次结算。'
@@ -154,7 +153,7 @@ class GodDescendant:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.sanae.GodDescendantAction)
 class GodDescendantAction:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -164,7 +163,7 @@ class GodDescendantAction:
             return (False, '神裔：请选择要重铸的牌并跳过结算（否则不发动）')
 
 
-@ui_meta
+@ui_meta(characters.sanae.GodDescendantEffect)
 class GodDescendantEffect:
 
     def effect_string_before(self, act):

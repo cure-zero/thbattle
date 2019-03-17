@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import ActionStage, ForEach, GenericAction, LaunchCard, LifeLost, PlayerDeath
 from thb.actions import UserAction
-from thb.cards.classes import AttackCard, AttackCardVitalityHandler, Skill, t_None, t_Self
+from thb.cards.base import Skill
+from thb.cards.classes import AttackCard, AttackCardVitalityHandler, t_None, t_Self
 from thb.characters.base import Character, register_character_to
 from thb.common import CharChoice
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 from thb.thbkof import KOFCharacterSwitchHandler
 
 
@@ -20,7 +21,7 @@ class HeterodoxySkipAction(GenericAction):
         return True
 
 
-class HeterodoxyHandler(EventHandler):
+class HeterodoxyHandler(THBEventHandler):
     interested = ['action_before']
     execute_before = ['MaidenCostumeHandler']
 
@@ -145,7 +146,7 @@ class SummonAction(UserAction):
         return True
 
 
-class SummonHandler(EventHandler):
+class SummonHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):
@@ -174,7 +175,9 @@ class SummonKOFAction(UserAction):
         ActionStage.force_break(g)
 
         assert g.current_player is old
-        tgt = KOFCharacterSwitchHandler.switch(old)
+
+        handler = g.dispatcher.find_by_cls(KOFCharacterSwitchHandler)
+        tgt = handler.switch(old)
         g.current_player = tgt
 
         tgt.life = old_life
@@ -198,7 +201,7 @@ class SummonKOFAction(UserAction):
                 act.target = tgt
 
             if isinstance(act, LaunchCard):
-                act.target_list[:] = [
+                act.target_list = [
                     tgt if p is old else p
                     for p in act.target_list
                 ]
@@ -224,7 +227,7 @@ class SummonKOFCollect(UserAction):
         return True
 
 
-class SummonKOFHandler(EventHandler):
+class SummonKOFHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):

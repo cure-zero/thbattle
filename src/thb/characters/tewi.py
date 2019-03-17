@@ -3,10 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import EventHandler
 from thb.actions import DrawCards
-from thb.cards.classes import Skill, t_None
+from thb.cards.base import Skill
+from thb.cards.classes import t_None
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -20,7 +21,7 @@ class LuckDrawCards(DrawCards):
     pass
 
 
-class LuckHandler(EventHandler):
+class LuckHandler(THBEventHandler):
     interested = ['card_migration']
 
     def handle(self, evt_type, arg):

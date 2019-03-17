@@ -3,10 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import EventHandler
 from thb.actions import DrawCards, GenericAction
-from thb.cards.classes import Card, RejectCard, Skill, SpellCardAction, t_None
+from thb.cards.base import Card, Skill
+from thb.cards.classes import RejectCard, SpellCardAction, t_None
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -36,7 +37,7 @@ class KnowledgeAction(GenericAction):
         return True
 
 
-class KnowledgeHandler(EventHandler):
+class KnowledgeHandler(THBEventHandler):
     interested = ['action_before']
     execute_before = ['RejectHandler']
 
@@ -51,7 +52,7 @@ class KnowledgeHandler(EventHandler):
         return act
 
 
-class LibraryHandler(EventHandler):
+class LibraryHandler(THBEventHandler):
     interested = ['action_before', 'calcdistance', 'choose_target']
     execute_before = ['RejectHandler']
 

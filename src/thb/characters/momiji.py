@@ -6,13 +6,14 @@ import itertools
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler, sync_primitive
+from game.base import sync_primitive
 from thb.actions import ActionStage, ActionStageLaunchCard, AskForCard, Damage, FinalizeStage
 from thb.actions import GenericAction, LaunchCard, ShowCards, UserAction, migrate_cards, ttags
-from thb.cards.classes import AttackCard, CardList, DollControlCard, DuelCard, Skill, TreatAs
-from thb.cards.classes import VirtualCard, t_None
+from thb.cards.base import CardList, Skill, VirtualCard
+from thb.cards.classes import AttackCard, DollControlCard, DuelCard, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -42,7 +43,7 @@ class DisarmReturningAction(GenericAction):
         return True
 
 
-class DisarmHandler(EventHandler):
+class DisarmHandler(THBEventHandler):
     interested = ['action_after']
     execute_after = ['DeathHandler']
 
@@ -104,7 +105,7 @@ class SentryAction(AskForCard):
         return g.process_action(LaunchCard(src, [tgt], c))
 
 
-class SentryHandler(EventHandler):
+class SentryHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):
@@ -138,7 +139,7 @@ class Sentry(Skill):
     target = t_None
 
 
-class TelegnosisHandler(EventHandler):
+class TelegnosisHandler(THBEventHandler):
     interested = ['calcdistance']
     execute_after = ['AttackCardHandler', 'UFODistanceHandler']
 
@@ -173,7 +174,7 @@ class Telegnosis(Skill):
     target = t_None
 
 
-class SolidShieldHandler(EventHandler):
+class SolidShieldHandler(THBEventHandler):
     interested = ['action_before']
     execute_after = ['AttackCardHandler']
 

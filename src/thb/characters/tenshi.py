@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, DrawCards, Fatetell, GenericAction, LaunchCard, UserAction
 from thb.actions import ask_for_action, migrate_cards
-from thb.cards.classes import Card, Skill, t_None
+from thb.cards.base import Card, Skill
+from thb.cards.classes import t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -44,7 +45,7 @@ class MasochistAction(UserAction):
                 return True
 
             cl, pl = rst
-            pl[0].reveal(cl)
+            pl[0].player.reveal(cl)
             migrate_cards(cl, pl[0].cards)
             n -= len(cl)
 
@@ -61,7 +62,7 @@ class MasochistAction(UserAction):
         return (tl[-1:], True)
 
 
-class MasochistHandler(EventHandler):
+class MasochistHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):
@@ -97,7 +98,7 @@ class ScarletPerceptionAction(GenericAction):
         return True
 
 
-class ScarletPerceptionHandler(EventHandler):
+class ScarletPerceptionHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):

@@ -3,7 +3,7 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import EventHandler
+from thb.mode import THBEventHandler
 from thb.actions import DrawCards, PlayerTurn, UserAction
 from thb.cards.base import Skill, t_None
 from thb.characters.base import Character, register_character_to
@@ -22,7 +22,7 @@ class UltimateSpeedAction(UserAction):
         return g.process_action(DrawCards(self.target, 1))
 
 
-class UltimateSpeedHandler(EventHandler):
+class UltimateSpeedHandler(THBEventHandler):
     interested = ['action_apply', 'choose_target', 'post_calcdistance']
 
     def handle(self, evt_type, arg):

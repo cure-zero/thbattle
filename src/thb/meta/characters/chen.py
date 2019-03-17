@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import cast
 # -- third party --
 # -- own --
 from thb import actions, characters
 from thb.cards.classes import AttackCard, DollControlCard, InstantSpellCardAction, RejectCard
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 from thb.meta.typing import CharacterMeta
 from utils.misc import BatchList
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.chen)
 
 
-@ui_meta
+@ui_meta(characters.chen.FlyingSkanda)
 class FlyingSkanda:
     # Skill
     name = '飞翔韦驮天'
@@ -59,10 +59,10 @@ class FlyingSkanda:
         else:
             return (True, '喵！')
 
-    def effect_string(self, act):
+    def effect_string(self, act: actions.LaunchCard):
         # for LaunchCard.ui_meta.effect_string
-        source = act.source
-        card = act.card.associated_cards[0]
+        src = act.source
+        card = cast(characters.chen.FlyingSkanda, act.card).associated_cards[0]
         tl = BatchList(act.target_list)
 
         if card.is_card(AttackCard):
@@ -71,7 +71,7 @@ class FlyingSkanda:
             s = '符卡掺了金坷垃，一张能顶两张用！'
 
         return '|G【%s】|r：“%s|G【%s】|r接招吧！”' % (
-            source.ui_meta.name,
+            src.ui_meta.name,
             s,
             '】|r、|G【'.join(tl.ui_meta.name),
         )
@@ -80,7 +80,7 @@ class FlyingSkanda:
         return 'thb-cv-chen_skanda'
 
 
-@ui_meta
+@ui_meta(characters.chen.Shikigami)
 class Shikigami:
     # Skill
     name = '式神'
@@ -115,14 +115,14 @@ class Shikigami:
         return 'thb-cv-chen_shikigami'
 
 
-@ui_meta
+@ui_meta(characters.chen.ShikigamiAction)
 class ShikigamiAction:
     choose_option_buttons = (('摸2张牌', False), ('回复1点体力', True))
     choose_option_prompt = '请为受到的【式神】选择效果'
 
 
-@ui_meta
-class Chen(CharacterMeta):
+@ui_meta(characters.chen.Chen)
+class Chen:
     name        = '橙'
     title       = '凶兆的黑喵'
     illustrator = '和茶'

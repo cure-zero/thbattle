@@ -4,14 +4,11 @@
 # -- third party --
 # -- own --
 from thb import thbfaith
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(thbfaith)
-
-
-@ui_meta
+@ui_meta(thbfaith.THBattleFaith)
 class THBattleFaith:
     name = '信仰争夺战'
     logo = 'thb-modelogo-faith'
@@ -38,10 +35,14 @@ class THBattleFaith:
         },
     }
 
-    roles = thbfaith.THBFaithRole
+    roles_disp = {
+        thbfaith.THBFaithRole.HIDDEN: '？',
+        thbfaith.THBFaithRole.HAKUREI: '博丽',
+        thbfaith.THBFaithRole.MORIYA: '守矢',
+    }
 
 
-@ui_meta
+@ui_meta(thbfaith.DeathHandler)
 class DeathHandler:
     # choose_option
     choose_option_buttons = (('全部换走', True), ('不用换', False))

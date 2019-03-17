@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Dict, List
+from typing import Dict, List, Sequence
 import logging
 
 # -- third party --
@@ -117,12 +117,11 @@ class Game(object):
 
         return g
 
-    def build_players(self, g: ClientGame) -> BatchList[Player]:
+    def build_players(self, g: ClientGame, uvl: Sequence[dict]) -> BatchList[Player]:
         core = self.core
 
         me_uid = core.auth.uid
 
-        uvl = g._[self]['users']
         assert me_uid in [uv['id'] for uv in uvl]
 
         me = Theone(g, me_uid, core.auth.name)

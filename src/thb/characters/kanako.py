@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import Any, Type
+
 # -- third party --
 # -- own --
-from game.base import EventHandler
 from thb.actions import Damage, DrawCardStage, DrawCards, DropCards, FinalizeStage, ForEach
 from thb.actions import LaunchCard, ShowCards, UserAction, migrate_cards, random_choose_card, ttags
 from thb.actions import user_choose_cards, user_choose_players, user_input
-from thb.cards.classes import AttackCard, Card, DuelCard, Skill, TreatAs, VirtualCard, t_None
+from thb.cards.base import Card, Skill, VirtualCard
+from thb.cards.classes import AttackCard, DuelCard, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -62,6 +65,7 @@ class KanakoFaithCounteractPart2(UserAction):
 
         choice = user_input([tgt], ChooseOptionInputlet(self, ('duel', 'attack')))
 
+        cls: Type[Any]
         if choice == 'duel':
             cls = KanakoFaithDuel
         elif choice == 'attack':
@@ -145,7 +149,7 @@ class VirtueAction(UserAction):
         return len(cl) == 1 and not cl[0].is_card(VirtualCard)
 
 
-class VirtueHandler(EventHandler):
+class VirtueHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):
@@ -185,7 +189,7 @@ class KanakoFaithKOFAction(DrawCards):
     pass
 
 
-class KanakoFaithKOFHandler(EventHandler):
+class KanakoFaithKOFHandler(THBEventHandler):
     interested = ['action_before', 'action_apply']
 
     def handle(self, evt_type, act):

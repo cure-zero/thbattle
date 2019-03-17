@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import List
 # -- third party --
 # -- own --
 from game.autoenv import user_input
@@ -425,14 +426,14 @@ class RepentanceStickSkill(WeaponSkill):
 
 
 class RepentanceStick(GenericAction):
-    def apply_action(self):
+    def apply_action(self) -> bool:
         src, tgt = self.source, self.target
         g = self.game
 
         catnames = ('cards', 'showncards', 'equips', 'fatetell')
         cats = [getattr(tgt, i) for i in catnames]
 
-        l = []
+        l: List[PhysicalCard] = []
         for i in range(2):
             if not (tgt.cards or tgt.showncards or tgt.equips or tgt.fatetell):
                 break
@@ -445,7 +446,7 @@ class RepentanceStick(GenericAction):
                 card = random_choose_card(g, cats)
             if card:
                 l.append(card)
-                g.players.exclude(tgt).reveal(card)
+                g.players.exclude(tgt).player.reveal(card)
                 g.process_action(DropCards(src, tgt, [card]))
 
         self.cards = l

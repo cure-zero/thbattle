@@ -8,14 +8,13 @@ import random
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.meta.common import ui_meta_for, my_turn, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, my_turn, passive_clickable, passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.yuyuko)
 
 
-@ui_meta
+@ui_meta(characters.yuyuko.Yuyuko)
 class Yuyuko:
     # Character
     name        = '西行寺幽幽子'
@@ -30,7 +29,7 @@ class Yuyuko:
     notes = '|RKOF不平衡角色'
 
 
-@ui_meta
+@ui_meta(characters.yuyuko.GuidedDeath)
 class GuidedDeath:
     # Skill
     name = '诱死'
@@ -40,7 +39,7 @@ class GuidedDeath:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.yuyuko.SoulDrain)
 class SoulDrain:
     # Skill
     name = '离魂'
@@ -54,7 +53,7 @@ class SoulDrain:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.yuyuko.PerfectCherryBlossom)
 class PerfectCherryBlossom:
     # Skill
     name = '反魂'
@@ -101,7 +100,7 @@ class PerfectCherryBlossom:
         return 'thb-cv-yuyuko_pcb'
 
 
-@ui_meta
+@ui_meta(characters.yuyuko.PerfectCherryBlossomExtractAction)
 class PerfectCherryBlossomExtractAction:
 
     def effect_string_before(self, act):
@@ -111,7 +110,7 @@ class PerfectCherryBlossomExtractAction:
         return 'thb-cv-yuyuko_pcb_extract'
 
 
-@ui_meta
+@ui_meta(characters.yuyuko.GuidedDeathEffect)
 class GuidedDeathEffect:
     def effect_string_apply(self, act):
         return '|G【%s】|r微微一笑，身后的西行妖显得更加迷人，让人觉得不如就这样沉眠于花下好了。' % (
@@ -119,7 +118,7 @@ class GuidedDeathEffect:
         )
 
 
-@ui_meta
+@ui_meta(characters.yuyuko.SoulDrainEffect)
 class SoulDrainEffect:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))

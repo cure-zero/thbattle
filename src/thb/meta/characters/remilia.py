@@ -7,14 +7,13 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, my_turn, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, my_turn, passive_clickable, passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.remilia)
 
 
-@ui_meta
+@ui_meta(characters.remilia.SpearTheGungnir)
 class SpearTheGungnir:
     # Skill
     name = '神枪'
@@ -27,7 +26,7 @@ class SpearTheGungnir:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.remilia.SpearTheGungnirAction)
 class SpearTheGungnirAction:
     def effect_string(self, act):
         return '|G【%s】|r举起右手，将|G弹幕|r汇聚成一把命运之矛，向|G【%s】|r掷去！' % (
@@ -39,14 +38,14 @@ class SpearTheGungnirAction:
         return 'thb-cv-remilia_stg'
 
 
-@ui_meta
+@ui_meta(characters.remilia.SpearTheGungnirHandler)
 class SpearTheGungnirHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【神枪】吗？'
 
 
-@ui_meta
+@ui_meta(characters.remilia.VampireKiss)
 class VampireKiss:
     # Skill
     name = '红魔之吻'
@@ -56,7 +55,7 @@ class VampireKiss:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.remilia.VampireKissAction)
 class VampireKissAction:
     def effect_string_before(self, act):
         return '|G【%s】|r:“B型血，赞！”' % (
@@ -67,13 +66,13 @@ class VampireKissAction:
         return 'thb-cv-remilia_vampirekiss'
 
 
-@ui_meta
+@ui_meta(characters.remilia.ScarletMistAttackLimit)
 class ScarletMistAttackLimit:
     target_independent = False
     shootdown_message = '红雾：你只能对距离1的角色使用弹幕'
 
 
-@ui_meta
+@ui_meta(characters.remilia.ScarletMistAction)
 class ScarletMistAction:
     def effect_string(self, act):
         src = act.source
@@ -95,13 +94,13 @@ class ScarletMistAction:
         ])
 
 
-@ui_meta
+@ui_meta(characters.remilia.ScarletMistEndAction)
 class ScarletMistEndAction:
     def effect_string(self, act):
         return '|G红雾|r结束了。'
 
 
-@ui_meta
+@ui_meta(characters.remilia.ScarletMist)
 class ScarletMist:
     name = '红雾'
     description = (
@@ -125,7 +124,7 @@ class ScarletMist:
         return (True, '红雾：选择这些角色获得增益效果')
 
 
-@ui_meta
+@ui_meta(characters.remilia.Remilia)
 class Remilia:
     # Character
     name        = '蕾米莉亚'

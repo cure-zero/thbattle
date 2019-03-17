@@ -6,15 +6,12 @@ import random
 
 # -- third party --
 # -- own --
-from thb.cards import spellcard
-from thb.meta.common import card_desc, ui_meta_for
+from thb.cards import definition, spellcard
+from thb.meta.common import card_desc, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(spellcard)
-
-
-@ui_meta
+@ui_meta(definition.DemolitionCard)
 class DemolitionCard:
     # action_stage meta
     image = 'thb-card-demolition'
@@ -39,7 +36,7 @@ class DemolitionCard:
         return 'thb-cv-card_demolition'
 
 
-@ui_meta
+@ui_meta(spellcard.Demolition)
 class Demolition:
     def effect_string(self, act):
         if not act.succeeded: return None
@@ -50,7 +47,7 @@ class Demolition:
         )
 
 
-@ui_meta
+@ui_meta(definition.RejectCard)
 class RejectCard:
     # action_stage meta
     name = '好人卡'
@@ -87,7 +84,7 @@ class RejectCard:
         return False
 
 
-@ui_meta
+@ui_meta(spellcard.RejectHandler)
 class RejectHandler:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -105,7 +102,7 @@ class RejectHandler:
             return (False, '请选择一张好人卡（%s)' % s)
 
 
-@ui_meta
+@ui_meta(definition.SealingArrayCard)
 class SealingArrayCard:
     # action_stage meta
     name = '封魔阵'
@@ -132,7 +129,7 @@ class SealingArrayCard:
         return 'thb-cv-card_sealarray'
 
 
-@ui_meta
+@ui_meta(spellcard.SealingArray)
 class SealingArray:
     def effect_string(self, act):
         tgt = act.target
@@ -142,7 +139,7 @@ class SealingArray:
             return '封魔阵没有布置完善，|G【%s】|r侥幸逃了出来' % tgt.ui_meta.name
 
 
-@ui_meta
+@ui_meta(definition.FrozenFrogCard)
 class FrozenFrogCard:
     # action_stage meta
     name = '冻青蛙'
@@ -169,7 +166,7 @@ class FrozenFrogCard:
         return 'thb-cv-card_frozenfrog'
 
 
-@ui_meta
+@ui_meta(spellcard.FrozenFrog)
 class FrozenFrog:
     def effect_string(self, act):
         tgt = act.target
@@ -179,7 +176,7 @@ class FrozenFrog:
             return '幻想乡今天大晴，|G【%s】|r没有被冻住~' % tgt.ui_meta.name
 
 
-@ui_meta
+@ui_meta(definition.NazrinRodCard)
 class NazrinRodCard:
     # action_stage meta
     name = '寻龙尺'
@@ -198,7 +195,7 @@ class NazrinRodCard:
         return 'thb-cv-card_nazrinrod'
 
 
-@ui_meta
+@ui_meta(definition.SinsackCard)
 class SinsackCard:
     # action_stage meta
     name = '罪袋'
@@ -221,7 +218,7 @@ class SinsackCard:
         return 'thb-cv-card_sinsack'
 
 
-@ui_meta
+@ui_meta(spellcard.Sinsack)
 class Sinsack:
     def effect_string(self, act):
         tgt = act.target
@@ -229,13 +226,13 @@ class Sinsack:
             return '罪袋终于找到了机会，将|G【%s】|r推倒了…' % tgt.ui_meta.name
 
 
-@ui_meta
+@ui_meta(spellcard.SinsackDamage)
 class SinsackDamage:
     def sound_effect(self, act):
         return 'thb-cv-card_sinsack_effect'
 
 
-@ui_meta
+@ui_meta(definition.YukariDimensionCard)
 class YukariDimensionCard:
     # action_stage meta
     image = 'thb-card-yukaridimension'
@@ -261,7 +258,7 @@ class YukariDimensionCard:
         return 'thb-cv-card_dimension'
 
 
-@ui_meta
+@ui_meta(spellcard.YukariDimension)
 class YukariDimension:
     def effect_string(self, act):
         src, tgt = act.source, act.target
@@ -272,7 +269,7 @@ class YukariDimension:
             )
 
 
-@ui_meta
+@ui_meta(definition.DuelCard)
 class DuelCard:
     # action_stage meta
     image = 'thb-card-duel'
@@ -293,7 +290,7 @@ class DuelCard:
         return 'thb-cv-card_duel'
 
 
-@ui_meta
+@ui_meta(definition.MapCannonCard)
 class MapCannonCard:
     image = 'thb-card-mapcannon'
     name = '地图炮'
@@ -311,7 +308,7 @@ class MapCannonCard:
         return 'thb-cv-card_mapcannon'
 
 
-@ui_meta
+@ui_meta(definition.DemonParadeCard)
 class DemonParadeCard:
     image = 'thb-card-demonparade'
     name = '百鬼夜行'
@@ -329,7 +326,7 @@ class DemonParadeCard:
         return 'thb-cv-card_demonparade'
 
 
-@ui_meta
+@ui_meta(definition.FeastCard)
 class FeastCard:
     # action_stage meta
     image = 'thb-card-feast'
@@ -352,7 +349,7 @@ class FeastCard:
         ])
 
 
-@ui_meta
+@ui_meta(definition.HarvestCard)
 class HarvestCard:
     # action_stage meta
     image = 'thb-card-harvest'
@@ -371,7 +368,7 @@ class HarvestCard:
         return 'thb-cv-card_harvest'
 
 
-@ui_meta
+@ui_meta(spellcard.HarvestEffect)
 class HarvestEffect:
     def effect_string(self, act):
         if not act.succeeded: return None
@@ -383,7 +380,7 @@ class HarvestEffect:
         )
 
 
-@ui_meta
+@ui_meta(definition.DollControlCard)
 class DollControlCard:
     # action_stage meta
     name = '人形操控'
@@ -421,7 +418,7 @@ class DollControlCard:
         return 'thb-cv-card_dollcontrol'
 
 
-@ui_meta
+@ui_meta(spellcard.DollControl)
 class DollControl:
     # choose card meta
     def choose_card_text(self, g, act, cards):
@@ -436,7 +433,7 @@ class DollControl:
         return [(src, tl[0]), (tl[0], tl[1])]
 
 
-@ui_meta
+@ui_meta(definition.DonationBoxCard)
 class DonationBoxCard:
     # action_stage meta
     name = '赛钱箱'
@@ -463,7 +460,7 @@ class DonationBoxCard:
         return 'thb-cv-card_donationbox'
 
 
-@ui_meta
+@ui_meta(spellcard.DonationBoxEffect)
 class DonationBoxEffect:
     # choose card meta
     def choose_card_text(self, g, act, cards):

@@ -4,14 +4,11 @@
 # -- third party --
 # -- own --
 from thb import thbkof
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(thbkof)
-
-
-@ui_meta
+@ui_meta(thbkof.THBattleKOF)
 class THBattleKOF:
     name = 'KOF模式'
     logo = 'thb-modelogo-kof'
@@ -25,4 +22,8 @@ class THBattleKOF:
         '|R胜利条件|r：当其中一方3名角色被击坠时，判对方胜出'
     )
 
-    identities = thbkof.Identity.TYPE
+    roles_disp = {
+        thbkof.THBKOFRole.HIDDEN: '？',
+        thbkof.THBKOFRole.HAKUREI: '博丽',
+        thbkof.THBKOFRole.MORIYA: '守矢',
+    }

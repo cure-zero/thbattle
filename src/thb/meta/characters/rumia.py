@@ -4,14 +4,13 @@
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.meta.common import ui_meta_for, limit1_skill_used, passive_clickable
+from thb.meta.common import ui_meta, limit1_skill_used, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.rumia)
 
 
-@ui_meta
+@ui_meta(characters.rumia.Darkness)
 class Darkness:
     # Skill
     name = '黑暗'
@@ -59,7 +58,7 @@ class Darkness:
         return 'thb-cv-rumia_darkness'
 
 
-@ui_meta
+@ui_meta(characters.rumia.DarknessKOF)
 class DarknessKOF:
     # Skill
     name = '黑暗'
@@ -69,7 +68,7 @@ class DarknessKOF:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.rumia.DarknessKOFAction)
 class DarknessKOFAction:
 
     def effect_string(self, act):
@@ -79,12 +78,12 @@ class DarknessKOFAction:
         return 'thb-cv-rumia_darkness_kof'
 
 
-@ui_meta
+@ui_meta(characters.rumia.DarknessKOFLimit)
 class DarknessKOFLimit:
     shootdown_message = '【黑暗】你不能对其使用卡牌'
 
 
-@ui_meta
+@ui_meta(characters.rumia.DarknessAction)
 class DarknessAction:
     def ray(self, act):
         src = act.source
@@ -98,7 +97,7 @@ class DarknessAction:
             return (False, '请使用一张【弹幕】（否则受到一点伤害）')
 
 
-@ui_meta
+@ui_meta(characters.rumia.Cheating)
 class Cheating:
     # Skill
     name = '作弊'
@@ -108,7 +107,7 @@ class Cheating:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.rumia.CheatingDrawCards)
 class CheatingDrawCards:
     def effect_string(self, act):
         return '突然不知道是谁把太阳挡住了。等到大家回过神来，赫然发现牌堆里少了一张牌！'
@@ -117,7 +116,7 @@ class CheatingDrawCards:
         return 'thb-cv-rumia_cheat'
 
 
-@ui_meta
+@ui_meta(characters.rumia.Rumia)
 class Rumia:
     # Character
     name        = '露米娅'
@@ -130,7 +129,7 @@ class Rumia:
     miss_sound_effect = 'thb-cv-rumia_miss'
 
 
-@ui_meta
+@ui_meta(characters.rumia.RumiaKOF)
 class RumiaKOF:
     # Character
     name        = '露米娅'

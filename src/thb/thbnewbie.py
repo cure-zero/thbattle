@@ -53,7 +53,7 @@ class DeathHandler(THBEventHandler):
 
 class THBNewbieRole(Enum):
     HIDDEN = 0
-    HAKUREI = 1
+    NEWBIE = 1
     BAKA = 2
 
 
@@ -177,7 +177,7 @@ class THBattleNewbieBootstrap(BootstrapAction):
             meirin_p: PlayerRole[THBNewbieRole](),
         }
         cirno_p.set(THBNewbieRole.BAKA)
-        meirin_p.set(THBNewbieRole.HAKUREI)
+        meirin_p.set(THBNewbieRole.NEWBIE)
 
         g.process_action(RevealRole(cirno_p, pl))
         g.process_action(RevealRole(meirin_p, pl))

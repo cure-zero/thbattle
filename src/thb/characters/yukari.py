@@ -4,11 +4,11 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import GenericAction, PlayerTurn, UserAction, migrate_cards, random_choose_card
 from thb.cards.base import CardList, Skill, t_One
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -68,7 +68,7 @@ class SpiritingAway(Skill):
         return not self.associated_cards
 
 
-class SpiritingAwayHandler(EventHandler):
+class SpiritingAwayHandler(THBEventHandler):
     interested = ['action_after', 'action_apply']
 
     def handle(self, evt_type, arg):

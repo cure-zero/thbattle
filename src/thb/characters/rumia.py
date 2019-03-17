@@ -3,11 +3,12 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import ActionShootdown, EventHandler
+from game.base import ActionShootdown
 from thb.actions import Damage, DrawCards, LaunchCard, PlayerTurn, UserAction, user_choose_cards
-from thb.cards.classes import Attack, AttackCard, BaseDuel, PhysicalCard, RejectCard, Skill, t_None
-from thb.cards.classes import t_OtherN
+from thb.cards.base import Skill, t_None, t_OtherN
+from thb.cards.classes import Attack, AttackCard, BaseDuel, PhysicalCard, RejectCard
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -91,7 +92,7 @@ class DarknessKOFLimit(ActionShootdown):
     pass
 
 
-class DarknessKOFHandler(EventHandler):
+class DarknessKOFHandler(THBEventHandler):
     interested = ['character_debut', 'action_shootdown']
 
     def handle(self, evt_type, arg):
@@ -137,7 +138,7 @@ class CheatingDrawCards(DrawCards):
     pass
 
 
-class CheatingHandler(EventHandler):
+class CheatingHandler(THBEventHandler):
     interested = ['action_after']
     execute_before = ['CiguateraHandler']
 

@@ -3,10 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import EventHandler
 from thb.actions import ActionLimitExceeded, ActionStageLaunchCard
-from thb.cards.classes import Card, DummyCard, Skill, TreatAs
+from thb.cards.base import DummyCard, PhysicalCard, Skill
+from thb.cards.classes import TreatAs
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -83,7 +84,7 @@ class Morphing(TreatAs, Skill):
         return rst
 
 
-class MorphingHandler(EventHandler):
+class MorphingHandler(THBEventHandler):
     interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):

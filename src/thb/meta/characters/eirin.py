@@ -6,13 +6,12 @@
 from thb import actions, characters
 from thb.cards.classes import AskForHeal
 from thb.cards.base import Card
-from thb.meta.common import ui_meta_for, limit1_skill_used
+from thb.meta.common import ui_meta, limit1_skill_used
 
 # -- code --
-ui_meta = ui_meta_for(characters.eirin)
 
 
-@ui_meta
+@ui_meta(characters.eirin.FirstAid)
 class FirstAid:
     # Skill
     name = '急救'
@@ -29,8 +28,7 @@ class FirstAid:
 
         return False
 
-    def is_complete(self, g, cl):
-        skill = cl[0]
+    def is_complete(self, g, skill):
         acards = skill.associated_cards
         if len(acards) != 1 or acards[0].suit not in (Card.DIAMOND, Card.HEART):
             return (False, '请选择一张红色牌！')
@@ -41,7 +39,7 @@ class FirstAid:
         return 'thb-cv-eirin_firstaid'
 
 
-@ui_meta
+@ui_meta(characters.eirin.Medic)
 class Medic:
     # Skill
     name = '医者'
@@ -92,7 +90,7 @@ class Medic:
         return 'thb-cv-eirin_medic'
 
 
-@ui_meta
+@ui_meta(characters.eirin.Eirin)
 class Eirin:
     # Character
     name        = '八意永琳'

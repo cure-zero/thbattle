@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import DrawCards, ForEach, LaunchCard, UserAction
+from thb.cards.base import Skill
 from thb.cards.classes import AttackCard, DollControlCard, Heal, InstantSpellCardAction, RejectCard
-from thb.cards.classes import Skill, t_OtherOne
+from thb.cards.classes import t_OtherOne
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -77,7 +78,7 @@ class FlyingSkanda(Skill):
         return isinstance(self, cls)
 
 
-class FlyingSkandaHandler(EventHandler):
+class FlyingSkandaHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):
@@ -120,7 +121,7 @@ class Shikigami(Skill):
         return not self.associated_cards
 
 
-class ShikigamiHandler(EventHandler):
+class ShikigamiHandler(THBEventHandler):
     interested = ['post_calcdistance']
 
     def handle(self, evt_type, arg):

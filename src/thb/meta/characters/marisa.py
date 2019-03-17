@@ -4,13 +4,12 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, limit1_skill_used, my_turn
+from thb.meta.common import ui_meta, limit1_skill_used, my_turn
 
 # -- code --
-ui_meta = ui_meta_for(characters.marisa)
 
 
-@ui_meta
+@ui_meta(characters.marisa.Marisa)
 class Marisa:
     # Character
     name        = '雾雨魔理沙'
@@ -23,7 +22,7 @@ class Marisa:
     miss_sound_effect = 'thb-cv-marisa_miss'
 
 
-@ui_meta
+@ui_meta(characters.marisa.Daze)
 class Daze:
     name = '打贼'
 
@@ -35,14 +34,14 @@ class Daze:
         )
 
 
-@ui_meta
+@ui_meta(characters.marisa.BorrowAction)
 class BorrowAction:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要视为对魔理沙使用弹幕吗？'
 
 
-@ui_meta
+@ui_meta(characters.marisa.Borrow)
 class Borrow:
     # Skill
     name = '借走'

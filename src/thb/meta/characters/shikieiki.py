@@ -5,14 +5,13 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import card_desc, ui_meta_for, passive_clickable
+from thb.meta.common import card_desc, ui_meta, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.shikieiki)
 
 
-@ui_meta
+@ui_meta(characters.shikieiki.Trial)
 class Trial:
     # Skill
     name = '审判'
@@ -22,7 +21,7 @@ class Trial:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.shikieiki.TrialAction)
 class TrialAction:
     def effect_string(self, act):
         return '幻想乡各地巫女妖怪纷纷表示坚决拥护|G【%s】|r将|G【%s】|r的判定结果修改为%s的有关决定！' % (
@@ -38,7 +37,7 @@ class TrialAction:
         ])
 
 
-@ui_meta
+@ui_meta(characters.shikieiki.Majesty)
 class Majesty:
     # Skill
     name = '威严'
@@ -48,7 +47,7 @@ class Majesty:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.shikieiki.MajestyAction)
 class MajestyAction:
     def effect_string(self, act):
         return '|G【%s】|r脸上挂满黑线，收走了|G【%s】|r的一张牌填补自己的|G威严|r。' % (
@@ -60,7 +59,7 @@ class MajestyAction:
         return 'thb-cv-shikieiki_majesty'
 
 
-@ui_meta
+@ui_meta(characters.shikieiki.TrialHandler)
 class TrialHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
@@ -74,14 +73,14 @@ class TrialHandler:
             return (False, '请选择一张牌代替当前的判定牌')
 
 
-@ui_meta
+@ui_meta(characters.shikieiki.MajestyHandler)
 class MajestyHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【威严】吗？'
 
 
-@ui_meta
+@ui_meta(characters.shikieiki.Shikieiki)
 class Shikieiki:
     # Character
     name        = '四季映姬'

@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-, Sequence
+# -*- coding: utf-8 -*-
 
 # -- stdlib --
 from collections import OrderedDict, defaultdict
@@ -11,12 +11,12 @@ from typing_extensions import Protocol
 
 # -- own --
 from game.autoenv import user_input
-from game.base import Action, ActionShootdown, EventArbiter, GameViralContext
-from game.base import InputTransaction, Player, sync_primitive, Game
+from game.base import Action, ActionShootdown, EventArbiter, GameViralContext, InputTransaction
+from game.base import Player, sync_primitive
 from thb.cards.base import Card, CardList, PhysicalCard, Skill, VirtualCard
 from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
-from thb.mode import THBattle, THBAction, THBEventHandler
+from thb.mode import THBAction, THBEventHandler, THBPlayerAction, THBattle
 from utils.check import CheckFailed, check, check_type
 from utils.misc import BatchList, group_by
 
@@ -42,9 +42,9 @@ class CardChooser(Protocol):
 
 
 class CharacterChooser(Protocol):
-    game: Game
+    game: THBattle
 
-    def choose_player_target(self, pl: List[Character]) -> Tuple[List[Character], bool]: ...
+    def choose_player_target(self, pl: Sequence[Character]) -> Tuple[Sequence[Character], bool]: ...
 
 
 def ask_for_action(initiator: Union[CardChooser, CharacterChooser],
@@ -230,7 +230,7 @@ class GenericAction(THBAction):
 
 
 class UserAction(THBAction):  # card/character skill actions
-    target_list: List[Character]
+    target_list: Sequence[Character]
     associated_card: Card
 
 
@@ -240,7 +240,7 @@ CardMovement = Tuple[THBAction, List[Card], Optional[CardList], Optional[CardLis
 class MigrateCardsTransaction(GameViralContext):
     movements: List[CardMovement]
 
-    def __init__(self, action: Optional[THBAction]=None):
+    def __init__(self, action: Optional[THBAction] = None):
         self.action = cast(THBAction, action or self.game.action_stack[-1])
         self.cancelled = False
         self.movements = []
@@ -660,10 +660,10 @@ class DrawCardStage(DrawCards):
 
 
 class LaunchCard(GenericAction):
-    def __init__(self, source: Character,
-                       target_list: List[Character],
+    def __init__(self, src: Character,
+                       target_list: Sequence[Character],
                        card: Card,
-                       action: Optional[UserAction]=None,
+                       action: Optional[UserAction] = None,
                        bypass_check=False):
         self.force_action = action
         bypass_check = bool(action) or bypass_check
@@ -671,10 +671,10 @@ class LaunchCard(GenericAction):
         if bypass_check:
             tl, tl_valid = target_list, True
         else:
-            tl, tl_valid = card.target(self.game, source, target_list)
+            tl, tl_valid = card.target(self.game, src, target_list)
 
-        self.source, self.target_list, self.card, self.tl_valid = source, tl, card, tl_valid
-        self.target = target_list[0] if target_list else source
+        self.source, self.target_list, self.card, self.tl_valid = src, tl, card, tl_valid
+        self.target = target_list[0] if target_list else src
 
     def apply_action(self) -> bool:
         card = self.card
@@ -814,6 +814,7 @@ class ActionStageLaunchCard(LaunchCard):
 
 class BaseActionStage(GenericAction):
     card_usage = 'launch'
+    launch_card_cls: Type[LaunchCard]
 
     def __init__(self, target):
         self.source = self.source = target
@@ -1153,7 +1154,7 @@ class DummyAction(GenericAction):
         return self.result
 
 
-class RevealRole(PlayerAction):
+class RevealRole(THBPlayerAction):
 
     def __init__(self, target: Player, to: Union[Player, BatchList[Player]]):
         self.target = target

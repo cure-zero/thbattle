@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import Sequence, Tuple, List
+
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import DrawCards, LaunchCard, Pindian, UserAction
-from thb.cards.classes import AttackCard, BaseAttack, DuelCard, Skill, TreatAs, VirtualCard, t_None
+from thb.cards.base import Skill, VirtualCard
+from thb.cards.classes import AttackCard, BaseAttack, DuelCard, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler, THBattle
 
 
 # -- code --
@@ -72,14 +75,16 @@ class Incite(Skill):
     skill_category = ['character', 'active']
     usage = 'none'
 
-    def target(self, g, source, tl):
-        tl = [t for t in tl if not t.dead and t is not source]
+    def target(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
+        tl = [t for t in tl if not t.dead and t is not src]
 
         if not tl:
             return ([], False)
 
-        tl_, valid = AttackCard.target(g, tl[0], tl[1:])
-        return tl[:1] + tl_, valid
+        tl_, valid = AttackCard.target(None, g, tl[0], tl[1:])
+        tl = tl[:1]
+        tl.extend(tl_)
+        return tl, valid
 
     def check(self):
         return not self.associated_cards
@@ -98,7 +103,7 @@ class ReversalDuel(TreatAs, VirtualCard):
         return not self.associated_cards
 
 
-class ReversalHandler(EventHandler):
+class ReversalHandler(THBEventHandler):
     interested = ['action_before']
     execute_before = [
         'HouraiJewelHandler',

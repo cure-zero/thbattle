@@ -4,15 +4,14 @@
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.meta.common import card_desc, ui_meta_for, passive_clickable
+from thb.meta.common import card_desc, ui_meta, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.kanako)
 
 
-@ui_meta
+@ui_meta(characters.kanako.Kanako)
 class Kanako:
     # Character
     name        = '八坂神奈子'
@@ -27,7 +26,7 @@ class Kanako:
     notes = '|RKOF模式不可用|r'
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoKOF)
 class KanakoKOF:
     # Character
     name        = '八坂神奈子'
@@ -42,7 +41,7 @@ class KanakoKOF:
     notes = '|RKOF修正角色|r'
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoFaith)
 class KanakoFaith:
     # Skill
     name = '信仰'
@@ -88,7 +87,7 @@ class KanakoFaith:
         return 'thb-cv-kanako_faith'
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoFaithCheers)
 class KanakoFaithCheers:
     def effect_string_before(self, act):
         return '|G【%s】|r献上了信仰！' % (
@@ -96,7 +95,7 @@ class KanakoFaithCheers:
         )
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoFaithCounteract)
 class KanakoFaithCounteract:
     def effect_string_before(self, act):
         return '|G【%s】|r决定要拆台！' % (
@@ -104,7 +103,7 @@ class KanakoFaithCounteract:
         )
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoFaithCounteractPart1)
 class KanakoFaithCounteractPart1:
     def effect_string(self, act):
         return '|G【%s】|r弃置了|G【%s】|r的%s' % (
@@ -114,21 +113,21 @@ class KanakoFaithCounteractPart1:
         )
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoFaithCounteractPart2)
 class KanakoFaithCounteractPart2:
     # choose_option meta
     choose_option_buttons = (('弹幕战', 'duel'), ('弹幕', 'attack'))
     choose_option_prompt = '信仰：请选择希望的效果'
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoFaithEffect)
 class KanakoFaithEffect:
     # choose_option meta
     choose_option_buttons = (('弃置对方的牌', 'drop'), ('对方摸牌', 'draw'))
     choose_option_prompt = '信仰：请选择希望的效果'
 
 
-@ui_meta
+@ui_meta(characters.kanako.Virtue)
 class Virtue:
     # Skill
     name = '神德'
@@ -138,7 +137,7 @@ class Virtue:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.kanako.VirtueHandler)
 class VirtueHandler:
     def target(self, pl):
         if not pl:
@@ -147,7 +146,7 @@ class VirtueHandler:
         return (True, '神德：放弃摸牌，选定的目标摸2张牌')
 
 
-@ui_meta
+@ui_meta(characters.kanako.VirtueAction)
 class VirtueAction:
     def choose_card_text(self, g, act, cards):
         prompt = '神德：交给对方一张牌'
@@ -169,7 +168,7 @@ class VirtueAction:
         return 'thb-cv-kanako_virtue'
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoFaithKOF)
 class KanakoFaithKOF:
     # Skill
     name = '信仰'
@@ -184,7 +183,7 @@ class KanakoFaithKOF:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.kanako.KanakoFaithKOFAction)
 class KanakoFaithKOFAction:
     def effect_string_before(self, act):
         return '|G【%s】|r又收到的%s张香火钱，比博丽神社不知道高到哪里去了！' % (

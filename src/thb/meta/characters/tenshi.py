@@ -4,14 +4,13 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import card_desc, ui_meta_for, passive_clickable
+from thb.meta.common import card_desc, ui_meta, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.tenshi)
 
 
-@ui_meta
+@ui_meta(characters.tenshi.Masochist)
 class Masochist:
     # Skill
     name = '抖Ｍ'
@@ -21,14 +20,14 @@ class Masochist:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.tenshi.MasochistHandler)
 class MasochistHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【抖Ｍ】吗？'
 
 
-@ui_meta
+@ui_meta(characters.tenshi.MasochistAction)
 class MasochistAction:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -52,7 +51,7 @@ class MasochistAction:
         return 'thb-cv-tenshi_masochist'
 
 
-@ui_meta
+@ui_meta(characters.tenshi.ScarletPerception)
 class ScarletPerception:
     # Skill
     name = '绯想'
@@ -67,7 +66,7 @@ class ScarletPerception:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.tenshi.ScarletPerceptionAction)
 class ScarletPerceptionAction:
     def effect_string(self, act):
         return '|G【%s】|r获得了%s' % (
@@ -79,7 +78,7 @@ class ScarletPerceptionAction:
         return 'thb-cv-tenshi_sp'
 
 
-@ui_meta
+@ui_meta(characters.tenshi.Tenshi)
 class Tenshi:
     # Character
     name        = '比那名居天子'

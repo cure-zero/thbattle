@@ -91,23 +91,59 @@ class Core(object):
         self.events = Events()
 
         disables = self.options.disables
-        self.auth    = parts.auth.Auth(self) if 'auth' not in disables else None
-        self.lobby   = parts.lobby.Lobby(self) if 'lobby' not in disables else None
-        self.room    = parts.room.Room(self) if 'room' not in disables else None
-        self.game    = parts.game.Game(self) if 'game' not in disables else None
-        self.observe = parts.observe.Observe(self) if 'observe' not in disables else None
-        self.invite  = parts.invite.Invite(self) if 'invite' not in disables else None
-        self.item    = parts.item.Item(self) if 'item' not in disables else None
-        self.reward  = parts.reward.Reward(self) if 'reward' not in disables else None
-        self.match   = parts.match.Match(self) if 'match' not in disables else None
-        self.admin   = parts.admin.Admin(self) if 'admin' not in disables else None
-        self.kedama  = parts.kedama.Kedama(self) if 'kedama' not in disables else None
-        self.archive = parts.archive.Archive(self) if 'archive' not in disables else None
-        self.hooks   = parts.hooks.Hooks(self) if 'hooks' not in disables else None
-        self.connect = parts.connect.Connect(self) if 'connect' not in disables else None
-        self.backend = parts.backend.Backend(self) if 'backend' not in disables else None
-        self.log     = parts.log.Log(self) if 'log' not in disables else None
-        self.stats   = parts.stats.Stats(self) if 'stats' not in disables else None
-        self.view    = parts.view.View(self) if 'view' not in disables else None
+
+        if 'auth' not in disables:
+            self.auth = parts.auth.Auth(self)
+
+        if 'lobby' not in disables:
+            self.lobby = parts.lobby.Lobby(self)
+
+        if 'room' not in disables:
+            self.room = parts.room.Room(self)
+
+        if 'game' not in disables:
+            self.game = parts.game.Game(self)
+
+        if 'observe' not in disables:
+            self.observe = parts.observe.Observe(self)
+
+        if 'invite' not in disables:
+            self.invite = parts.invite.Invite(self)
+
+        if 'item' not in disables:
+            self.item = parts.item.Item(self)
+
+        if 'reward' not in disables:
+            self.reward = parts.reward.Reward(self)
+
+        if 'match' not in disables:
+            self.match = parts.match.Match(self)
+
+        if 'admin' not in disables:
+            self.admin = parts.admin.Admin(self)
+
+        if 'kedama' not in disables:
+            self.kedama = parts.kedama.Kedama(self)
+
+        if 'archive' not in disables:
+            self.archive = parts.archive.Archive(self)
+
+        if 'hooks' not in disables:
+            self.hooks = parts.hooks.Hooks(self)
+
+        if 'connect' not in disables:
+            self.connect = parts.connect.Connect(self)
+
+        if 'backend' not in disables:
+            self.backend = parts.backend.Backend(self)
+
+        if 'log' not in disables:
+            self.log = parts.log.Log(self)
+
+        if 'stats' not in disables:
+            self.stats = parts.stats.Stats(self)
+
+        if 'view' not in disables:
+            self.view = parts.view.View(self)
 
         self.events.core_initialized.emit(self)

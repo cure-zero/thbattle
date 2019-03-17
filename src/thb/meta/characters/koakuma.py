@@ -5,14 +5,13 @@
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.meta.common import ui_meta_for, my_turn
+from thb.meta.common import ui_meta, my_turn
 
 # -- code --
 
-ui_meta = ui_meta_for(characters.koakuma)
 
 
-@ui_meta
+@ui_meta(characters.koakuma.Koakuma)
 class Koakuma:
     # Character
     name        = '小恶魔'
@@ -25,7 +24,7 @@ class Koakuma:
     miss_sound_effect = 'thb-cv-koakuma_miss'
 
 
-@ui_meta
+@ui_meta(characters.koakuma.Find)
 class Find:
     # Skill
     name = '寻找'

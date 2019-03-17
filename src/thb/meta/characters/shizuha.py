@@ -4,16 +4,15 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import card_desc, ui_meta_for, passive_clickable
+from thb.meta.common import card_desc, ui_meta, passive_clickable
 from thb.meta.common import passive_is_action_valid
 from utils.misc import BatchList
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.shizuha)
 
 
-@ui_meta
+@ui_meta(characters.shizuha.AutumnWindEffect)
 class AutumnWindEffect:
     def effect_string(self, act):
         return '|G秋风|r带走了|G【%s】|r的%s。' % (
@@ -22,10 +21,10 @@ class AutumnWindEffect:
         )
 
 
-@ui_meta
+@ui_meta(characters.shizuha.AutumnWindAction)
 class AutumnWindAction:
 
-    def effect_string_before(self, act):
+    def effect_string_before(self, act: characters.shizuha.AutumnWindAction):
         tl = BatchList(act.target_list)
         return '当|G秋风|r吹起，|G【%s】|r连牌都拿不住的时候，才回想起，妈妈说的对，要穿秋裤。' % (
             '】|r、|G【'.join(tl.ui_meta.name),
@@ -35,7 +34,7 @@ class AutumnWindAction:
         return 'thb-cv-shizuha_autumnwind'
 
 
-@ui_meta
+@ui_meta(characters.shizuha.Decay)
 class Decay:
     # Skill
     name = '凋零'
@@ -45,14 +44,14 @@ class Decay:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.shizuha.DecayAction)
 class DecayAction:
 
     def effect_string(self, act):
         return '|G【%s】|r觉得屁股凉了一下……' % act.target.ui_meta.name
 
 
-@ui_meta
+@ui_meta(characters.shizuha.DecayEffect)
 class DecayEffect:
 
     def effect_string(self, act):
@@ -62,14 +61,14 @@ class DecayEffect:
         return 'thb-cv-shizuha_decay'
 
 
-@ui_meta
+@ui_meta(characters.shizuha.DecayDrawCards)
 class DecayDrawCards:
 
     def sound_effect(self, act):
         return 'thb-cv-shizuha_decay'
 
 
-@ui_meta
+@ui_meta(characters.shizuha.AutumnWind)
 class AutumnWind:
     # Skill
     name = '秋风'
@@ -79,7 +78,7 @@ class AutumnWind:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.shizuha.AutumnWindHandler)
 class AutumnWindHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
@@ -92,7 +91,7 @@ class AutumnWindHandler:
         return (True, '秋风弃牌')
 
 
-@ui_meta
+@ui_meta(characters.shizuha.Shizuha)
 class Shizuha:
     # Character
     name        = '秋静叶'

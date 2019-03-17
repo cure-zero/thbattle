@@ -6,14 +6,13 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import card_desc, ui_meta_for, passive_clickable
+from thb.meta.common import card_desc, ui_meta, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.shinmyoumaru)
 
 
-@ui_meta
+@ui_meta(characters.shinmyoumaru.MiracleMallet)
 class MiracleMallet:
     # Skill
     name = '万宝槌'
@@ -23,7 +22,7 @@ class MiracleMallet:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.shinmyoumaru.MiracleMalletAction)
 class MiracleMalletAction:
     def effect_string(self, act):
         return '|G【%s】|r将|G【%s】|r的判定结果改为%s。' % (
@@ -39,7 +38,7 @@ class MiracleMalletAction:
         ))
 
 
-@ui_meta
+@ui_meta(characters.shinmyoumaru.VengeOfTsukumogami)
 class VengeOfTsukumogami:
     # Skill
     name = '付丧神之怨'
@@ -49,7 +48,7 @@ class VengeOfTsukumogami:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.shinmyoumaru.VengeOfTsukumogamiAction)
 class VengeOfTsukumogamiAction:
     def effect_string_before(self, act):
         return '|G【%s】|r对|G【%s】|r发动了|G付丧神之怨|r。' % (
@@ -64,7 +63,7 @@ class VengeOfTsukumogamiAction:
         ))
 
 
-@ui_meta
+@ui_meta(characters.shinmyoumaru.MiracleMalletHandler)
 class MiracleMalletHandler:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -74,7 +73,7 @@ class MiracleMalletHandler:
             return (False, '请选择一张牌点数更大的牌代替当前的判定牌')
 
 
-@ui_meta
+@ui_meta(characters.shinmyoumaru.VengeOfTsukumogamiHandler)
 class VengeOfTsukumogamiHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
@@ -84,7 +83,7 @@ class VengeOfTsukumogamiHandler:
         return prompt % act.target.ui_meta.name
 
 
-@ui_meta
+@ui_meta(characters.shinmyoumaru.Shinmyoumaru)
 class Shinmyoumaru:
     # Character
     name        = '少名针妙丸'

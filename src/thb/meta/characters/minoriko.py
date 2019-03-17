@@ -4,14 +4,13 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, limit1_skill_used, my_turn
+from thb.meta.common import ui_meta, limit1_skill_used, my_turn
 from thb.meta.common import passive_clickable, passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.minoriko)
 
 
-@ui_meta
+@ui_meta(characters.minoriko.Foison)
 class Foison:
     # Skill
     name = '丰收'
@@ -21,7 +20,7 @@ class Foison:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.minoriko.FoisonDrawCardStage)
 class FoisonDrawCardStage:
     def effect_string(self, act):
         return '大丰收！|G【%s】|r一下子收获了%d张牌！' % (
@@ -33,7 +32,7 @@ class FoisonDrawCardStage:
         return 'thb-cv-minoriko_foison'
 
 
-@ui_meta
+@ui_meta(characters.minoriko.AutumnFeast)
 class AutumnFeast:
     # Skill
     name = '秋祭'
@@ -70,7 +69,7 @@ class AutumnFeast:
         return 'thb-cv-minoriko_autumnfeast'
 
 
-@ui_meta
+@ui_meta(characters.minoriko.AkiTribute)
 class AkiTribute:
     # Skill
     name = '上贡'
@@ -80,13 +79,13 @@ class AkiTribute:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.minoriko.AkiTributeCollectCard)
 class AkiTributeCollectCard:
     def sound_effect(self, act):
         return 'thb-cv-minoriko_akitribute'
 
 
-@ui_meta
+@ui_meta(characters.minoriko.AkiTributeHandler)
 class AkiTributeHandler:
 
     def target(self, pl):
@@ -96,7 +95,7 @@ class AkiTributeHandler:
         return (True, '浪费粮食，可不是好行为！')
 
 
-@ui_meta
+@ui_meta(characters.minoriko.Minoriko)
 class Minoriko:
     # Character
     name        = '秋穰子'

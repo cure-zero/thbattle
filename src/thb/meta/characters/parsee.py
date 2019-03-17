@@ -6,14 +6,13 @@
 from thb import characters
 from thb.cards.base import Card
 from thb.cards.classes import DemolitionCard
-from thb.meta.common import my_turn, ui_meta_for
+from thb.meta.common import my_turn, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.parsee)
 
 
-@ui_meta
+@ui_meta(characters.parsee.Parsee)
 class Parsee:
     # Character
     name        = '水桥帕露西'
@@ -26,7 +25,7 @@ class Parsee:
     miss_sound_effect = 'thb-cv-parsee_miss'
 
 
-@ui_meta
+@ui_meta(characters.parsee.Envy)
 class Envy:
     # Skill
     name = '嫉妒'
@@ -69,7 +68,7 @@ class Envy:
         return 'thb-cv-parsee_envy'
 
 
-@ui_meta
+@ui_meta(characters.parsee.EnvyHandler)
 class EnvyHandler:
     choose_option_buttons = (('获得', True), ('不获得', False))
 
@@ -77,7 +76,7 @@ class EnvyHandler:
         return '你要获得【%s】吗？' % act.card.ui_meta.name
 
 
-@ui_meta
+@ui_meta(characters.parsee.EnvyRecycleAction)
 class EnvyRecycleAction:
     def effect_string(self, act):
         return '|G【%s】|r：“喂喂这么好的牌扔掉不觉得可惜么？不要嫉妒我。”' % (

@@ -6,15 +6,14 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import G, card_desc, ui_meta_for, passive_clickable
+from thb.meta.common import G, card_desc, ui_meta, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.alice)
 
 
-@ui_meta
+@ui_meta(characters.alice.Alice)
 class Alice:
     # Character
     name        = '爱丽丝'
@@ -27,7 +26,7 @@ class Alice:
     miss_sound_effect = 'thb-cv-alice_miss'
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegion)
 class LittleLegion:
     # Skill
     name = '小小军势'
@@ -43,7 +42,7 @@ class LittleLegion:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegionAttackCard)
 class LittleLegionAttackCard:
     name = '小小军势'
 
@@ -58,7 +57,7 @@ class LittleLegionAttackCard:
         return 'thb-cv-alice_legion_attack'
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegionDollControlCard)
 class LittleLegionDollControlCard:
     name = '小小军势'
     custom_ray = True
@@ -76,7 +75,7 @@ class LittleLegionDollControlCard:
         return 'thb-cv-alice_legion_control'
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegionAttackAction)
 class LittleLegionAttackAction:
 
     def target(self, pl):
@@ -86,7 +85,7 @@ class LittleLegionAttackAction:
         return (True, '就让你见识下人偶军团的厉害！')
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegionCoverEffect)
 class LittleLegionCoverEffect:
     def effect_string(self, act):
         if act.succeeded:
@@ -98,7 +97,7 @@ class LittleLegionCoverEffect:
         return 'thb-cv-alice_legion_cover'
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegionCoverAction)
 class LittleLegionCoverAction:
 
     def target(self, pl):
@@ -108,14 +107,14 @@ class LittleLegionCoverAction:
         return (True, '支援到了，重复，支援到了！')
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegionHoldAction)
 class LittleLegionHoldAction:
 
     def sound_effect(self, act):
         return 'thb-cv-alice_legion_hold'
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegionControlAction)
 class LittleLegionControlAction:
 
     def target(self, pl):
@@ -132,7 +131,7 @@ class LittleLegionControlAction:
             return rst, prompt
 
 
-@ui_meta
+@ui_meta(characters.alice.LittleLegionHandler)
 class LittleLegionHandler:
 
     # choose_card
@@ -155,7 +154,7 @@ class LittleLegionHandler:
             return (False, '小小军势：重铸一张装备牌，发动相应效果（否则不发动）')
 
 
-@ui_meta
+@ui_meta(characters.alice.DollBlast)
 class DollBlast:
     # Skill
     name = '人偶爆弹'
@@ -165,7 +164,7 @@ class DollBlast:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.alice.DollBlastEffect)
 class DollBlastEffect:
 
     def effect_string_before(self, act):
@@ -186,7 +185,7 @@ class DollBlastEffect:
             )
 
 
-@ui_meta
+@ui_meta(characters.alice.DollBlastAction)
 class DollBlastAction:
 
     def sound_effect(self, act):
@@ -196,7 +195,7 @@ class DollBlastAction:
         ])
 
 
-@ui_meta
+@ui_meta(characters.alice.DollBlastHandlerCommon)
 class DollBlastHandlerCommon:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))

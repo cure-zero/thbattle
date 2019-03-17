@@ -5,15 +5,12 @@
 # -- own --
 from thb import actions
 from thb.actions import ttags
-from thb.cards import classes
-from thb.meta.common import G, ui_meta_for
+from thb.cards import basic, definition
+from thb.meta.common import G, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(classes)
-
-
-@ui_meta
+@ui_meta(definition.AttackCard)
 class AttackCard:
     # action_stage meta
     image = 'thb-card-attack'
@@ -52,7 +49,7 @@ class AttackCard:
         ][ttags(current)['__attack_graze_count'] % 4 - 1]
 
 
-@ui_meta
+@ui_meta(definition.GrazeCard)
 class GrazeCard:
     # action_stage meta
     name = '擦弹'
@@ -90,7 +87,7 @@ class GrazeCard:
         ][ttags(current)['__attack_graze_count'] % 4 - 1]
 
 
-@ui_meta
+@ui_meta(definition.WineCard)
 class WineCard:
     # action_stage meta
     name = '酒'
@@ -113,19 +110,19 @@ class WineCard:
         return 'thb-cv-card_wine'
 
 
-@ui_meta
+@ui_meta(basic.Wine)
 class Wine:
     def effect_string(self, act):
         return '|G【%s】|r喝醉了…' % act.target.ui_meta.name
 
 
-@ui_meta
+@ui_meta(basic.WineRevive)
 class WineRevive:
     def effect_string(self, act):
         return '|G【%s】|r醒酒了。' % act.target.ui_meta.name
 
 
-@ui_meta
+@ui_meta(definition.ExinwanCard)
 class ExinwanCard:
     # action_stage meta
     name = '恶心丸'
@@ -146,7 +143,7 @@ class ExinwanCard:
         return (True, '哼，哼，哼哼……')
 
 
-@ui_meta
+@ui_meta(basic.ExinwanEffect)
 class ExinwanEffect:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -162,7 +159,7 @@ class ExinwanEffect:
         return 'thb-cv-card_exinwan'
 
 
-@ui_meta
+@ui_meta(basic.UseGraze)
 class UseGraze:
     # choose_card meta
 
@@ -181,7 +178,7 @@ class UseGraze:
         )
 
 
-@ui_meta
+@ui_meta(basic.LaunchGraze)
 class LaunchGraze:
     # choose_card meta
 
@@ -192,7 +189,7 @@ class LaunchGraze:
             return (False, '请使用一张【擦弹】抵消【弹幕】效果…')
 
 
-@ui_meta
+@ui_meta(basic.UseAttack)
 class UseAttack:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -210,7 +207,7 @@ class UseAttack:
         )
 
 
-@ui_meta
+@ui_meta(definition.HealCard)
 class HealCard:
     # action_stage meta
     image = 'thb-card-heal'
@@ -237,7 +234,7 @@ class HealCard:
         return 'thb-cv-card_heal'
 
 
-@ui_meta
+@ui_meta(basic.AskForHeal)
 class AskForHeal:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -247,7 +244,7 @@ class AskForHeal:
             return (False, '请选择一张【麻薯】(对%s使用)…' % act.source.ui_meta.name)
 
 
-@ui_meta
+@ui_meta(basic.Heal)
 class Heal:
     def effect_string(self, act):
         if act.succeeded:

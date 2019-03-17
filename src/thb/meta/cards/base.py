@@ -4,15 +4,12 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from ..common import ui_meta_for
-from thb import cards
+from thb.meta.common import ui_meta
+from thb.cards import base
 
 
 # -- code --
-ui_meta = ui_meta_for(cards)
-
-
-@ui_meta
+@ui_meta(base.CardList)
 class CardList:
     lookup = {
         'cards':      '手牌区',
@@ -28,7 +25,7 @@ class CardList:
     }
 
 
-@ui_meta
+@ui_meta(base.HiddenCard)
 class HiddenCard:
     # action_stage meta
     image = 'thb-card-hidden'

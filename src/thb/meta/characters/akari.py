@@ -5,14 +5,13 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
+from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.akari)
 
 
-@ui_meta
+@ui_meta(characters.akari.AkariSkill)
 class AkariSkill:
     # Skill
     name = '阿卡林'
@@ -22,7 +21,7 @@ class AkariSkill:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.akari.Akari)
 class Akari:
     # Character
     name        = '随机角色'

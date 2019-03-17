@@ -8,14 +8,13 @@ import random
 from thb import actions, characters
 from thb.actions import ttags
 from thb.cards.classes import AttackCard, GrazeCard
-from thb.meta.common import build_handcard, my_turn, ui_meta_for
+from thb.meta.common import build_handcard, my_turn, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.nitori)
 
 
-@ui_meta
+@ui_meta(characters.nitori.Dismantle)
 class Dismantle:
     # Skill
     name = '拆解'
@@ -43,7 +42,7 @@ class Dismantle:
         ])
 
 
-@ui_meta
+@ui_meta(characters.nitori.Craftsman)
 class Craftsman:
     name = '匠心'
     description = '你可以将你的全部手牌（至少1张）当做任意的一张基本牌使用或打出。出牌阶段内使用时，一回合限一次。'
@@ -64,8 +63,7 @@ class Craftsman:
         except (IndexError, AttributeError):
             return False
 
-    def is_complete(self, g, cl):
-        skill = cl[0]
+    def is_complete(self, g, skill):
         assert skill.is_card(characters.nitori.Craftsman)
         if set(skill.associated_cards) != set(g.me.cards) | set(g.me.showncards):
             return (False, '请选择所有的手牌（包括明牌）！')
@@ -104,12 +102,12 @@ class Craftsman:
             else:
                 l = ['_graze']
         else:
-            l = None
+            l = []
 
         return l and 'thb-cv-nitori_craftsman%s' % random.choice(l)
 
 
-@ui_meta
+@ui_meta(characters.nitori.Nitori)
 class Nitori:
     # Character
     name        = '河城荷取'

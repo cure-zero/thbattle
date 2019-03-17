@@ -6,14 +6,13 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, passive_clickable
+from thb.meta.common import ui_meta, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.kaguya)
 
 
-@ui_meta
+@ui_meta(characters.kaguya.Kaguya)
 class Kaguya:
     # Character
     name        = '蓬莱山辉夜'
@@ -26,7 +25,7 @@ class Kaguya:
     miss_sound_effect = 'thb-cv-kaguya_miss'
 
 
-@ui_meta
+@ui_meta(characters.kaguya.Dilemma)
 class Dilemma:
     # Skill
     name = '难题'
@@ -36,7 +35,7 @@ class Dilemma:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.kaguya.DilemmaDamageAction)
 class DilemmaDamageAction:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -67,7 +66,7 @@ class DilemmaDamageAction:
         ])
 
 
-@ui_meta
+@ui_meta(characters.kaguya.DilemmaHealAction)
 class DilemmaHealAction:
     def effect_string(self, act):
         return '|G【%s】|r发动了|G难题|r，|G【%s】|r摸了一张牌。' % (
@@ -82,7 +81,7 @@ class DilemmaHealAction:
         ])
 
 
-@ui_meta
+@ui_meta(characters.kaguya.DilemmaHandler)
 class DilemmaHandler:
     # choose_option meta
     choose_option_buttons = (('发动', True), ('不发动', False))
@@ -95,7 +94,7 @@ class DilemmaHandler:
         return '你要发动【难题】吗（%s）？' % _type
 
 
-@ui_meta
+@ui_meta(characters.kaguya.ImperishableNight)
 class ImperishableNight:
     # Skill
     name = '永夜'
@@ -118,7 +117,7 @@ class ImperishableNight:
         return 'thb-cv-kaguya_inight'
 
 
-@ui_meta
+@ui_meta(characters.kaguya.ImperishableNightHandler)
 class ImperishableNightHandler:
     # choose_option meta
     choose_option_buttons = (('发动', True), ('不发动', False))

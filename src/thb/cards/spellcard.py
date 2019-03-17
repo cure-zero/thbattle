@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import Sequence
+
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler, InputTransaction, sync_primitive
+from game.base import InputTransaction, sync_primitive
 from thb.actions import ActionStage, Damage, DrawCardStage, DrawCards, DropCards, FatetellAction
 from thb.actions import ForEach, LaunchCard, PlayerTurn, UserAction, ask_for_action, detach_cards
 from thb.actions import migrate_cards, random_choose_card, register_eh, user_choose_cards
 from thb.cards import basic
 from thb.cards.base import Card
 from thb.inputlets import ChooseIndividualCardInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 from utils.check import CheckFailed, check
 from utils.misc import BatchList, flatten
-from typing import Sequence
 
 
 # -- code --
@@ -68,7 +70,7 @@ class Reject(InstantSpellCardAction):
 
 
 @register_eh
-class RejectHandler(EventHandler):
+class RejectHandler(THBEventHandler):
     interested = ['action_before']
     card_usage = 'launch'
 

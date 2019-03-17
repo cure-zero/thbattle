@@ -7,14 +7,13 @@ import random
 # -- own --
 from thb import characters
 from thb.cards.classes import AttackCard
-from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta_for
+from thb.meta.common import passive_clickable, passive_is_action_valid, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.sakuya)
 
 
-@ui_meta
+@ui_meta(characters.sakuya.Sakuya)
 class Sakuya:
     # Character
     name        = '十六夜咲夜'
@@ -27,7 +26,7 @@ class Sakuya:
     miss_sound_effect = 'thb-cv-sakuya_miss'
 
 
-@ui_meta
+@ui_meta(characters.sakuya.Dagger)
 class Dagger:
     # Skill
     name = '飞刀'
@@ -48,8 +47,7 @@ class Dagger:
 
         return False
 
-    def is_complete(self, g, cl):
-        skill = cl[0]
+    def is_complete(self, g, skill):
         assert skill.is_card(characters.sakuya.Dagger)
         cl = skill.associated_cards
         if len(cl) != 1 or 'equipment' not in cl[0].category:
@@ -82,13 +80,13 @@ class Dagger:
         ])
 
 
-@ui_meta
+@ui_meta(characters.sakuya.LunaDialActionStage)
 class LunaDialActionStage:
     def sound_effect(self, act):
         return 'thb-cv-sakuya_lunadial'
 
 
-@ui_meta
+@ui_meta(characters.sakuya.LunaDial)
 class LunaDial:
     # Skill
     name = '月时计'

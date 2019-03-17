@@ -6,14 +6,13 @@
 from thb import characters
 from thb.cards.base import Card, Skill
 from thb.meta.common import card_desc, limit1_skill_used, my_turn, passive_clickable
-from thb.meta.common import passive_is_action_valid, ui_meta_for
+from thb.meta.common import passive_is_action_valid, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.kokoro)
 
 
-@ui_meta
+@ui_meta(characters.kokoro.Kokoro)
 class Kokoro:
     # Character
     name        = '秦心'
@@ -26,7 +25,7 @@ class Kokoro:
     miss_sound_effect = 'thb-cv-kokoro_miss'
 
 
-@ui_meta
+@ui_meta(characters.kokoro.KokoroKOF)
 class KokoroKOF:
     # Character
     name        = '秦心'
@@ -41,7 +40,7 @@ class KokoroKOF:
     notes = '|RKOF修正角色|r'
 
 
-@ui_meta
+@ui_meta(characters.kokoro.HopeMask)
 class HopeMask:
     # Skill
     name = '希望之面'
@@ -51,7 +50,7 @@ class HopeMask:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.kokoro.HopeMaskKOF)
 class HopeMaskKOF:
     # Skill
     name = '希望之面'
@@ -61,14 +60,14 @@ class HopeMaskKOF:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.kokoro.BaseHopeMaskHandler)
 class BaseHopeMaskHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【希望之面】吗？'
 
 
-@ui_meta
+@ui_meta(characters.kokoro.BaseHopeMaskAction)
 class BaseHopeMaskAction:
     def effect_string_before(self, act):
         return '|G【%s】|r挑选面具中……' % (act.source.ui_meta.name)
@@ -85,7 +84,7 @@ class BaseHopeMaskAction:
         return 'thb-cv-kokoro_hopemask'
 
 
-@ui_meta
+@ui_meta(characters.kokoro.BaseDarkNohAction)
 class BaseDarkNohAction:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -95,7 +94,7 @@ class BaseDarkNohAction:
             return (False, '请弃置%d张手牌（不能包含获得的那一张）' % act.n)
 
 
-@ui_meta
+@ui_meta(characters.kokoro.BaseDarkNoh)
 class BaseDarkNoh:
     # Skill
     name = '暗黑能乐'
@@ -130,7 +129,7 @@ class BaseDarkNoh:
         return 'thb-cv-kokoro_darknoh'
 
 
-@ui_meta
+@ui_meta(characters.kokoro.DarkNoh)
 class DarkNoh:
     description = '出牌阶段限一次，你可以将一张黑色牌置于体力值不小于你的其他角色的明牌区，然后其须弃置除获得的牌以外的手牌，直到手牌数与体力值相等。'
 
@@ -148,7 +147,7 @@ class DarkNoh:
         return False
 
 
-@ui_meta
+@ui_meta(characters.kokoro.DarkNohKOF)
 class DarkNohKOF:
     description = '|B限定技|r，出牌阶段，你可以将一张黑色牌置于体力值不小于你的其他角色的明牌区，然后其须弃置除获得的牌以外的手牌，直到手牌数与体力值相等。'
 

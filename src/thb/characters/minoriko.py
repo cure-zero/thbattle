@@ -3,10 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import EventHandler
 from thb.actions import DrawCardStage, UserAction, migrate_cards, user_choose_players
-from thb.cards.classes import Card, Harvest, HarvestCard, Skill, TreatAs, t_None
+from thb.cards.base import Card, Skill
+from thb.cards.classes import Harvest, HarvestCard, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -22,7 +23,7 @@ class FoisonDrawCardStage(DrawCardStage):
         return DrawCardStage.apply_action(self)
 
 
-class FoisonHandler(EventHandler):
+class FoisonHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):
@@ -75,7 +76,7 @@ class AkiTributeCollectCard(UserAction):
         return True
 
 
-class AkiTributeHandler(EventHandler):
+class AkiTributeHandler(THBEventHandler):
     interested = ['choose_target', 'harvest_finish']
 
     def handle(self, evt_type, act):
@@ -102,10 +103,10 @@ class AkiTributeHandler(EventHandler):
             if not cards: return act
 
             candidates = [p for p in g.players if not p.dead]
-            pl = user_choose_players(self, src, candidates)
-            if not pl: return act
+            tl = user_choose_players(self, src, candidates)
+            if not tl: return act
 
-            tgt, = pl
+            tgt, = tl
             g.process_action(AkiTributeCollectCard(src, tgt, cards))
 
         return act

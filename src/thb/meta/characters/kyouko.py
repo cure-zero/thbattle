@@ -5,14 +5,13 @@
 # -- own --
 from thb import characters
 from thb.cards.base import VirtualCard
-from thb.meta.common import card_desc, passive_clickable, passive_is_action_valid, ui_meta_for
+from thb.meta.common import card_desc, passive_clickable, passive_is_action_valid, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.kyouko)
 
 
-@ui_meta
+@ui_meta(characters.kyouko.Kyouko)
 class Kyouko:
     # Character
     name        = '幽谷响子'
@@ -26,7 +25,7 @@ class Kyouko:
     miss_sound_effect = 'thb-cv-kyouko_miss'
 
 
-@ui_meta
+@ui_meta(characters.kyouko.Echo)
 class Echo:
     # Skill
     name = '回响'
@@ -36,7 +35,7 @@ class Echo:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.kyouko.Resonance)
 class Resonance:
     # Skill
     name = '共振'
@@ -46,7 +45,7 @@ class Resonance:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.kyouko.EchoHandler)
 class EchoHandler:
     # choose_option meta
     choose_option_buttons = (('发动', True), ('放弃', False))
@@ -60,7 +59,7 @@ class EchoHandler:
         return (True, '回响···')
 
 
-@ui_meta
+@ui_meta(characters.kyouko.ResonanceAction)
 class ResonanceAction:
     # choose_card meta
     def choose_card_text(self, g, act, cards):
@@ -83,7 +82,7 @@ class ResonanceAction:
         return 'thb-cv-kyouko_resonance'
 
 
-@ui_meta
+@ui_meta(characters.kyouko.EchoAction)
 class EchoAction:
 
     def effect_string_before(self, act):
@@ -97,7 +96,7 @@ class EchoAction:
         return 'thb-cv-kyouko_echo'
 
 
-@ui_meta
+@ui_meta(characters.kyouko.ResonanceHandler)
 class ResonanceHandler:
     # choose_players
     def target(self, pl):

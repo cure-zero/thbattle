@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, DrawCards, DropCardStage, DropCards, GenericAction, UserAction
 from thb.actions import random_choose_card, user_choose_players
-from thb.cards.classes import Skill, VirtualCard, t_None
+from thb.cards.base import Skill, VirtualCard
+from thb.cards.classes import t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -53,7 +54,7 @@ class AutumnWindAction(UserAction):
         return True
 
 
-class AutumnWindHandler(EventHandler):
+class AutumnWindHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):
@@ -102,7 +103,7 @@ class DecayDrawCards(DrawCards):
     pass
 
 
-class DecayDrawCardHandler(EventHandler):
+class DecayDrawCardHandler(THBEventHandler):
     interested = ['card_migration']
     execute_before = ['LuckHandler']
 
@@ -151,7 +152,7 @@ class DecayEffect(UserAction):
         return True
 
 
-class DecayDamageHandler(EventHandler):
+class DecayDamageHandler(THBEventHandler):
     interested = ['action_after', 'action_before']
     execute_after = ['SuwakoHatHandler']
 

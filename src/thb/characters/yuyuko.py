@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import DrawCards, DummyAction, FinalizeStage, GenericAction, LifeLost
 from thb.actions import MaxLifeChange, Pindian, PlayerDeath, TryRevive, UserAction, ttags
-from thb.cards.classes import Heal, Skill, t_None, t_OtherOne
+from thb.cards.base import Skill
+from thb.cards.classes import Heal, t_None, t_OtherOne
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -38,7 +39,7 @@ class GuidedDeathEffect(GenericAction):
         return True
 
 
-class GuidedDeathHandler(EventHandler):
+class GuidedDeathHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):
@@ -87,7 +88,7 @@ class SoulDrainEffect(GenericAction):
         return True
 
 
-class SoulDrainHandler(EventHandler):
+class SoulDrainHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):
@@ -112,7 +113,7 @@ class SoulDrainHandler(EventHandler):
         return act
 
 
-class PerfectCherryBlossomHandler(EventHandler):
+class PerfectCherryBlossomHandler(THBEventHandler):
     interested = ['action_apply']
 
     def handle(self, evt_type, act):

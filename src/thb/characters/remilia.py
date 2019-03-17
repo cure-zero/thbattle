@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import Sequence, Any
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import ActionShootdown, Damage, GenericAction, LaunchCard, PrepareStage, UserAction
-from thb.cards.classes import Attack, AttackCard, Card, DummyCard, Heal, InevitableAttack, Skill
-from thb.cards.classes import t_None
+from thb.cards.base import Card, DummyCard, Skill, t_None
+from thb.cards.classes import Attack, AttackCard, Heal, InevitableAttack
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -30,7 +31,7 @@ class SpearTheGungnirAction(GenericAction):
         return True
 
 
-class SpearTheGungnirHandler(EventHandler):
+class SpearTheGungnirHandler(THBEventHandler):
     interested = ['action_before']
     execute_before = ['ScarletRhapsodySwordHandler']
     execute_after = ['HakuroukenEffectHandler', 'HouraiJewelHandler']
@@ -67,7 +68,7 @@ class VampireKissAction(GenericAction):
         )
 
 
-class VampireKissHandler(EventHandler):
+class VampireKissHandler(THBEventHandler):
     interested = ['action_apply', 'calcdistance']
 
     def handle(self, evt_type, act):
@@ -99,7 +100,7 @@ class ScarletMistAttackLimit(ActionShootdown):
     pass
 
 
-class ScarletMistHandler(EventHandler):
+class ScarletMistHandler(THBEventHandler):
     interested = [
         'action_after',
         'action_apply',
@@ -150,7 +151,7 @@ class ScarletMistHandler(EventHandler):
             if not tgt.has_skill(ScarletMist): return act
             if not tgt.tags['scarlet_mist']: return act
             g = self.game
-            g.process_action(ScarletMistEndAction(None, None))
+            g.process_action(ScarletMistEndAction(tgt, tgt))
 
         return act
 
@@ -185,21 +186,21 @@ class ScarletMist(Skill):
     associated_action = ScarletMistAction
     skill_category = ['character', 'active', 'once', 'boss']
 
-    def check(self):
+    def check(self) -> bool:
         return not len(self.associated_cards)
 
-    def target(self, g, source, tl):
-        from thb.thbidentity import Identity
-        n = sum(i == Identity.TYPE.ACCOMPLICE for i in g.identities)
-        n -= sum(p.dead and p.identity.type == Identity.TYPE.ACCOMPLICE for p in g.players)
+    def target(self, g: Any, src: Character, tl: Sequence[Character]):
+        from thb.thbrole import THBRoleRole
+        n = sum(i == THBRoleRole.ACCOMPLICE for i in g.roles.values())
+        n -= sum(ch.dead and g.roles[ch.player] == THBRoleRole.ACCOMPLICE for ch in g.players)
 
         tl = [t for t in tl if not t.dead]
         try:
-            tl.remove(source)
+            tl.remove(src)
         except ValueError:
             pass
 
-        tl.insert(0, source)
+        tl.insert(0, src)
         return (tl[:n+1], bool(len(tl)))
 
 

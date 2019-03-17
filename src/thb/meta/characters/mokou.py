@@ -4,13 +4,12 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, passive_clickable, passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.mokou)
 
 
-@ui_meta
+@ui_meta(characters.mokou.Mokou)
 class Mokou:
     # Character
     name        = '藤原妹红'
@@ -23,7 +22,7 @@ class Mokou:
     miss_sound_effect = 'thb-cv-mokou_miss'
 
 
-@ui_meta
+@ui_meta(characters.mokou.Ashes)
 class Ashes:
     # Skill
     name = '浴火'
@@ -33,7 +32,7 @@ class Ashes:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.mokou.AshesAction)
 class AshesAction:
     def effect_string_before(self, act):
         return '|G【%s】|r：“不~可~饶~恕~！”' % (
@@ -44,14 +43,14 @@ class AshesAction:
         return 'thb-cv-mokou_ashes'
 
 
-@ui_meta
+@ui_meta(characters.mokou.AshesHandler)
 class AshesHandler:
     # choose_option meta
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【浴火】吗？'
 
 
-@ui_meta
+@ui_meta(characters.mokou.Reborn)
 class Reborn:
     # Skill
     name = '重生'
@@ -61,7 +60,7 @@ class Reborn:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.mokou.RebornAction)
 class RebornAction:
     def effect_string(self, act):
         return '|G【%s】|r使用了|G重生|r。' % (
@@ -72,7 +71,7 @@ class RebornAction:
         return 'thb-cv-mokou_reborn'
 
 
-@ui_meta
+@ui_meta(characters.mokou.RebornHandler)
 class RebornHandler:
     # choose_card meta
     def choose_card_text(self, g, act, cards):

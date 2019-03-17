@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import ActionStage, DrawCardStage, GenericAction, MigrateCardsTransaction
 from thb.actions import PlayerDeath, UserAction, migrate_cards
-from thb.cards.classes import CardList, Heal, Skill, t_None, t_OtherOne
+from thb.cards.base import CardList, Skill, t_None, t_OtherOne
+from thb.cards.classes import Heal
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -50,10 +51,9 @@ class Support(Skill):
 class SupportKOFAction(UserAction):
     def apply_action(self):
         tgt = self.target
-        g = self.game
         cl = tgt.support_cl = CardList(tgt, 'support')
 
-        with MigrateCardsTransaction(g, self) as trans:
+        with MigrateCardsTransaction(self) as trans:
             migrate_cards(tgt.cards, cl, unwrap=True, trans=trans)
             migrate_cards(tgt.showncards, cl, unwrap=True, trans=trans)
             migrate_cards(tgt.equips, cl, unwrap=True, trans=trans)
@@ -67,7 +67,7 @@ class SupportKOFReturningAction(GenericAction):
         return True
 
 
-class SupportKOFHandler(EventHandler):
+class SupportKOFHandler(THBEventHandler):
     interested = ['character_debut', 'action_apply']
     execute_after = ['DeathHandler']
 
@@ -110,7 +110,7 @@ class MoeDrawCard(DrawCardStage):
     pass
 
 
-class DaiyouseiHandler(EventHandler):
+class DaiyouseiHandler(THBEventHandler):
     interested = ['action_before']
 
     # Well, well, things are getting messy

@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
+from typing import Sequence, Tuple
 # -- stdlib --
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import ActionStage, Damage, DrawCards, DropCardStage, DropCards, GenericAction
-from thb.actions import LaunchCard, PlayerTurn, PostCardMigrationHandler, Reforge, UserAction, mark
-from thb.actions import marked, random_choose_card, user_choose_cards, user_choose_players
-from thb.cards.classes import AttackCard, DollControlCard, Heal, Skill, TreatAs, VirtualCard, t_None
+from thb.actions import LaunchCard, PlayerTurn, PostCardMigrationHandler, Reforge, UserAction
+from thb.actions import random_choose_card, user_choose_cards, user_choose_players
+from thb.cards.base import Skill, VirtualCard
+from thb.cards.definition import EquipmentCard
+from thb.cards.classes import AttackCard, DollControlCard, Heal, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -84,7 +87,7 @@ class LittleLegionHoldAction(UserAction):
         g = self.game
         g.process_action(DrawCards(src, 1))
 
-        turn = PlayerTurn.get_current(g, src)
+        turn = PlayerTurn.get_current(g)
         try:
             turn.pending_stages.remove(DropCardStage)
         except Exception:
@@ -94,26 +97,28 @@ class LittleLegionHoldAction(UserAction):
 
 
 class LittleLegionControlAction(UserAction):
-    def apply_action(self):
+    def apply_action(self) -> bool:
         g = self.game
         src = self.source
         pl = [p for p in g.players if not p.dead]
-        attacker, victim = user_choose_players(self, src, pl) or (None, None)
-        if attacker is None:
+        rst = user_choose_players(self, src, pl)
+
+        if not rst:
             return False
 
+        attacker, victim = rst
         self.target_list = attacker, victim
 
         g.process_action(LaunchCard(src, [attacker, victim], LittleLegionDollControlCard(attacker)))
         return True
 
-    def choose_player_target(self, tl):
+    def choose_player_target(self, tl: Sequence[Character]) -> Tuple[Sequence[Character], bool]:
         src = self.source
-        trimmed, rst = DollControlCard.target(None, src, tl)
+        trimmed, rst = DollControlCard.target(None, None, src, tl)
         return trimmed, rst and LaunchCard(src, trimmed, LittleLegionDollControlCard(src)).can_fire()
 
 
-class LittleLegionHandler(EventHandler):
+class LittleLegionHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):
@@ -128,7 +133,7 @@ class LittleLegionHandler(EventHandler):
 
             g = self.game
 
-            assert 'equipment' in c.category
+            assert isinstance(c, EquipmentCard)
             category = c.equipment_category
 
             g.process_action(Reforge(tgt, tgt, c))
@@ -215,7 +220,7 @@ class DollBlastHandlerCommon(object):
         g.process_action(DollBlastAction(src, tgt, cards))
 
 
-class DollBlastMigrationHandler(DollBlastHandlerCommon, EventHandler):
+class DollBlastMigrationHandler(DollBlastHandlerCommon, THBEventHandler):
     interested = ['post_card_migration']
     arbiter = PostCardMigrationHandler
 
@@ -245,7 +250,7 @@ class DollBlastMigrationHandler(DollBlastHandlerCommon, EventHandler):
         return True
 
 
-class DollBlastDropHandler(DollBlastHandlerCommon, EventHandler):
+class DollBlastDropHandler(DollBlastHandlerCommon, THBEventHandler):
     interested = ['action_before', 'action_after']
 
     def handle(self, evt_type, act):
@@ -261,9 +266,9 @@ class DollBlastDropHandler(DollBlastHandlerCommon, EventHandler):
             if not any(c.resides_in.type == 'equips' for c in act.cards):
                 return act
 
-            mark(act, 'doll_blast')
+            act._['doll_blast'] = True
 
-        elif evt_type == 'action_after' and isinstance(act, DropCards) and marked(act, 'doll_blast'):
+        elif evt_type == 'action_after' and isinstance(act, DropCards) and act._['doll_blast']:
             self.fire(act.target, act.source, act.cards)
 
         return act

@@ -44,6 +44,13 @@ class THBattle(Game):
 
     dispatcher_cls = THBEventDispatcher
 
+    def find_character(g, p: Player) -> Character:
+        for ch in g.players:
+            if ch.player is p:
+                return ch
+
+        raise Exception('Could not find character!')
+
 
 class THBAction(Action):
     source: Character

@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import ActionStageLaunchCard, Damage, DrawCardStage, GenericAction, PlayerDeath
 from thb.actions import PlayerTurn, register_eh, ttags
+from thb.cards.base import Skill
 from thb.cards.classes import ActionLimitExceeded, AttackCard, AttackCardVitalityHandler, BaseAttack
-from thb.cards.classes import BaseDuel, DuelCard, ElementalReactorSkill, Skill, UserAction, t_None
+from thb.cards.classes import BaseDuel, DuelCard, ElementalReactorSkill, UserAction, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -32,7 +33,7 @@ class CriticalStrikeLimit(ActionLimitExceeded):
     pass
 
 
-class CriticalStrikeHandler(EventHandler):
+class CriticalStrikeHandler(THBEventHandler):
     interested = ['action_apply', 'action_before', 'action_shootdown', 'action_stage_action']
     execute_after = [
         'AttackCardHandler',
@@ -138,7 +139,7 @@ class ExterminateAction(UserAction):
         return True
 
 
-class ExterminateHandler(EventHandler):
+class ExterminateHandler(THBEventHandler):
     interested = ['choose_target']
 
     def handle(self, evt_type, arg):
@@ -161,7 +162,7 @@ class ExterminateHandler(EventHandler):
 
 
 @register_eh
-class ExterminateFadeHandler(EventHandler):
+class ExterminateFadeHandler(THBEventHandler):
     interested = ['action_after', 'action_apply']
 
     def handle(self, evt_type, arg):

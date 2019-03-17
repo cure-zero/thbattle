@@ -4,10 +4,12 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from thb.actions import DropCards, EventHandler, LaunchCard, migrate_cards
-from thb.cards.classes import Card, Demolition, DemolitionCard, DummyCard, Skill, TreatAs
+from thb.actions import DropCards, LaunchCard, migrate_cards
+from thb.cards.base import Card, Skill, DummyCard
+from thb.cards.classes import Demolition, DemolitionCard, TreatAs
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 from utils.misc import classmix
 
 
@@ -36,7 +38,7 @@ class EnvyRecycle(DummyCard):
     distance = 1
 
 
-class EnvyHandler(EventHandler):
+class EnvyHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):

@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, DropCards, FatetellAction, FatetellMalleateHandler
 from thb.actions import MigrateCardsTransaction, PostCardMigrationHandler, UseCard, detach_cards
 from thb.actions import migrate_cards, user_choose_cards
-from thb.cards.classes import Skill, t_None
+from thb.cards.base import Skill
+from thb.cards.classes import t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -45,7 +46,7 @@ class MiracleMalletAction(UseCard):
         return True
 
 
-class MiracleMalletHandler(EventHandler):
+class MiracleMalletHandler(THBEventHandler):
     interested = ['fatetell']
     execute_before = ['YinYangOrbHandler']
     arbiter = FatetellMalleateHandler
@@ -91,7 +92,7 @@ class VengeOfTsukumogamiAction(FatetellAction):
         return True
 
 
-class VengeOfTsukumogamiHandler(EventHandler):
+class VengeOfTsukumogamiHandler(THBEventHandler):
     interested = ['post_card_migration']
     arbiter = PostCardMigrationHandler
 

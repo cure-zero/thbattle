@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, DrawCardStage, DrawCards, UserAction, detach_cards, migrate_cards
 from thb.actions import user_choose_players
-from thb.cards.classes import Card, Skill, VirtualCard, t_None, t_One, t_OtherOne
+from thb.cards.base import Card, Skill, VirtualCard
+from thb.cards.classes import t_None, t_OtherOne
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -82,7 +83,7 @@ class JollyDrawCard(DrawCards):
         self.amount = 1
 
 
-class JollyHandler(EventHandler):
+class JollyHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):

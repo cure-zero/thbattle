@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import List, Type
+from typing import List, Type, Dict, Any
 import logging
 import random
 
@@ -233,5 +233,5 @@ class Game(object):
     def current(self, u: Client) -> ServerGame:
         return u._[self]['game']
 
-    def params_of(self, g: ServerGame) -> dict:
+    def params_of(self, g: ServerGame) -> Dict[str, Any]:
         return g._[self]['params']

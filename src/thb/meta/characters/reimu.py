@@ -9,14 +9,13 @@ from thb import actions, characters
 from thb.cards.base import Card
 from thb.cards.classes import ExinwanCard, RejectCard
 from thb.meta.common import card_desc, limit1_skill_used, passive_clickable, passive_is_action_valid
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.reimu)
 
 
-@ui_meta
+@ui_meta(characters.reimu.Flight)
 class Flight:
     # Skill
     name = '飞行'
@@ -24,7 +23,7 @@ class Flight:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.reimu.SpiritualAttack)
 class SpiritualAttack:
     name = '灵击'
 
@@ -43,8 +42,7 @@ class SpiritualAttack:
 
         return False
 
-    def is_complete(self, g, cl):
-        skill = cl[0]
+    def is_complete(self, g, skill):
         me = g.me
         assert skill.is_card(characters.reimu.SpiritualAttack)
         acards = skill.associated_cards
@@ -60,7 +58,7 @@ class SpiritualAttack:
 
         return (True, '反正这条也看不到，偷个懒~~~')
 
-    def is_action_valid(self, g, cl, target_list):
+    def is_action_valid(self, g, cl, tl):
         return (False, '你不能主动使用灵击')
 
     def sound_effect(self, act):
@@ -70,7 +68,7 @@ class SpiritualAttack:
         return RejectCard.ui_meta.effect_string(act)
 
 
-@ui_meta
+@ui_meta(characters.reimu.TributeTarget)
 class TributeTarget:
     # Skill
     name = '纳奉'
@@ -80,7 +78,7 @@ class TributeTarget:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.reimu.Tribute)
 class Tribute:
     # Skill
     name = '赛钱'
@@ -141,7 +139,7 @@ class Tribute:
 
 # ----------------------
 
-@ui_meta
+@ui_meta(characters.reimu.ReimuExterminate)
 class ReimuExterminate:
     # Skill
     name = '退治'
@@ -155,7 +153,7 @@ class ReimuExterminate:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.reimu.ReimuExterminateAction)
 class ReimuExterminateAction:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -165,7 +163,7 @@ class ReimuExterminateAction:
             return (False, '退治：选择一张弹幕对%s使用（否则不发动）' % act.victim.ui_meta.name)
 
 
-@ui_meta
+@ui_meta(characters.reimu.ReimuExterminateLaunchCard)
 class ReimuExterminateLaunchCard:
     def effect_string_before(self, act):
         if act.cause == 'damage':
@@ -183,7 +181,7 @@ class ReimuExterminateLaunchCard:
             return 'thb-cv-reimu_exterminate_active'
 
 
-@ui_meta
+@ui_meta(characters.reimu.ReimuClear)
 class ReimuClear:
     # Skill
     name = '快晴'
@@ -193,7 +191,7 @@ class ReimuClear:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.reimu.ReimuClearAction)
 class ReimuClearAction:
     def effect_string_before(self, act):
         return '异变解决啦！|G【%s】|r和|G【%s】|r一起去吃饭了！' % (
@@ -205,13 +203,13 @@ class ReimuClearAction:
         return 'thb-cv-reimu_clear'
 
 
-@ui_meta
+@ui_meta(characters.reimu.ReimuClearHandler)
 class ReimuClearHandler:
     choose_option_prompt  = '要发动【快晴】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
-@ui_meta
+@ui_meta(characters.reimu.Reimu)
 class Reimu:
     # Character
     name        = '博丽灵梦'

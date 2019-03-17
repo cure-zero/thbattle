@@ -24,7 +24,7 @@ class ForcedKill(gevent.GreenletExit):
     pass
 
 
-def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
+def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction] = None):
     '''
     Type can be 'single', 'all' or 'any'
     '''
@@ -41,6 +41,7 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
             return user_input(players, inputlet, timeout, type, trans)
 
     g = trans.game
+    assert isinstance(g, Game)
     core = g.core
 
     t = {'single': '', 'all': '&', 'any': '|'}[type]
@@ -52,12 +53,14 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
 
     inputproc = None
 
+    me = Game.me(g)
+
     def input_func(st):
-        my = ilets[g.me]
+        my = ilets[me]
         with TimeLimitExceeded(timeout + 1, False):
             _, my = g.emit_event('user_input', (trans, my))
 
-        g.me.server.gwrite(tag + str(st), my.data())
+        core.server.gwrite(tag + str(st), my.data())
 
     results = {p: None for p in players}
 
@@ -65,15 +68,15 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
     synctags_r = {v: k for k, v in synctags.items()}
 
     try:
-        if g.me in players:  # me involved
-            g._my_user_input = (trans, ilets[g.me])
+        if me in players:  # me involved
+            g._my_user_input = (trans, ilets[me])
 
         for p in players:
             g.emit_event('user_input_start', (trans, ilets[p]))
 
-        if g.me in players:  # me involved
+        if me in players:  # me involved
             if not core.game.is_observe(g):
-                inputproc = gevent.spawn(input_func, synctags[g.me])
+                inputproc = gevent.spawn(input_func, synctags[me])
 
         orig_players = players[:]
         inputany_player = None
@@ -82,7 +85,7 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
         while players:
             # should be [tag, <Data for Inputlet.parse>]
             # tag likes 'RI?:ChooseOption:2345'
-            tag_, data = g.me.server.gexpect('R%s*' % tag)
+            tag_, data = me.server.gexpect('R%s*' % tag)
             st = int(tag_.split(':')[2])
             if st not in synctags_r:
                 log.warning('Unexpected sync tag: %d', st)
@@ -106,7 +109,7 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
 
             g.emit_event('user_input_finish', (trans, my, rst))
 
-            if p is g.me:
+            if p is me:
                 g._my_user_input = (None, None)
 
             players.remove(p)
@@ -212,9 +215,13 @@ class Game(game.base.Game):
 
     def is_dropped(g, p: Player):
         core = g.core
-        return core.game.is_dropped(g, p)
+        return core.room.is_dropped(g, p)
 
-    def _get_me(self):
+    @classmethod
+    def me(cls, g: game.base.Game) -> Theone:
+        core = g.core
+        core.game.users_of
+        # FIXME: not working
         me = self._me
         for i in self.players:
             if i is me:
@@ -224,8 +231,3 @@ class Game(game.base.Game):
                 return i
 
         raise AttributeError('WTF?!')
-
-    def _set_me(self, me):
-        self._me = me
-
-    me = property(_get_me, _set_me)

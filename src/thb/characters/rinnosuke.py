@@ -3,10 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import EventHandler
 from thb.actions import DrawCards, UserAction
-from thb.cards.classes import Heal, Skill, t_None, t_OtherOne
+from thb.cards.base import Skill
+from thb.cards.classes import Heal, t_None, t_OtherOne
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -54,7 +55,7 @@ class PsychopathDrawCards(DrawCards):
     pass
 
 
-class PsychopathHandler(EventHandler):
+class PsychopathHandler(THBEventHandler):
     interested = ['card_migration']
 
     def handle(self, evt_type, args):

@@ -6,13 +6,12 @@
 from thb import characters
 from thb.cards.base import Skill
 from thb.meta.common import card_desc, my_turn, passive_clickable, passive_is_action_valid
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 # -- code --
-ui_meta = ui_meta_for(characters.sp_aya)
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.WindWalk)
 class WindWalk:
     # Skill
     name = '疾走'
@@ -50,12 +49,12 @@ class WindWalk:
         return 'thb-cv-sp_aya_windwalk'
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.WindWalkLaunch)
 class WindWalkLaunch:
     pass
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.WindWalkAction)
 class WindWalkAction:
     idle_prompt = '疾走：请使用摸到的牌（否则结束出牌并跳过弃牌阶段）'
 
@@ -66,7 +65,7 @@ class WindWalkAction:
             return True, '不会显示……'
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.WindWalkSkipAction)
 class WindWalkSkipAction:
     def effect_string_before(self, act):
         return '|G【%s】|r放弃了追击。' % act.target.ui_meta.name
@@ -75,19 +74,19 @@ class WindWalkSkipAction:
         return 'thb-cv-sp_aya_windwalk_stop'
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.WindWalkTargetLimit)
 class WindWalkTargetLimit:
     # target_independent = True
     shootdown_message = '你只能对上一张使用的牌的目标角色（或之一）使用。'
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.DominanceHandler)
 class DominanceHandler:
     choose_option_prompt = '你要发动【风靡】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.DominanceAction)
 class DominanceAction:
     def effect_string_before(self, act):
         return '|G【%s】|r成功地了搞了个大新闻！' % (
@@ -98,7 +97,7 @@ class DominanceAction:
         return 'thb-cv-sp_aya_dominance'
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.Dominance)
 class Dominance:
     # Skill
     name = '风靡'
@@ -108,7 +107,7 @@ class Dominance:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.sp_aya.SpAya)
 class SpAya:
     # Character
     name        = 'SP射命丸文'

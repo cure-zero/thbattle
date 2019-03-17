@@ -4,13 +4,12 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, passive_clickable, passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.tewi)
 
 
-@ui_meta
+@ui_meta(characters.tewi.Luck)
 class Luck:
     # Skill
     name = '幸运'
@@ -20,7 +19,7 @@ class Luck:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.tewi.LuckDrawCards)
 class LuckDrawCards:
     def effect_string(self, act):
         return '|G【%s】|r觉得手上没有牌就输了，于是又摸了2张牌。' % (
@@ -31,7 +30,7 @@ class LuckDrawCards:
         return 'thb-cv-tewi_lucky'
 
 
-@ui_meta
+@ui_meta(characters.tewi.Tewi)
 class Tewi:
     # Character
     name        = '因幡帝'

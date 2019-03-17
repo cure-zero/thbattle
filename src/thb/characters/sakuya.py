@@ -3,10 +3,11 @@
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.base import EventHandler
 from thb.actions import ActionStage, PlayerTurn, PrepareStage
-from thb.cards.classes import AttackCard, Skill, TreatAs, t_None
+from thb.cards.base import Skill
+from thb.cards.classes import AttackCard, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -50,7 +51,7 @@ class LunaDial(Skill):
     target = t_None
 
 
-class LunaDialHandler(EventHandler):
+class LunaDialHandler(THBEventHandler):
     interested = ['action_after']
     execute_after = ['CiguateraHandler']
 
@@ -61,7 +62,7 @@ class LunaDialHandler(EventHandler):
                 return act
 
             g = self.game
-            PlayerTurn.get_current(g, src).pending_stages.insert(0, LunaDialActionStage)
+            PlayerTurn.get_current(g).pending_stages.insert(0, LunaDialActionStage)
 
         return act
 

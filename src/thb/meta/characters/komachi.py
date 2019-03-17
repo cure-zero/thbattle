@@ -6,14 +6,13 @@
 from thb import characters
 from thb.cards.base import Skill
 from thb.meta.common import limit1_skill_used, my_turn, passive_clickable, passive_is_action_valid
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.komachi)
 
 
-@ui_meta
+@ui_meta(characters.komachi.Komachi)
 class Komachi:
     # Character
     name        = '小野塚小町'
@@ -26,7 +25,7 @@ class Komachi:
     miss_sound_effect = 'thb-cv-komachi_miss'
 
 
-@ui_meta
+@ui_meta(characters.komachi.Riverside)
 class Riverside:
     # Skill
     name = '彼岸'
@@ -64,14 +63,14 @@ class Riverside:
         return 'thb-cv-komachi_riverside'
 
 
-@ui_meta
+@ui_meta(characters.komachi.RiversideAction)
 class RiversideAction:
     # choose_option meta
     choose_option_buttons = (('弃置一张牌', 'drop'), ('摸一张牌', 'draw'))
     choose_option_prompt = '彼岸：你希望发动的效果？'
 
 
-@ui_meta
+@ui_meta(characters.komachi.ReturningAwake)
 class ReturningAwake:
     def effect_string(self, act):
         return '|G【%s】|r：“啊啊不能再偷懒啦！要被四季大人说教啦！”' % (
@@ -82,7 +81,7 @@ class ReturningAwake:
         return 'thb-cv-komachi_awake'
 
 
-@ui_meta
+@ui_meta(characters.komachi.Returning)
 class Returning:
     # Skill
     name = '归航'
@@ -95,7 +94,7 @@ class Returning:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.komachi.FerryFee)
 class FerryFee:
     # Skill
     name = '渡钱'
@@ -105,7 +104,7 @@ class FerryFee:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.komachi.FerryFeeEffect)
 class FerryFeeEffect:
     def effect_string(self, act):
         return '|G【%s】|r收走了|G【%s】|r的一张牌作为|G渡钱|r。' % (
@@ -117,7 +116,7 @@ class FerryFeeEffect:
         return 'thb-cv-komachi_ferryfee'
 
 
-@ui_meta
+@ui_meta(characters.komachi.FerryFeeHandler)
 class FerryFeeHandler:
     # choose_option meta
     choose_option_buttons = (('发动', True), ('不发动', False))

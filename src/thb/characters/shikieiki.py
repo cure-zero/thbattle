@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, FatetellMalleateHandler, MigrateCardsTransaction, UseCard
 from thb.actions import UserAction, detach_cards, migrate_cards, user_choose_cards
-from thb.cards.classes import Skill, t_None
+from thb.cards.base import Skill
+from thb.cards.classes import t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -43,7 +44,7 @@ class TrialAction(UseCard):
         return True
 
 
-class TrialHandler(EventHandler):
+class TrialHandler(THBEventHandler):
     interested = ['fatetell']
     arbiter = FatetellMalleateHandler
     card_usage = 'use'
@@ -83,7 +84,7 @@ class MajestyAction(UserAction):
         return True
 
 
-class MajestyHandler(EventHandler):
+class MajestyHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):

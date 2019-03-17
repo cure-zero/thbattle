@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import AskForCard, Damage, DrawCards, LaunchCard, UserAction, migrate_cards
 from thb.actions import user_choose_players
-from thb.cards.classes import Attack, AttackCard, Skill, VirtualCard, t_None
+from thb.cards.base import Skill, VirtualCard
+from thb.cards.classes import Attack, AttackCard, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -29,7 +30,7 @@ class EchoAction(UserAction):
         return True
 
 
-class EchoHandler(EventHandler):
+class EchoHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):
@@ -103,7 +104,7 @@ class ResonanceAction(AskForCard):
         return ResonanceLaunchCard(self.target, [self.victim], cl[0], bypass_check=True).can_fire()
 
 
-class ResonanceHandler(EventHandler):
+class ResonanceHandler(THBEventHandler):
     interested = ['action_done']
 
     def handle(self, evt_type, act):

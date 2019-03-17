@@ -4,12 +4,14 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, DrawCards, LaunchCard, LifeLost, UserAction, migrate_cards
 from thb.actions import skill_check, skill_wrap, user_choose_cards
-from thb.cards.classes import Card, Heal, SealingArrayCard, Skill, TreatAs, VirtualCard, t_None
+from thb.cards.base import Card, Skill, VirtualCard, t_None
+from thb.cards.classes import Heal, SealingArrayCard, TreatAs
+from thb.cards.definition import BasicCard
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -58,7 +60,7 @@ class DilemmaHealAction(DrawCards):
         self.amount = amount
 
 
-class DilemmaHandler(EventHandler):
+class DilemmaHandler(THBEventHandler):
     interested = ['action_after']
     execute_after = ['DyingHandler']
 
@@ -93,7 +95,7 @@ class ImperishableNight(TreatAs, Skill):
         return self.game.current_player is not self.player
 
 
-class ImperishableNightHandler(EventHandler):
+class ImperishableNightHandler(THBEventHandler):
     interested = ['action_after']
     card_usage = 'launch'
 
@@ -105,7 +107,7 @@ class ImperishableNightHandler(EventHandler):
 
         card = act.card
         if not card: return act
-        if 'basic' not in card.category: return act
+        if not isinstance(card, BasicCard): return act
         if card.color != Card.RED: return act
 
         if card.is_card(VirtualCard):

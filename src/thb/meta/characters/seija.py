@@ -7,15 +7,14 @@ import random
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, limit1_skill_used, my_turn, passive_clickable
+from thb.meta.common import ui_meta, limit1_skill_used, my_turn, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.seija)
 
 
-@ui_meta
+@ui_meta(characters.seija.InciteAttack)
 class InciteAttack:
     name = '挑拨'
 
@@ -26,7 +25,7 @@ class InciteAttack:
         )
 
 
-@ui_meta
+@ui_meta(characters.seija.InciteFailAttack)
 class InciteFailAttack:
     name = '挑拨'
 
@@ -37,7 +36,7 @@ class InciteFailAttack:
         )
 
 
-@ui_meta
+@ui_meta(characters.seija.InciteSilentFailAction)
 class InciteSilentFailAction:
     def effect_string(self, act):
         return '|G【%s】|r低头看了一眼，诶，好像真的是蓝白条……' % (
@@ -45,7 +44,7 @@ class InciteSilentFailAction:
         )
 
 
-@ui_meta
+@ui_meta(characters.seija.Incite)
 class Incite:
     # Skill
     name = '挑拨'
@@ -92,7 +91,7 @@ class Incite:
         ])
 
 
-@ui_meta
+@ui_meta(characters.seija.InciteAction)
 class InciteAction:
     # choose_option
     choose_option_buttons = (('使用', True), ('不使用', False))
@@ -106,7 +105,7 @@ class InciteAction:
         return '你要对【%s】使用【弹幕】吗？' % act.source.ui_meta.name
 
 
-@ui_meta
+@ui_meta(characters.seija.Reversal)
 class Reversal:
     # Skill
     name = '逆转'
@@ -116,7 +115,7 @@ class Reversal:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.seija.ReversalDuel)
 class ReversalDuel:
     name = '逆转'
 
@@ -130,14 +129,14 @@ class ReversalDuel:
         return 'thb-cv-seija_reversal'
 
 
-@ui_meta
+@ui_meta(characters.seija.ReversalHandler)
 class ReversalHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【逆转】吗？'
 
 
-@ui_meta
+@ui_meta(characters.seija.Seija)
 class Seija:
     # Character
     name        = '鬼人正邪'

@@ -4,11 +4,12 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import FatetellAction, FatetellStage, migrate_cards
-from thb.cards.classes import Card, GrazeCard, Skill, TreatAs, t_None
+from thb.cards.base import Card, Skill
+from thb.cards.classes import GrazeCard, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -36,7 +37,7 @@ class TreasureHunt(Skill):
     target = t_None
 
 
-class TreasureHuntHandler(EventHandler):
+class TreasureHuntHandler(THBEventHandler):
     interested = ['action_before']
     execute_before = ['CiguateraHandler']
 

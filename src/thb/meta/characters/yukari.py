@@ -6,13 +6,12 @@ import random
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 # -- code --
-ui_meta = ui_meta_for(characters.yukari)
 
 
-@ui_meta
+@ui_meta(characters.yukari.SpiritingAway)
 class SpiritingAway:
     # Skill
     name = '神隐'
@@ -46,7 +45,7 @@ class SpiritingAway:
         return (True, '发动【神隐】')
 
 
-@ui_meta
+@ui_meta(characters.yukari.SpiritingAwayAction)
 class SpiritingAwayAction:
 
     def effect_string(self, act):
@@ -69,7 +68,7 @@ class SpiritingAwayAction:
         ])
 
 
-@ui_meta
+@ui_meta(characters.yukari.Yukari)
 class Yukari:
     # Character
     name        = '八云紫'

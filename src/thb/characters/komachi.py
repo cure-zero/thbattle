@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, DrawCards, DropCards, GenericAction, LaunchCard, MaxLifeChange
 from thb.actions import PlayerTurn, UserAction, migrate_cards, random_choose_card
-from thb.cards.classes import Skill, t_None, t_OtherOne
+from thb.cards.base import Skill
+from thb.cards.classes import t_None, t_OtherOne
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -42,7 +43,7 @@ class RiversideAction(UserAction):
         return not src.tags['riverside_tag'] >= src.tags['turn_count']
 
 
-class RiversideHandler(EventHandler):
+class RiversideHandler(THBEventHandler):
     interested = ['calcdistance']
 
     def handle(self, evt_type, arg):
@@ -82,7 +83,7 @@ class ReturningAwake(GenericAction):
         return True
 
 
-class ReturningHandler(EventHandler):
+class ReturningHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):
@@ -124,7 +125,7 @@ class FerryFeeEffect(UserAction):
         return True
 
 
-class FerryFeeHandler(EventHandler):
+class FerryFeeHandler(THBEventHandler):
     interested = ['action_after']
 
     def handle(self, evt_type, act):

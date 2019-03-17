@@ -5,14 +5,13 @@
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
+from thb.meta.common import card_desc, ui_meta, my_turn, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.cirno)
 
 
-@ui_meta
+@ui_meta(characters.cirno.PerfectFreeze)
 class PerfectFreeze:
     # Skill
     name = '完美冻结'
@@ -22,7 +21,7 @@ class PerfectFreeze:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.cirno.CirnoDropCards)
 class CirnoDropCards:
     def effect_string(self, act):
         return '|G【%s】|r弃置了|G【%s】|r的%s。' % (
@@ -32,7 +31,7 @@ class CirnoDropCards:
         )
 
 
-@ui_meta
+@ui_meta(characters.cirno.PerfectFreezeAction)
 class PerfectFreezeAction:
     def effect_string_before(self, act):
         return '|G【%s】|r被冻伤了。' % act.target.ui_meta.name
@@ -48,13 +47,13 @@ class PerfectFreezeAction:
             return (False, '完美冻结：选择一张牌弃置')
 
 
-@ui_meta
+@ui_meta(characters.cirno.PerfectFreezeHandler)
 class PerfectFreezeHandler:
     choose_option_prompt = '你要发动【完美冻结】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
-@ui_meta
+@ui_meta(characters.cirno.Bakadesu)
 class Bakadesu:
     # Skill
     name = '最强'
@@ -92,7 +91,7 @@ class Bakadesu:
         return 'thb-cv-cirno_bakadesu'
 
 
-@ui_meta
+@ui_meta(characters.cirno.BakadesuAction)
 class BakadesuAction:
     def choose_card_text(self, g, act, cl):
         if act.cond(cl):
@@ -101,7 +100,7 @@ class BakadesuAction:
             return (False, '请选择一张弹幕对【%s】使用' % act.source.ui_meta.name)
 
 
-@ui_meta
+@ui_meta(characters.cirno.Cirno)
 class Cirno:
     # Character
     name        = '琪露诺'

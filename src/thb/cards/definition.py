@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Type
+from typing import Any, List, Sequence, Tuple, Type
 
 # -- third party --
 # -- own --
 from thb.cards.base import Card, PhysicalCard, Skill, t_All, t_AllInclusive, t_None, t_One
 from thb.cards.base import t_OtherLessEqThanN, t_OtherOne, t_Self
+from thb.characters.base import Character
 
 
 # -- code --
@@ -166,10 +167,10 @@ class HarvestCard(SpellcardCard):
 class DollControlCard(SpellcardCard):
     associated_action = spellcard.DollControl
 
-    def t_DollControl(self, g, source, tl):
+    def t_DollControl(self: Any, g: Any, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
         if not tl: return ([], False)
-        tl = tl[:]
-        while tl and source is tl[0]:
+        tl = list(tl)
+        while tl and src is tl[0]:
             del tl[0]
         return (tl[:2], len(tl) >= 2)
 

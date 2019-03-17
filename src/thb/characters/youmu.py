@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import ActionStage, Damage, DropCards, UserAction, migrate_cards
 from thb.actions import random_choose_card
-from thb.cards.classes import Attack, BaseDuel, LaunchGraze, Skill, UseAttack, t_None
+from thb.cards.base import Skill
+from thb.cards.classes import Attack, BaseDuel, LaunchGraze, UseAttack, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseIndividualCardInputlet
+from thb.mode import THBEventHandler
 from utils.misc import classmix
 
 
@@ -63,7 +64,7 @@ class NitoryuuWearEquipmentAction(UserAction):
         return True
 
 
-class NitoryuuWearEquipmentHandler(EventHandler):
+class NitoryuuWearEquipmentHandler(THBEventHandler):
     interested = ['wear_equipment']
 
     def handle(self, evt_type, arg):
@@ -78,7 +79,7 @@ class NitoryuuWearEquipmentHandler(EventHandler):
         return we, tgt, c, 'handled'
 
 
-class YoumuHandler(EventHandler):
+class YoumuHandler(THBEventHandler):
     interested = ['action_apply', 'action_before', 'attack_aftergraze', 'card_migration']
     execute_before = ['ScarletRhapsodySwordHandler', 'LaevateinHandler', 'HouraiJewelHandler']
     execute_after = ['VitalityHandler']
@@ -88,7 +89,6 @@ class YoumuHandler(EventHandler):
             if isinstance(act, Attack):
                 if not act.source.has_skill(Mijincihangzhan): return act
                 act.__class__ = classmix(MijincihangzhanAttack, act.__class__)
-                act.graze_count = 0
             elif isinstance(act, BaseDuel):
                 if not isinstance(act, MijincihangzhanDuelMixin):
                     act.__class__ = classmix(MijincihangzhanDuelMixin, act.__class__)

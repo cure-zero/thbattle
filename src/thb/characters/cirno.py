@@ -4,12 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import Damage, DropCards, GenericAction, LaunchCard, LifeLost, UserAction
 from thb.actions import random_choose_card, ttags, user_choose_cards
-from thb.cards.classes import AttackCard, DuelCard, Skill, VirtualCard, t_None, t_OtherOne
+from thb.cards.base import Skill, VirtualCard
+from thb.cards.classes import AttackCard, DuelCard, t_None, t_OtherOne
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -121,7 +122,7 @@ class PerfectFreezeAction(UserAction):
         return CirnoDropCards(self.source, self.target, cl).can_fire()
 
 
-class PerfectFreezeHandler(EventHandler):
+class PerfectFreezeHandler(THBEventHandler):
     interested = ['action_before']
 
     execute_after = [

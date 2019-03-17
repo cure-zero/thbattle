@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import List, Type
+from typing import List, Type, ClassVar
 
 # -- third party --
 # -- own --
-from game.base import EventHandler
-from thb.cards.classes import Skill, t_None
+from thb.cards.base import Skill, t_None
 from thb.characters.base import Character, register_character_to
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -21,5 +21,5 @@ class AkariSkill(Skill):
 class Akari(Character):
     # dummy player for hidden choices
     skills = [AkariSkill]
-    eventhandlers: List[Type[EventHandler]] = []
+    eventhandlers: ClassVar[List[Type[THBEventHandler]]] = []
     maxlife = 0

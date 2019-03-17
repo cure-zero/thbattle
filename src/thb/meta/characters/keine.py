@@ -8,15 +8,14 @@ import random
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.meta.common import card_desc, ui_meta_for, my_turn, passive_clickable
+from thb.meta.common import card_desc, ui_meta, my_turn, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.keine)
 
 
-@ui_meta
+@ui_meta(characters.keine.Devour)
 class Devour:
     # Skill
     name = '噬史'
@@ -30,7 +29,7 @@ class Devour:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.keine.DevourAction)
 class DevourAction:
     def effect_string_before(self, act):
         return '|G【%s】|r默默地拿出了一张%s，把|G【%s】|r的%s记在了卡牌背面。' % (
@@ -53,7 +52,7 @@ class DevourAction:
         # ])
 
 
-@ui_meta
+@ui_meta(characters.keine.DevourEffect)
 class DevourEffect:
     def effect_string_before(self, act):
         return '|G【%s】|r吞噬掉了刚才发生在|G【%s】|r身上的历史。' % (
@@ -62,7 +61,7 @@ class DevourEffect:
         )
 
 
-@ui_meta
+@ui_meta(characters.keine.DevourHandler)
 class DevourHandler:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -72,7 +71,7 @@ class DevourHandler:
             return (False, '请弃置一张牌基本牌或装备牌发动「噬史」（否则不发动）')
 
 
-@ui_meta
+@ui_meta(characters.keine.Teach)
 class Teach:
     # Skill
     name = '授业'
@@ -108,7 +107,7 @@ class Teach:
         ])
 
 
-@ui_meta
+@ui_meta(characters.keine.TeachAction)
 class TeachAction:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -124,14 +123,14 @@ class TeachAction:
         return (True, '传道授业！')
 
 
-@ui_meta
+@ui_meta(characters.keine.TeachTargetEffect)
 class TeachTargetEffect:
     # choose_option
     choose_option_buttons = (('重铸一张牌', 'reforge'), ('使用卡牌', 'action'))
     choose_option_prompt = '授业：请选择你的行动'
 
 
-@ui_meta
+@ui_meta(characters.keine.TeachTargetReforgeAction)
 class TeachTargetReforgeAction:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -147,7 +146,7 @@ class TeachTargetReforgeAction:
         return (True, '传道授业！')
 
 
-@ui_meta
+@ui_meta(characters.keine.KeineGuard)
 class KeineGuard:
     # Skill
     name = '守护'
@@ -162,7 +161,7 @@ class KeineGuard:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.keine.KeineGuardAwake)
 class KeineGuardAwake:
     def effect_string(self, act):
         return '直到满月，人们才回想起被|G【%s】|r的头锤 |BCAVED|r 的恐惧！！！！' % (
@@ -175,7 +174,7 @@ class KeineGuardAwake:
         ])
 
 
-@ui_meta
+@ui_meta(characters.keine.Keine)
 class Keine:
     # Character
     name        = '上白泽慧音'

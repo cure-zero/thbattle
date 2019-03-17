@@ -4,14 +4,14 @@
 # -- third party --
 # -- own --
 from thb import characters
-from thb.meta.common import ui_meta_for, limit1_skill_used, my_turn
+from thb.meta.common import ui_meta, limit1_skill_used, my_turn
+from thb import actions
 from utils.misc import BatchList
 
 # -- code --
-ui_meta = ui_meta_for(characters.mamizou)
 
 
-@ui_meta
+@ui_meta(characters.mamizou.Morphing)
 class Morphing:
     # Skill
     name = '变化'
@@ -46,10 +46,11 @@ class Morphing:
 
         return skill.treat_as.ui_meta.is_action_valid(g, [skill], target_list)
 
-    def effect_string(self, act):
+    def effect_string(self, act: actions.LaunchCard):
         # for LaunchCard.ui_meta.effect_string
         source = act.source
         card = act.card
+        assert isinstance(card, characters.mamizou.Morphing)
         tl = BatchList(act.target_list)
         cl = BatchList(card.associated_cards)
         s = '|G【%s】|r发动了|G变化|r技能，将|G%s|r当作|G%s|r对|G【%s】|r使用。' % (
@@ -65,7 +66,7 @@ class Morphing:
         return 'thb-cv-mamizou_morph'
 
 
-@ui_meta
+@ui_meta(characters.mamizou.Mamizou)
 class Mamizou:
     # Character
     name        = '二岩猯藏'

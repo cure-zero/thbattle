@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Dict, Optional, Type, Union
+from typing import Dict, Optional, Type, Union, Any
 
 # -- third party --
 # -- own --
@@ -10,7 +10,7 @@ from thb.characters.base import Character
 
 
 # -- code --
-UI_META: Dict[type, UIMeta] = {}
+UI_META: Dict[type, Any] = {}
 
 
 def G():
@@ -33,7 +33,7 @@ class UIMetaAccessor(object):
         raise AttributeError('%s.%s' % (self.cls.__name__, name))
 
 
-def ui_meta(for_cls: Type[GameObject]):
+def ui_meta(for_cls: type):
     def decorate(cls: type):
         name = cls.__name__
         if name in UI_META:

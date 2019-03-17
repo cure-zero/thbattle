@@ -4,12 +4,14 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import ActionShootdown, EventHandler
+from game.base import ActionShootdown
 from thb.actions import Damage, DrawCards, DropCards, FatetellStage, GenericAction, LaunchCard
 from thb.actions import LifeLost, ShowCards, UseCard, UserAction, user_choose_cards
-from thb.cards.classes import Card, Skill, VirtualCard, Wine, t_None
+from thb.cards.base import Card, Skill, VirtualCard
+from thb.cards.classes import Wine, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -36,7 +38,7 @@ class CiguateraAction(UserAction):
         return True
 
 
-class CiguateraHandler(EventHandler):
+class CiguateraHandler(THBEventHandler):
     interested = ['action_after', 'action_before']
     card_usage = 'drop'
 
@@ -102,7 +104,7 @@ class MelancholyAction(GenericAction):
         return True
 
 
-class MelancholyHandler(EventHandler):
+class MelancholyHandler(THBEventHandler):
     interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):

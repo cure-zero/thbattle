@@ -4,14 +4,11 @@
 # -- third party --
 # -- own --
 from thb import thbdebug
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(thbdebug)
-
-
-@ui_meta
+@ui_meta(thbdebug.DebugUseCard)
 class DebugUseCard:
     # Skill
     name = '转化'
@@ -43,11 +40,11 @@ class DebugUseCard:
 
         return skill.treat_as.ui_meta.is_action_valid(g, [skill], tl)
 
-    def is_complete(self, g, cl):
+    def is_complete(self, g, c):
         return True, 'XXX'
 
 
-@ui_meta
+@ui_meta(thbdebug.DebugDecMaxLife)
 class DebugDecMaxLife:
     # Skill
     name = '减上限'

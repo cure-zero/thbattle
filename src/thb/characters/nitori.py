@@ -4,11 +4,13 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from thb.actions import ActionLimitExceeded, ActionStageLaunchCard, DrawCards, EventHandler, Reforge
-from thb.actions import UserAction, random_choose_card, ttags
-from thb.cards.classes import AttackCard, Card, Skill, TreatAs, t_OtherOne
+from thb.actions import ActionLimitExceeded, ActionStageLaunchCard, DrawCards, Reforge, UserAction
+from thb.actions import random_choose_card, ttags
+from thb.cards.base import PhysicalCard, Skill, TreatAs, t_OtherOne
+from thb.cards.definition import AttackCard
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -65,7 +67,7 @@ class Craftsman(TreatAs, Skill):
         return [c() for c in PhysicalCard.classes.values() if 'basic' in c.category]
 
 
-class CraftsmanHandler(EventHandler):
+class CraftsmanHandler(THBEventHandler):
     interested = ['action_after', 'action_shootdown']
 
     def handle(self, evt_type, act):

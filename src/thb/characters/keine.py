@@ -4,13 +4,15 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler, GameException
+from game.base import GameException
 from thb.actions import ActionStage, ActiveDropCards, BaseActionStage, DrawCards, DropCards
 from thb.actions import GenericAction, LaunchCard, LifeLost, MaxLifeChange, PrepareStage, Reforge
 from thb.actions import UserAction, migrate_cards, random_choose_card, ttags, user_choose_cards
-from thb.cards.classes import Card, Heal, PhysicalCard, Skill, VirtualCard, t_None, t_OtherOne
+from thb.cards.base import Card, Skill, VirtualCard
+from thb.cards.classes import Heal, PhysicalCard, t_None, t_OtherOne
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -117,7 +119,7 @@ class KeineGuardAwake(UserAction):
         return True
 
 
-class KeineGuardHandler(EventHandler):
+class KeineGuardHandler(THBEventHandler):
     interested = ['action_before']
 
     def handle(self, evt_type, act):
@@ -191,7 +193,7 @@ class DevourEffect(GenericAction):
         return True
 
 
-class DevourHandler(EventHandler):
+class DevourHandler(THBEventHandler):
     interested = ['action_before', 'action_after']
 
     def handle(self, evt_type, act):

@@ -4,12 +4,12 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
-from thb.actions import Damage, DropCards, FatetellAction, LaunchCard, mark, marked
-from thb.cards.classes import AttackCard, BaseAttack, Card, InevitableAttack, RedUFOSkill, Skill
-from thb.cards.classes import TreatAs, VirtualCard, t_None
+from thb.actions import Damage, DropCards, FatetellAction, LaunchCard
+from thb.cards.base import Card, Skill, VirtualCard
+from thb.cards.classes import AttackCard, BaseAttack, InevitableAttack, RedUFOSkill, TreatAs, t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet, ChoosePeerCardInputlet
+from thb.mode import THBEventHandler
 from utils.misc import classmix
 
 
@@ -29,7 +29,7 @@ class AssaultAttack(TreatAs, VirtualCard):
     treat_as = AttackCard
 
 
-class AssaultKOFHandler(EventHandler):
+class AssaultKOFHandler(THBEventHandler):
     interested = ['character_debut']
 
     def handle(self, evt_type, arg):
@@ -68,7 +68,7 @@ class FreakingPowerAction(FatetellAction):
         if ft.succeeded:
             act.__class__ = classmix(InevitableAttack, act.__class__)
         else:
-            mark(act, 'freaking_power')
+            act._['freaking_power'] = True
 
         return True
 
@@ -77,11 +77,11 @@ class FreakingPowerAction(FatetellAction):
         return c.color == Card.RED
 
 
-class FreakingPowerHandler(EventHandler):
+class FreakingPowerHandler(THBEventHandler):
     interested = ['action_after', 'action_before']
 
     def handle(self, evt_type, act):
-        if evt_type == 'action_before' and isinstance(act, BaseAttack) and not marked(act, 'freaking_power'):
+        if evt_type == 'action_before' and isinstance(act, BaseAttack) and not act._['freaking_power']:
             src = act.source
             if not src.has_skill(FreakingPower): return act
             if not user_input([src], ChooseOptionInputlet(self, (False, True))):
@@ -93,7 +93,7 @@ class FreakingPowerHandler(EventHandler):
             g = self.game
 
             pact = g.action_stack[-1]
-            if not marked(pact, 'freaking_power'):
+            if not pact._['freaking_power']:
                 return act
 
             src, tgt = pact.source, act.target

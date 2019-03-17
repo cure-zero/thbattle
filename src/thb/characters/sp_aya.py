@@ -4,12 +4,14 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import ActionShootdown, EventHandler, InputTransaction
+from game.base import ActionShootdown, InputTransaction
 from thb.actions import ActionStage, ActionStageLaunchCard, DrawCards, DropCardStage, FinalizeStage
 from thb.actions import GenericAction, LaunchCard, PlayerTurn, ShowCards, UserAction, ask_for_action
-from thb.cards.classes import Card, PhysicalCard, Skill, VirtualCard, t_None, t_Self
+from thb.cards.base import Card, Skill, VirtualCard
+from thb.cards.classes import PhysicalCard, t_None, t_Self
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -18,11 +20,10 @@ class WindWalkLaunch(ActionStageLaunchCard):
 
 
 class WindWalkSkipAction(GenericAction):
-    def apply_action(self):
-        tgt = self.target
+    def apply_action(self) -> bool:
         g = self.game
         ActionStage.force_break(g)
-        turn = PlayerTurn.get_current(g, tgt)
+        turn = PlayerTurn.get_current(g)
         try:
             turn.pending_stages.remove(DropCardStage)
             turn.pending_stages.remove(FinalizeStage)
@@ -55,6 +56,9 @@ class WindWalkAction(UserAction):
                 g.process_action(WindWalkSkipAction(tgt, tgt))
                 break
 
+            assert p
+            assert rst
+
             cl, tl = rst
             g.players.reveal(cl)
             c, = cl
@@ -81,7 +85,7 @@ class WindWalkTargetLimit(ActionShootdown):
     pass
 
 
-class WindWalkHandler(EventHandler):
+class WindWalkHandler(THBEventHandler):
     interested = ['action_apply', 'action_shootdown']
 
     def handle(self, evt_type, act):
@@ -145,7 +149,7 @@ class DominanceAction(PlayerTurn):
     pass
 
 
-class DominanceHandler(EventHandler):
+class DominanceHandler(THBEventHandler):
     interested = ['action_after', 'action_apply']
 
     def handle(self, evt_type, act):

@@ -6,10 +6,9 @@ import time
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, passive_clickable, passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.rinnosuke)
 
 
 class Netoru:
@@ -58,7 +57,7 @@ class Netoru:
         return 'thb-cv-rinnosuke_nitoru'
 
 
-@ui_meta
+@ui_meta(characters.rinnosuke.Psychopath)
 class Psychopath:
     # Skill
     name = '变态'
@@ -68,7 +67,7 @@ class Psychopath:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.rinnosuke.PsychopathDrawCards)
 class PsychopathDrawCards:
     def effect_string(self, act):
         return (
@@ -86,7 +85,7 @@ class PsychopathDrawCards:
             return 'thb-cv-rinnosuke_psycopath'
 
 
-@ui_meta
+@ui_meta(characters.rinnosuke.Rinnosuke)
 class Rinnosuke:
     # Character
     name        = '森近霖之助'

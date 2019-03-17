@@ -83,12 +83,26 @@ class Core(object):
         self.events = Events()
 
         disables = self.options.disables
-        self.server   = parts.server.Server(self) if 'server' not in disables else None
-        self.auth     = parts.auth.Auth(self) if 'auth' not in disables else None
-        self.game     = parts.game.Game(self) if 'game' not in disables else None
-        self.replay   = parts.replay.Replay(self) if 'replay' not in disables else None
-        self.request  = parts.request.Request(self) if 'request' not in disables else None
-        self.update   = parts.update.Update(self) if 'update' not in disables else None
-        self.warpgate = parts.warpgate.Warpgate(self) if 'warpgate' not in disables else None
+
+        if 'server' not in disables:
+            self.server = parts.server.Server(self)
+
+        if 'auth' not in disables:
+            self.auth = parts.auth.Auth(self)
+
+        if 'game' not in disables:
+            self.game = parts.game.Game(self)
+
+        if 'replay' not in disables:
+            self.replay = parts.replay.Replay(self)
+
+        if 'request' not in disables:
+            self.request = parts.request.Request(self)
+
+        if 'update' not in disables:
+            self.update = parts.update.Update(self)
+
+        if 'warpgate' not in disables:
+            self.warpgate = parts.warpgate.Warpgate(self)
 
         self.events.core_initialized.emit(self)

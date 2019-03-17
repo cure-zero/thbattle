@@ -4,14 +4,11 @@
 # -- third party --
 # -- own --
 from thb import thb2v2
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(thb2v2)
-
-
-@ui_meta
+@ui_meta(thb2v2.THBattle2v2)
 class THBattle2v2:
     name = '2v2模式'
     logo = 'thb-modelogo-2v2'
@@ -44,10 +41,14 @@ class THBattle2v2:
         }
     }
 
-    roles = thb2v2.THB2v2Role
+    roles_disp = {
+        thb2v2.THB2v2Role.HIDDEN: '？',
+        thb2v2.THB2v2Role.HAKUREI: '博丽',
+        thb2v2.THB2v2Role.MORIYA: '守矢',
+    }
 
 
-@ui_meta
+@ui_meta(thb2v2.HeritageHandler)
 class HeritageHandler:
     # choose_option
     choose_option_buttons = (('获取队友的所有牌', 'inherit'), ('摸两张牌', 'draw'))

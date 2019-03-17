@@ -5,14 +5,13 @@
 # -- own --
 from thb import actions, characters
 from thb.cards.classes import AttackCard, GrazeCard
-from thb.meta.common import build_handcard, passive_clickable, passive_is_action_valid, ui_meta_for
+from thb.meta.common import build_handcard, passive_clickable, passive_is_action_valid, ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.meirin)
 
 
-@ui_meta
+@ui_meta(characters.meirin.RiverBehind)
 class RiverBehind:
     # Skill
     name = '背水'
@@ -25,7 +24,7 @@ class RiverBehind:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.meirin.Taichi)
 class Taichi:
     # Skill
     name = '太极'
@@ -48,8 +47,7 @@ class Taichi:
 
         return False
 
-    def is_complete(self, g, cl):
-        skill = cl[0]
+    def is_complete(self, g, skill):
         cl = skill.associated_cards
         from thb.cards.classes import AttackCard, GrazeCard
         if len(cl) != 1 or not (cl[0].is_card(AttackCard) or cl[0].is_card(GrazeCard)):
@@ -77,7 +75,7 @@ class Taichi:
         return 'thb-cv-meirin_taichi'
 
 
-@ui_meta
+@ui_meta(characters.meirin.LoongPunch)
 class LoongPunch:
     # Skill
     name = '龙拳'
@@ -87,14 +85,14 @@ class LoongPunch:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.meirin.LoongPunchHandler)
 class LoongPunchHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【龙拳】吗？'
 
 
-@ui_meta
+@ui_meta(characters.meirin.LoongPunchAction)
 class LoongPunchAction:
     def effect_string_before(self, act):
         if act.type == 'attack':
@@ -113,7 +111,7 @@ class LoongPunchAction:
         return 'thb-cv-meirin_loongpunch'
 
 
-@ui_meta
+@ui_meta(characters.meirin.RiverBehindAwake)
 class RiverBehindAwake:
     def effect_string_before(self, act):
         return '|G【%s】|r发现自己处境危险，于是强行催动内力护住身体，顺便参悟了太极拳。' % (
@@ -124,7 +122,7 @@ class RiverBehindAwake:
         return 'thb-cv-meirin_rb'
 
 
-@ui_meta
+@ui_meta(characters.meirin.Meirin)
 class Meirin:
     # Character
     name        = '红美铃'

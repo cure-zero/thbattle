@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from abc import abstractmethod, ABCMeta
 from collections import defaultdict
 from random import Random
 from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, Sequence
@@ -67,11 +66,11 @@ class GameObject(object, metaclass=GameObjectMeta):
     pass
 
 
-class TimeLimitExceeded(Timeout, metaclass=GameObjectMeta):
+class TimeLimitExceeded(Timeout, GameObject):
     pass
 
 
-class GameException(Exception, metaclass=GameObjectMeta):
+class GameException(Exception, GameObject):
     def __init__(self, msg=None, **kwargs):
         Exception.__init__(self, msg)
         self.__dict__.update(kwargs)
@@ -251,19 +250,15 @@ class Game(GameObject, GameViralContext):
     def pause(self, t: float) -> None:
         pass
 
-    @abstractmethod
     def get_synctag(self) -> int:
         raise GameError('Abstract')
 
-    @abstractmethod
     def is_dropped(self, p: Player) -> bool:
         raise GameError('Abstract')
 
-    @abstractmethod
     def name_of(self, p: Player) -> str:
         raise GameError('Abstract')
 
-    @abstractmethod
     def can_leave(self, p: Player) -> bool:
         raise GameError('Abstract')
 
@@ -297,7 +292,7 @@ class Game(GameObject, GameViralContext):
     '''
 
 
-class ActionShootdown(BaseException, metaclass=GameObjectMeta):
+class ActionShootdown(BaseException, GameObject):
     def __bool__(self):
         return False
 
@@ -428,7 +423,7 @@ class EventDispatcher(GameObject):
         except ValueError:
             pass
 
-    def populate_handlers(self) -> List[EventHandler]:
+    def populate_handlers(self) -> Sequence[EventHandler]:
         raise Exception('Override this!')
 
     def emit(self, evt_type: str, data: Any):
@@ -741,7 +736,7 @@ class GameData(object):
     def is_live(self) -> bool:
         return self._recv_serial > self._live_serial
 
-    def gexpect(self, tag: str, blocking: bool=True):
+    def gexpect(self, tag: str, blocking: bool = True):
         if self._dead:
             raise EndpointDied
 

@@ -6,14 +6,13 @@
 from thb import characters
 from thb.cards.classes import AttackCard
 from thb.meta.common import build_handcard, my_turn, passive_clickable, passive_is_action_valid
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.yuuka)
 
 
-@ui_meta
+@ui_meta(characters.yuuka.ReversedScales)
 class ReversedScales:
     # Skill
     name = '逆鳞'
@@ -35,8 +34,7 @@ class ReversedScales:
 
         return False
 
-    def is_complete(self, g, cl):
-        skill = cl[0]
+    def is_complete(self, g, skill):
         acards = skill.associated_cards
         if len(acards) != 1:
             return (False, '请选择1张牌！')
@@ -62,7 +60,7 @@ class ReversedScales:
         return 'thb-cv-yuuka_flowerqueen'
 
 
-@ui_meta
+@ui_meta(characters.yuuka.Sadist)
 class Sadist:
     # Skill
     name = '施虐'
@@ -72,7 +70,7 @@ class Sadist:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.yuuka.SadistKOF)
 class SadistKOF:
     # Skill
     name = '施虐'
@@ -82,7 +80,7 @@ class SadistKOF:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.yuuka.ReversedScalesAction)
 class ReversedScalesAction:
     def effect_string_apply(self, act):
         return (
@@ -95,7 +93,7 @@ class ReversedScalesAction:
         return 'thb-cv-yuuka_rs'
 
 
-@ui_meta
+@ui_meta(characters.yuuka.SadistAction)
 class SadistAction:
     def effect_string_apply(self, act):
         return (
@@ -109,7 +107,7 @@ class SadistAction:
         return 'thb-cv-yuuka_sadist'
 
 
-@ui_meta
+@ui_meta(characters.yuuka.SadistKOFDamageAction)
 class SadistKOFDamageAction:
     def effect_string_apply(self, act):
         return (
@@ -123,7 +121,7 @@ class SadistKOFDamageAction:
         return 'thb-cv-yuuka_sadist'
 
 
-@ui_meta
+@ui_meta(characters.yuuka.SadistHandler)
 class SadistHandler:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -139,14 +137,14 @@ class SadistHandler:
         return (True, '发动【施虐】')
 
 
-@ui_meta
+@ui_meta(characters.yuuka.ReversedScalesHandler)
 class ReversedScalesHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【逆鳞】吗？'
 
 
-@ui_meta
+@ui_meta(characters.yuuka.Yuuka)
 class Yuuka:
     # Character
     name        = '风见幽香'
@@ -159,7 +157,7 @@ class Yuuka:
     miss_sound_effect = 'thb-cv-yuuka_miss'
 
 
-@ui_meta
+@ui_meta(characters.yuuka.YuukaKOF)
 class YuukaKOF:
     # Character
     name        = '风见幽香'

@@ -4,18 +4,17 @@
 # -- third party --
 # -- own --
 from thb import actions, characters
-from thb.meta.common import ui_meta_for, passive_clickable, passive_is_action_valid
+from thb.meta.common import ui_meta, passive_clickable, passive_is_action_valid
 
 # -- code --
-ui_meta = ui_meta_for(characters.suika)
 
 
-@ui_meta
+@ui_meta(characters.suika.HeavyDrinkerWine)
 class HeavyDrinkerWine:
     name = '酒'
 
 
-@ui_meta
+@ui_meta(characters.suika.HeavyDrinker)
 class HeavyDrinker:
     # Skill
     name = '酒豪'
@@ -56,7 +55,7 @@ class HeavyDrinker:
         )
 
 
-@ui_meta
+@ui_meta(characters.suika.DrunkenDream)
 class DrunkenDream:
     # Skill
     name = '醉梦'
@@ -66,14 +65,14 @@ class DrunkenDream:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.suika.DrunkenDreamDrawCards)
 class DrunkenDreamDrawCards:
 
     def sound_effect(self, act):
         return 'thb-cv-suika_drunkendream'
 
 
-@ui_meta
+@ui_meta(characters.suika.Suika)
 class Suika:
     # Character
     name        = '伊吹萃香'

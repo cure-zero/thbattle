@@ -7,14 +7,11 @@ from thb import thbrole
 from thb.actions import ttags
 from thb.cards.classes import AttackCard
 from thb.meta.common import card_desc, my_turn, passive_clickable, passive_is_action_valid
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(thbrole)
-
-
-@ui_meta
+@ui_meta(thbrole.THBattleRole)
 class THBattleRole:
     name = '8人身份场'
     logo = 'thb-modelogo-8id'
@@ -59,10 +56,16 @@ class THBattleRole:
         },
     }
 
-    roles = thbrole.THBRoleRole
+    roles_disp = {
+        thbrole.THBRoleRole.HIDDEN:     '？',
+        thbrole.THBRoleRole.BOSS:       'BOSS',
+        thbrole.THBRoleRole.ACCOMPLICE: '道中',
+        thbrole.THBRoleRole.ATTACKER:   '城管',
+        thbrole.THBRoleRole.CURTAIN:    '黑幕',
+    }
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedAttack)
 class AssistedAttack:
     # Skill
     name = '同仇'
@@ -96,7 +99,7 @@ class AssistedAttack:
         )
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedUseAction)
 class AssistedUseAction:
     def choose_option_prompt(self, act):
         return '你要帮BOSS出【%s】吗？' % (
@@ -106,7 +109,7 @@ class AssistedUseAction:
     choose_option_buttons = (('帮BOSS', True), ('不关我事', False))
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedAttackAction)
 class AssistedAttackAction:
     def choose_card_text(self, g, act, cards):
         if act.cond(cards):
@@ -115,7 +118,7 @@ class AssistedAttackAction:
             return (False, '同仇：请选择一张弹幕（对%s出）' % act.target.ui_meta.name)
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedAttackCard)
 class AssistedAttackCard:
     def effect_string(self, act):
         s = act.card
@@ -126,13 +129,13 @@ class AssistedAttackCard:
         )
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedAttackHandler)
 class AssistedAttackHandler:
     choose_option_prompt = '你要发动【同仇】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedGraze)
 class AssistedGraze:
     # Skill
     name = '协力'
@@ -141,13 +144,13 @@ class AssistedGraze:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedGrazeHandler)
 class AssistedGrazeHandler:
     choose_option_prompt = '你要发动【协力】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedHealAction)
 class AssistedHealAction:
     def effect_string_before(self, act):
         return '|G【%s】|r发动了|G牺牲|r' % (
@@ -155,13 +158,13 @@ class AssistedHealAction:
         )
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedHealHandler)
 class AssistedHealHandler:
     choose_option_prompt = '你要发动【牺牲】吗？'
     choose_option_buttons = (('发动', True), ('不发动', False))
 
 
-@ui_meta
+@ui_meta(thbrole.AssistedHeal)
 class AssistedHeal:
     # Skill
     name = '牺牲'
@@ -170,7 +173,7 @@ class AssistedHeal:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(thbrole.ExtraCardSlot)
 class ExtraCardSlot:
     # Skill
     name = '应援'
@@ -179,7 +182,7 @@ class ExtraCardSlot:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(thbrole.ChooseBossSkillAction)
 class ChooseBossSkillAction:
     choose_option_prompt = '请选择BOSS技：'
 

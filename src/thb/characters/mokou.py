@@ -4,13 +4,14 @@
 # -- third party --
 # -- own --
 from game.autoenv import user_input
-from game.base import EventHandler
 from thb.actions import DrawCards, DropCards, FatetellStage, LifeLost, PlayerTurn, UserAction
 from thb.actions import user_choose_cards
+from thb.cards.base import Card, Skill
 from thb.cards.basic import Heal
-from thb.cards.classes import Card, Skill, t_None
+from thb.cards.classes import t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -49,7 +50,7 @@ class RebornAction(UserAction):
         return True
 
 
-class AshesHandler(EventHandler):
+class AshesHandler(THBEventHandler):
     interested = ['action_after']
     execute_before = ['CiguateraHandler']
 
@@ -65,7 +66,7 @@ class AshesHandler(EventHandler):
         return act
 
 
-class RebornHandler(EventHandler):
+class RebornHandler(THBEventHandler):
     interested = ['action_before']
     execute_before = ['CiguateraHandler']
     card_usage = 'drop'

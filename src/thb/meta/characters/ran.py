@@ -5,15 +5,14 @@
 # -- own --
 from thb import characters
 from thb.actions import ttags
-from thb.meta.common import ui_meta_for, my_turn, passive_clickable
+from thb.meta.common import ui_meta, my_turn, passive_clickable
 from thb.meta.common import passive_is_action_valid
 
 
 # -- code --
-ui_meta = ui_meta_for(characters.ran)
 
 
-@ui_meta
+@ui_meta(characters.ran.Prophet)
 class Prophet:
     # Skill
     name = '神算'
@@ -23,7 +22,7 @@ class Prophet:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.ran.ExtremeIntelligence)
 class ExtremeIntelligence:
     # Skill
     name = '极智'
@@ -33,7 +32,7 @@ class ExtremeIntelligence:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.ran.ExtremeIntelligenceKOF)
 class ExtremeIntelligenceKOF:
     # Skill
     name = '极智'
@@ -78,14 +77,14 @@ class ExtremeIntelligenceKOF:
         return s
 
 
-@ui_meta
+@ui_meta(characters.ran.ProphetHandler)
 class ProphetHandler:
     # choose_option
     choose_option_buttons = (('发动', True), ('不发动', False))
     choose_option_prompt = '你要发动【神算】吗？'
 
 
-@ui_meta
+@ui_meta(characters.ran.ProphetAction)
 class ProphetAction:
     def effect_string_before(self, act):
         return '众人正准备接招呢，|G【%s】|r却掐着指头算了起来…' % (
@@ -96,7 +95,7 @@ class ProphetAction:
         return 'thb-cv-ran_prophet'
 
 
-@ui_meta
+@ui_meta(characters.ran.ExtremeIntelligenceAction)
 class ExtremeIntelligenceAction:
     # choose_card
     def choose_card_text(self, g, act, cards):
@@ -117,7 +116,7 @@ class ExtremeIntelligenceAction:
         return 'thb-cv-ran_ei'
 
 
-@ui_meta
+@ui_meta(characters.ran.NakedFox)
 class NakedFox:
     # Skill
     name = '素裸'
@@ -127,7 +126,7 @@ class NakedFox:
     is_action_valid = passive_is_action_valid
 
 
-@ui_meta
+@ui_meta(characters.ran.NakedFoxAction)
 class NakedFoxAction:
     def effect_string_before(self, act):
         if act.dmgamount <= 1:
@@ -138,7 +137,7 @@ class NakedFoxAction:
         return s % act.target.ui_meta.name
 
 
-@ui_meta
+@ui_meta(characters.ran.Ran)
 class Ran:
     # Character
     name        = '八云蓝'
@@ -151,7 +150,7 @@ class Ran:
     miss_sound_effect = 'thb-cv-ran_miss'
 
 
-@ui_meta
+@ui_meta(characters.ran.RanKOF)
 class RanKOF:
     # Character
     name        = '八云蓝'

@@ -4,12 +4,14 @@ from __future__ import absolute_import
 # -- stdlib --
 # -- third party --
 # -- own --
-from game.autoenv import EventHandler, user_input
+from game.autoenv import user_input
 from thb.actions import Damage, GenericAction, LaunchCard, LifeLost, MaxLifeChange, PlayerTurn
 from thb.actions import ttags, user_choose_players
-from thb.cards.classes import Skill, t_None
+from thb.cards.base import Skill
+from thb.cards.classes import t_None
 from thb.characters.base import Character, register_character_to
 from thb.inputlets import ChooseOptionInputlet
+from thb.mode import THBEventHandler
 
 
 # -- code --
@@ -32,7 +34,7 @@ class DestructionImpulseAction(GenericAction):
         return True
 
 
-class DestructionImpulseHandler(EventHandler):
+class DestructionImpulseHandler(THBEventHandler):
     interested = ['action_after']
     execute_before = ['CiguateraHandler']
 
@@ -101,7 +103,7 @@ class FourOfAKindAction(GenericAction):
         return True
 
 
-class FourOfAKindHandler(EventHandler):
+class FourOfAKindHandler(THBEventHandler):
     interested = ['action_before']
     execute_before = ['WineHandler']
     execute_after = [

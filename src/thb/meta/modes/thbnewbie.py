@@ -4,14 +4,11 @@
 # -- third party --
 # -- own --
 from thb import thbnewbie
-from thb.meta.common import ui_meta_for
+from thb.meta.common import ui_meta
 
 
 # -- code --
-ui_meta = ui_meta_for(thbnewbie)
-
-
-@ui_meta
+@ui_meta(thbnewbie.THBattleNewbie)
 class THBattleNewbie:
     name = '琪露诺的完美THB教室'
     logo = 'thb-modelogo-newbie'
@@ -24,16 +21,8 @@ class THBattleNewbie:
         '\n'
     ).strip()
 
-    T = thbnewbie.Identity.TYPE
-    identity_table = {
-        T.HIDDEN:  '？',
-        T.HAKUREI: '博丽',
-        T.BAKA:    '马鹿',
+    roles_disp = {
+        thbnewbie.THBNewbieRole.HIDDEN: '？',
+        thbnewbie.THBNewbieRole.NEWBIE: '萌新',
+        thbnewbie.THBNewbieRole.BAKA:   '笨蛋',
     }
-
-    identity_color = {
-        T.HIDDEN:  'blue',
-    }
-
-    IdentityType = T
-    del T
