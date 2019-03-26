@@ -44,7 +44,7 @@ class CardChooser(Protocol):
 class CharacterChooser(Protocol):
     game: THBattle
 
-    def choose_player_target(self, pl: Sequence[Character]) -> Tuple[Sequence[Character], bool]: ...
+    def choose_player_target(self, pl: Sequence[Character]) -> Tuple[List[Character], bool]: ...
 
 
 def ask_for_action(initiator: Union[CardChooser, CharacterChooser],

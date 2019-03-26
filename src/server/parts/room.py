@@ -2,12 +2,13 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Dict, List, Optional, TYPE_CHECKING
+from typing import Dict, List, Optional, TYPE_CHECKING, Any
 import logging
 import time
 
 # -- third party --
 import gevent
+from gevent import Greenlet
 
 # -- own --
 from endpoint import Endpoint
@@ -15,6 +16,7 @@ from server.base import Game
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList, throttle
+from wire import msg as wiremsg
 
 # -- typing --
 if TYPE_CHECKING:
@@ -35,17 +37,23 @@ class Room(object):
         core.events.game_joined += self.handle_game_joined
         core.events.game_left += self.handle_game_left
         core.events.game_ended += self.handle_game_ended
+        core.events.core_initialized += self.handle_core_initialized
 
-        _ = core.events.client_command
-        _['room:create'] += self._create
-        _['room:join'] += self._join
-        _['room:leave'] += self._leave
-        _['room:users'] += self._users
-        _['room:get-ready'] += self._get_ready
-        _['room:change-location'] += self._change_location
-        _['room:cancel-ready'] += self._cancel_ready
+        D = core.events.client_command
+        D['room:create'] += self._create
+        D['room:join'] += self._join
+        D['room:leave'] += self._leave
+        D['room:users'] += self._users
+        D['room:get-ready'] += self._get_ready
+        D['room:change-location'] += self._change_location
+        D['room:cancel-ready'] += self._cancel_ready
 
         self.games: Dict[int, Game] = {}
+
+    def handle_core_initialized(self, core: 'Core') -> 'Core':
+        self.client_placeholder = u = Client(core, None)
+        core.auth.set_auth(u, uid=0, name='空位置')
+        return core
 
     def handle_user_state_transition(self, ev):
         c, f, t = ev
@@ -73,7 +81,7 @@ class Room(object):
 
     def handle_game_left(self, ev):
         g, c = ev
-        g._[self]['left'][c] = bool(g._[self]['greenlet'])
+        g._[self]['left'][c] = self.is_started(g)
         return ev
 
     def handle_game_started(self, g):
@@ -118,7 +126,7 @@ class Room(object):
 
     # ----- Client Commands -----
     @command('lobby')
-    def _create(self, u: Client, typ: str, name: str, flags: dict):
+    def _create(self, u: Client, typ: str, name: str, flags: Dict[str, Any]):
         core = self.core
         from thb import modes
 
@@ -185,7 +193,7 @@ class Room(object):
         g = core.game.current(u)
         users = g._[self]['users']
 
-        if (not 0 <= loc < len(users)) or (users[loc] is not None):
+        if (not 0 <= loc < len(users)) or (users[loc] is not self.client_placeholder):
             return
 
         i = users.index(u)
@@ -194,40 +202,40 @@ class Room(object):
         core.events.game_change_location.emit(g)
 
     # ----- Public Methods -----
-    def is_online(self, g: Game, c: Client):
-        rst = c is not None
+    def is_online(self, g: Game, c: Client) -> bool:
+        rst = c is not self.client_placeholder
         rst = rst and c in g._[self]['users']
         rst = rst and not g._[self]['left'][c]
-        return rst
+        return bool(rst)
 
-    def is_left(self, g: Game, c: Client):
+    def is_left(self, g: Game, c: Client) -> bool:
         return g._[self]['left'][c]
 
-    def online_users_of(self, g: Game):
-        return [u for u in g._[self]['users'] if self.is_online(g, u)]
+    def online_users_of(self, g: Game) -> BatchList[Client]:
+        return BatchList([u for u in g._[self]['users'] if self.is_online(g, u)])
 
-    def users_of(self, g: Game):
+    def users_of(self, g: Game) -> BatchList[Client]:
         return g._[self]['users']
 
-    def gid_of(self, g: Game):
+    def gid_of(self, g: Game) -> int:
         return g._[self]['gid']
 
-    def name_of(self, g: Game):
+    def name_of(self, g: Game) -> str:
         return g._[self]['name']
 
-    def flags_of(self, g: Game):
+    def flags_of(self, g: Game) -> Dict[str, Any]:
         return g._[self]['flags']
 
-    def greenlet_of(self, g: Game):
+    def start_time_of(self, g: Game) -> int:
+        return int(g._[self]['start_time'])
+
+    def greenlet_of(self, g: Game) -> Optional[Greenlet]:
         return g._[self]['greenlet']
 
-    def is_started(self, g: Game):
+    def is_started(self, g: Game) -> bool:
         return bool(g._[self]['greenlet'])
 
-    def get_game(self, gid: int):
-        return self.games.get(gid)
-
-    def create_game(self, gamecls: type, name: str, flags: dict):
+    def create_game(self, gamecls: type, name: str, flags: dict) -> Game:
         core = self.core
         gid = self._new_gid()
         g = core.game.create_game(gamecls)
@@ -235,7 +243,7 @@ class Room(object):
 
         g._[self] = {
             'gid': gid,
-            'users': BatchList([None] * g.n_persons),
+            'users': BatchList([self.client_placeholder] * g.n_persons),
             'left': defaultdict(bool),
             'name': name,
             'flags': flags,  # {'match': 1, 'invite': 1}
@@ -249,31 +257,33 @@ class Room(object):
         assert ev
         return g
 
-    def join_game(self, g: Game, u: Client, slot: Optional[int]=None):
+    def join_game(self, g: Game, u: Client, slot: Optional[int] = None) -> None:
         core = self.core
 
         assert core.lobby.state_of(u) == 'lobby'
 
         slot = slot if slot is not None else self._next_slot(g)
-        if not (0 <= slot < g.n_persons and g._[self]['users'][slot] is None):
+        if not (0 <= slot < g.n_persons and g._[self]['users'][slot] is self.client_placeholder):
             return
 
         g._[self]['users'][slot] = u
 
         core.lobby.state_of(u).transit('room')
-        u.write(['game_joined', core.view.Game(g)])
+        u.write(wiremsg.GameJoined(core.view.Game(g)))
 
         core.events.game_joined.emit((g, u))
 
-    def exit_game(self, u: Client):
+    def exit_game(self, u: Client) -> None:
         core = self.core
 
         g = core.game.current(u)
-        rst = g._[self]['users'].replace(u, None)
-        assert rst
-        u.write(['game_left', None])
+        if not self.is_started(g):
+            rst = g._[self]['users'].replace(u, None)
+            assert rst
 
-        gid = core.room.gid_of(g),
+        gid = g._[self]['gid']
+
+        u.write(wiremsg.GameLeft(g._[self]['gid']))
 
         log.info(
             'Player %s left game [%s]',
@@ -283,7 +293,6 @@ class Room(object):
 
         core.events.game_left.emit((g, u))
 
-        gid = g._[self]['gid']
         if gid not in self.games:
             return
 
@@ -292,22 +301,22 @@ class Room(object):
         if users:
             return
 
-        if g._[self]['greenlet']:
+        if self.is_started(g):
             log.info('Game [%s] aborted', gid)
             core.game.abort(g)
         else:
             log.info('Game [%s] cancelled', gid)
             self.games.pop(gid, 0)
 
-    def send_room_users(self, g: Game, to: List[Client]):
+    def send_room_users(self, g: Game, to: List[Client]) -> None:
         core = self.core
         gid = g._[self]['gid']
         pl = [core.view.User(u) for u in g._[self]['users']]
-        s = Endpoint.encode(['room_users', [gid, pl]])  # former `gameinfo` and `player_change`
+        s = Endpoint.encode(wiremsg.RoomUsers(gid=gid, users=pl))  # former `gameinfo` and `player_change`
         for u in to:
             u.raw_write(s)
 
-    def cancel_ready(self, u: Client):
+    def cancel_ready(self, u: Client) -> None:
         core = self.core
         if core.lobby.state_of(u) != 'ready':
             return
@@ -355,7 +364,7 @@ class Room(object):
 
     def _next_slot(self, g: Game):
         try:
-            return g._[self]['users'].index(None)
+            return g._[self]['users'].index(self.client_placeholder)
         except ValueError:
             return None
 

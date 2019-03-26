@@ -1,7 +1,15 @@
+# -*- coding: utf-8 -*-
+
+# -- stdlib --
+from typing import Any, Dict, List
+
+# -- third party --
 from mypy_extensions import TypedDict
-from typing import List, Dict, Any
+
+# -- own --
 
 
+# -- code --
 class User(TypedDict):
     uid: int
     name: str

@@ -86,7 +86,7 @@ class Lobby(object):
     def state_of(self, u: Client) -> FSM:
         return u._[self]['state']
 
-    def all_users(self) -> List[Client]:
+    def all_users(self) -> BatchList[Client]:
         return BatchList(self.users.values())
 
     def get(self, uid: int) -> Optional[Client]:

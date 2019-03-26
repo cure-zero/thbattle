@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import defaultdict
 from random import Random
-from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, Sequence
+from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, Sequence, ClassVar
 import logging
 import random
 
@@ -136,13 +136,13 @@ class Game(GameObject, GameViralContext):
     IS_DEBUG = False
 
     # ----- Class Variables -----
-    CLIENT: bool
-    SERVER: bool
-    n_persons: int
-    npc_players: List[NPC] = []
-    params_def: Dict[str, Any] = {}
-    bootstrap: Type['BootstrapAction']
-    dispatcher_cls: Type['EventDispatcher']
+    CLIENT: ClassVar[bool]
+    SERVER: ClassVar[bool]
+    n_persons: ClassVar[int]
+    npc_players: ClassVar[List[NPC]] = []
+    params_def: ClassVar[Dict[str, Any]] = {}
+    bootstrap: ClassVar[Type['BootstrapAction']]
+    dispatcher_cls: ClassVar[Type['EventDispatcher']]
 
     # ----- Instance Variables -----
     game: 'Game'

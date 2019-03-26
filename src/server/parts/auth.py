@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import TYPE_CHECKING, Tuple
 import logging
 
 # -- third party --
 # -- own --
 from server.endpoint import Client
-from server.utils import command
-from server.core import Core
+from server.utils import for_state
+from wire import msg as wiremsg
+
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
 
 
 # -- code --
@@ -15,20 +20,21 @@ log = logging.getLogger('Auth')
 
 
 class Auth(object):
-    def __init__(self, core: Core):
+    def __init__(self, core: 'Core'):
         self.core = core
         self._kedama_uid = -10032
 
         core.events.user_state_transition += self.handle_user_state_transition
-        core.events.client_command['auth'] += self._auth
+        D = core.events.client_command
+        D[wiremsg.Auth] += self._auth
 
-    def handle_user_state_transition(self: 'Auth', ev):
+    def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         u, f, t = ev
 
         if (f, t) == ('initial', 'connected'):
             from settings import VERSION
             core = self.core
-            u.write(['thbattle_greeting', (core.options.node, VERSION)])
+            u.write(wiremsg.Greeting(node=core.options.node, version=VERSION))
             u._[self] = {
                 'uid': 0,
                 'name': '',
@@ -39,9 +45,12 @@ class Auth(object):
         return ev
 
     # ----- Command -----
-    @command('connected')
-    def _auth(self, u: Client, token: str):
+    @for_state('connected')
+    def _auth(self, ev: Tuple[Client, wiremsg.Auth]) -> Tuple[Client, wiremsg.Auth]:
         core = self.core
+        u, auth = ev
+        token = auth.token
+
         rst = core.backend.query('''
             query($token: String) {
                 player(token: $token) {
@@ -93,17 +102,10 @@ class Auth(object):
     def is_kedama(self, u: Client) -> bool:
         return u._[self]['kedama']
 
-    # ----- Auxiliary Methods -----
-    def set_auth(self, u: Client, uid=1, name='Foo', kedama=False, permissions=[]):
-        '''
-        Used by tests
-        '''
-        core = self.core
-        assert core.lobby.state_of(u) == 'connected'
+    def set_auth(self, u: Client, uid=1, name='Foo', kedama=False, permissions=[]) -> None:
         u._[self] = {
             'uid': uid,
             'name': name,
             'kedama': kedama,
             'permissions': set(permissions),
         }
-        core.lobby.state_of(u).transit('authed')

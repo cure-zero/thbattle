@@ -14,25 +14,25 @@ log = logging.getLogger('utils.events')
 T = TypeVar('T')
 
 
-class _StopPropagation:
-    __slots__ = ()
-
-
 class EventHub(Generic[T]):
     __slots__ = ('_subscribers',)
-    STOP_PROPAGATION = _StopPropagation()
 
-    _subscribers: List[Tuple[float, Callable[[T], Union[T, _StopPropagation]]]]
+    class StopPropagation:
+        __slots__ = ()
+
+    STOP_PROPAGATION = StopPropagation()
+
+    _subscribers: List[Tuple[float, Callable[[T], Union[T, StopPropagation]]]]
 
     def __init__(self):
         self._subscribers = []
 
-    def subscribe(self, cb: Callable[[T], Union[T, _StopPropagation]], prio: float):
+    def subscribe(self, cb: Callable[[T], Union[T, StopPropagation]], prio: float):
         self._subscribers.append((prio, cb))
         self._subscribers.sort()
         return self
 
-    def __iadd__(self, cb: Callable[[T], Union[T, _StopPropagation]]):
+    def __iadd__(self, cb: Callable[[T], Union[T, StopPropagation]]):
         # deterministic priority
         f = sys._getframe(1)
         s = '{}:{}'.format(f.f_code.co_filename, f.f_lineno).encode('utf-8')
@@ -48,8 +48,7 @@ class EventHub(Generic[T]):
         for prio, cb in self._subscribers:
             r = cb(ev)
 
-            # if r is self.STOP_PROPAGATION:
-            if isinstance(r, _StopPropagation):
+            if isinstance(r, EventHub.StopPropagation):
                 return None
             else:
                 ev = r

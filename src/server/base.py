@@ -225,7 +225,7 @@ class Game(game.base.Game):
         try:
             g.process_action(g.bootstrap(params, items, players))
         except GameEnded as e:
-            g.winners = e.winners
+            core.game.set_winners(e.winners)
         except Exception:
             core.game.mark_crashed(g)
             raise
@@ -259,7 +259,7 @@ class Game(game.base.Game):
         else:
             assert False, 'WTF!'
 
-    def pause(self, time: float):
+    def pause(self, time: float) -> None:
         gevent.sleep(time)
 
 
@@ -270,11 +270,11 @@ class HumanPlayer(Player):
         self.game = g
         self.client = client
 
-    def reveal(self, obj_list):
+    def reveal(self, ol: Any) -> None:
         g = self.game
         core = g.core
         st = g.get_synctag()
-        core.game.write(g, self.client, 'Sync:%d' % st, obj_list)  # XXX encode?
+        core.game.write(g, self.client, 'Sync:%d' % st, ol)  # XXX encode?
 
 
 class NPCPlayer(Player):

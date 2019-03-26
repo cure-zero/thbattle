@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, Optional
 import logging
 
 # -- third party --
-from gevent import Timeout, getcurrent
+from gevent import getcurrent, Greenlet
 import gevent
 
 # -- own --
 from endpoint import Endpoint, EndpointDied
 from utils.misc import log_failure
+from wire import msg as wiremsg
 
 # -- typing --
 if TYPE_CHECKING:
@@ -28,43 +29,30 @@ class Pivot(Exception):
 class Client(object):
     __slots__ = ('_ep', '_gr', '_core', '_')
 
-    def __init__(self, core: Core, ep: Endpoint):
-        self._ep = ep
+    def __init__(self, core: Core, ep: Optional[Endpoint]):
+        self._ep: Optional[Endpoint] = ep
+        self._gr: Optional[Greenlet] = None
         self._core = core
 
         self._: dict = {}
 
-    def _before_serve(self):
+    def _before_serve(self) -> None:
         core = self._core
         self._gr = getcurrent()
         core.events.client_connected.emit(self)
 
     @log_failure(log)
-    def _serve(self):
+    def _serve(self) -> None:
         core = self._core
+        tbl = core.events.client_command
 
         while True:
+            if not self._ep:
+                break
+
             try:
-                hasdata = False
-                with Timeout(90, False):
-                    cmd, args = self._ep.read()
-                    hasdata = True
-
-                if not hasdata:
-                    # client should send heartbeat periodically
-                    self.close()
-                    break
-
-                if cmd == 'heartbeat':
-                    continue
-
-                if not isinstance(cmd, str):
-                    continue
-
-                tbl = core.events.client_command
-                if cmd not in tbl:
-                    continue
-                tbl[cmd].emit((self, args))
+                for msg in self._ep.messages(timeout=90):
+                    tbl[msg.op].emit(msg)
 
             except EndpointDied:
                 break
@@ -77,17 +65,20 @@ class Client(object):
 
         core.events.client_dropped.emit(self)
 
-    def serve(self):
+    def serve(self) -> None:
         self._before_serve()
         self._serve()
 
-    def close(self):
+    def close(self) -> None:
         self._ep and self._ep.close()
         self._ep = None
         self._gr and self._gr.kill(EndpointDied)
         self._gr = None
 
-    def pivot_to(self, other):
+    def is_dead(self) -> bool:
+        return not self._gr or self._gr.ready()
+
+    def pivot_to(self, other) -> None:
         if not self._ep:
             raise Exception("self._ep is not valid!")
 
@@ -106,10 +97,14 @@ class Client(object):
             'FIXME', 'FIXME'
         )
 
-    def write(self, d):
-        ep = self._ep
-        ep and ep.write(d)
+    def get_greenlet(self) -> Optional[Greenlet]:
+        return self._gr
 
-    def raw_write(self, d):
+    def write(self, v: wiremsg.ServerToClient) -> None:
         ep = self._ep
-        ep and ep.raw_write(d)
+        data = cast(wiremsg.Message, v).encode()
+        if ep: ep.write(data)
+
+    def raw_write(self, v: bytes) -> None:
+        ep = self._ep
+        if ep: ep.raw_write(v)

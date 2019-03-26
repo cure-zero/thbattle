@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Dict, Tuple
+from typing import Any, Dict, Tuple, Type, TypeVar, cast
 
 # -- third party --
 # -- own --
@@ -11,16 +11,25 @@ from .base import Game
 from .endpoint import Client
 from game.base import Packet
 from utils.events import EventHub
+from wire import msg as wiremsg
 
 
 # -- code --
 class Options(object):
-    def __init__(self, options):
+    def __init__(self, options: Dict[str, Any]):
         self.node         = options.get('node', 'localhost')  # Current node name
         self.backend      = options.get('backend', '')        # Backend URI
         self.interconnect = options.get('interconnect', '')   # URI of chat server
         self.archive_path = options.get('archive_path', '')   # file:// URI of dir for storing game archives
         self.disables     = options.get('disables', [])       # disabled core components, will assign a None value
+
+
+T = TypeVar('T', bound=wiremsg.Message)
+
+
+class _ClientCommandMapping:
+    def __getitem__(self, k: Type[T]) -> EventHub[Tuple[Client, T]]:
+        ...
 
 
 class Events(object):
@@ -36,7 +45,7 @@ class Events(object):
         self.client_connected = EventHub[Client]()
 
         # Client dropped(connection lost)
-        self.client_dropped = EventHub[Client]
+        self.client_dropped = EventHub[Client]()
 
         # Client logged in when previous login still online, or still in active game
         # ev = c: Client  # old client obj with new connection `pivot_to`ed to it
@@ -44,8 +53,8 @@ class Events(object):
 
         # Client send some command
         # ev = (c: Client, args: (...))
-        self.client_command: Dict[str, EventHub[Tuple[Client, list]]] = \
-            defaultdict(lambda: EventHub[Tuple[Client, list]]())
+        self.client_command: _ClientCommandMapping = \
+            cast(_ClientCommandMapping, defaultdict(lambda: EventHub()))
 
         # Game is created
         # ev = g: Game
@@ -85,7 +94,7 @@ class Events(object):
 
 
 class Core(object):
-    def __init__(self: 'Core', **options):
+    def __init__(self, **options: Dict[str, Any]):
         self.options = Options(options)
 
         self.events = Events()

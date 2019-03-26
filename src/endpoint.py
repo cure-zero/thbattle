@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from enum import IntEnum
 from collections import deque
-from typing import Deque, Any
+from typing import Deque, Any, Sequence, Tuple, Iterator
 import json
 import logging
 import zlib
 
 # -- third party --
 from gevent import socket
+from gevent.timeout import Timeout
 from gevent.lock import RLock
 import msgpack
+from wire import msg as wiremsg
 
 # -- own --
 
@@ -26,13 +29,14 @@ class DecodeError(Exception):
     pass
 
 
+class Format(IntEnum):
+    Packed = 1
+    BulkCompressed = 2
+
+
 class Endpoint(object):
 
     ENDPOINT_DEBUG = False
-
-    FMT_PACKED          = 1
-    FMT_BULK_COMPRESSED = 2
-    FMT_RAW_JSON        = 3
 
     def __init__(self, sock, address):
         sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
@@ -44,7 +48,6 @@ class Endpoint(object):
         self.writelock  = RLock()
         self.address    = address
         self.link_state = 'connected'  # or disconnected
-        self.recv_buf: Deque[Any]   = deque()
 
     def __repr__(self):
         return '%s:%s:%s' % (
@@ -54,32 +57,51 @@ class Endpoint(object):
         )
 
     @staticmethod
-    def encode(p, format=FMT_PACKED):
-        if format == Endpoint.FMT_PACKED:
-            return msgpack.packb([Endpoint.FMT_PACKED, p], use_bin_type=True)
-        elif format == Endpoint.FMT_BULK_COMPRESSED:
-            assert isinstance(p, list)
-            data = msgpack.packb(p, use_bin_type=True)
-            return msgpack.packb([Endpoint.FMT_BULK_COMPRESSED, zlib.compress(data)], use_bin_type=True)
-        elif format == Endpoint.FMT_RAW_JSON:
-            return json.dumps(p)
-        else:
-            raise Exception('WTF?!')
-
-    @classmethod
-    def decode(cls, s):
-        return cls.decode_packet(msgpack.unpackb(s, encoding='utf-8'))[1]
+    def encode(p: wiremsg.Message) -> bytes:
+        return msgpack.packb([Format.Packed, p], use_bin_type=True)
 
     @staticmethod
-    def decode_packet(p):
+    def encode_bulk(pl: Sequence[wiremsg.Message]) -> bytes:
+        data = msgpack.packb(pl, use_bin_type=True)
+        return msgpack.packb([Format.BulkCompressed, zlib.compress(data)], use_bin_type=True)
+
+    def write(self, p) -> None:
+        if Endpoint.ENDPOINT_DEBUG:
+            log.debug("SEND>> %s" % p)
+        self.raw_write(self.encode(p))
+
+    def write_bulk(self, pl: Sequence[wiremsg.Message]) -> None:
+        if Endpoint.ENDPOINT_DEBUG:
+            for p in pl:
+                log.debug("SEND>> %s" % p)
+        self.raw_write(self.encode_bulk(pl))
+
+    def raw_write(self, s: bytes) -> None:
+        if self.link_state == 'connected':
+            try:
+                with self.writelock:
+                    self.sock.sendall(s)
+            except IOError:
+                self.close()
+        else:
+            return False
+
+    def close(self):
+        if not self.link_state == 'disconnected':
+            self.link_state = 'disconnected'
+            self.sock.close()
+
+    @staticmethod
+    def _decode_packet(p: Any) -> Tuple[Format, Any]:
         try:
             if not (isinstance(p, (list, tuple)) and len(p) == 2):
                 raise DecodeError
 
             fmt, data = p
-            if fmt == Endpoint.FMT_PACKED:
+            fmt = Format(fmt)
+            if fmt == Format.Packed:
                 return fmt, data
-            elif fmt == Endpoint.FMT_BULK_COMPRESSED:
+            elif fmt == Format.BulkCompressed:
                 try:
                     inflated = zlib.decompress(data)
                 except Exception:
@@ -91,57 +113,39 @@ class Endpoint(object):
         except (ValueError, msgpack.UnpackValueError):
             raise DecodeError
 
-    def raw_write(self, s):
-        if self.link_state == 'connected':
-            if Endpoint.ENDPOINT_DEBUG:
-                log.debug("SEND>> %s" % self.decode(s))
-            try:
-                with self.writelock:
-                    self.sock.sendall(s)
-            except IOError:
-                self.close()
-        else:
-            return False
-
-    def write(self, p, format=FMT_PACKED):
-        '''
-        Send json encoded packet
-        '''
-        self.raw_write(self.encode(p, format))
-
-    def close(self):
-        if not self.link_state == 'disconnected':
-            self.link_state = 'disconnected'
-            self.sock.close()
-
-    def read(self):
+    def messages(self, timeout=90) -> Iterator[wiremsg.Message]:
         if self.link_state != 'connected':
             raise EndpointDied
 
-        if self.recv_buf:
-            return self.recv_buf.popleft()
-
+        unpacker = self.unpacker
+        _NONE = object()
         while True:
-            u = self.unpacker
             try:
-                try:
-                    packet = next(u)
-                except msgpack.UnpackValueError:
-                    raise DecodeError
-                except (StopIteration, IOError):
+                v = _NONE
+                with Timeout(timeout, False):
+                    v = next(unpacker)
+
+                if v is not _NONE:
+                    fmt, data = self._decode_packet(v)
+                    if fmt == Format.Packed:
+                        msg = wiremsg.Message.decode(data)
+                        if msg:
+                            if Endpoint.ENDPOINT_DEBUG:
+                                log.debug("<<RECV %r" % msg)
+                            yield msg
+                    elif fmt == Format.BulkCompressed:
+                        for d in data:
+                            msg = wiremsg.Message.decode(d)
+                            if msg:
+                                if Endpoint.ENDPOINT_DEBUG:
+                                    log.debug("<<RECV %r" % msg)
+                                yield msg
+                else:
                     self.close()
                     raise EndpointDied
 
-                fmt, d = self.decode_packet(packet)
-                if fmt == Endpoint.FMT_BULK_COMPRESSED:
-                    self.recv_buf.extend(d[1:])
-                    d = d[0]
-
-                if Endpoint.ENDPOINT_DEBUG:
-                    log.debug("<<RECV %r" % d)
-
-                return d
-
             except DecodeError:
-                self.write(['bad_format', None])
+                continue
+
+            except msgpack.UnpackValueError:
                 continue

@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import List, Type, Dict, Any
+from typing import List, Type, Dict, Any, cast
 import logging
 import random
 
@@ -14,6 +14,7 @@ from server.core import Core
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList
+from wire import msg as wiremsg
 
 
 # -- code --
@@ -153,7 +154,7 @@ class Game(object):
         core.events.game_data_recv.emit((g, u, pkt))
 
     # ----- Public Methods -----
-    def create_game(self, cls: Type[ServerGame]):
+    def create_game(self, cls: Type[ServerGame]) -> ServerGame:
         core = self.core
         g = cls(core)
 
@@ -171,7 +172,7 @@ class Game(object):
 
         return g
 
-    def replay(self, c: Client, to: Client):
+    def replay(self, c: Client, to: Client) -> None:
         # XXX compress
         g = c._[self]['game']
         pkts = g._[self]['data'][c].get_sent()
@@ -183,24 +184,23 @@ class Game(object):
             to.write(['game:data', [p.id, p.tag, p.data]])
 
     # ----- Public Methods -----
-    def mark_crashed(self, g: ServerGame):
+    def mark_crashed(self, g: ServerGame) -> None:
         g._[self]['crashed'] = True
 
-    def is_crashed(self, g: ServerGame):
+    def is_crashed(self, g: ServerGame) -> bool:
         return g._[self]['crashed']
 
-    def abort(self, g: ServerGame):
+    def abort(self, g: ServerGame) -> None:
         core = self.core
         g._[self]['aborted'] = True
         core.events.game_aborted.emit(g)
 
-    def is_aborted(self, g: ServerGame):
+    def is_aborted(self, g: ServerGame) -> bool:
         return g._[self]['aborted']
 
-    def setup_game(self, g):
+    def setup_game(self, g: ServerGame) -> None:
         core = self.core
         users = core.room.users_of(g)
-        g.players = self.build_players(g, users)
 
         g._[self]['data'] = {
             core.auth.uid_of(u): GameData()
@@ -216,18 +216,18 @@ class Game(object):
     def is_fleed(self, g: ServerGame, u: Client) -> bool:
         return g._[self]['fleed'][u]
 
-    def get_gamedata_archive(self, g: ServerGame):
+    def get_gamedata_archive(self, g: ServerGame) -> List[dict]:
         return [
             g._[self]['data'][i].archive()
             for i in g._[self]['users']
         ]
 
-    def write(self, g: ServerGame, u: Client, tag: str, data: object):
+    def write(self, g: ServerGame, u: Client, tag: str, data: object) -> None:
         core = self.core
         assert u._[self]['game'] is g
         pkt = g._[self]['data'][u].feed_send(tag, data)
         gid = core.room.gid_of(g)
-        u.write(['game:data', [gid, pkt.serial, pkt.tag, pkt.data]])
+        u.write(wiremsg.GameData(gid=gid, serial=pkt.serial, tag=pkt.tag, data=pkt.data))
         core.events.game_data_send.emit((g, u, pkt))
 
     def current(self, u: Client) -> ServerGame:
@@ -235,3 +235,9 @@ class Game(object):
 
     def params_of(self, g: ServerGame) -> Dict[str, Any]:
         return g._[self]['params']
+
+    def winners_of(self, g: ServerGame) -> List[Client]:
+        return [p.client for p in cast(List[HumanPlayer], g.winners)]
+
+    def rngseed_of(self, g: ServerGame) -> int:
+        return g._[self]['rngseed']

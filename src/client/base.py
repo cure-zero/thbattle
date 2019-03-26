@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import cast, List, Sequence
 from collections import OrderedDict
 from copy import copy
 from random import Random
@@ -60,7 +61,7 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
         with TimeLimitExceeded(timeout + 1, False):
             _, my = g.emit_event('user_input', (trans, my))
 
-        core.server.gwrite(tag + str(st), my.data())
+        core.game.write(cast(Game, g), tag + str(st), my.data())
 
     results = {p: None for p in players}
 
@@ -68,9 +69,6 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
     synctags_r = {v: k for k, v in synctags.items()}
 
     try:
-        if me in players:  # me involved
-            g._my_user_input = (trans, ilets[me])
-
         for p in players:
             g.emit_event('user_input_start', (trans, ilets[p]))
 
@@ -85,7 +83,7 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
         while players:
             # should be [tag, <Data for Inputlet.parse>]
             # tag likes 'RI?:ChooseOption:2345'
-            tag_, data = me.server.gexpect('R%s*' % tag)
+            tag_, data = core.game.gamedata_of(g).gexpect('R%s*' % tag)
             st = int(tag_.split(':')[2])
             if st not in synctags_r:
                 log.warning('Unexpected sync tag: %d', st)
@@ -108,9 +106,6 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
             rst = my.post_process(p, rst)
 
             g.emit_event('user_input_finish', (trans, my, rst))
-
-            if p is me:
-                g._my_user_input = (None, None)
 
             players.remove(p)
             results[p] = rst
@@ -145,18 +140,18 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
 
 class Theone(game.base.Player):
 
-    def __init__(self, game, uid, name):
+    def __init__(self, game: 'Game', uid: int, name: str):
         Player.__init__(self)
         self.game = game
         self.uid = uid
         self.name = name
 
-    def reveal(self, obj_list):
+    def reveal(self, obj_list: Any) -> None:
         # It's me, server will tell me what the hell these is.
         g = self.game
         core = g.core
         st = g.get_synctag()
-        _, raw_data = core.game.gexpect('Sync:%d' % st)
+        _, raw_data = core.game.gamedata_of(g).gexpect('Sync:%d' % st)
         if isinstance(obj_list, (list, tuple)):
             for o, rd in zip(obj_list, raw_data):
                 o.sync(rd)
@@ -166,13 +161,13 @@ class Theone(game.base.Player):
 
 class Someone(Player):
 
-    def __init__(self, game, uid, name):
+    def __init__(self, game: 'Game', uid: int, name: str):
         Player.__init__(self)
         self.game = game
         self.uid = uid
         self.name = name
 
-    def reveal(self, obj_list):
+    def reveal(self, ol: Any) -> None:
         # Peer player, won't reveal.
         self.game.get_synctag()  # must sync
 
@@ -187,7 +182,6 @@ class Game(game.base.Game):
     def __init__(self, core: Core):
         game.base.Game.__init__(self)
         self.core = core
-        self._my_user_input = (None, None)
 
     def run(g) -> None:
         g.synctag = 0
@@ -195,7 +189,8 @@ class Game(game.base.Game):
         core.events.game_started.emit(g)
         params = core.game.params_of(g)
         items = core.game.items_of(g)
-        players = core.game.build_players(g)
+        users = core.game.users_of(g)
+        players = core.game.build_players(g, users)
 
         try:
             g.process_action(g.bootstrap(params, items, players))
@@ -215,7 +210,7 @@ class Game(game.base.Game):
 
     def is_dropped(g, p: Player):
         core = g.core
-        return core.room.is_dropped(g, p)
+        return core.game.is_dropped(g, p)
 
     @classmethod
     def me(cls, g: game.base.Game) -> Theone:

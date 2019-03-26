@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Tuple, List
+from typing import Any, Sequence, Tuple
 
 # -- third party --
 # -- own --
 from . import parts
 from .base import Game
 from utils.events import EventHub
+from wire import msg as wiremsg, model as wiremodel
 
 
 # -- code --
@@ -26,7 +27,7 @@ class Events(object):
 
         # Fires when server send some command
         # ev = (cmd: str, arg: object)
-        self.server_command = EventHub[Tuple[str, object]]()
+        self.server_command = EventHub[wiremsg.Message]()
 
         # Server connected
         self.server_connected = EventHub[None]()
@@ -42,11 +43,11 @@ class Events(object):
 
         # Update error'd
         # ev = (up: GitUpdator, rst: Exception)
-        self.update_error = EventHub[Tuple[object, Exception]]()
+        self.update_error = EventHub[Tuple[Any, Exception]]()
 
         # Update in progress
         # ev = (up: GitUpdator, stat: <SomeComplexObjectFromPyGit>)
-        self.update_progress = EventHub[Tuple[object, object]]()
+        self.update_progress = EventHub[Tuple[Any, Any]]()
 
         # Joined a game
         self.game_joined = EventHub[Game]()
@@ -56,7 +57,7 @@ class Events(object):
 
         # Left a game
         # ev = (g: Game, users: [server.core.view.User(u), ...])
-        self.room_users = EventHub[Tuple[Game, List[dict]]]()
+        self.room_users = EventHub[Tuple[Game, Sequence[wiremodel.User]]]()
 
         # Game is up and running
         # ev = (g: Game)

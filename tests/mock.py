@@ -106,7 +106,9 @@ class ServerWorld(object):
 
         for i in range(g.n_persons):
             u = self.client()
+            assert core.lobby.state_of(u) == 'connected'
             core.auth.set_auth(u, base + i, 'UID%d' % (base + i))
+            core.lobby.state_of(u).transit('authed')
             core.room.join_game(g, u, i)
 
         core.game.setup_game(g)

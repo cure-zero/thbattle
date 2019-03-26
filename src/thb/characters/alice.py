@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, List
 # -- stdlib --
 # -- third party --
 # -- own --
@@ -112,7 +112,7 @@ class LittleLegionControlAction(UserAction):
         g.process_action(LaunchCard(src, [attacker, victim], LittleLegionDollControlCard(attacker)))
         return True
 
-    def choose_player_target(self, tl: Sequence[Character]) -> Tuple[Sequence[Character], bool]:
+    def choose_player_target(self, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
         src = self.source
         trimmed, rst = DollControlCard.target(None, None, src, tl)
         return trimmed, rst and LaunchCard(src, trimmed, LittleLegionDollControlCard(src)).can_fire()

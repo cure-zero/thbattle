@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import TYPE_CHECKING, Dict, Any
+import base64
 import json
 import logging
 import time
 import zlib
-import base64
 
 # -- third party --
 import arrow
 
 # -- own --
+from server.base import Game
 import settings
+
+
+# -- code --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
 
 
 # -- code --
@@ -19,11 +26,11 @@ log = logging.getLogger('Archive')
 
 
 class Archive(object):
-    def __init__(self, core):
+    def __init__(self, core: 'Core'):
         self.core = core
         core.events.game_ended += self.handle_game_ended
 
-    def handle_game_ended(self, g):
+    def handle_game_ended(self, g: Game) -> Game:
         core = self.core
 
         meta = self._meta(g)
@@ -43,9 +50,9 @@ class Archive(object):
 
     # ----- Methods -----
 
-    def _meta(self, g):
+    def _meta(self, g: Game) -> Dict[str, Any]:
         core = self.core
-        start = int(core.room.start_time_of(g))
+        start = core.room.start_time_of(g)
         flags = core.room.flags_of(g)
 
         if core.game.is_crashed(g):
@@ -65,17 +72,17 @@ class Archive(object):
             'duration': int(time.time() - start),
         }
 
-    def _archive(self, g):
+    def _archive(self, g: Game) -> str:
         core = self.core
         data = {
             'version': settings.VERSION,
             'gid': core.room.gid_of(g),
             'class': g.__class__.__name__,
             'params': core.game.params_of(g),
-            'items': core.items.items_of(g),  # XXX {k: list(v) for k, v in self.game_items.items()},
-            'rngseed': g.rngseed,
+            'items': core.item.item_skus_of(g),
+            'rndseed': core.game.rngseed_of(g),
             'players': [core.auth.uid_of(u) for u in core.room.users_of(g)],
-            'data': core.game.get_game_archive(g),
+            'data': core.game.get_gamedata_archive(g),
         }
 
         return base64.b64encode(
