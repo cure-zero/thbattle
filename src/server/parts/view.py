@@ -8,7 +8,7 @@ import logging
 # -- own --
 from server.base import Game as ServerGame
 from server.endpoint import Client
-import wiremodel
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ class View(object):
     def __init__(self, core: 'Core'):
         self.core = core
 
-    def User(self, u: Client) -> wiremodel.User:
+    def User(self, u: Client) -> wire.User:
         core = self.core
 
         return {
@@ -32,7 +32,7 @@ class View(object):
             'state': str(core.lobby.state_of(u)),
         }
 
-    def Game(self, g: ServerGame) -> wiremodel.Game:
+    def Game(self, g: ServerGame) -> wire.Game:
         core = self.core
 
         return {
@@ -43,7 +43,7 @@ class View(object):
             'online':   len(core.room.online_users_of(g)),
         }
 
-    def GameDetail(self, g: ServerGame) -> wiremodel.GameDetail:
+    def GameDetail(self, g: ServerGame) -> wire.GameDetail:
         core = self.core
 
         return {
@@ -56,5 +56,5 @@ class View(object):
             # **self.Game(g),
             'users':  [self.User(u) for u in core.room.users_of(g)],
             'params': core.game.params_of(g),
-            'items':  core.item.items_of(g),
+            'items':  core.item.item_skus_of(g),
         }

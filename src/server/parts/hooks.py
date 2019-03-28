@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import List
+from typing import List, Any
 import logging
 
 # -- third party --
@@ -16,11 +16,11 @@ log = logging.getLogger('server.parts.hooks')
 
 
 class ServerEventHooks(EventHandler):
-    def __init__(self):
+    def __init__(self) -> None:
         self.hooks: List[EventHandler] = [
         ]
 
-    def handle(self, evt_type, arg):
+    def handle(self, evt_type: str, arg: Any) -> Any:
         for h in self.hooks:
             arg = h.handle(evt_type, arg)
 
@@ -32,6 +32,6 @@ class Hooks(object):
         self.core = core
         core.events.game_started += self.handle_game_started
 
-    def handle_game_started(self, g: Game):
+    def handle_game_started(self, g: Game) -> Game:
         g.event_observer = ServerEventHooks()
         return g

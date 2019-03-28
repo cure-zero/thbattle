@@ -2,19 +2,22 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import List, Type, Dict, Any, cast
+from typing import Any, Dict, List, TYPE_CHECKING, Type, cast, Tuple
 import logging
 import random
 
 # -- third party --
 # -- own --
-from game.base import Player, GameData
-from server.base import Game as ServerGame, NPCPlayer, HumanPlayer
-from server.core import Core
+from game.base import GameData, Player
+from server.base import Game as ServerGame, HumanPlayer, NPCPlayer
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList
 from wire import msg as wiremsg
+
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
 
 
 # -- code --
@@ -22,7 +25,7 @@ log = logging.getLogger('Game')
 
 
 class Game(object):
-    def __init__(self, core: Core):
+    def __init__(self, core: 'Core'):
         self.core = core
 
         core.events.game_started += self.handle_game_started
@@ -33,11 +36,11 @@ class Game(object):
         core.events.user_state_transition += self.handle_user_state_transition
         core.events.client_pivot += self.handle_client_pivot
 
-        _ = core.events.client_command
-        _['game:set-param'] += self._set_param
-        _['game:data'] += self._gamedata
+        D = core.events.client_command
+        D[wiremsg.SetGameParam] += self._set_param
+        D[wiremsg.GameData] += self._gamedata
 
-    def handle_user_state_transition(self, ev):
+    def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         u, f, t = ev
         if t == 'lobby':
             u._[self] = {
@@ -46,37 +49,39 @@ class Game(object):
             }
         return ev
 
-    def handle_client_pivot(self, u):
+    def handle_client_pivot(self, u: Client) -> Client:
         core = self.core
         if core.lobby.state_of(u) == 'game':
             g = u._[self]['game']
             assert g
             assert u in g.players.client
 
-            u.write(['game_joined',  core.view.Game(g)])
-            u.write(['game_started', core.view.GameDetail(g)])
+            u.write(wiremsg.GameJoined(core.view.Game(g)))
+            u.write(wiremsg.GameStarted(core.view.GameDetail(g)))
 
             self.replay(u, u)
 
         return u
 
-    def handle_game_started(self, g):
+    def handle_game_started(self, g: ServerGame) -> ServerGame:
         self.setup_game(g)
 
         core = self.core
         users = core.room.users_of(g)
         for u in users:
-            u.write(['game_started', core.view.GameDetail(g)])
+            u.write(wiremsg.GameStarted(core.view.GameDetail(g)))
 
         return g
 
-    def handle_game_ended(self, g):
+    def handle_game_ended(self, g: ServerGame) -> ServerGame:
         core = self.core
         users = core.room.online_users_of(g)
         for u in users:
-            u.write(['game_ended', core.room.gid_of(g)])
+            u.write(wiremsg.GameEnded(core.room.gid_of(g)))
 
-    def handle_game_joined(self, ev):
+        return g
+
+    def handle_game_joined(self, ev: Tuple[ServerGame, Client]) -> Tuple[ServerGame, Client]:
         g, c = ev
         core = self.core
         if core.room.is_started(g):
@@ -87,7 +92,7 @@ class Game(object):
 
         return ev
 
-    def handle_game_left(self, ev):
+    def handle_game_left(self, ev: Tuple[ServerGame, Client]) -> Tuple[ServerGame, Client]:
         g, c = ev
         core = self.core
         if core.room.is_started(g):
@@ -98,20 +103,20 @@ class Game(object):
 
         return ev
 
-    def handle_game_successive_create(self, ev):
+    def handle_game_successive_create(self, ev: Tuple[ServerGame, ServerGame]) -> Tuple[ServerGame, ServerGame]:
         old, g = ev
         core = self.core
 
         params = old._[self]['params']
         g._[self]['params'] = params
         gid = core.room.gid_of(g)
-        core.room.online_users_of(old).write(['game_params', [gid, params]])
+        core.room.online_users_of(old).write(wiremsg.GameParams(gid=gid, params=params))
 
         return ev
 
     # ----- Commands -----
     @command('room')
-    def _set_param(self, u: Client, key: str, value: object):
+    def _set_param(self, u: Client, ev: wiremsg.SetGameParam) -> None:
         core = self.core
 
         if core.lobby.state_of(u) != 'room':
@@ -120,19 +125,23 @@ class Game(object):
         g = core.game.current(u)
         users = core.room.online_users_of(g)
 
+        if core.room.gid_of(g) != ev.gid:
+            log.error("Error setting game param, gid mismatch with user's current game")
+            return
+
         cls = g.__class__
-        if key not in cls.params_def:
-            log.error('Invalid option "%s"', key)
+        if ev.key not in cls.params_def:
+            log.error('Invalid option "%s"', ev.key)
             return
 
-        if value not in cls.params_def[key]:
-            log.error('Invalid value "%s" for key "%s"', value, key)
+        if ev.value not in cls.params_def[ev.key]:
+            log.error('Invalid value "%s" for key "%s"', ev.value, ev.key)
             return
 
-        if g._[self]['params'][key] == value:
+        if g._[self]['params'][ev.key] == ev.value:
             return
 
-        g._[self]['params'][key] = value
+        g._[self]['params'][ev.key] = ev.value
 
         gid = core.room.gid_of(g)
 
@@ -140,17 +149,17 @@ class Game(object):
             if core.lobby.state_of(u) == 'ready':
                 core.room.cancel_ready(u)
 
-            u.write(['set_game_param', [u, key, value]])
-            u.write(['game_params', [gid, g._[self]['params']]])
+            u.write(ev)
+            u.write(wiremsg.GameParams(gid, g._[self]['params']))
 
     @command('game')
-    def _gamedata(self, u: Client, gid: int, serial: int, tag: str, data: object):
+    def _gamedata(self, u: Client, ev: wiremsg.GameData) -> None:
         core = self.core
         g = u._[self]['game']
-        if gid != core.room.gid_of(g):
+        if ev.gid != core.room.gid_of(g):
             return
 
-        pkt = g._[self]['data'][u].feed_recv(serial, tag, data)
+        pkt = g._[self]['data'][u].feed_recv(ev.serial, ev.tag, ev.data)
         core.events.game_data_recv.emit((g, u, pkt))
 
     # ----- Public Methods -----
@@ -173,15 +182,19 @@ class Game(object):
         return g
 
     def replay(self, c: Client, to: Client) -> None:
-        # XXX compress
+        core = self.core
         g = c._[self]['game']
         pkts = g._[self]['data'][c].get_sent()
         if not pkts:
             return
 
-        to.write(['game:live-at', pkts[-1].serial])
-        for p in pkts:
-            to.write(['game:data', [p.id, p.tag, p.data]])
+        gid = core.room.gid_of(g)
+
+        to.write(wiremsg.GameLiveAt(pkts[-1].serial))
+        to.write_bulk([
+            wiremsg.GameData(gid, p.id, p.tag, p.data)
+            for p in pkts
+        ])
 
     # ----- Public Methods -----
     def mark_crashed(self, g: ServerGame) -> None:

@@ -55,13 +55,13 @@ class Admin(object):
         self.admins: List[int] = [2, 109, 351, 3044, 6573, 6584, 9783]
 
     @_need_admin
-    def _kick(self, c: Client, m: msg.AdminKick):
+    def _kick(self, c: Client, m: msg.AdminKick) -> None:
         core = self.core
         u = core.lobby.get(m.uid)
         if u: u.close()
 
     @_need_admin
-    def _clearzombies(self, c: Client, m: msg.AdminClearZombies):
+    def _clearzombies(self, c: Client, m: msg.AdminClearZombies) -> None:
         core = self.core
         users = core.lobby.all_users()
         for u in users:
@@ -70,18 +70,18 @@ class Admin(object):
                 core.events.client_dropped.emit(u)
 
     @_need_admin
-    def _migrate(self, c: Client, m: msg.AdminMigrate):
+    def _migrate(self, c: Client, m: msg.AdminMigrate) -> None:
         core = self.core
 
         @gevent.spawn
-        def sysmsg():
+        def sysmsg() -> None:
             while True:
                 users = core.lobby.all_users()
                 users.write(msg.SystemMsg(msg='游戏已经更新，当前的游戏结束后将会被自动踢出，请更新后重新游戏'))
                 gevent.sleep(30)
 
         @gevent.spawn
-        def kick():
+        def kick() -> None:
             gevent.sleep(30)
             while True:
                 users = core.lobby.all_users()
@@ -92,7 +92,7 @@ class Admin(object):
                 gevent.sleep(1)
 
     @_need_admin
-    def _stacktrace(self, c: Client, m: msg.AdminStacktrace):
+    def _stacktrace(self, c: Client, m: msg.AdminStacktrace) -> None:
         core = self.core
         g = core.game.current(c)
         if not g:
@@ -100,7 +100,7 @@ class Admin(object):
 
         log.info('>>>>> GAME STACKTRACE <<<<<')
 
-        def logtraceback(f: Any):
+        def logtraceback(f: Any) -> None:
             import traceback
             log.info('----- %r -----\n%s', gr, ''.join(traceback.format_stack(f)))
 
@@ -108,12 +108,13 @@ class Admin(object):
 
         for u in core.room.online_users_of(g):
             gr = u.get_greenlet()
-            gr and gr.gr_frame and logtraceback(gr.gr_frame)
+            if gr and gr.gr_frame:
+                logtraceback(gr.gr_frame)
 
         log.info('===========================')
 
     @_need_admin
-    def _kill_game(self, c: Client, m: msg.AdminKillGame):
+    def _kill_game(self, c: Client, m: msg.AdminKillGame) -> None:
         core = self.core
         g = core.room.get(m.gid)
         if not g: return
@@ -123,22 +124,22 @@ class Admin(object):
             core.room.exit_game(u)
 
     @_need_admin
-    def _add(self, c: Client, m: msg.AdminAdd):
+    def _add(self, c: Client, m: msg.AdminAdd) -> None:
         self.admins.append(m.uid)
 
     @_need_admin
-    def _remove(self, c: Client, m: msg.AdminRemove):
+    def _remove(self, c: Client, m: msg.AdminRemove) -> None:
         try:
             self.admins.remove(m.uid)
         except Exception:
             pass
 
     @_need_admin
-    def _add_bigbrother(self, c: Client, m: msg.AdminAddBigbrother):
+    def _add_bigbrother(self, c: Client, m: msg.AdminAddBigbrother) -> None:
         core = self.core
         core.observe.add_bigbrother(m.uid)
 
     @_need_admin
-    def _remove_bigbrother(self, c: Client, m: msg.AdminRemoveBigbrother):
+    def _remove_bigbrother(self, c: Client, m: msg.AdminRemoveBigbrother) -> None:
         core = self.core
         core.observe.remove_bigbrother(m.uid)

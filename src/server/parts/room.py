@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Dict, List, Optional, TYPE_CHECKING, Any
+from typing import Dict, List, Optional, TYPE_CHECKING, Any, Tuple
 import logging
 import time
 
@@ -16,7 +16,7 @@ from server.base import Game
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList, throttle
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -40,13 +40,13 @@ class Room(object):
         core.events.core_initialized += self.handle_core_initialized
 
         D = core.events.client_command
-        D['room:create'] += self._create
-        D['room:join'] += self._join
-        D['room:leave'] += self._leave
-        D['room:users'] += self._users
-        D['room:get-ready'] += self._get_ready
-        D['room:change-location'] += self._change_location
-        D['room:cancel-ready'] += self._cancel_ready
+        D[wire.CreateRoom]     += self._create
+        D[wire.JoinRoom]       += self._join
+        D[wire.LeaveRoom]      += self._leave
+        D[wire.GetRoomUsers]   += self._users
+        D[wire.GetReady]       += self._get_ready
+        D[wire.ChangeLocation] += self._change_location
+        D[wire.CancelReady]    += self._cancel_ready
 
         self.games: Dict[int, Game] = {}
 
@@ -55,7 +55,7 @@ class Room(object):
         core.auth.set_auth(u, uid=0, name='空位置')
         return core
 
-    def handle_user_state_transition(self, ev):
+    def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         c, f, t = ev
         core = self.core
 
@@ -66,7 +66,7 @@ class Room(object):
            t in ('room', 'ready', 'game'):
             # TODO: order with core.game?
             g = core.game.current(c)
-            g and self._notify(g)
+            if g: self._notify(g)
 
         users = core.lobby.all_users()
         ul = [u for u in users if core.lobby.state_of(u) == 'lobby']
@@ -74,17 +74,17 @@ class Room(object):
 
         return ev
 
-    def handle_game_joined(self, ev):
+    def handle_game_joined(self, ev: Tuple[Game, Client]) -> Tuple[Game, Client]:
         g, c = ev
         g._[self]['left'][c] = False
         return ev
 
-    def handle_game_left(self, ev):
+    def handle_game_left(self, ev: Tuple[Game, Client]) -> Tuple[Game, Client]:
         g, c = ev
         g._[self]['left'][c] = self.is_started(g)
         return ev
 
-    def handle_game_started(self, g):
+    def handle_game_started(self, g: Game) -> Game:
         core = self.core
         users = g._[self]['users']
         assert None not in users
@@ -98,7 +98,7 @@ class Room(object):
         g._[self]['start_time'] = time.time()
         return g
 
-    def handle_game_ended(self, g):
+    def handle_game_ended(self, g: Game) -> Game:
         core = self.core
         self.games.pop(g._[self]['gid'], 0)
 
@@ -108,9 +108,7 @@ class Room(object):
 
         old = g
 
-        gid = self._new_gid()
         g = self.create_game(
-            gid,
             old.__class__,
             old._[self]['name'],
             old._[self]['flags'],
@@ -119,49 +117,49 @@ class Room(object):
         core.events.game_successive_create.emit((old, g))
 
         for u in old._[self]['users']:
-            if self.is_online(u):
+            if self.is_online(old, u):
                 self.join_game(g, u)
 
         return old
 
     # ----- Client Commands -----
     @command('lobby')
-    def _create(self, u: Client, typ: str, name: str, flags: Dict[str, Any]):
+    def _create(self, u: Client, ev: wire.CreateRoom) -> None:
         core = self.core
         from thb import modes
 
-        if typ not in modes:
+        if ev.mode not in modes:
             return
 
-        g = self.create_game(modes[typ], name, flags)
+        g = self.create_game(modes[ev.mode], ev.name, ev.flags)
         core.invite.add_invited(g, u)
-        core.room.join_game(g, u, 0)
+        self.join_game(g, u, 0)
 
     @command('lobby', 'ob')
-    def _join(self, u, gid: int, slot: int):
-        g = self.games.get(gid)
+    def _join(self, u: Client, ev: wire.JoinRoom) -> None:
+        g = self.games.get(ev.gid)
         if not g:
             return
 
         log.info("join game")
-        self.join_game(g, u, slot)
+        self.join_game(g, u, ev.slot)
 
     @command('room', 'ready', 'game')
-    def _leave(self, u: Client):
+    def _leave(self, u: Client, ev: wire.LeaveRoom) -> None:
         core = self.core
         self.exit_game(u)
         core.lobby.state_of(u).transit('lobby')
 
     @command('lobby')
-    def _users(self, u: Client, gid: int):
-        g = self.games.get(gid)
+    def _users(self, u: Client, ev: wire.GetRoomUsers) -> None:
+        g = self.games.get(ev.gid)
         if not g:
             return
 
         self.send_room_users(g, [u])
 
     @command('room')
-    def _get_ready(self, u: Client):
+    def _get_ready(self, u: Client, ev: wire.GetReady) -> None:
         core = self.core
         g = core.game.current(u)
 
@@ -178,11 +176,11 @@ class Room(object):
                 g._[self]['greenlet'] = gevent.spawn(g.run)
 
     @command('ready')
-    def _cancel_ready(self, u: Client):
+    def _cancel_ready(self, u: Client, ev: wire.CancelReady) -> None:
         self.cancel_ready(u)
 
     @command('room', 'ob')
-    def _change_location(self, u: Client, loc: int):
+    def _change_location(self, u: Client, ev: wire.ChangeLocation) -> None:
         core = self.core
 
         if core.lobby.state_of(u) not in ('room', ):
@@ -193,13 +191,13 @@ class Room(object):
         g = core.game.current(u)
         users = g._[self]['users']
 
-        if (not 0 <= loc < len(users)) or (users[loc] is not self.client_placeholder):
+        if (not 0 <= ev.loc < len(users)) or (users[ev.loc] is not self.client_placeholder):
             return
 
         i = users.index(u)
-        users[loc], users[i] = users[i], users[loc]
+        users[ev.loc], users[i] = users[i], users[ev.loc]
 
-        core.events.game_change_location.emit(g)
+        # core.events.game_change_location.emit(g)
 
     # ----- Public Methods -----
     def is_online(self, g: Game, c: Client) -> bool:
@@ -263,13 +261,17 @@ class Room(object):
         assert core.lobby.state_of(u) == 'lobby'
 
         slot = slot if slot is not None else self._next_slot(g)
+
+        if slot is None:
+            return
+
         if not (0 <= slot < g.n_persons and g._[self]['users'][slot] is self.client_placeholder):
             return
 
         g._[self]['users'][slot] = u
 
         core.lobby.state_of(u).transit('room')
-        u.write(wiremsg.GameJoined(core.view.Game(g)))
+        u.write(wire.GameJoined(core.view.GameDetail(g)))
 
         core.events.game_joined.emit((g, u))
 
@@ -283,7 +285,7 @@ class Room(object):
 
         gid = g._[self]['gid']
 
-        u.write(wiremsg.GameLeft(g._[self]['gid']))
+        u.write(wire.GameLeft(g._[self]['gid']))
 
         log.info(
             'Player %s left game [%s]',
@@ -312,7 +314,7 @@ class Room(object):
         core = self.core
         gid = g._[self]['gid']
         pl = [core.view.User(u) for u in g._[self]['users']]
-        s = Endpoint.encode(wiremsg.RoomUsers(gid=gid, users=pl))  # former `gameinfo` and `player_change`
+        s = Endpoint.encode(wire.RoomUsers(gid=gid, users=pl))  # former `gameinfo` and `player_change`
         for u in to:
             u.raw_write(s)
 
@@ -333,7 +335,7 @@ class Room(object):
         return self.games.get(gid)
 
     # ----- Methods -----
-    def _notify(self, g: Game):
+    def _notify(self, g: Game) -> None:
         notifier = g._[self]['_notifier']
 
         if notifier:
@@ -341,34 +343,31 @@ class Room(object):
             return
 
         @throttle(0.5)
-        def _notifier():
+        def _notifier() -> None:
             gevent.spawn(self.send_room_users, g, g._[self]['users'])
 
         g._[self]['_notifier'] = _notifier
         _notifier()
 
     @throttle(3)
-    def _notify_gamelist(self, ul: List[Client]):
+    def _notify_gamelist(self, ul: List[Client]) -> None:
         core = self.core
 
         lst = [core.view.Game(g) for g in self.games.values()]
-
-        d = Endpoint.encode([
-            ['current_games', lst],
-        ], Endpoint.FMT_BULK_COMPRESSED)
+        d = Endpoint.encode_bulk([wire.CurrentGames(lst)])
 
         @gevent.spawn
-        def do_send():
+        def do_send() -> None:
             for u in ul:
-                u.write(d)
+                u.raw_write(d)
 
-    def _next_slot(self, g: Game):
+    def _next_slot(self, g: Game) -> Optional[int]:
         try:
             return g._[self]['users'].index(self.client_placeholder)
         except ValueError:
             return None
 
-    def _new_gid(self):
+    def _new_gid(self) -> int:
         core = self.core
         gid = core.backend.query('query { gameId }')['gameId']
         return gid

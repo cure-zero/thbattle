@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
-import logging
+from typing import TYPE_CHECKING, Any
 import json
+import logging
 
 # -- third party --
 import gevent
@@ -12,12 +12,17 @@ import websocket
 # -- own --
 from utils.misc import throttle
 
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
+
+
 # -- code --
 log = logging.getLogger('Interconnect')
 
 
 class Connect(object):
-    def __init__(self, core):
+    def __init__(self, core: 'Core'):
         self.core = core
 
         core.events.game_created += self.refresh_status
@@ -32,7 +37,7 @@ class Connect(object):
         self._wshb = gevent.spawn(self._websocket_heartbeat)
 
     @throttle(1.5)
-    def refresh_status(self, ev):
+    def refresh_status(self, ev: Any) -> Any:
         core = self.core
         self._wssend({
             'op': 'Message',
@@ -41,13 +46,15 @@ class Connect(object):
                 'channel': 'users',
                 'text': json.dumps([
                     core.view.User(u)
-                    for u in core.lobby.get_users()
+                    for u in core.lobby.all_users()
                 ]),
             }
         })
 
+        return ev
+
     # ----- Public Methods -----
-    def speaker(self, name: str, text: str):
+    def speaker(self, name: str, text: str) -> None:
         core = self.core
         self._wssend({
             'op': 'Message',
@@ -59,7 +66,7 @@ class Connect(object):
         })
 
     # ----- Methods -----
-    def _websocket_handler(self):
+    def _websocket_handler(self) -> None:
         ws = self._wsconn
         while ws.connected:
             try:
@@ -69,7 +76,7 @@ class Connect(object):
                 log.exception(e)
                 gevent.sleep(1)
 
-    def _websocket_heartbeat(self):
+    def _websocket_heartbeat(self) -> None:
         ws = self._wsconn
         while ws.connected:
             try:
@@ -78,8 +85,8 @@ class Connect(object):
             except Exception as e:
                 log.exception(e)
 
-    def _wssend(self, v):
+    def _wssend(self, v: Any) -> None:
         self._wsconn.send(json.dumps(v))
 
-    def _wsrecv(self, v):
+    def _wsrecv(self, v: Any) -> None:
         pass

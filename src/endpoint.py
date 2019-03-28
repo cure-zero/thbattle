@@ -83,8 +83,6 @@ class Endpoint(object):
                     self.sock.sendall(s)
             except IOError:
                 self.close()
-        else:
-            return False
 
     def close(self):
         if not self.link_state == 'disconnected':

@@ -360,7 +360,7 @@ class ThrottleState(object):
         self.running = self.pending = False
 
 
-def throttle(seconds):
+def throttle(seconds: float) -> Callable[[T], T]:
     def decorate(f):
         state = ThrottleState()
 

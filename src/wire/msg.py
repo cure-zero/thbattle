@@ -48,19 +48,22 @@ class Message:
 def message(cls: Type[Message]) -> Type[Message]:
     assert issubclass(cls, ServerToClient) or issubclass(cls, ClientToServer)
     cls.op = cls.__name__
-    env = {}
-    fields = [f"    '{i.name}': self.{i.name}," for i in dataclasses.fields(cls)]
-    code = (
-        "def encode(self) -> dict:"
-        "    return {"
-        "        'op': self.op,"
-        "        %s"
-        "    }"
-    ) % '\n'.join(fields)
-    exec(code, env)
-    cls.encode = env['encode']
-    assert cls.op not in Message.types, cls.op
     Message.types[cls.op] = cls
+    assert cls.op not in Message.types, cls.op
+
+    if not hasattr(cls, 'encode'):
+        env = {}
+        fields = [f"    '{i.name}': self.{i.name}," for i in dataclasses.fields(cls)]
+        code = (
+            "def encode(self) -> dict:"
+            "    return {"
+            "        'op': self.op,"
+            "        %s"
+            "    }"
+        ) % '\n'.join(fields)
+        exec(code, env)
+        cls.encode = env['encode']
+
     return cls
 
 
@@ -91,6 +94,18 @@ class Error(Message, ServerToClient):
 @dataclass
 class SystemMsg(Message, ServerToClient):
     msg: str
+
+
+@message
+@dataclass
+class CurrentGames(Message, ServerToClient):
+    games: Sequence[model.Game]
+
+
+@message
+@dataclass
+class CurrentUsers(Message, ServerToClient):
+    users: Sequence[model.User]
 
 
 @message
@@ -161,13 +176,21 @@ class InviteRequest(Message, ServerToClient):
 @dataclass
 class ObserveRequest(Message, ServerToClient):
     uid: int
-    name: str
+
+
+@message
+@dataclass
+class KickRequest(Message, ServerToClient):
+    uid: int
+    victim: int
+    votes: int
 
 
 @message
 @dataclass
 class ObserveStarted(Message, ServerToClient):
     game: model.GameDetail
+    observee: int
 
 
 @message
@@ -287,6 +310,20 @@ class KickObserver(Message, ClientToServer):
     uid: int
 
 
+@message
+@dataclass
+class ObserverEnter(Message, ServerToClient):
+    observer: int
+    observee: int
+
+
+@message
+@dataclass
+class ObserverLeave(Message, ServerToClient):
+    observer: int
+    observee: int
+
+
 # ----- invite -----
 @message
 @dataclass
@@ -360,3 +397,12 @@ class AdminAddBigbrother(Message, ClientToServer):
 @dataclass
 class AdminRemoveBigbrother(Message, ClientToServer):
     uid: int
+
+
+# ----- match -----
+@message
+@dataclass
+class SetupMatch(Message, ClientToServer):
+    name: str
+    mode: str
+    uids: Sequence[int]

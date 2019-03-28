@@ -1,22 +1,29 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
+from typing import TYPE_CHECKING
 import logging
 
 # -- third party --
 # -- own --
+from server.base import Game
+
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
+
 
 # -- code --
 log = logging.getLogger('Reward')
 
 
 class Reward(object):
-    def __init__(self, core):
+    def __init__(self, core: 'Core'):
         self.core = core
 
         core.events.game_ended += self.handle_game_ended
 
-    def handle_game_ended(self, g):
+    def handle_game_ended(self, g: Game) -> Game:
         core = self.core
 
         if core.game.is_crashed(g):

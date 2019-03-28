@@ -73,20 +73,20 @@ class Item(object):
 
     # ----- Command -----
     @command('room')
-    def _use_item(self, u: Client, sku: str):
+    def _use_item(self, u: Client, ev: wiremsg.UseItem) -> None:
         core = self.core
         g = core.game.current(u)
         assert g
 
         try:
-            i = GameItem.from_sku(sku)
+            i = GameItem.from_sku(ev.sku)
             i.should_usable(g, u)
             uid = core.auth.uid_of(u)
             g._[self]['items'][uid].append(i)
             u.write(wiremsg.Info('use_item_success'))
         except BusinessException as e:
             uid = core.auth.uid_of(u)
-            log.exception('User %s failed to use item %s', uid, sku)
+            log.exception('User %s failed to use item %s', uid, ev.sku)
             u.write(wiremsg.Error(e.snake_case))
 
     # ----- Methods ------

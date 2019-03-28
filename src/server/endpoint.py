@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import TYPE_CHECKING, cast, Optional
+from typing import TYPE_CHECKING, cast, Optional, Sequence
 import logging
 
 # -- third party --
@@ -78,20 +78,20 @@ class Client(object):
     def is_dead(self) -> bool:
         return not self._gr or self._gr.ready()
 
-    def pivot_to(self, other) -> None:
+    def pivot_to(self, other: 'Client') -> None:
         if not self._ep:
             raise Exception("self._ep is not valid!")
 
         other._ep = self._ep
         self._ep = None
-        self._gr.kill()  # this skips client_dropped event
+        self._gr and self._gr.kill()  # this skips client_dropped event
 
         if other._ep:
-            other._gr.kill(Pivot)
+            other._gr and other._gr.kill(Pivot)
         else:
             other._gr = gevent.spawn(other._serve)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '%s:%s:%s' % (
             self.__class__.__name__,
             'FIXME', 'FIXME'
@@ -102,8 +102,11 @@ class Client(object):
 
     def write(self, v: wiremsg.ServerToClient) -> None:
         ep = self._ep
-        data = cast(wiremsg.Message, v).encode()
-        if ep: ep.write(data)
+        if ep: ep.write(v)
+
+    def write_bulk(self, vl: Sequence[wiremsg.ServerToClient]) -> None:
+        ep = self._ep
+        if ep: ep.write_bulk(cast(Sequence[wiremsg.Message], vl))
 
     def raw_write(self, v: bytes) -> None:
         ep = self._ep

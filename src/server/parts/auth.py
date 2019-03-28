@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING, Tuple, Sequence
 import logging
 
 # -- third party --
 # -- own --
 from server.endpoint import Client
-from server.utils import for_state
+from server.utils import command
 from wire import msg as wiremsg
 
 # -- typing --
@@ -45,11 +45,11 @@ class Auth(object):
         return ev
 
     # ----- Command -----
-    @for_state('connected')
-    def _auth(self, ev: Tuple[Client, wiremsg.Auth]) -> Tuple[Client, wiremsg.Auth]:
+
+    @command('connected')
+    def _auth(self, u: Client, m: wiremsg.Auth) -> None:
         core = self.core
-        u, auth = ev
-        token = auth.token
+        token = m.token
 
         rst = core.backend.query('''
             query($token: String) {
@@ -72,17 +72,18 @@ class Auth(object):
         ''', token=token)
 
         if not rst or rst['player']:
-            u.write(['auth:error', {'error': 'invalid_credential'}])
+            u.write(wiremsg.AuthError('invalid_credentials'))
             return
 
         rst = rst['player']
 
         if not rst['user']['isActive']:
-            u.write(['auth:error', {'error': 'not_available'}])
+            u.write(wiremsg.AuthError('not_available'))
         else:
-            u.write(['auth:result', {'uid': rst['id'], 'name': rst['name']}])
+            uid = int(rst['id'])
+            u.write(wiremsg.AuthSuccess(uid))
             u._[self] = {
-                'uid': int(rst['id']),
+                'uid': uid,
                 'name': rst['name'],
                 'kedama': False,
                 'permissions': set(
@@ -102,7 +103,7 @@ class Auth(object):
     def is_kedama(self, u: Client) -> bool:
         return u._[self]['kedama']
 
-    def set_auth(self, u: Client, uid=1, name='Foo', kedama=False, permissions=[]) -> None:
+    def set_auth(self, u: Client, uid: int = 1, name: str = 'Foo', kedama: bool = False, permissions: Sequence[str] = []) -> None:
         u._[self] = {
             'uid': uid,
             'name': name,

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Dict, List, TYPE_CHECKING, Tuple, Optional
+from typing import Dict, Optional, Sequence, TYPE_CHECKING, Tuple
 import logging
 
 # -- third party --
@@ -13,10 +13,11 @@ from server.base import Game
 from server.endpoint import Client
 from utils.events import FSM
 from utils.misc import BatchList, throttle
+from wire import msg as wiremsg
 
 # -- typing --
 if TYPE_CHECKING:
-    from server.core import Core
+    from server.core import Core  # noqa: F401
 
 
 # -- code --
@@ -24,7 +25,7 @@ log = logging.getLogger('Lobby')
 
 
 class Lobby(object):
-    def __init__(self, core: Core):
+    def __init__(self, core: 'Core'):
         self.core = core
 
         core.events.client_connected += self.handle_client_connected
@@ -34,7 +35,7 @@ class Lobby(object):
         self.users: Dict[int, Client] = {}          # all users
         self.dropped_users: Dict[int, Client] = {}  # passively dropped users
 
-    def handle_user_state_transition(self, ev: Tuple[Client, str, str]):
+    def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         c, f, t = ev
 
         if (f, t) == ('connected', 'authed'):
@@ -49,7 +50,7 @@ class Lobby(object):
 
         return ev
 
-    def handle_client_connected(self, c: Client):
+    def handle_client_connected(self, c: Client) -> Client:
         core = self.core
         c._[self] = {
             'state': FSM(
@@ -72,7 +73,7 @@ class Lobby(object):
         c._[self]['state'].transit('connected')
         return c
 
-    def handle_game_ended(self, g: Game):
+    def handle_game_ended(self, g: Game) -> Game:
         core = self.core
         users = core.room.users_of(g)
 
@@ -93,7 +94,7 @@ class Lobby(object):
         return self.users.get(uid)
 
     # ----- Methods -----
-    def _user_join(self, u: Client):
+    def _user_join(self, u: Client) -> None:
         core = self.core
         uid = core.auth.uid_of(u)
         name = core.auth.name_of(u)
@@ -125,7 +126,7 @@ class Lobby(object):
 
         log.info('User %s joined, online user %d' % (name, len(self.users)))
 
-    def _user_leave(self, u: Client):
+    def _user_leave(self, u: Client) -> None:
         core = self.core
         uid = core.auth.uid_of(u)
         name = core.auth.name_of(u)
@@ -133,16 +134,12 @@ class Lobby(object):
         log.info('User %s left, online user %d' % (name, len(self.users)))
 
     @throttle(3)
-    def _notify_online_users(self, ul: List[Client]):
+    def _notify_online_users(self, ul: Sequence[Client]) -> None:
         core = self.core
-
         lst = [core.view.User(u) for u in self.users.values()]
-
-        d = Endpoint.encode([
-            ['current_users', lst],
-        ], Endpoint.FMT_BULK_COMPRESSED)
+        d = Endpoint.encode_bulk([wiremsg.CurrentUsers(users=lst)])
 
         @gevent.spawn
-        def do_send():
+        def do_send() -> None:
             for u in ul:
-                u.write(d)
+                u.raw_write(d)
