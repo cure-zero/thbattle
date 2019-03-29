@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Any, TYPE_CHECKING, Optional, cast
+from typing import Optional, TYPE_CHECKING, cast
 from urllib.parse import urlparse
 import logging
 import socket
 
 # -- third party --
-import gevent
 from gevent import Greenlet
+import gevent
 
 # -- own --
 from endpoint import Endpoint
@@ -28,37 +28,34 @@ STOP = EventHub.STOP_PROPAGATION
 class Server(object):
     def __init__(self, core: 'Core'):
         self.core = core
-        core.events.server_command += self.handle_server_command
 
         self.server_name = 'Unknown'
-
         self.state = 'initial'
 
         self._ep: Optional[Endpoint] = None
         self._recv_gr: Optional[Greenlet] = None
         self._beater_gr: Optional[Greenlet] = None
 
-    def handle_server_command(self, ev: wire.Message) -> Any:
-        greet = wire.cast(wire.Greeting, ev)
-        if greet:
-            from settings import VERSION
+        D = core.events.server_command
+        D[wire.Greeting] += self._greeting
+        D[wire.Ping] += self._ping
 
-            core = self.core
+    def _greeting(self, ev: wire.Greeting) -> wire.Greeting:
+        from settings import VERSION
 
-            if greet.version != VERSION:
-                self.disconnect()
-                core.events.version_mismatch.emit(None)
-            else:
-                self.server_name = greet.node
-                core.events.server_connected.emit(None)
+        core = self.core
 
-            return STOP
+        if ev.version != VERSION:
+            self.disconnect()
+            core.events.version_mismatch.emit(None)
+        else:
+            self.server_name = ev.node
+            core.events.server_connected.emit(None)
 
-        ping = wire.cast(wire.Ping, ev)
-        if ping:
-            self.write(wire.Pong())
-            return STOP
+        return ev
 
+    def _ping(self, ev: wire.Ping) -> wire.Ping:
+        self.write(wire.Pong())
         return ev
 
     # ----- Public Methods -----
@@ -100,21 +97,21 @@ class Server(object):
 
     def write(self, v: wire.ClientToServer) -> None:
         ep = self._ep
-        ep and ep.write(cast(wire.Message, v).encode())
+        if ep: ep.write(cast(wire.Message, v).encode())
 
     def raw_write(self, v: bytes) -> None:
         ep = self._ep
-        ep and ep.raw_write(v)
+        if ep: ep.raw_write(v)
 
     # ----- Methods -----
     def _recv(self) -> None:
         me = gevent.getcurrent()
         me.link_exception(self._dropped)
         core = self.core
-        ev = core.events.server_command
-        while self._ep:
-            v = self._ep.read()
-            ev.emit(v)
+        D = core.events.server_command
+        assert self._ep
+        for v in self._ep.messages(timeout=None):
+            D[v.__class__].emit(v)
 
     def _dropped(self) -> None:
         core = self.core

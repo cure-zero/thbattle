@@ -142,11 +142,10 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout: int = 25, ty
 
 class Theone(game.base.Player):
 
-    def __init__(self, game: 'Game', uid: int, name: str):
+    def __init__(self, game: 'Game', uid: int):
         Player.__init__(self)
         self.game = game
         self.uid = uid
-        self.name = name
 
     def reveal(self, obj_list: Any) -> None:
         # It's me, server will tell me what the hell these is.
@@ -163,11 +162,10 @@ class Theone(game.base.Player):
 
 class Someone(Player):
 
-    def __init__(self, game: 'Game', uid: int, name: str):
+    def __init__(self, game: 'Game', uid: int):
         Player.__init__(self)
         self.game = game
         self.uid = uid
-        self.name = name
 
     def reveal(self, ol: Any) -> None:
         # Peer player, won't reveal.

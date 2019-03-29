@@ -12,7 +12,6 @@ from mypy_extensions import TypedDict
 # -- code --
 class User(TypedDict):
     uid: int
-    name: str
     state: str
 
 

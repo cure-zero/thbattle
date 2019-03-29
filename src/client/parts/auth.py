@@ -1,37 +1,40 @@
 # -*- coding: utf-8 -*-
 
-
 # -- stdlib --
+from typing import TYPE_CHECKING
+
 # -- third party --
 # -- own --
 from utils.events import EventHub
+import wire
+
+# -- typing --
+if TYPE_CHECKING:
+    from client.core import Core  # noqa: F401
 
 
 # -- code --
 class Auth(object):
-    def __init__(self, core):
+    def __init__(self, core: 'Core'):
         self.core = core
-        core.events.server_command += self.handle_server_command
-
         self.uid = 0
-        self.name = ''
 
-    def handle_server_command(self, ev):
-        cmd, arg = ev
-        if cmd == 'auth:result':
-            core = self.core
-            self.uid = arg['uid']
-            self.name = arg['name']
-            core.events.auth.emit((True, arg))
-            return EventHub.STOP_PROPAGATION
+        D = core.events.server_command
+        D[wire.AuthSuccess] += self._auth_success
+        D[wire.AuthError] += self._auth_error
 
-        elif cmd == 'auth:error':
-            core.events.auth.emit((False, arg))
-            return EventHub.STOP_PROPAGATION
+    def _auth_success(self, ev: wire.AuthSuccess) -> EventHub.StopPropagation:
+        core = self.core
+        self.uid = ev.uid
+        core.events.auth_success.emit(ev.uid)
+        return EventHub.STOP_PROPAGATION
 
-        return ev
+    def _auth_error(self, ev: wire.AuthError) -> EventHub.StopPropagation:
+        core = self.core
+        core.events.auth_error.emit(ev.reason)
+        return EventHub.STOP_PROPAGATION
 
     # ----- Public Methods -----
-    def login(self, token: str):
+    def login(self, token: str) -> None:
         core = self.core
-        core.server.write(['auth', token])
+        core.server.write(wire.Auth(token))

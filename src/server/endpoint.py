@@ -52,7 +52,7 @@ class Client(object):
 
             try:
                 for msg in self._ep.messages(timeout=90):
-                    tbl[msg.op].emit(msg)
+                    tbl[msg.__class__].emit((self, msg))
 
             except EndpointDied:
                 break

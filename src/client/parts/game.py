@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Any, Dict, List, Sequence, Union
+from typing import Any, Dict, List, Sequence
 import logging
 
 # -- third party --
 import gevent
+from gevent import Greenlet
 
 # -- own --
 from client.base import ForcedKill, Game as ClientGame, Someone, Theone
@@ -13,7 +14,7 @@ from client.core import Core
 from game.base import GameData, Player
 from utils.events import EventHub
 from utils.misc import BatchList
-from wire import model as wiremodel, msg as wire
+import wire
 
 
 # -- code --
@@ -24,55 +25,44 @@ STOP = EventHub.STOP_PROPAGATION
 class Game(object):
     def __init__(self, core: Core):
         self.core = core
-        core.events.server_command += self.handle_server_command
         self.games: Dict[int, ClientGame] = {}
 
-    def handle_server_command(self, ev: wire.Message) -> Union[wire.Message, EventHub.StopPropagation]:
-        if isinstance(ev, wire.RoomUsers):
-            self._room_users(ev)
-            return STOP
-        elif isinstance(ev, wire.GameStarted):
-            self._game_started(ev)
-            return STOP
-        elif isinstance(ev, wire.GameJoined):
-            self._game_joined(ev)
-            return STOP
-        elif isinstance(ev, wire.ObserveStarted):
-            self._observe_started(ev)
-            return STOP
-        elif isinstance(ev, wire.GameLeft):
-            self._game_left(ev)
-            return STOP
-        elif isinstance(ev, wire.GameEnded):
-            self._game_ended(ev)
-            return STOP
+        D = core.events.server_command
+        D[wire.RoomUsers]      += self._room_users
+        D[wire.GameStarted]    += self._game_started
+        D[wire.GameJoined]     += self._game_joined
+        D[wire.ObserveStarted] += self._observe_started
+        D[wire.GameLeft]       += self._game_left
+        D[wire.GameEnded]      += self._game_ended
 
-        return ev
-
-    def _room_users(self, ev: wire.RoomUsers) -> None:
+    def _room_users(self, ev: wire.RoomUsers) -> wire.RoomUsers:
         core = self.core
 
         g = self.games.get(ev.gid)
         if not g:
-            return
+            return ev
 
         g._[self]['users'] = ev.users
         core.events.room_users.emit((g, ev.users))
 
-    def _game_started(self, ev: wire.GameStarted):
+        return ev
+
+    def _game_started(self, ev: wire.GameStarted) -> wire.GameStarted:
         core = self.core
         gv = ev.game
         g = self.games[gv['gid']]
         core.events.game_started.emit(g)
+        return ev
 
-    def _observe_started(self, ev: wire.ObserveStarted):
+    def _observe_started(self, ev: wire.ObserveStarted) -> wire.ObserveStarted:
         gv = ev.game
         g = self.games[gv['gid']]
         g._[self]['observe'] = True
         core = self.core
         core.events.game_started.emit(g)
+        return ev
 
-    def _game_joined(self, ev: wire.GameJoined):
+    def _game_joined(self, ev: wire.GameJoined) -> wire.GameJoined:
         gv = ev.game
         gid = gv['gid']
         g = self.create_game(
@@ -86,31 +76,36 @@ class Game(object):
         self.games[gid] = g
         core = self.core
         core.events.game_joined.emit(g)
+        return ev
 
-    def _game_left(self, ev: wire.GameLeft):
+    def _game_left(self, ev: wire.GameLeft) -> wire.GameLeft:
         g = self.games.get(ev.gid)
         if not g:
-            return
+            return ev
 
         self.kill_game(g)
 
         core = self.core
         core.events.game_left.emit(g)
 
-    def _game_ended(self, ev: wire.GameEnded):
+        return ev
+
+    def _game_ended(self, ev: wire.GameEnded) -> wire.GameEnded:
         g = self.games.get(ev.gid)
         if not g:
-            return
+            return ev
 
         log.info('=======GAME ENDED=======')
         core = self.core
         core.events.game_ended.emit(g)
 
+        return ev
+
     # ----- Public Methods -----
     def is_observe(self, g: ClientGame) -> bool:
         return g._[self]['observe']
 
-    def create_game(self, gid: int, mode: str, name: str, users: List[wiremodel.User], params: Dict[str, Any], items: Dict[int, List[str]]) -> ClientGame:
+    def create_game(self, gid: int, mode: str, name: str, users: List[wire.model.User], params: Dict[str, Any], items: Dict[int, List[str]]) -> ClientGame:
         from thb import modes
         g = modes[mode]()
         assert isinstance(g, ClientGame)
@@ -139,18 +134,18 @@ class Game(object):
         ))
         # core.events.game_data_send.emit((g, pkt))
 
-    def build_players(self, g: ClientGame, uvl: Sequence[wiremodel.User]) -> BatchList[Player]:
+    def build_players(self, g: ClientGame, uvl: Sequence[wire.model.User]) -> BatchList[Player]:
         core = self.core
         me_uid = core.auth.uid
         assert me_uid in [uv['uid'] for uv in uvl]
 
-        me = Theone(g, me_uid, core.auth.name)
+        me = Theone(g, me_uid)
 
         pl = BatchList[Player]([
-            me if uv['uid'] == me_uid else Someone(g, uv['uid'], uv['name'])
+            me if uv['uid'] == me_uid else Someone(g, uv['uid'])
             for uv in uvl
         ])
-        pl[:0] = [Someone(g, -i, npc.name) for i, npc in enumerate(g.npc_players)]
+        pl[:0] = [Someone(g, 0) for i, npc in enumerate(g.npc_players)]
 
         return pl
 
@@ -160,7 +155,7 @@ class Game(object):
         g._[self]['greenlet'] = gr
 
         @gr.link_exception
-        def crash(gr):
+        def crash(gr: Greenlet) -> None:
             core.events.game_crashed.emit(g)
 
         log.info('----- GAME STARTED: %d -----' % g._[self]['gid'])
@@ -183,5 +178,5 @@ class Game(object):
     def params_of(self, g: ClientGame) -> dict:
         return g._[self]['params']
 
-    def users_of(self, g: ClientGame) -> List[wiremodel.User]:
+    def users_of(self, g: ClientGame) -> List[wire.model.User]:
         return g._[self]['users']
