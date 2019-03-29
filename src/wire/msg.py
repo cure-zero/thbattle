@@ -9,7 +9,7 @@ import dataclasses
 
 # -- own --
 # -- errord --
-from wire import model
+from . import model
 
 
 # -- code --

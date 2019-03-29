@@ -11,7 +11,7 @@ from .base import Game
 from .endpoint import Client
 from game.base import Packet
 from utils.events import EventHub
-from wire import msg as wiremsg
+import wire
 
 
 # -- code --
@@ -24,7 +24,7 @@ class Options(object):
         self.disables     = options.get('disables', [])       # disabled core components, will assign a None value
 
 
-T = TypeVar('T', bound=wiremsg.Message)
+T = TypeVar('T', bound=wire.Message)
 
 
 class _ClientCommandMapping:

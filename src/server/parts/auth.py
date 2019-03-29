@@ -8,7 +8,7 @@ import logging
 # -- own --
 from server.endpoint import Client
 from server.utils import command
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ class Auth(object):
 
         core.events.user_state_transition += self.handle_user_state_transition
         D = core.events.client_command
-        D[wiremsg.Auth] += self._auth
+        D[wire.Auth] += self._auth
 
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         u, f, t = ev
@@ -34,7 +34,7 @@ class Auth(object):
         if (f, t) == ('initial', 'connected'):
             from settings import VERSION
             core = self.core
-            u.write(wiremsg.Greeting(node=core.options.node, version=VERSION))
+            u.write(wire.Greeting(node=core.options.node, version=VERSION))
             u._[self] = {
                 'uid': 0,
                 'name': '',
@@ -47,7 +47,7 @@ class Auth(object):
     # ----- Command -----
 
     @command('connected')
-    def _auth(self, u: Client, m: wiremsg.Auth) -> None:
+    def _auth(self, u: Client, m: wire.Auth) -> None:
         core = self.core
         token = m.token
 
@@ -72,16 +72,16 @@ class Auth(object):
         ''', token=token)
 
         if not rst or rst['player']:
-            u.write(wiremsg.AuthError('invalid_credentials'))
+            u.write(wire.AuthError('invalid_credentials'))
             return
 
         rst = rst['player']
 
         if not rst['user']['isActive']:
-            u.write(wiremsg.AuthError('not_available'))
+            u.write(wire.AuthError('not_available'))
         else:
             uid = int(rst['id'])
-            u.write(wiremsg.AuthSuccess(uid))
+            u.write(wire.AuthSuccess(uid))
             u._[self] = {
                 'uid': uid,
                 'name': rst['name'],

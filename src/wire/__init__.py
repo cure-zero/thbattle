@@ -1,2 +1,2 @@
-from .model import *
 from .msg import *
+from . import model

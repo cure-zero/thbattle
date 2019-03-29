@@ -13,7 +13,7 @@ from server.base import Game
 from server.endpoint import Client
 from utils.events import FSM
 from utils.misc import BatchList, throttle
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -137,7 +137,7 @@ class Lobby(object):
     def _notify_online_users(self, ul: Sequence[Client]) -> None:
         core = self.core
         lst = [core.view.User(u) for u in self.users.values()]
-        d = Endpoint.encode_bulk([wiremsg.CurrentUsers(users=lst)])
+        d = Endpoint.encode_bulk([wire.CurrentUsers(users=lst)])
 
         @gevent.spawn
         def do_send() -> None:

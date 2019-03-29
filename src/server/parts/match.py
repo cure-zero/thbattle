@@ -12,7 +12,7 @@ from server.base import Game
 from server.endpoint import Client
 from server.utils import command
 from utils.events import EventHub
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -34,8 +34,8 @@ class Match(object):
         core.events.game_successive_create += self.handle_game_successive_create
 
         D = core.events.client_command
-        D[wiremsg.SetupMatch] += self._match
-        D[wiremsg.JoinRoom].subscribe(self._room_join_match_limit, -3)
+        D[wire.SetupMatch] += self._match
+        D[wire.JoinRoom].subscribe(self._room_join_match_limit, -3)
 
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         c, f, t = ev
@@ -96,12 +96,12 @@ class Match(object):
 
     # ----- Client Commands -----
     @command()
-    def _match(self, c: Client, ev: wiremsg.SetupMatch) -> None:
+    def _match(self, c: Client, ev: wire.SetupMatch) -> None:
         core = self.core
         from thb import modes
         gamecls = modes[ev.mode]
         if len(ev.uids) != gamecls.n_persons:
-            c.write(wiremsg.SystemMsg('参赛人数不正确'))
+            c.write(wire.SystemMsg('参赛人数不正确'))
             return
 
         g = core.room.create_game(gamecls, ev.name, {'match': True})
@@ -112,7 +112,7 @@ class Match(object):
         self._start_poll(g, ev.uids)
 
     @command()
-    def _room_join_match_limit(self, u: Client, ev: wiremsg.JoinRoom) -> Optional[EventHub.StopPropagation]:
+    def _room_join_match_limit(self, u: Client, ev: wire.JoinRoom) -> Optional[EventHub.StopPropagation]:
         core = self.core
 
         g = core.room.get(ev.gid)
@@ -125,7 +125,7 @@ class Match(object):
         if flags.get('match'):
             uid = core.auth.uid_of(u)
             if uid not in g._[self]['match_uids']:
-                u.write(wiremsg.Error('not_invited'))
+                u.write(wire.Error('not_invited'))
                 return EventHub.STOP_PROPAGATION
 
         return None
@@ -160,7 +160,7 @@ class Match(object):
                         gevent.sleep(1)
                         core.room.join_game(g, u)
                     elif core.lobby.state_of(u) == 'game':
-                        gevent.spawn(u.write, wiremsg.SystemMsg('你有比赛房间，请尽快结束游戏参与比赛'))
+                        gevent.spawn(u.write, wire.SystemMsg('你有比赛房间，请尽快结束游戏参与比赛'))
 
                     gevent.sleep(0.1)
 

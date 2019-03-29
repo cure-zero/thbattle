@@ -13,7 +13,7 @@ from server.base import Game as ServerGame, HumanPlayer, NPCPlayer
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BatchList
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -37,8 +37,8 @@ class Game(object):
         core.events.client_pivot += self.handle_client_pivot
 
         D = core.events.client_command
-        D[wiremsg.SetGameParam] += self._set_param
-        D[wiremsg.GameData] += self._gamedata
+        D[wire.SetGameParam] += self._set_param
+        D[wire.GameData] += self._gamedata
 
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         u, f, t = ev
@@ -56,8 +56,8 @@ class Game(object):
             assert g
             assert u in g.players.client
 
-            u.write(wiremsg.GameJoined(core.view.Game(g)))
-            u.write(wiremsg.GameStarted(core.view.GameDetail(g)))
+            u.write(wire.GameJoined(core.view.Game(g)))
+            u.write(wire.GameStarted(core.view.GameDetail(g)))
 
             self.replay(u, u)
 
@@ -69,7 +69,7 @@ class Game(object):
         core = self.core
         users = core.room.users_of(g)
         for u in users:
-            u.write(wiremsg.GameStarted(core.view.GameDetail(g)))
+            u.write(wire.GameStarted(core.view.GameDetail(g)))
 
         return g
 
@@ -77,7 +77,7 @@ class Game(object):
         core = self.core
         users = core.room.online_users_of(g)
         for u in users:
-            u.write(wiremsg.GameEnded(core.room.gid_of(g)))
+            u.write(wire.GameEnded(core.room.gid_of(g)))
 
         return g
 
@@ -110,13 +110,13 @@ class Game(object):
         params = old._[self]['params']
         g._[self]['params'] = params
         gid = core.room.gid_of(g)
-        core.room.online_users_of(old).write(wiremsg.GameParams(gid=gid, params=params))
+        core.room.online_users_of(old).write(wire.GameParams(gid=gid, params=params))
 
         return ev
 
     # ----- Commands -----
     @command('room')
-    def _set_param(self, u: Client, ev: wiremsg.SetGameParam) -> None:
+    def _set_param(self, u: Client, ev: wire.SetGameParam) -> None:
         core = self.core
 
         if core.lobby.state_of(u) != 'room':
@@ -150,10 +150,10 @@ class Game(object):
                 core.room.cancel_ready(u)
 
             u.write(ev)
-            u.write(wiremsg.GameParams(gid, g._[self]['params']))
+            u.write(wire.GameParams(gid, g._[self]['params']))
 
     @command('game')
-    def _gamedata(self, u: Client, ev: wiremsg.GameData) -> None:
+    def _gamedata(self, u: Client, ev: wire.GameData) -> None:
         core = self.core
         g = u._[self]['game']
         if ev.gid != core.room.gid_of(g):
@@ -190,9 +190,9 @@ class Game(object):
 
         gid = core.room.gid_of(g)
 
-        to.write(wiremsg.GameLiveAt(pkts[-1].serial))
+        to.write(wire.GameLiveAt(pkts[-1].serial))
         to.write_bulk([
-            wiremsg.GameData(gid, p.id, p.tag, p.data)
+            wire.GameData(gid, p.id, p.tag, p.data)
             for p in pkts
         ])
 
@@ -240,7 +240,7 @@ class Game(object):
         assert u._[self]['game'] is g
         pkt = g._[self]['data'][u].feed_send(tag, data)
         gid = core.room.gid_of(g)
-        u.write(wiremsg.GameData(gid=gid, serial=pkt.serial, tag=pkt.tag, data=pkt.data))
+        u.write(wire.GameData(gid=gid, serial=pkt.serial, tag=pkt.tag, data=pkt.data))
         core.events.game_data_send.emit((g, u, pkt))
 
     def current(self, u: Client) -> ServerGame:

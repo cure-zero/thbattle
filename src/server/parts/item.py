@@ -12,7 +12,7 @@ from server.base import Game
 from server.endpoint import Client
 from server.utils import command
 from utils.misc import BusinessException
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -73,7 +73,7 @@ class Item(object):
 
     # ----- Command -----
     @command('room')
-    def _use_item(self, u: Client, ev: wiremsg.UseItem) -> None:
+    def _use_item(self, u: Client, ev: wire.UseItem) -> None:
         core = self.core
         g = core.game.current(u)
         assert g
@@ -83,11 +83,11 @@ class Item(object):
             i.should_usable(g, u)
             uid = core.auth.uid_of(u)
             g._[self]['items'][uid].append(i)
-            u.write(wiremsg.Info('use_item_success'))
+            u.write(wire.Info('use_item_success'))
         except BusinessException as e:
             uid = core.auth.uid_of(u)
             log.exception('User %s failed to use item %s', uid, ev.sku)
-            u.write(wiremsg.Error(e.snake_case))
+            u.write(wire.Error(e.snake_case))
 
     # ----- Methods ------
     # ----- Public Methods -----

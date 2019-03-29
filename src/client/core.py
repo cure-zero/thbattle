@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Any, Sequence, Tuple
+from typing import Any, Dict, Sequence, Tuple
 
 # -- third party --
 # -- own --
-from . import parts
-from .base import Game
+from client import parts
+from client.base import Game
 from utils.events import EventHub
-from wire import msg as wiremsg, model as wiremodel
+import wire
 
 
 # -- code --
 class Options(object):
-    def __init__(self, options):
+    def __init__(self, options: Dict[str, Any]):
         self.no_update        = options.get('no_update', False)
         self.show_hidden_mode = options.get('show_hidden_mode', False)
         self.freeplay         = options.get('freeplay', False)
@@ -27,7 +27,7 @@ class Events(object):
 
         # Fires when server send some command
         # ev = (cmd: str, arg: object)
-        self.server_command = EventHub[wiremsg.Message]()
+        self.server_command = EventHub[wire.Message]()
 
         # Server connected
         self.server_connected = EventHub[None]()
@@ -57,7 +57,7 @@ class Events(object):
 
         # Left a game
         # ev = (g: Game, users: [server.core.view.User(u), ...])
-        self.room_users = EventHub[Tuple[Game, Sequence[wiremodel.User]]]()
+        self.room_users = EventHub[Tuple[Game, Sequence[wire.model.User]]]()
 
         # Game is up and running
         # ev = (g: Game)
@@ -78,7 +78,7 @@ class Events(object):
 
 
 class Core(object):
-    def __init__(self: 'Core', **options):
+    def __init__(self: 'Core', **options: Dict[str, Any]):
         self.options = Options(options)
 
         self.events = Events()

@@ -13,7 +13,7 @@ from gevent import Greenlet
 # -- own --
 from endpoint import Endpoint
 from utils.events import EventHub
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -38,8 +38,8 @@ class Server(object):
         self._recv_gr: Optional[Greenlet] = None
         self._beater_gr: Optional[Greenlet] = None
 
-    def handle_server_command(self, ev: wiremsg.Message) -> Any:
-        greet = wiremsg.cast(wiremsg.Greeting, ev)
+    def handle_server_command(self, ev: wire.Message) -> Any:
+        greet = wire.cast(wire.Greeting, ev)
         if greet:
             from settings import VERSION
 
@@ -54,9 +54,9 @@ class Server(object):
 
             return STOP
 
-        ping = wiremsg.cast(wiremsg.Ping, ev)
+        ping = wire.cast(wire.Ping, ev)
         if ping:
-            self.write(wiremsg.Pong())
+            self.write(wire.Pong())
             return STOP
 
         return ev
@@ -98,9 +98,9 @@ class Server(object):
         beater and beater.kill()
         self.state = 'initial'
 
-    def write(self, v: wiremsg.ClientToServer) -> None:
+    def write(self, v: wire.ClientToServer) -> None:
         ep = self._ep
-        ep and ep.write(cast(wiremsg.Message, v).encode())
+        ep and ep.write(cast(wire.Message, v).encode())
 
     def raw_write(self, v: bytes) -> None:
         ep = self._ep

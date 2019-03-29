@@ -13,7 +13,7 @@ from client.core import Core
 from game.base import GameData, Player
 from utils.events import EventHub
 from utils.misc import BatchList
-from wire import model as wiremodel, msg as wiremsg
+from wire import model as wiremodel, msg as wire
 
 
 # -- code --
@@ -27,29 +27,29 @@ class Game(object):
         core.events.server_command += self.handle_server_command
         self.games: Dict[int, ClientGame] = {}
 
-    def handle_server_command(self, ev: wiremsg.Message) -> Union[wiremsg.Message, EventHub.StopPropagation]:
-        if isinstance(ev, wiremsg.RoomUsers):
+    def handle_server_command(self, ev: wire.Message) -> Union[wire.Message, EventHub.StopPropagation]:
+        if isinstance(ev, wire.RoomUsers):
             self._room_users(ev)
             return STOP
-        elif isinstance(ev, wiremsg.GameStarted):
+        elif isinstance(ev, wire.GameStarted):
             self._game_started(ev)
             return STOP
-        elif isinstance(ev, wiremsg.GameJoined):
+        elif isinstance(ev, wire.GameJoined):
             self._game_joined(ev)
             return STOP
-        elif isinstance(ev, wiremsg.ObserveStarted):
+        elif isinstance(ev, wire.ObserveStarted):
             self._observe_started(ev)
             return STOP
-        elif isinstance(ev, wiremsg.GameLeft):
+        elif isinstance(ev, wire.GameLeft):
             self._game_left(ev)
             return STOP
-        elif isinstance(ev, wiremsg.GameEnded):
+        elif isinstance(ev, wire.GameEnded):
             self._game_ended(ev)
             return STOP
 
         return ev
 
-    def _room_users(self, ev: wiremsg.RoomUsers) -> None:
+    def _room_users(self, ev: wire.RoomUsers) -> None:
         core = self.core
 
         g = self.games.get(ev.gid)
@@ -59,20 +59,20 @@ class Game(object):
         g._[self]['users'] = ev.users
         core.events.room_users.emit((g, ev.users))
 
-    def _game_started(self, ev: wiremsg.GameStarted):
+    def _game_started(self, ev: wire.GameStarted):
         core = self.core
         gv = ev.game
         g = self.games[gv['gid']]
         core.events.game_started.emit(g)
 
-    def _observe_started(self, ev: wiremsg.ObserveStarted):
+    def _observe_started(self, ev: wire.ObserveStarted):
         gv = ev.game
         g = self.games[gv['gid']]
         g._[self]['observe'] = True
         core = self.core
         core.events.game_started.emit(g)
 
-    def _game_joined(self, ev: wiremsg.GameJoined):
+    def _game_joined(self, ev: wire.GameJoined):
         gv = ev.game
         gid = gv['gid']
         g = self.create_game(
@@ -87,7 +87,7 @@ class Game(object):
         core = self.core
         core.events.game_joined.emit(g)
 
-    def _game_left(self, ev: wiremsg.GameLeft):
+    def _game_left(self, ev: wire.GameLeft):
         g = self.games.get(ev.gid)
         if not g:
             return
@@ -97,7 +97,7 @@ class Game(object):
         core = self.core
         core.events.game_left.emit(g)
 
-    def _game_ended(self, ev: wiremsg.GameEnded):
+    def _game_ended(self, ev: wire.GameEnded):
         g = self.games.get(ev.gid)
         if not g:
             return
@@ -131,7 +131,7 @@ class Game(object):
         core = self.core
         pkt = g._[self]['data'].feed_send(tag, data)
         gid = g._[self]['gid']
-        core.server.write(wiremsg.GameData(
+        core.server.write(wire.GameData(
             gid=gid,
             serial=pkt.serial,
             tag=pkt.tag,

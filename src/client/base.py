@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import cast, List, Sequence
 from collections import OrderedDict
 from copy import copy
 from random import Random
-from typing import Any, Optional, Sequence
+from typing import Any, Optional, Sequence, TYPE_CHECKING, cast
 import logging
 
 # -- third party --
 import gevent
 
 # -- own --
-from client.core import Core
 from game.base import GameEnded, InputTransaction, Inputlet, Player, TimeLimitExceeded
 import game.base
+
+# -- typing --
+if TYPE_CHECKING:
+    from client.core import Core  # noqa: F401
 
 
 # -- code --
@@ -25,7 +27,7 @@ class ForcedKill(gevent.GreenletExit):
     pass
 
 
-def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction] = None):
+def user_input(players: Sequence[Any], inputlet: Inputlet, timeout: int = 25, type: str = 'single', trans: Optional[InputTransaction] = None) -> Any:
     '''
     Type can be 'single', 'all' or 'any'
     '''
@@ -179,7 +181,7 @@ class Game(game.base.Game):
 
     random = Random()
 
-    def __init__(self, core: Core):
+    def __init__(self, core: 'Core'):
         game.base.Game.__init__(self)
         self.core = core
 

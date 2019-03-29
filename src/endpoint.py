@@ -13,7 +13,7 @@ from gevent import socket
 from gevent.timeout import Timeout
 from gevent.lock import RLock
 import msgpack
-from wire import msg as wiremsg
+import wire
 
 # -- own --
 
@@ -57,11 +57,11 @@ class Endpoint(object):
         )
 
     @staticmethod
-    def encode(p: wiremsg.Message) -> bytes:
+    def encode(p: wire.Message) -> bytes:
         return msgpack.packb([Format.Packed, p], use_bin_type=True)
 
     @staticmethod
-    def encode_bulk(pl: Sequence[wiremsg.Message]) -> bytes:
+    def encode_bulk(pl: Sequence[wire.Message]) -> bytes:
         data = msgpack.packb(pl, use_bin_type=True)
         return msgpack.packb([Format.BulkCompressed, zlib.compress(data)], use_bin_type=True)
 
@@ -70,7 +70,7 @@ class Endpoint(object):
             log.debug("SEND>> %s" % p)
         self.raw_write(self.encode(p))
 
-    def write_bulk(self, pl: Sequence[wiremsg.Message]) -> None:
+    def write_bulk(self, pl: Sequence[wire.Message]) -> None:
         if Endpoint.ENDPOINT_DEBUG:
             for p in pl:
                 log.debug("SEND>> %s" % p)
@@ -111,7 +111,7 @@ class Endpoint(object):
         except (ValueError, msgpack.UnpackValueError):
             raise DecodeError
 
-    def messages(self, timeout=90) -> Iterator[wiremsg.Message]:
+    def messages(self, timeout=90) -> Iterator[wire.Message]:
         if self.link_state != 'connected':
             raise EndpointDied
 
@@ -126,14 +126,14 @@ class Endpoint(object):
                 if v is not _NONE:
                     fmt, data = self._decode_packet(v)
                     if fmt == Format.Packed:
-                        msg = wiremsg.Message.decode(data)
+                        msg = wire.Message.decode(data)
                         if msg:
                             if Endpoint.ENDPOINT_DEBUG:
                                 log.debug("<<RECV %r" % msg)
                             yield msg
                     elif fmt == Format.BulkCompressed:
                         for d in data:
-                            msg = wiremsg.Message.decode(d)
+                            msg = wire.Message.decode(d)
                             if msg:
                                 if Endpoint.ENDPOINT_DEBUG:
                                     log.debug("<<RECV %r" % msg)

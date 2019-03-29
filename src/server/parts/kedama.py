@@ -9,7 +9,7 @@ import logging
 from server.endpoint import Client
 from server.utils import command
 from utils.events import EventHub
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -24,23 +24,23 @@ class Kedama(object):
     def __init__(self, core: 'Core'):
         self.core = core
         D = core.events.client_command
-        D[wiremsg.CreateRoom].subscribe(self._room_create_limit, -5)
-        D[wiremsg.JoinRoom].subscribe(self._room_join_limit, -5)
-        D[wiremsg.Invite].subscribe(self._invite_limit, -5)
+        D[wire.CreateRoom].subscribe(self._room_create_limit, -5)
+        D[wire.JoinRoom].subscribe(self._room_join_limit, -5)
+        D[wire.Invite].subscribe(self._invite_limit, -5)
 
     # ----- Commands -----
     @command()
-    def _room_create_limit(self, u: Client, ev: wiremsg.CreateRoom) -> Optional[EventHub.StopPropagation]:
+    def _room_create_limit(self, u: Client, ev: wire.CreateRoom) -> Optional[EventHub.StopPropagation]:
         core = self.core
         from thb import modes_kedama
         if core.auth.is_kedama(u) and ev.mode not in modes_kedama:
-            u.write(wiremsg.Error('kedama_limitation'))
+            u.write(wire.Error('kedama_limitation'))
             return EventHub.STOP_PROPAGATION
 
         return None
 
     @command()
-    def _room_join_limit(self, u: Client, ev: wiremsg.JoinRoom) -> Optional[EventHub.StopPropagation]:
+    def _room_join_limit(self, u: Client, ev: wire.JoinRoom) -> Optional[EventHub.StopPropagation]:
         core = self.core
         g = core.room.get(ev.gid)
         if not g:
@@ -48,17 +48,17 @@ class Kedama(object):
 
         from thb import modes_kedama
         if core.auth.is_kedama(u) and g.__class__.__name__ not in modes_kedama:
-            u.write(wiremsg.Error('kedama_limitation'))
+            u.write(wire.Error('kedama_limitation'))
             return EventHub.STOP_PROPAGATION
 
         return None
 
     @command()
-    def _invite_limit(self, c: Client, ev: wiremsg.Invite) -> Optional[EventHub.StopPropagation]:
+    def _invite_limit(self, c: Client, ev: wire.Invite) -> Optional[EventHub.StopPropagation]:
         core = self.core
         uid = core.auth.uid_of(c)
         if uid <= 0:
-            c.write(wiremsg.Error('kedama_limitation'))
+            c.write(wire.Error('kedama_limitation'))
             return EventHub.STOP_PROPAGATION
 
         return None

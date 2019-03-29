@@ -11,7 +11,7 @@ import gevent
 # -- own --
 from endpoint import Endpoint, EndpointDied
 from utils.misc import log_failure
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -100,13 +100,13 @@ class Client(object):
     def get_greenlet(self) -> Optional[Greenlet]:
         return self._gr
 
-    def write(self, v: wiremsg.ServerToClient) -> None:
+    def write(self, v: wire.ServerToClient) -> None:
         ep = self._ep
         if ep: ep.write(v)
 
-    def write_bulk(self, vl: Sequence[wiremsg.ServerToClient]) -> None:
+    def write_bulk(self, vl: Sequence[wire.ServerToClient]) -> None:
         ep = self._ep
-        if ep: ep.write_bulk(cast(Sequence[wiremsg.Message], vl))
+        if ep: ep.write_bulk(cast(Sequence[wire.Message], vl))
 
     def raw_write(self, v: bytes) -> None:
         ep = self._ep

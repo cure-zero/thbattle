@@ -12,7 +12,7 @@ from server.base import Game
 from server.endpoint import Client
 from server.utils import command
 from utils.events import EventHub
-from wire import msg as wiremsg
+import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -32,10 +32,10 @@ class Invite(object):
         core.events.game_successive_create += self.handle_game_successive_create
 
         D = core.events.client_command
-        D[wiremsg.Invite] += self._invite
-        D[wiremsg.Kick] += self._kick
+        D[wire.Invite] += self._invite
+        D[wire.Kick] += self._kick
 
-        D[wiremsg.JoinRoom].subscribe(self._room_join_invite_limit, -3)
+        D[wire.JoinRoom].subscribe(self._room_join_invite_limit, -3)
 
     def handle_game_created(self, g: Game) -> Game:
         g._[self] = {
@@ -60,7 +60,7 @@ class Invite(object):
 
     # ----- Commands -----
     @command()
-    def _room_join_invite_limit(self, u: Client, ev: wiremsg.JoinRoom) -> Optional[EventHub.StopPropagation]:
+    def _room_join_invite_limit(self, u: Client, ev: wire.JoinRoom) -> Optional[EventHub.StopPropagation]:
         core = self.core
         g = core.room.get(ev.gid)
         if not g:
@@ -74,18 +74,18 @@ class Invite(object):
 
         # banned
         if len(banned[uid]) >= max(g.n_persons // 2, 1):
-            u.write(wiremsg.Error('banned'))
+            u.write(wire.Error('banned'))
             return EventHub.STOP_PROPAGATION
 
         # invite
         if flags.get('invite') and uid not in invited:
-            u.write(wiremsg.Error('not_invited'))
+            u.write(wire.Error('not_invited'))
             return EventHub.STOP_PROPAGATION
 
         return None
 
     @command('room', 'ready')
-    def _invite(self, u: Client, ev: wiremsg.Invite) -> None:
+    def _invite(self, u: Client, ev: wire.Invite) -> None:
         core = self.core
 
         other = core.lobby.get(ev.uid)
@@ -96,7 +96,7 @@ class Invite(object):
         g = core.game.current(u)
         g._[self]['invited'].add(other)
 
-        other.write(wiremsg.InviteRequest(
+        other.write(wire.InviteRequest(
             uid=core.auth.uid_of(u),
             name=core.auth.name_of(u),
             gid=core.room.gid_of(g),
@@ -104,7 +104,7 @@ class Invite(object):
         ))
 
     @command('room', 'ready')
-    def _kick(self, c: Client, ev: wiremsg.Kick) -> None:
+    def _kick(self, c: Client, ev: wire.Kick) -> None:
         core = self.core
         other = core.lobby.get(ev.uid)
         if not other:
@@ -122,7 +122,7 @@ class Invite(object):
         bl.add(c)
 
         for u in core.room.online_users_of(g):
-            u.write(wiremsg.KickRequest(
+            u.write(wire.KickRequest(
                 uid=core.auth.uid_of(c),
                 victim=core.auth.uid_of(other),
                 votes=len(bl),
