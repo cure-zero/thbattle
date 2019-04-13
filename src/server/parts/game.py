@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Any, Dict, List, TYPE_CHECKING, Type, cast, Tuple
+from typing import Any, Dict, List, TYPE_CHECKING, Tuple, Type
 import logging
 import random
 
@@ -56,7 +56,7 @@ class Game(object):
             assert g
             assert u in g.players.client
 
-            u.write(wire.GameJoined(core.view.Game(g)))
+            u.write(wire.GameJoined(core.view.GameDetail(g)))
             u.write(wire.GameStarted(core.view.GameDetail(g)))
 
             self.replay(u, u)
@@ -177,6 +177,7 @@ class Game(object):
             'crashed': False,
             'rngseed': seed,
             'data': {},
+            'winners': [],
         }
 
         return g
@@ -221,7 +222,8 @@ class Game(object):
         }
 
     def build_players(self, g: ServerGame, users: List[Client]) -> BatchList[Player]:
-        pl: BatchList[Player] = BatchList([HumanPlayer(g, u) for u in users])
+        core = self.core
+        pl: BatchList[Player] = BatchList([HumanPlayer(g, core.auth.uid_of(u), u) for u in users])
         pl[:0] = [NPCPlayer(g, i.name, i.input_handler) for i in g.npc_players]
 
         return pl
@@ -246,11 +248,17 @@ class Game(object):
     def current(self, u: Client) -> ServerGame:
         return u._[self]['game']
 
+    def set_winners(self, g: ServerGame, winners: List[Player]) -> None:
+        g._[self]['winners'] = winners
+
     def params_of(self, g: ServerGame) -> Dict[str, Any]:
         return g._[self]['params']
 
-    def winners_of(self, g: ServerGame) -> List[Client]:
-        return [p.client for p in cast(List[HumanPlayer], g.winners)]
+    def winners_of(self, g: ServerGame) -> List[Player]:
+        return g._[self]['winners']
 
     def rngseed_of(self, g: ServerGame) -> int:
         return g._[self]['rngseed']
+
+    def gamedata_of(self, g: ServerGame, u: Client) -> GameData:
+        return g._[self]['data'][u]

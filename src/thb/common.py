@@ -105,12 +105,11 @@ def roll(g: THBattle, pl: BatchList[Player], items: Dict[Player, List[GameItem]]
     from thb.item import European
     roll = list(range(len(pl)))
     g.random.shuffle(roll)
-    for i, p in enumerate(pl):
-        if European.is_european(g, items, p):
-            g.emit_event('european', p)
-            roll.remove(i)
-            roll.insert(0, i)
-            break
+    eu = European.get_european(g, items)
+    if eu:
+        i = pl.index(eu)
+        roll.remove(i)
+        roll.insert(0, i)
 
     roll = sync_primitive(roll, pl)
     roll = BatchList(pl[i] for i in roll)

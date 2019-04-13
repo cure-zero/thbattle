@@ -23,16 +23,15 @@ class View(object):
     def __init__(self, core: 'Core'):
         self.core = core
 
-    def User(self, u: Client) -> wire.User:
+    def User(self, u: Client) -> wire.model.User:
         core = self.core
 
         return {
             'uid': core.auth.uid_of(u),
-            'name': core.auth.name_of(u),
             'state': str(core.lobby.state_of(u)),
         }
 
-    def Game(self, g: ServerGame) -> wire.Game:
+    def Game(self, g: ServerGame) -> wire.model.Game:
         core = self.core
 
         return {
@@ -43,7 +42,7 @@ class View(object):
             'online':   len(core.room.online_users_of(g)),
         }
 
-    def GameDetail(self, g: ServerGame) -> wire.GameDetail:
+    def GameDetail(self, g: ServerGame) -> wire.model.GameDetail:
         core = self.core
 
         return {

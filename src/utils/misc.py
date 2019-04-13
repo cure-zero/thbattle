@@ -455,7 +455,7 @@ def validate_args(*typelist):
                 raise ArgCountError(e, a)
 
             for i, e, v in zip(range(1000), typelist, args):
-                if not isinstance(v, e):  # type: ignore
+                if not isinstance(v, e):
                     raise ArgValidationError(i, e, v.__class__)
 
             return f(*args)

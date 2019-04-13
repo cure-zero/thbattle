@@ -3,7 +3,8 @@
 # -- stdlib --
 from collections import defaultdict
 from random import Random
-from typing import Any, Dict, List, Optional, Set, Type, TypeVar, Union, Sequence, ClassVar
+from typing import Any, ClassVar, Dict, List, Optional, Sequence, Set, TYPE_CHECKING, Type, TypeVar
+from typing import Union
 import logging
 import random
 
@@ -16,6 +17,11 @@ import gevent
 from endpoint import EndpointDied
 from utils.misc import BatchList, exceptions, instantiate
 from utils.viral import ViralContext
+
+# -- typing --
+if TYPE_CHECKING:
+    from server.base import Game as ServerGame  # noqa: F401
+    from server.endpoint import Client  # noqa: F401
 
 
 # -- code --
@@ -95,6 +101,7 @@ class AssociatedDataViralContext(ViralContext):
 
 
 class Player(GameObject, AssociatedDataViralContext):
+    uid: int
     # index = None
     # game: 'Game'
 
@@ -821,6 +828,9 @@ class GameItem(object):
 
     def __init__(self, *args):
         raise Exception('Should not instantiate plain GameItem!')
+
+    def should_usable(self, g: 'ServerGame', u: 'Client') -> None:
+        ...
 
     @classmethod
     def register(cls, item_cls):

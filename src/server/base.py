@@ -3,7 +3,7 @@
 # -- stdlib --
 from collections import OrderedDict
 from copy import copy
-from typing import Any, Callable, Dict, List, Optional, cast, Sequence
+from typing import Any, Callable, Dict, Optional, Sequence, TYPE_CHECKING, Tuple, cast
 import logging
 
 # -- third party --
@@ -14,34 +14,39 @@ import gevent
 # -- own --
 from .endpoint import Client
 from endpoint import EndpointDied
-from game.base import Player, GameEnded, GameViralContext, InputTransaction, Inputlet
-from game.base import TimeLimitExceeded
-from server.core import Core
+from game.base import GameEnded, InputTransaction, Inputlet, Player, TimeLimitExceeded
 from utils.misc import log_failure
 import game.base
+
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
 
 
 # -- code --
 log = logging.getLogger('Game_Server')
 
 
-class InputWaiter(Greenlet, GameViralContext):
-    def __init__(self, player, tag):
+class InputWaiter(Greenlet):
+    def __init__(self, game: 'Game', player: 'HumanPlayer', tag: str):
         Greenlet.__init__(self)
+        self.game = game
         self.player = player
         self.tag = tag
 
-    def _run(self):
+    def _run(self) -> Optional[Tuple[str, Any]]:
         p, t = self.player, self.tag
+        g = self.game
+        core = g.core
         try:
             # should be [tag, <Data for Inputlet.parse>]
             # tag likes 'I?:ChooseOption:2345'
-            tag, rst = p.client.gexpect(t)
+            tag, rst = core.game.gamedata_of(g, p.client).gexpect(t)
             return rst
         except EndpointDied:
             return None
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return '<InputWaiter: p = %s, tag = %s>' % (self.player, self.tag)
 
 
@@ -49,7 +54,7 @@ class InputWaiterGroup(GreenletGroup):
     greenlet_class = InputWaiter
 
 
-def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='single', trans: Optional[InputTransaction]=None):
+def user_input(players: Sequence[Any], inputlet: Inputlet, timeout: int = 25, type: str = 'single', trans: Optional[InputTransaction] = None) -> Any:
     '''
     Type can be 'single', 'all' or 'any'
     '''
@@ -92,14 +97,14 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout=25, type='sin
                 waiters.add(gevent.spawn(lambda v: v, ilet.data()))
             else:
                 t = tag + str(synctags[p])
-                waiters.spawn(p, t)
+                waiters.spawn(g, p, t)
 
         for p in players:
             g.emit_event('user_input_start', (trans, ilets[p]))
 
         bottom_halves: Any = []  # FIXME: proper typing
 
-        def flush():
+        def flush() -> None:
             core = g.core
             for t, data, trans, my, rst in bottom_halves:
                 # for u in g.players.client:
@@ -225,7 +230,7 @@ class Game(game.base.Game):
         try:
             g.process_action(g.bootstrap(params, items, players))
         except GameEnded as e:
-            core.game.set_winners(e.winners)
+            core.game.set_winners(g, list(e.winners))
         except Exception:
             core.game.mark_crashed(g)
             raise
@@ -233,13 +238,14 @@ class Game(game.base.Game):
             g.ended = True
             core.events.game_ended.emit(g)
 
-    def __repr__(self):
+    def __repr__(g) -> str:
+        core = g.core
         try:
-            gid = str(self.gameid)
+            gid = str(core.room.gid_of(g))
         except Exception:
             gid = 'X'
 
-        return '%s:%s' % (self.__class__.__name__, gid)
+        return '%s:%s' % (g.__class__.__name__, gid)
 
     def get_synctag(g) -> int:
         core = g.core
@@ -266,8 +272,9 @@ class Game(game.base.Game):
 class HumanPlayer(Player):
     client: Client
 
-    def __init__(self, g: Game, client: Client):
+    def __init__(self, g: Game, uid: int, client: Client):
         self.game = g
+        self.uid = uid
         self.client = client
 
     def reveal(self, ol: Any) -> None:
@@ -281,8 +288,9 @@ class NPCPlayer(Player):
 
     def __init__(self, g: Game, name: str, handler: Callable[[InputTransaction, Inputlet], Any]):
         self.game = g
+        self.uid = 0
         self.name = name
         self.handle_user_input = handler
 
-    def reveal(self, obj_list):
+    def reveal(self, ol: Any) -> None:
         self.game.get_synctag()

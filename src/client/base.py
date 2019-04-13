@@ -9,6 +9,7 @@ import logging
 
 # -- third party --
 import gevent
+from gevent import Greenlet
 
 # -- own --
 from game.base import GameEnded, InputTransaction, Inputlet, Player, TimeLimitExceeded
@@ -54,11 +55,11 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout: int = 25, ty
     for p in players:
         ilets[p].actor = p
 
-    inputproc = None
+    inputproc: Optional[Greenlet] = None
 
     me = Game.me(g)
 
-    def input_func(st):
+    def input_func(st: str) -> None:
         my = ilets[me]
         with TimeLimitExceeded(timeout + 1, False):
             _, my = g.emit_event('user_input', (trans, my))
@@ -123,7 +124,7 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout: int = 25, ty
         g.emit_event('user_input_end_wait_resp', trans)  # for replay speed control
 
     finally:
-        inputproc and [inputproc.kill(), inputproc.join()]
+        if inputproc: [inputproc.kill(), inputproc.join()]
 
     if type == 'single':
         return results[orig_players[0]]
@@ -189,8 +190,7 @@ class Game(game.base.Game):
         core.events.game_started.emit(g)
         params = core.game.params_of(g)
         items = core.game.items_of(g)
-        users = core.game.users_of(g)
-        players = core.game.build_players(g, users)
+        players = core.game.players_of(g)
 
         try:
             g.process_action(g.bootstrap(params, items, players))
@@ -205,15 +205,16 @@ class Game(game.base.Game):
         self.synctag += 1
         return self.synctag
 
-    def pause(self, time):
+    def pause(self, time: float) -> None:
         gevent.sleep(time)
 
-    def is_dropped(g, p: Player):
+    def is_dropped(g, p: Player) -> bool:
         core = g.core
         return core.game.is_dropped(g, p)
 
     @classmethod
     def me(cls, g: game.base.Game) -> Theone:
+        assert isinstance(g, Game)
         core = g.core
         core.game.users_of
         # FIXME: not working

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Dict, List, Sequence, TYPE_CHECKING, Type, Tuple
+from typing import Dict, List, Sequence, TYPE_CHECKING, Type, Tuple, Optional
 
 # -- third party --
 # -- own --
-from game.base import GameItem, Player
+from game.base import GameItem, Player, Game
 from server.base import Client, Game as ServerGame
 from thb.characters.base import Character
 from utils.misc import BatchList, exceptions
@@ -21,7 +21,7 @@ class ImperialChoice(GameItem):
     key = 'imperial-choice'
     args = [str]
 
-    def __init__(self, char):
+    def __init__(self, char: str):
         if char == 'Akari' or char not in Character.classes:
             raise exceptions.CharacterNotFound
 
@@ -41,7 +41,7 @@ class ImperialChoice(GameItem):
             raise exceptions.IncorrectGameMode
 
         core = g.core
-        items = core.game.items_of(g)
+        items = core.item.items_of(g)
 
         for l in items.values():
             if self.sku in l:
@@ -141,16 +141,14 @@ class ImperialRole(GameItem):
 
         rst = []
         for p in pl:
-            uid = p.account.userid
-            if uid not in items:
+            if p not in items:
                 continue
 
-            for i in items[uid]:
-                i = GameItem.from_sku(i)
+            for i in items[p]:
                 if not isinstance(i, cls):
                     continue
 
-                rst.append((p, mapping[i.id]))
+                rst.append((p, mapping[i.role]))
 
         return rst
 
@@ -162,19 +160,24 @@ class European(GameItem):
     title = '欧洲卡'
     description = 'Roll点保证第一。身份场不可用。'
 
-    def should_usable(self, g: ServerGame, u: Client):
+    @classmethod
+    def should_usable(cls, g: ServerGame, u: Client):
         from thb.thbrole import THBattleRole
         if isinstance(g, THBattleRole):
             raise exceptions.IncorrectGameMode
 
         core = g.core
-        items = core.game.items_of(g)
+        items = core.item.items_of(g)
 
         for l in items:
-            if self.key in l:
+            if isinstance(l, cls):
                 raise exceptions.EuropeanConflict
 
     @classmethod
-    def is_european(cls, g, items, p):
-        uid = p.account.userid
-        return uid in items and cls.key in items[uid]
+    def get_european(cls, g: Game, items: Dict[Player, List[GameItem]]) -> Optional[Player]:
+        for p, l in items.items():
+            for i in l:
+                if isinstance(i, cls):
+                    return p
+
+        return None

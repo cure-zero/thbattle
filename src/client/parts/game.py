@@ -11,7 +11,7 @@ from gevent import Greenlet
 # -- own --
 from client.base import ForcedKill, Game as ClientGame, Someone, Theone
 from client.core import Core
-from game.base import GameData, Player
+from game.base import GameData, Player, GameItem
 from utils.events import EventHub
 from utils.misc import BatchList
 import wire
@@ -47,19 +47,25 @@ class Game(object):
 
         return ev
 
-    def _game_started(self, ev: wire.GameStarted) -> wire.GameStarted:
+    def _do_start_game(self, gv: wire.model.GameDetail) -> None:
         core = self.core
-        gv = ev.game
         g = self.games[gv['gid']]
+        g._[self]['users'] = gv['users']
+        g._[self]['params'] = gv['params']
+        players = self._build_players(g, g._[self]['users'])
+        g._[self]['players'] = players
+        items = self._build_items(g, players, gv['items'])
+        g._[self]['items'] = items
         core.events.game_started.emit(g)
+
+    def _game_started(self, ev: wire.GameStarted) -> wire.GameStarted:
+        self._do_start_game(ev.game)
         return ev
 
     def _observe_started(self, ev: wire.ObserveStarted) -> wire.ObserveStarted:
-        gv = ev.game
-        g = self.games[gv['gid']]
+        g = self.games[ev.game['gid']]
         g._[self]['observe'] = True
-        core = self.core
-        core.events.game_started.emit(g)
+        self._do_start_game(ev.game)
         return ev
 
     def _game_joined(self, ev: wire.GameJoined) -> wire.GameJoined:
@@ -134,7 +140,7 @@ class Game(object):
         ))
         # core.events.game_data_send.emit((g, pkt))
 
-    def build_players(self, g: ClientGame, uvl: Sequence[wire.model.User]) -> BatchList[Player]:
+    def _build_players(self, g: ClientGame, uvl: Sequence[wire.model.User]) -> BatchList[Player]:
         core = self.core
         me_uid = core.auth.uid
         assert me_uid in [uv['uid'] for uv in uvl]
@@ -148,6 +154,13 @@ class Game(object):
         pl[:0] = [Someone(g, 0) for i, npc in enumerate(g.npc_players)]
 
         return pl
+
+    def _build_items(self, g: ClientGame, players: Sequence[Player], items: Dict[int, List[str]]) -> Dict[Player, List[GameItem]]:
+        m = {p.uid: p for p in players}
+        return {
+            m[uid]: [GameItem.from_sku(i) for i in skus]
+            for uid, skus in items.items()
+        }
 
     def start_game(self, g: ClientGame) -> None:
         core = self.core
@@ -178,5 +191,5 @@ class Game(object):
     def params_of(self, g: ClientGame) -> dict:
         return g._[self]['params']
 
-    def users_of(self, g: ClientGame) -> List[wire.model.User]:
-        return g._[self]['users']
+    def players_of(self, g: ClientGame) -> BatchList[Player]:
+        return g._[self]['players']
