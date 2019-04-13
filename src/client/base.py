@@ -216,14 +216,11 @@ class Game(game.base.Game):
     def me(cls, g: game.base.Game) -> Theone:
         assert isinstance(g, Game)
         core = g.core
-        core.game.users_of
-        # FIXME: not working
-        me = self._me
-        for i in self.players:
-            if i is me:
-                return i
-
-            if getattr(i, 'player', 0) is me:
-                return i
-
-        raise AttributeError('WTF?!')
+        pl = core.game.players_of(g)
+        uid = core.auth.uid
+        for p in pl:
+            if p.uid == uid:
+                assert isinstance(p, Theone)
+                return p
+        else:
+            raise Exception("Can't find Theone!")

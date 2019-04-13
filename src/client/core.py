@@ -8,6 +8,7 @@ from typing import Any, Dict, Sequence, Tuple, Type, TypeVar, cast
 # -- own --
 from client import parts
 from client.base import Game
+from game.base import Player
 from utils.events import EventHub
 import wire
 
@@ -51,6 +52,9 @@ class Events(object):
 
         # Joined a game
         self.game_joined = EventHub[Game]()
+
+        # Player presence changed
+        self.player_presence = EventHub[Tuple[Game, Dict[Player, bool]]]()
 
         # Left a game
         self.game_left = EventHub[Game]()

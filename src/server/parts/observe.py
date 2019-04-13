@@ -1,28 +1,49 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import List, TYPE_CHECKING, Tuple
+from typing import List, Optional, Set, TYPE_CHECKING, Tuple
 import logging
 
 # -- third party --
+from gevent import Greenlet
+from mypy_extensions import TypedDict
 import gevent
 
 # -- own --
 from endpoint import Endpoint
+from game.base import Packet
 from server.base import Game
 from server.endpoint import Client
 from server.utils import command
-from game.base import Packet
-from utils.misc import BatchList, throttle
+from utils.misc import throttle
 import wire
 
-# -- typing --
+
+# -- code --
 if TYPE_CHECKING:
     from server.core import Core  # noqa: F401
 
 
 # -- code --
 log = logging.getLogger('Observe')
+
+
+class ObserveAssocOnClient(TypedDict):
+    obs: Set[Client]      # observers
+    reqs: Set[int]        # observe requests
+    ob: Optional[Client]  # observing
+
+
+def Au(self: 'Observe', u: Client) -> ObserveAssocOnClient:
+    return u._[self]
+
+
+class ObserveAssocOnGame(TypedDict):
+    _notifier: Optional[Greenlet]
+
+
+def Ag(self: 'Observe', g: Game) -> ObserveAssocOnGame:
+    return g._[self]
 
 
 class Observe(object):
@@ -46,19 +67,20 @@ class Observe(object):
         c, f, t = ev
 
         if (f, t) == ('ready', 'game'):
-            for u in c._[self]['obs']:
+            for u in Au(self, c)['obs']:
                 self._observe_start(u, c)
 
         elif (f, t) == ('game', 'lobby'):
-            for u in c._[self]['obs']:
+            for u in Au(self, c)['obs']:
                 self._observe_detach(u)
 
         if t == 'lobby':
-            c._[self] = {
-                'obs': BatchList(),  # observers
-                'reqs': set(),       # observe requests
-                'ob': None,          # observing
+            assoc: ObserveAssocOnClient = {
+                'obs': set(),
+                'reqs': set(),
+                'ob': None,
             }
+            c._[self] = assoc
 
         if f in ('room', 'ready', 'game') or \
            t in ('room', 'ready', 'game'):
@@ -70,15 +92,16 @@ class Observe(object):
         return ev
 
     def handle_game_created(self, g: Game) -> Game:
-        g._[self] = {
+        assoc: ObserveAssocOnGame = {
             '_notifier': None
         }
+        g._[self] = assoc
         return g
 
     def handle_game_joined(self, ev: Tuple[Game, Client]) -> Tuple[Game, Client]:
         g, c = ev
         core = self.core
-        for ob in c._[self]['obs']:
+        for ob in Au(self, c)['obs']:
             ob.write(wire.GameJoined(core.view.GameDetail(g)))
             core.lobby.state_of(ob).transit('ob')
 
@@ -93,7 +116,7 @@ class Observe(object):
             gid=gid, serial=pkt.serial, tag=pkt.tag, data=pkt.data
         ))
 
-        for u in u._[self]['obs']:
+        for u in Au(self, u)['obs']:
             u.raw_write(d)
 
         return ev
@@ -108,7 +131,7 @@ class Observe(object):
             return
 
         if core.lobby.state_of(observee) == 'ob':
-            observee = observee._[self]['ob']
+            observee = Au(self, observee)['ob']
             assert observee
 
         if core.lobby.state_of(observee) not in ('game', 'room', 'ready'):
@@ -124,16 +147,16 @@ class Observe(object):
             self._observe_attach(u, observee)
             return
 
-        if uid in observee._[self]['reqs']:
+        if uid in Au(self, observee)['reqs']:
             # request already sent
             return
 
-        observee._[self]['reqs'].add(uid)
+        Au(self, observee)['reqs'].add(uid)
         observee.write(wire.ObserveRequest(uid=uid))
 
     @command('room', 'ready', 'game')
     def _grant(self, c: Client, ev: wire.GrantObserve) -> None:
-        if ev.uid not in c._[self]['reqs']:
+        if ev.uid not in Au(self, c)['reqs']:
             return
 
         core = self.core
@@ -159,7 +182,7 @@ class Observe(object):
 
         g = core.game.current(c)
         for u in core.room.online_users_of(g):
-            if ob in u._[self]['obs']:
+            if ob in Au(self, u)['obs']:
                 break
         else:
             return
@@ -227,8 +250,8 @@ class Observe(object):
 
         log.info("observe attach")
 
-        observee._[self]['obs'].add(ob)
-        ob._[self]['ob'] = observee
+        Au(self, observee)['obs'].add(ob)
+        Au(self, ob)['ob'] = observee
         core.lobby.state_of(ob).transit('ob')
 
         ob.write(wire.GameJoined(core.view.GameDetail(g)))
@@ -242,7 +265,8 @@ class Observe(object):
 
             for u in users:
                 u.raw_write(d)
-                u._[self]['obs'].raw_write(d)
+                for i in Au(self, u)['obs']:
+                    i.raw_write(d)
 
         if core.room.is_started(g):
             self._observe_start(ob, observee)
@@ -252,9 +276,12 @@ class Observe(object):
         core = self.core
         assert core.lobby.state_of(ob) == 'ob'
 
-        observee = ob._[self]['ob']
-        ob._[self]['ob'] = None
-        observee._[self]['obs'].remove(ob)
+        observee = Au(self, ob)['ob']
+        if not observee:
+            return
+
+        Au(self, ob)['ob'] = None
+        Au(self, observee)['obs'].remove(ob)
 
         # TODO add these back
         # try:
@@ -269,6 +296,7 @@ class Observe(object):
 
         @gevent.spawn
         def notify_observer_leave() -> None:
+            assert observee
             g = core.game.current(observee)
             ul = core.room.online_users_of(g)
 
@@ -279,10 +307,11 @@ class Observe(object):
 
             for u in ul:
                 u.raw_write(d)
-                u._[self]['obs'].raw_write(d)
+                for i in Au(self, u)['obs']:
+                    i.raw_write(d)
 
     def _notify(self, g: Game) -> None:
-        notifier = g._[self]['_notifier']
+        notifier = Ag(self, g)['_notifier']
         core = self.core
 
         if notifier:
@@ -294,10 +323,10 @@ class Observe(object):
             pl = core.room.users_of(g)
             obs: List[Client] = []
             for u in pl:
-                obs.extend(u._[self]['obs'])
+                obs.extend(Au(self, u)['obs'])
 
             gevent.spawn(core.room.send_room_users, g, obs)
 
-        g._[self]['_notifier'] = _notifier
+        Ag(self, g)['_notifier'] = _notifier
 
         _notifier()

@@ -2,7 +2,8 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Any, Dict, List, TYPE_CHECKING, Tuple, Type
+from typing import Any, Dict, List, TYPE_CHECKING, Tuple, Type, Optional
+from mypy_extensions import TypedDict
 import logging
 import random
 
@@ -24,6 +25,30 @@ if TYPE_CHECKING:
 log = logging.getLogger('Game')
 
 
+class GameAssocOnClient(TypedDict):
+    game: Optional[ServerGame]
+    params: Dict[str, Any]
+
+
+def Au(self: 'Game', u: Client) -> GameAssocOnClient:
+    return u._[self]
+
+
+class GameAssocOnGame(TypedDict):
+    params: Dict[str, Any]
+    players: BatchList[Player]
+    fleed: Dict[Client, bool]
+    aborted: bool
+    crashed: bool
+    rngseed: int
+    data: Dict[Client, GameData]
+    winners: List[Player]
+
+
+def Ag(self: 'Game', g: ServerGame) -> GameAssocOnGame:
+    return Ag(self, g)
+
+
 class Game(object):
     def __init__(self, core: 'Core'):
         self.core = core
@@ -43,18 +68,20 @@ class Game(object):
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         u, f, t = ev
         if t == 'lobby':
-            u._[self] = {
+            assoc: GameAssocOnClient = {
                 'game': None,
                 'params': {},
             }
+            u._[self] = assoc
+
         return ev
 
     def handle_client_pivot(self, u: Client) -> Client:
         core = self.core
         if core.lobby.state_of(u) == 'game':
-            g = u._[self]['game']
+            g = Au(self, u)['game']
             assert g
-            assert u in g.players.client
+            assert u in core.room.users_of(g)
 
             u.write(wire.GameJoined(core.view.GameDetail(g)))
             u.write(wire.GameStarted(core.view.GameDetail(g)))
@@ -64,7 +91,7 @@ class Game(object):
         return u
 
     def handle_game_started(self, g: ServerGame) -> ServerGame:
-        self.setup_game(g)
+        self._setup_game(g)
 
         core = self.core
         users = core.room.users_of(g)
@@ -82,24 +109,26 @@ class Game(object):
         return g
 
     def handle_game_joined(self, ev: Tuple[ServerGame, Client]) -> Tuple[ServerGame, Client]:
-        g, c = ev
+        g, u = ev
         core = self.core
         if core.room.is_started(g):
-            g._[self]['data'][c].revive()
-            g._[self]['fleed'][c] = False
+            Ag(self, g)['data'][u].revive()
+            Ag(self, g)['fleed'][u] = False
 
-        c._[self]['game'] = g
+        Au(self, u)['game'] = g
 
         return ev
 
     def handle_game_left(self, ev: Tuple[ServerGame, Client]) -> Tuple[ServerGame, Client]:
-        g, c = ev
+        g, u = ev
         core = self.core
         if core.room.is_started(g):
-            g._[self]['data'][c].die()
-            g._[self]['fleed'][c] = bool(g.can_leave(self._find_player(c)))
+            Ag(self, g)['data'][u].die()
+            uid = core.auth.uid_of(u)
+            p = next(i for i in Ag(self, g)['players'] if i.uid == uid)
+            Ag(self, g)['fleed'][u] = bool(g.can_leave(p))
 
-        c._[self]['game'] = None
+        Au(self, u)['game'] = None
 
         return ev
 
@@ -107,8 +136,8 @@ class Game(object):
         old, g = ev
         core = self.core
 
-        params = old._[self]['params']
-        g._[self]['params'] = params
+        params = Ag(self, old)['params']
+        Ag(self, g)['params'] = params
         gid = core.room.gid_of(g)
         core.room.online_users_of(old).write(wire.GameParams(gid=gid, params=params))
 
@@ -123,6 +152,9 @@ class Game(object):
             return
 
         g = core.game.current(u)
+        if not g:
+            return None
+
         users = core.room.online_users_of(g)
 
         if core.room.gid_of(g) != ev.gid:
@@ -138,10 +170,10 @@ class Game(object):
             log.error('Invalid value "%s" for key "%s"', ev.value, ev.key)
             return
 
-        if g._[self]['params'][ev.key] == ev.value:
+        if Ag(self, g)['params'][ev.key] == ev.value:
             return
 
-        g._[self]['params'][ev.key] = ev.value
+        Ag(self, g)['params'][ev.key] = ev.value
 
         gid = core.room.gid_of(g)
 
@@ -150,17 +182,37 @@ class Game(object):
                 core.room.cancel_ready(u)
 
             u.write(ev)
-            u.write(wire.GameParams(gid, g._[self]['params']))
+            u.write(wire.GameParams(gid, Ag(self, g)['params']))
 
     @command('game')
     def _gamedata(self, u: Client, ev: wire.GameData) -> None:
         core = self.core
-        g = u._[self]['game']
+        g = Au(self, u)['game']
+        if not g:
+            return None
+
         if ev.gid != core.room.gid_of(g):
             return
 
-        pkt = g._[self]['data'][u].feed_recv(ev.serial, ev.tag, ev.data)
+        pkt = Ag(self, g)['data'][u].feed_recv(ev.serial, ev.tag, ev.data)
         core.events.game_data_recv.emit((g, u, pkt))
+
+    # ----- Private Methods -----
+    def _setup_game(self, g: ServerGame) -> None:
+        core = self.core
+        users = core.room.users_of(g)
+
+        Ag(self, g)['data'] = {
+            u: GameData() for u in users
+        }
+        Ag(self, g)['players'] = self._build_players(g, users)
+
+    def _build_players(self, g: ServerGame, users: List[Client]) -> BatchList[Player]:
+        core = self.core
+        pl: BatchList[Player] = BatchList([HumanPlayer(g, core.auth.uid_of(u), u) for u in users])
+        pl[:0] = [NPCPlayer(g, i.name, i.input_handler) for i in g.npc_players]
+
+        return pl
 
     # ----- Public Methods -----
     def create_game(self, cls: Type[ServerGame]) -> ServerGame:
@@ -170,8 +222,9 @@ class Game(object):
         seed = random.getrandbits(63)
         g.random = random.Random(seed)
 
-        g._[self] = {
+        assoc: GameAssocOnGame = {
             'params': {k: v[0] for k, v in cls.params_def.items()},
+            'players': BatchList(),
             'fleed': defaultdict(bool),
             'aborted': False,
             'crashed': False,
@@ -179,13 +232,15 @@ class Game(object):
             'data': {},
             'winners': [],
         }
+        g._[self] = assoc
 
         return g
 
-    def replay(self, c: Client, to: Client) -> None:
+    def replay(self, u: Client, to: Client) -> None:
         core = self.core
-        g = c._[self]['game']
-        pkts = g._[self]['data'][c].get_sent()
+        g = Au(self, u)['game']
+        assert g
+        pkts = Ag(self, g)['data'][u].get_sent()
         if not pkts:
             return
 
@@ -193,72 +248,63 @@ class Game(object):
 
         to.write(wire.GameLiveAt(pkts[-1].serial))
         to.write_bulk([
-            wire.GameData(gid, p.id, p.tag, p.data)
+            wire.GameData(gid, p.serial, p.tag, p.data)
             for p in pkts
         ])
 
-    # ----- Public Methods -----
     def mark_crashed(self, g: ServerGame) -> None:
-        g._[self]['crashed'] = True
+        Ag(self, g)['crashed'] = True
 
     def is_crashed(self, g: ServerGame) -> bool:
-        return g._[self]['crashed']
+        return Ag(self, g)['crashed']
 
     def abort(self, g: ServerGame) -> None:
         core = self.core
-        g._[self]['aborted'] = True
+        Ag(self, g)['aborted'] = True
         core.events.game_aborted.emit(g)
 
     def is_aborted(self, g: ServerGame) -> bool:
-        return g._[self]['aborted']
-
-    def setup_game(self, g: ServerGame) -> None:
-        core = self.core
-        users = core.room.users_of(g)
-
-        g._[self]['data'] = {
-            core.auth.uid_of(u): GameData()
-            for u in users
-        }
-
-    def build_players(self, g: ServerGame, users: List[Client]) -> BatchList[Player]:
-        core = self.core
-        pl: BatchList[Player] = BatchList([HumanPlayer(g, core.auth.uid_of(u), u) for u in users])
-        pl[:0] = [NPCPlayer(g, i.name, i.input_handler) for i in g.npc_players]
-
-        return pl
+        return Ag(self, g)['aborted']
 
     def is_fleed(self, g: ServerGame, u: Client) -> bool:
-        return g._[self]['fleed'][u]
+        return Ag(self, g)['fleed'][u]
 
     def get_gamedata_archive(self, g: ServerGame) -> List[dict]:
+        core = self.core
+        ul = core.room.users_of(g)
         return [
-            g._[self]['data'][i].archive()
-            for i in g._[self]['users']
+            Ag(self, g)['data'][u].archive() for u in ul
         ]
 
     def write(self, g: ServerGame, u: Client, tag: str, data: object) -> None:
         core = self.core
-        assert u._[self]['game'] is g
-        pkt = g._[self]['data'][u].feed_send(tag, data)
+        assert Au(self, u)['game'] is g
+        pkt = Ag(self, g)['data'][u].feed_send(tag, data)
         gid = core.room.gid_of(g)
         u.write(wire.GameData(gid=gid, serial=pkt.serial, tag=pkt.tag, data=pkt.data))
         core.events.game_data_send.emit((g, u, pkt))
 
     def current(self, u: Client) -> ServerGame:
-        return u._[self]['game']
+        g = Au(self, u)['game']
+        if not g:
+            raise Exception('Client %s not in game!' % u)
+
+        return g
 
     def set_winners(self, g: ServerGame, winners: List[Player]) -> None:
-        g._[self]['winners'] = winners
+        Ag(self, g)['winners'] = winners
 
     def params_of(self, g: ServerGame) -> Dict[str, Any]:
-        return g._[self]['params']
+        return Ag(self, g)['params']
 
     def winners_of(self, g: ServerGame) -> List[Player]:
-        return g._[self]['winners']
+        return Ag(self, g)['winners']
 
     def rngseed_of(self, g: ServerGame) -> int:
-        return g._[self]['rngseed']
+        return Ag(self, g)['rngseed']
 
     def gamedata_of(self, g: ServerGame, u: Client) -> GameData:
-        return g._[self]['data'][u]
+        return Ag(self, g)['data'][u]
+
+    def players_of(self, g: ServerGame) -> BatchList[Player]:
+        return Ag(self, g)['players']

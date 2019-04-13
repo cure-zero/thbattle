@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, division, print_function, unicode_literals
 
 # -- stdlib --
 from collections import defaultdict
-from typing import TYPE_CHECKING, Tuple, Optional
+from typing import Dict, Optional, Set, TYPE_CHECKING, Tuple
 import logging
 
 # -- third party --
+from mypy_extensions import TypedDict
+
 # -- own --
 from server.base import Game
 from server.endpoint import Client
@@ -21,6 +22,15 @@ if TYPE_CHECKING:
 
 # -- code --
 log = logging.getLogger('Invite')
+
+
+class InviteAssocOnGame(TypedDict):
+    invited: Set[int]
+    banned: Dict[int, Set[int]]
+
+
+def A(self: 'Invite', g: Game) -> InviteAssocOnGame:
+    return g._[self]
 
 
 class Invite(object):
@@ -38,10 +48,11 @@ class Invite(object):
         D[wire.JoinRoom].subscribe(self._room_join_invite_limit, -3)
 
     def handle_game_created(self, g: Game) -> Game:
-        g._[self] = {
-            'invited': set(),  # { uid1, uid2, ... }
-            'banned': defaultdict(set),  # { banned_id: {uid1, ...}, ...}
+        assoc: InviteAssocOnGame = {
+            'invited': set(),
+            'banned': defaultdict(set),
         }
+        g._[self] = assoc
         return g
 
     def handle_game_successive_create(self, ev: Tuple[Game, Game]) -> Tuple[Game, Game]:
@@ -53,7 +64,7 @@ class Invite(object):
         g, c = ev
         core = self.core
 
-        for bl in g._[self]['banned'].values():
+        for bl in A(self, g)['banned'].values():
             bl.discard(core.auth.uid_of(c))
 
         return ev
@@ -69,8 +80,8 @@ class Invite(object):
         flags = core.room.flags_of(g)
         uid = core.auth.uid_of(u)
 
-        banned = g._[self]['banned']
-        invited = g._[self]['invited']
+        banned = A(self, g)['banned']
+        invited = A(self, g)['invited']
 
         # banned
         if len(banned[uid]) >= max(g.n_persons // 2, 1):
@@ -87,14 +98,15 @@ class Invite(object):
     @command('room', 'ready')
     def _invite(self, u: Client, ev: wire.Invite) -> None:
         core = self.core
+        ouid = ev.uid
 
-        other = core.lobby.get(ev.uid)
-
+        other = core.lobby.get(ouid)
         if not (other and core.lobby.state_of(other) in ('lobby', 'ob')):
             return
 
         g = core.game.current(u)
-        g._[self]['invited'].add(other)
+
+        A(self, g)['invited'].add(ouid)
 
         other.write(wire.InviteRequest(
             uid=core.auth.uid_of(u),
@@ -104,13 +116,14 @@ class Invite(object):
         ))
 
     @command('room', 'ready')
-    def _kick(self, c: Client, ev: wire.Kick) -> None:
+    def _kick(self, u: Client, ev: wire.Kick) -> None:
         core = self.core
-        other = core.lobby.get(ev.uid)
+        ouid = ev.uid
+        other = core.lobby.get(ouid)
         if not other:
             return
 
-        g = core.game.current(c)
+        g = core.game.current(u)
         g2 = core.game.current(other)
         if g is not g2:
             return
@@ -118,20 +131,21 @@ class Invite(object):
         if core.lobby.state_of(other) not in ('room', 'ready'):
             return
 
-        bl = g._[self]['banned'][other]
-        bl.add(c)
+        bl = A(self, g)['banned'][ouid]
+        bl.add(core.auth.uid_of(u))
 
         for u in core.room.online_users_of(g):
             u.write(wire.KickRequest(
-                uid=core.auth.uid_of(c),
+                uid=core.auth.uid_of(u),
                 victim=core.auth.uid_of(other),
                 votes=len(bl),
             ))
 
         if len(bl) >= len(core.room.users_of(g)) // 2:
-            g._[self]['invited'].discard(other)
+            A(self, g)['invited'].discard(ouid)
             core.room.exit_game(other)
 
     # ----- Methods -----
     def add_invited(self, g: Game, u: Client) -> None:
-        g._[self]['invited'].add(u)
+        core = self.core
+        A(self, g)['invited'].add(core.auth.uid_of(u))

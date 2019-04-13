@@ -6,6 +6,8 @@ from typing import Dict, List, TYPE_CHECKING, Tuple
 import logging
 
 # -- third party --
+from mypy_extensions import TypedDict
+
 # -- own --
 from game.base import GameItem
 from server.base import Game
@@ -23,6 +25,14 @@ if TYPE_CHECKING:
 log = logging.getLogger('server.parts.item')
 
 
+class ItemAssocOnGame(TypedDict):
+    items: Dict[int, List[GameItem]]
+
+
+def A(self: 'Item', g: Game) -> ItemAssocOnGame:
+    return g._[self]
+
+
 class Item(object):
     def __init__(self, core: 'Core'):
         self.core = core
@@ -33,8 +43,9 @@ class Item(object):
 
     def handle_game_started(self, g: Game) -> Game:
         core = self.core
-        final = {}
-        for uid, l in g._[self]['items']:
+        final: Dict[int, List[GameItem]] = {}
+
+        for uid, l in A(self, g)['items'].items():
             consumed = []
             for i in l:
                 try:
@@ -53,21 +64,22 @@ class Item(object):
 
             final[uid] = consumed
 
-        g._[self]['items'] = final
+        A(self, g)['items'] = final
 
         return g
 
     def handle_game_created(self, g: Game) -> Game:
-        g._[self] = {
+        assoc: ItemAssocOnGame = {
             'items': defaultdict(list),
         }
+        g._[self] = assoc
         return g
 
     def handle_game_left(self, ev: Tuple[Game, Client]) -> Tuple[Game, Client]:
         g, u = ev
         core = self.core
         if not core.room.is_started(g) and not g.ended:
-            g._[self]['items'].pop(core.auth.uid_of(u), None)
+            A(self, g)['items'].pop(core.auth.uid_of(u), None)
 
         return ev
 
@@ -82,7 +94,7 @@ class Item(object):
             i = GameItem.from_sku(ev.sku)
             i.should_usable(g, u)
             uid = core.auth.uid_of(u)
-            g._[self]['items'][uid].append(i)
+            A(self, g)['items'][uid].append(i)
             u.write(wire.Info('use_item_success'))
         except BusinessException as e:
             uid = core.auth.uid_of(u)
@@ -92,7 +104,7 @@ class Item(object):
     # ----- Methods ------
     # ----- Public Methods -----
     def items_of(self, g: Game) -> Dict[int, List[GameItem]]:
-        return g._[self]['items']
+        return A(self, g)['items']
 
     def item_skus_of(self, g: Game) -> Dict[int, List[str]]:
         return {k: [i.sku for i in v] for k, v in self.items_of(g).items()}

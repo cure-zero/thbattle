@@ -217,8 +217,7 @@ class Game(game.base.Game):
         core.events.game_started.emit(g)
 
         params = core.game.params_of(g)
-        users = core.room.users_of(g)
-        players = core.game.build_players(g, users)
+        players = core.game.players_of(g)
 
         m: Dict[int, Player] = {
             core.auth.uid_of(p.client): p

@@ -160,7 +160,7 @@ class Game(GameObject, GameViralContext):
     ended: bool
     winners: Sequence[Player]
     random: Random
-    _: Dict[Any, dict]
+    _: dict
 
     def __init__(self) -> None:
         self.game = self

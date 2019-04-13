@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Any, ClassVar, Dict, Optional, Type, TypeVar, Sequence
+from typing import Any, ClassVar, Dict, List, Optional, Type, TypeVar
 
 # -- third party --
 from dataclasses import dataclass
 import dataclasses
 
 # -- own --
-# -- errord --
 from . import model
 
 
@@ -99,20 +98,20 @@ class SystemMsg(Message, ServerToClient):
 @message
 @dataclass
 class CurrentGames(Message, ServerToClient):
-    games: Sequence[model.Game]
+    games: List[model.Game]
 
 
 @message
 @dataclass
 class CurrentUsers(Message, ServerToClient):
-    users: Sequence[model.User]
+    users: List[model.User]
 
 
 @message
 @dataclass
 class RoomUsers(Message, ServerToClient):
     gid: int
-    users: Sequence[model.User]
+    users: List[model.User]
 
 
 @message
@@ -125,6 +124,16 @@ class GameJoined(Message, ServerToClient):
 @dataclass
 class GameStarted(Message, ServerToClient):
     game: model.GameDetail
+
+
+@message
+@dataclass
+class PlayerPresence(Message, ServerToClient):
+    '''
+    Indicates if player is still in the game
+    '''
+    gid: int
+    presence: Dict[int, bool]
 
 
 @message
@@ -405,4 +414,4 @@ class AdminRemoveBigbrother(Message, ClientToServer):
 class SetupMatch(Message, ClientToServer):
     name: str
     mode: str
-    uids: Sequence[int]
+    uids: List[int]

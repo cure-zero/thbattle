@@ -2,6 +2,7 @@
 
 # -- stdlib --
 from typing import Any, Dict, List, Sequence
+from mypy_extensions import TypedDict
 import logging
 
 # -- third party --
@@ -22,6 +23,23 @@ log = logging.getLogger('client.parts.Game')
 STOP = EventHub.STOP_PROPAGATION
 
 
+class GameAssocOnGame(TypedDict):
+    gid: int
+    name: str
+    users: List[wire.model.User]
+    presence: Dict[Player, bool]
+    params: Dict[str, Any]
+    players: BatchList[Player]
+    items: Dict[Player, List[GameItem]]
+    data: GameData
+    observe: bool
+    greenlet: Greenlet
+
+
+def A(self: 'Game', v: ClientGame) -> GameAssocOnGame:
+    return v._[self]
+
+
 class Game(object):
     def __init__(self, core: Core):
         self.core = core
@@ -30,6 +48,7 @@ class Game(object):
         D = core.events.server_command
         D[wire.RoomUsers]      += self._room_users
         D[wire.GameStarted]    += self._game_started
+        D[wire.PlayerPresence] += self._player_presence
         D[wire.GameJoined]     += self._game_joined
         D[wire.ObserveStarted] += self._observe_started
         D[wire.GameLeft]       += self._game_left
@@ -42,7 +61,7 @@ class Game(object):
         if not g:
             return ev
 
-        g._[self]['users'] = ev.users
+        A(self, g)['users'] = ev.users
         core.events.room_users.emit((g, ev.users))
 
         return ev
@@ -50,12 +69,12 @@ class Game(object):
     def _do_start_game(self, gv: wire.model.GameDetail) -> None:
         core = self.core
         g = self.games[gv['gid']]
-        g._[self]['users'] = gv['users']
-        g._[self]['params'] = gv['params']
-        players = self._build_players(g, g._[self]['users'])
-        g._[self]['players'] = players
+        A(self, g)['users'] = gv['users']
+        A(self, g)['params'] = gv['params']
+        players = self._build_players(g, A(self, g)['users'])
+        A(self, g)['players'] = players
         items = self._build_items(g, players, gv['items'])
-        g._[self]['items'] = items
+        A(self, g)['items'] = items
         core.events.game_started.emit(g)
 
     def _game_started(self, ev: wire.GameStarted) -> wire.GameStarted:
@@ -64,8 +83,18 @@ class Game(object):
 
     def _observe_started(self, ev: wire.ObserveStarted) -> wire.ObserveStarted:
         g = self.games[ev.game['gid']]
-        g._[self]['observe'] = True
+        A(self, g)['observe'] = True
         self._do_start_game(ev.game)
+        return ev
+
+    def _player_presence(self, ev: wire.PlayerPresence) -> wire.PlayerPresence:
+        core = self.core
+        g = self.games[ev.gid]
+        pl = A(self, g)['players']
+        tbl = ev.presence
+        presence = {p: tbl[p.uid] for p in pl}
+        A(self, g)['presence'] = presence
+        core.events.player_presence.emit((g, presence))
         return ev
 
     def _game_joined(self, ev: wire.GameJoined) -> wire.GameJoined:
@@ -109,29 +138,32 @@ class Game(object):
 
     # ----- Public Methods -----
     def is_observe(self, g: ClientGame) -> bool:
-        return g._[self]['observe']
+        return A(self, g)['observe']
 
     def create_game(self, gid: int, mode: str, name: str, users: List[wire.model.User], params: Dict[str, Any], items: Dict[int, List[str]]) -> ClientGame:
         from thb import modes
         g = modes[mode]()
         assert isinstance(g, ClientGame)
 
-        g._[self] = {
+        assoc: GameAssocOnGame = {
             'gid':     gid,
             'name':    name,
             'users':   users,
+            'presence': {},
             'params':  params,
+            'players': [],
             'items':   items,
             'data':    GameData(),
             'observe': False,
         }
+        g._[self] = assoc
 
         return g
 
     def write(self, g: ClientGame, tag: str, data: object) -> None:
         core = self.core
-        pkt = g._[self]['data'].feed_send(tag, data)
-        gid = g._[self]['gid']
+        pkt = A(self, g)['data'].feed_send(tag, data)
+        gid = A(self, g)['gid']
         core.server.write(wire.GameData(
             gid=gid,
             serial=pkt.serial,
@@ -165,31 +197,34 @@ class Game(object):
     def start_game(self, g: ClientGame) -> None:
         core = self.core
         gr = gevent.spawn(g.run)
-        g._[self]['greenlet'] = gr
+        A(self, g)['greenlet'] = gr
 
         @gr.link_exception
         def crash(gr: Greenlet) -> None:
             core.events.game_crashed.emit(g)
 
-        log.info('----- GAME STARTED: %d -----' % g._[self]['gid'])
+        log.info('----- GAME STARTED: %d -----' % A(self, g)['gid'])
 
     def kill_game(self, g: ClientGame) -> None:
-        g._[self]['greenlet'].kill(ForcedKill)
+        A(self, g)['greenlet'].kill(ForcedKill)
 
     def gid_of(self, g: ClientGame) -> int:
-        return g._[self]['gid']
+        return A(self, g)['gid']
 
     def name_of(self, g: ClientGame) -> str:
-        return g._[self]['name']
+        return A(self, g)['name']
 
     def gamedata_of(self, g: ClientGame) -> GameData:
-        return g._[self]['data']
+        return A(self, g)['data']
 
-    def items_of(self, g: ClientGame) -> None:
-        return g._[self]['items']
+    def items_of(self, g: ClientGame) -> Dict[Player, List[GameItem]]:
+        return A(self, g)['items']
 
     def params_of(self, g: ClientGame) -> dict:
-        return g._[self]['params']
+        return A(self, g)['params']
 
     def players_of(self, g: ClientGame) -> BatchList[Player]:
-        return g._[self]['players']
+        return A(self, g)['players']
+
+    def is_dropped(self, g: ClientGame, p: Player) -> bool:
+        return A(self, g)['presence'].get(p, True)

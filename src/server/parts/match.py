@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Optional, Sequence, TYPE_CHECKING, Tuple
+from typing import List, Optional, Sequence, TYPE_CHECKING, Tuple
 import logging
 
 # -- third party --
+from mypy_extensions import TypedDict
 import gevent
 
 # -- own --
-from server.base import Game
+from server.base import Game, HumanPlayer
 from server.endpoint import Client
 from server.utils import command
 from utils.events import EventHub
@@ -21,6 +22,14 @@ if TYPE_CHECKING:
 
 # -- code --
 log = logging.getLogger('Match')
+
+
+class MatchAssocOnGame(TypedDict):
+    uids: List[int]
+
+
+def A(self: 'Match', g: Game) -> MatchAssocOnGame:
+    return g._[self]
 
 
 class Match(object):
@@ -75,7 +84,10 @@ class Match(object):
         if core.game.is_aborted(g):
             return g
 
-        winners = core.game.winners_of(g)
+        winners: List[Client] = [
+            u.client for u in core.game.winners_of(g)
+            if isinstance(u, HumanPlayer)
+        ]
 
         core.connect.speaker(
             '文文',
@@ -91,7 +103,7 @@ class Match(object):
         old, g = ev
         fields = old._[self]
         g._[self] = fields
-        self._start_poll(g, fields['match_uids'])
+        self._start_poll(g, fields['uids'])
         return ev
 
     # ----- Client Commands -----
@@ -106,9 +118,10 @@ class Match(object):
 
         g = core.room.create_game(gamecls, ev.name, {'match': True})
 
-        g._[self] = {
-            'match_uids': ev.uids,
+        assoc: MatchAssocOnGame = {
+            'uids': ev.uids,
         }
+        g._[self] = assoc
         self._start_poll(g, ev.uids)
 
     @command()
@@ -124,7 +137,7 @@ class Match(object):
 
         if flags.get('match'):
             uid = core.auth.uid_of(u)
-            if uid not in g._[self]['match_uids']:
+            if uid not in A(self, g)['uids']:
                 u.write(wire.Error('not_invited'))
                 return EventHub.STOP_PROPAGATION
 
@@ -146,7 +159,7 @@ class Match(object):
             while core.room.get(gid) is g:
                 users = core.room.online_users_of(g)
                 uids = {core.auth.uid_of(u) for u in users}
-                match_uids = set(g._[self]['match_uids'])
+                match_uids = set(A(self, g)['uids'])
 
                 for uid in match_uids - uids:
                     u = core.lobby.get(uid)

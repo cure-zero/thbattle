@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import TYPE_CHECKING, Tuple, Sequence
+from typing import Sequence, Set, TYPE_CHECKING, Tuple
 import logging
 
 # -- third party --
+from mypy_extensions import TypedDict
+
 # -- own --
 from server.endpoint import Client
 from server.utils import command
@@ -17,6 +19,17 @@ if TYPE_CHECKING:
 
 # -- code --
 log = logging.getLogger('Auth')
+
+
+class AuthAssocOnClient(TypedDict):
+    uid: int
+    name: str
+    kedama: bool
+    permissions: Set[str]
+
+
+def A(self: 'Auth', v: Client) -> AuthAssocOnClient:
+    return v._[self]
 
 
 class Auth(object):
@@ -35,12 +48,13 @@ class Auth(object):
             from settings import VERSION
             core = self.core
             u.write(wire.Greeting(node=core.options.node, version=VERSION))
-            u._[self] = {
+            assoc: AuthAssocOnClient = {
                 'uid': 0,
                 'name': '',
                 'kedama': False,
                 'permissions': set(),
             }
+            u._[self] = assoc
 
         return ev
 
@@ -82,7 +96,7 @@ class Auth(object):
         else:
             uid = int(rst['id'])
             u.write(wire.AuthSuccess(uid))
-            u._[self] = {
+            assoc: AuthAssocOnClient = {
                 'uid': uid,
                 'name': rst['name'],
                 'kedama': False,
@@ -91,22 +105,24 @@ class Auth(object):
                     [i['codename'] for i in rst['user']['groups']['permissions']]
                 ),
             }
+            u._[self] = assoc
             core.lobby.state_of(u).transit('authed')
 
     # ----- Public Methods -----
     def uid_of(self, u: Client) -> int:
-        return u._[self]['uid']
+        return A(self, u)['uid']
 
     def name_of(self, u: Client) -> str:
-        return u._[self]['name']
+        return A(self, u)['name']
 
     def is_kedama(self, u: Client) -> bool:
-        return u._[self]['kedama']
+        return A(self, u)['kedama']
 
     def set_auth(self, u: Client, uid: int = 1, name: str = 'Foo', kedama: bool = False, permissions: Sequence[str] = []) -> None:
-        u._[self] = {
+        assoc: AuthAssocOnClient = {
             'uid': uid,
             'name': name,
             'kedama': kedama,
             'permissions': set(permissions),
         }
+        u._[self] = assoc
