@@ -104,9 +104,6 @@ class Core(object):
         if 'replay' not in disables:
             self.replay = parts.replay.Replay(self)
 
-        if 'request' not in disables:
-            self.request = parts.request.Request(self)
-
         if 'warpgate' not in disables:
             self.warpgate = parts.warpgate.Warpgate(self)
 

@@ -2,20 +2,19 @@
 
 # -- stdlib --
 from enum import IntEnum
-from collections import deque
-from typing import Deque, Any, Sequence, Tuple, Iterator
-import json
+from typing import Any, Iterator, Sequence, Tuple
 import logging
 import zlib
 
 # -- third party --
 from gevent import socket
-from gevent.timeout import Timeout
 from gevent.lock import RLock
+from gevent.timeout import Timeout
 import msgpack
-import wire
 
 # -- own --
+import wire
+
 
 # -- code --
 log = logging.getLogger("Endpoint")

@@ -3,14 +3,15 @@
 # -- stdlib --
 from collections import defaultdict
 from random import Random
-from typing import Any, ClassVar, Dict, List, Optional, Sequence, Set, TYPE_CHECKING, Type, TypeVar
-from typing import Union
+from typing import Any, ClassVar, Dict, List, Optional, Sequence, Set, TYPE_CHECKING, Tuple, Type
+from typing import TypeVar, Union
 import logging
 import random
 
 # -- third party --
 from gevent import Timeout, getcurrent
 from gevent.event import Event
+from mypy_extensions import TypedDict
 import gevent
 
 # -- own --
@@ -694,6 +695,11 @@ class Packet(object):
         return 'Packet[%s, %s, %s, %s]' % (self.serial, self.tag, self.data, '_X'[self.consumed])
 
 
+class GameArchive(TypedDict):
+    send: List[Tuple[int, str, Any]]  # serial, tag, data
+    recv: List[Tuple[int, str, Any]]  # serial, tag, data
+
+
 class GameData(object):
     @instantiate
     class NODATA(object):
@@ -802,11 +808,17 @@ class GameData(object):
     def revive(self) -> None:
         self._dead = False
 
-    def archive(self) -> dict:
+    def archive(self) -> GameArchive:
         return {
             'send': [(i.serial, i.tag, i.data) for i in self._send],
             'recv': [(i.serial, i.tag, i.data) for i in self._recv],
         }
+
+    def feed_archive(self, data: GameArchive) -> None:
+        recv = [Packet(s, t, d) for s, t, d in data['recv']]
+        self._recv = recv
+        self._pending_recv = list(recv)
+        self._has_data.set()
 
 
 class GameItem(object):

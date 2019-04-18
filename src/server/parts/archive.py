@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import TYPE_CHECKING, Dict, Any
+from typing import Any, Dict, TYPE_CHECKING
 import base64
 import json
 import logging
@@ -12,11 +12,10 @@ import zlib
 import arrow
 
 # -- own --
-from server.base import Game
+from server.base import Game, HumanPlayer
 import settings
 
-
-# -- code --
+# -- typing --
 if TYPE_CHECKING:
     from server.core import Core  # noqa: F401
 
@@ -67,7 +66,7 @@ class Archive(object):
             'type': g.__class__.__name__,
             'flags': flags,
             'players': [core.auth.uid_of(u) for u in core.room.users_of(g)],
-            'winners': [core.auth.uid_of(u) for u in core.game.winners_of(g)],
+            'winners': [core.auth.uid_of(p.client) if isinstance(p, HumanPlayer) else 0 for p in core.game.winners_of(g)],
             'startedAt': arrow.get(start).to('Asia/Shanghai').isoformat(),
             'duration': int(time.time() - start),
         }

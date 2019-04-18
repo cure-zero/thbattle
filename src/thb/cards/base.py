@@ -11,11 +11,11 @@ import logging
 # -- third party --
 # -- own --
 from game.base import GameError, GameObject, GameViralContext, list_shuffle
-from thb.actions import UserAction
 from thb.mode import THBattle
 
 # -- typing --
 if TYPE_CHECKING:
+    from thb.actions import UserAction  # noqa: F401
     from thb.characters.base import Character  # noqa: F401
     from thb.meta.typing import CardMeta, SkillMeta  # noqa: F401
 
@@ -52,7 +52,7 @@ class Card(GameObject):
 
     ui_meta: ClassVar['CardMeta']
 
-    associated_action: Optional[Type[UserAction]]
+    associated_action: Optional[Type['UserAction']]
     category: Sequence[str]
 
     # True means this card's associated cards have already been taken.

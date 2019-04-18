@@ -2,14 +2,15 @@
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Any, Dict, List, TYPE_CHECKING, Tuple, Type, Optional
-from mypy_extensions import TypedDict
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Tuple, Type
 import logging
 import random
 
 # -- third party --
+from mypy_extensions import TypedDict
+
 # -- own --
-from game.base import GameData, Player
+from game.base import GameArchive, GameData, Player
 from server.base import Game as ServerGame, HumanPlayer, NPCPlayer
 from server.endpoint import Client
 from server.utils import command
@@ -269,7 +270,7 @@ class Game(object):
     def is_fleed(self, g: ServerGame, u: Client) -> bool:
         return Ag(self, g)['fleed'][u]
 
-    def get_gamedata_archive(self, g: ServerGame) -> List[dict]:
+    def get_gamedata_archive(self, g: ServerGame) -> List[GameArchive]:
         core = self.core
         ul = core.room.users_of(g)
         return [

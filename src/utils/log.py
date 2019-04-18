@@ -14,6 +14,7 @@ import raven
 
 # -- own --
 
+
 # -- code --
 class UnityLogHandler(logging.Handler):
 
@@ -21,7 +22,7 @@ class UnityLogHandler(logging.Handler):
         msg = self.format(rec)
 
         try:
-            from UnityEngine import Debug
+            from UnityEngine import Debug  # type: ignore
             if rec.levelno <= logging.DEBUG:
                 Debug.LogDebug(msg)
             elif rec.levelno <= logging.INFO:
@@ -98,7 +99,7 @@ def init(level, sentry_dsn, release, colored=False):
     logging.getLogger('sentry.errors').setLevel(1000)
 
     if colored:
-        from colorlog import ColoredFormatter
+        from colorlog import ColoredFormatter  # type: ignore
 
         formatter = ColoredFormatter(
             "%(log_color)s%(message)s%(reset)s",

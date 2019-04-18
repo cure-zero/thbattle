@@ -5,7 +5,7 @@
 # -- own --
 from thb import actions
 # -- code --
-
+'''
 
 def get_identity_def(g):
     # [('hakurei', u'博丽'), ...]
@@ -35,10 +35,12 @@ def lookup_identity(g, p):
         return None
 
 
-def modename2display(modename):
+def modename2display(modename: str) -> str:
     from thb import modes
     gcls = modes.get(modename)
     if not gcls:
         return '未知模式'
     else:
         return gcls.ui_meta.name
+
+'''

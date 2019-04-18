@@ -71,7 +71,9 @@ def start_server():
     )
 
     def serve(sock, addr):
-        from server.core import Endpoint, Client
+        from endpoint import Endpoint
+        from server.endpoint import Client
+
         ep = Endpoint(sock, addr)
         cli = Client(core, ep)
         cli.serve()

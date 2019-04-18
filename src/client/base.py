@@ -212,9 +212,8 @@ class Game(game.base.Game):
         core = g.core
         return core.game.is_dropped(g, p)
 
-    @classmethod
-    def me(cls, g: game.base.Game) -> Theone:
-        assert isinstance(g, Game)
+    @property
+    def me(g) -> Theone:
         core = g.core
         pl = core.game.players_of(g)
         uid = core.auth.uid

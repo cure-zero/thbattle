@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import Sequence, List
+from typing import Sequence, List, cast
 from functools import wraps
 import logging
 
@@ -127,7 +127,7 @@ def actv_handle_target_selection(g: THBattle, stage: BaseActionStage, card: Card
     selected: List[Character] = []
     disables: List[Character] = []
 
-    me = g.find_character(ClientGame.me(g))
+    me = g.find_character(cast(ClientGame, g).me)
     tl, tl_valid = card.target(g, me, players)
     if tl is not None:
         selected = list(tl)

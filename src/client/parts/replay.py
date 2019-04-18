@@ -10,7 +10,6 @@ import msgpack
 
 # -- own --
 from client.base import Game
-import wire
 
 # -- typing --
 if TYPE_CHECKING:
@@ -25,8 +24,8 @@ class ReplayFile(TypedDict):
     name: str
     params: Dict[str, Any]
     items: Dict[int, List[str]]
-    users: List[wire.model.User]
-    index: int
+    users: List[int]
+    me: int
     data: Any  # FIXME
     gid: int
 
@@ -37,9 +36,8 @@ class Replay(object):
 
     def dumps(self, g: Game) -> bytes:
         core = self.core
-        me_uid = core.auth.uid
-        users = core.game.users_of(g)
-        pos = [uv['uid'] for uv in users].index(me_uid)
+        uid = core.auth.uid
+        uids = [p.uid for p in core.game.players_of(g)]
 
         rep: ReplayFile = {
             'version': 1,
@@ -47,9 +45,12 @@ class Replay(object):
             'mode': g.__class__.__name__,
             'name': core.game.name_of(g),
             'params': core.game.params_of(g),
-            'items': core.game.items_of(g),
-            'users': users,
-            'index': pos,
+            'items': {
+                p.uid: [i.sku for i in items]
+                for p, items in core.game.items_of(g).items()
+            },
+            'users': uids,
+            'me': uid,
             'data': core.game.gamedata_of(g).archive(),
             'gid': core.game.gid_of(g),
         }
@@ -66,7 +67,7 @@ class Replay(object):
             rep['gid'],
             rep['mode'],
             rep['name'],
-            rep['users'],
+            [{'uid': i, 'state': 'game'} for i in rep['users']],
             rep['params'],
             rep['items'],
         )
