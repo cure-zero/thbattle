@@ -16,9 +16,7 @@ import wire
 # -- code --
 class Options(object):
     def __init__(self, options: Dict[str, Any]):
-        self.show_hidden_mode = options.get('show_hidden_mode', False)
-        self.freeplay         = options.get('freeplay', False)
-        self.disables         = options.get('disables', [])       # disabled core components, will assign a None value
+        self.disables = options.get('disables', [])
 
 
 T = TypeVar('T')

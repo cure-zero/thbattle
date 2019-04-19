@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 # -- code --
-log = logging.getLogger('client.core.parts.Server')
+log = logging.getLogger('client.parts.Server')
 STOP = EventHub.STOP_PROPAGATION
 
 

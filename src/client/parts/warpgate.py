@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-# flake8: noqa
-
-# For Unity
-
 
 # -- stdlib --
+import typing
+from typing import TYPE_CHECKING, Any, Callable, Tuple, List
+from typing_extensions import Literal
+import logging
+from mypy_extensions import TypedDict
+import utils.log
+
 import random
 import sys
 
@@ -15,76 +18,78 @@ import gevent.hub
 
 # -- own --
 from game.base import EventHandler
-from utils.misc import instantiate
+from client.base import Game
 import settings
+
+# -- typing --
+if TYPE_CHECKING:
+    from client.core import Core  # noqa: F401
 
 
 # -- code --
-'''
-Emits:
-    ['game_event', g -> Game, evt_name -> str, arg -> object]  // Game.emit_event
-    ['system_event', evt_name -> str, args -> tuple]  // See Executive
-'''
+class GameEvent(TypedDict):
+    t: Literal['g']
+    g: Game
+    evt: str
+    arg: Any
+
+
+class InputEvent(TypedDict):
+    t: Literal['i']
+    g: Game
+    arg: Any
+    done: Callable
+
+
+class SystemEvent(TypedDict):
+    t: Literal['s']
+    evt: str
+    arg: Tuple
 
 
 class UnityUIEventHook(EventHandler):
-    def __init__(self, g, warpgate):
+    game: Game
+
+    def __init__(self, g: Game):
         EventHandler.__init__(self, g)
-        self.warpgate = warpgate
         self.game = g
         self.live = False
 
-    def evt_user_input(self, g, evt_name, arg):
-        trans, ilet = arg
+    def evt_user_input(self, arg: Any) -> None:
         evt = Event()
-        self.warpgate.events.append(('game_event', self.game, evt_name, (trans, ilet, evt.set)))
+        g = self.game
+        core = g.core
+        core.warpgate.feed_ev({'t': 'i', 'g': g, 'arg': arg, 'done': evt.set})
         evt.wait()
-        return ilet
 
-    def handle(self, evt, data):
+    def handle(self, evt: str, arg: Any) -> Any:
         if not self.live and evt not in ('game_begin', 'switch_character', 'reseat'):
-            return data
+            return arg
 
-        handler = getattr(self, 'evt_' + evt, None)
-        if handler:
-            handler(self.game, evt, data)
+        g = self.game
+        core = g.core
+
+        if evt == 'user_input':
+            self.evt_user_input(arg)
         else:
-            self.warpgate.events.append(('game_event', self.game, evt, data))
+            core.warpgate.feed_ev({'t': 'g', 'g': g, 'evt': evt, 'arg': arg})
 
         if random.random() < 0.01:
             gevent.sleep(0.005)
 
-        return data
+        return arg
 
-    def set_live(self):
+    def set_live(self) -> None:
         self.live = True
-        self.warpgate.events.append(('game_event', self.game, 'game_live', None))
+        core = self.game.core
+        core.warpgate.feed_ev({'t': 'g', 'g': self.game, 'evt': 'game_live', 'arg': None})
 
-
-# from gevent.resolver_ares import Resolver
-# hub = gevent.hub.get_hub()
-# hub.resolver = Resolver(hub=hub)
-
-import logging
-import utils.log
 
 sys.argv = []
 
-utils.log.init_unity(logging.ERROR, settings.SENTRY_DSN, settings.VERSION)
-utils.log.patch_gevent_hub_print_exception()
 
 
 class ExecutiveWrapper(object):
-    def __init__(self, executive, warpgate):
-        object.__setattr__(self, "executive", executive)
-        object.__setattr__(self, "warpgate", warpgate)
-
-    def __getattr__(self, k):
-        return getattr(self.executive, k)
-
-    def __setattr__(self, k, v):
-        setattr(self.executive, k, v)
-
     def connect_server(self, host, port):
         from UnityEngine import Debug
         Debug.Log(repr((host, port)))
@@ -96,19 +101,6 @@ class ExecutiveWrapper(object):
 
     def start_replay(self, rep):
         self.executive.start_replay(rep, self.warpgate.queue_system_event)
-
-    def update(self):
-        Q = self.warpgate.queue_system_event
-
-        def update_cb(name, p):
-            Q('update', name, p)
-
-        @gevent.spawn
-        def do():
-            Q('result', self.executive.update(update_cb))
-
-    def get_account_data(self):
-        return self.executive.gamemgr.accdata
 
     def ignite(self, g):
         g.event_observer = UnityUIEventHook(self.warpgate, g)
@@ -128,58 +120,44 @@ class ExecutiveWrapper(object):
                 g.start()
 
 
-@instantiate
 class Warpgate(object):
+    def __init__(self, core: 'Core'):
+        self.core = core
+        self.events: List[Any] = []
+        core.events.core_initialized += self.init_warpgate
 
-    def init(self):
-        import options
+    def init_warpgate(self, core: 'Core') -> 'Core':
         from UnityEngine import Debug
 
-        L = lambda s: Debug.Log("PyWrap: " + s)
-        L("init")
+        Debug.Log("core.warpgate: Initializing logging")
+        utils.log.init_unity(logging.ERROR, settings.SENTRY_DSN, settings.VERSION)
+        utils.log.patch_gevent_hub_print_exception()
 
-        self.events = []
-
-        # should set them
-        options.no_update
-        options.show_hidden_mode
-        options.freeplay = False
-
-        if options.no_update:
-            import autoupdate
-            autoupdate.Autoupdate = autoupdate.DummyAutoupdate
-
-        L("before gevent")
+        Debug.Log("core.warpgate: Before gevent")
         from gevent import monkey
         monkey.patch_socket()
         monkey.patch_os()
         monkey.patch_select()
-        L("after gevent")
+        Debug.Log("core.warpgate: After gevent")
 
-        from .game import autoenv
+        from game import autoenv
         autoenv.init('Client')
 
-        import thb.meta  # noqa, init ui_meta
+        return core
 
-    def get_events(self):
+    @typing.overload
+    def feed_ev(self, ev: GameEvent) -> None: ...
+
+    @typing.overload
+    def feed_ev(self, ev: InputEvent) -> None: ...
+
+    @typing.overload
+    def feed_ev(self, ev: SystemEvent) -> None: ...
+
+    def feed_ev(self, ev: Any) -> None:
+        self.events.append(ev)
+
+    def get_events(self) -> List[Any]:
         l = self.events
         self.events = []
         return l
-
-    def start_backdoor(self):
-        from gevent.backdoor import BackdoorServer
-        import gevent
-        self.bds = BackdoorServer(('127.0.0.1', 12345))
-        self.gr_bds = gevent.spawn(self.bds.serve_forever)
-
-    def stop_backdoor(self):
-        self.gr_bds.kill()
-        self.bds.close()
-
-    def shutdown(self):
-        from client.core.executive import Executive
-        if Executive.state == 'connected':
-            Executive.disconnect()
-
-    def queue_system_event(self, evt_name, arg=None):
-        self.events.append(('system_event', evt_name, arg))

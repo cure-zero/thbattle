@@ -5,7 +5,6 @@ from typing import Dict, Type
 
 # -- third party --
 # -- own --
-from game.base import Game
 from thb.mode import THBattle
 from thb.thb2v2 import THBattle2v2
 from thb.thbfaith import THBattleFaith
@@ -16,6 +15,7 @@ from thb.thbnewbie import THBattleNewbie
 
 # -- code --
 import thb.item  # noqa, init it
+import thb.meta  # noqa, init it
 
 modes: Dict[str, Type[THBattle]] = {}
 modelst = [

@@ -69,11 +69,7 @@ class Game(object):
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         u, f, t = ev
         if t == 'lobby':
-            assoc: GameAssocOnClient = {
-                'game': None,
-                'params': {},
-            }
-            u._[self] = assoc
+            u._[self] = GameAssocOnClient(game=None, params={})
 
         return ev
 
@@ -223,7 +219,7 @@ class Game(object):
         seed = random.getrandbits(63)
         g.random = random.Random(seed)
 
-        assoc: GameAssocOnGame = {
+        g._[self] = GameAssocOnGame({
             'params': {k: v[0] for k, v in cls.params_def.items()},
             'players': BatchList(),
             'fleed': defaultdict(bool),
@@ -232,8 +228,7 @@ class Game(object):
             'rngseed': seed,
             'data': {},
             'winners': [],
-        }
-        g._[self] = assoc
+        })
 
         return g
 

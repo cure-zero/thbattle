@@ -98,7 +98,7 @@ class ServerWorld(object):
 
     def fullgame(self, cls=None, flags={}):
         if not cls:
-            from thb.thb3v3 import THBattle as cls
+            from thb.thb2v2 import THBattle2v2 as cls
 
         base = random.randint(1, 1000000)
         core = self.core
@@ -129,14 +129,3 @@ def hook_game(g):
         pass
 
     g.synctag = 0
-
-    from game.autoenv import Game
-    Game.getgame = staticmethod(lambda: g)
-
-    from client.core import Game
-    Game.getgame = staticmethod(lambda: g)
-
-    from server.core import Game
-    Game.getgame = staticmethod(lambda: g)
-
-    g.__class__.getgame = staticmethod(lambda: g)
