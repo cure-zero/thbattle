@@ -159,12 +159,6 @@ class SetGameParam(Message, BiDirectional):
 
 @message
 @dataclass
-class GameLiveAt(Message, ServerToClient):
-    serial: int
-
-
-@message
-@dataclass
 class GameData(Message, BiDirectional):
     gid: int
     serial: int

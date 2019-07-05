@@ -242,11 +242,11 @@ class Game(object):
 
         gid = core.room.gid_of(g)
 
-        to.write(wire.GameLiveAt(pkts[-1].serial))
         to.write_bulk([
             wire.GameData(gid, p.serial, p.tag, p.data)
             for p in pkts
         ])
+        to.write(wire.GameData(gid, -1, "__game_live", None))
 
     def mark_crashed(self, g: ServerGame) -> None:
         Ag(self, g)['crashed'] = True

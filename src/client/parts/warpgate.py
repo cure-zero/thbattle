@@ -71,6 +71,9 @@ class UnityUIEventHook(EventHandler):
 
         if evt == 'user_input':
             self.evt_user_input(arg)
+        elif evt == '__game_live':
+            self.live = True
+            return None
         else:
             core.warpgate.feed_ev({'t': 'g', 'g': g, 'evt': evt, 'arg': arg})
 
@@ -124,26 +127,26 @@ class Warpgate(object):
     def __init__(self, core: 'Core'):
         self.core = core
         self.events: List[Any] = []
-        core.events.core_initialized += self.init_warpgate
-
-    def init_warpgate(self, core: 'Core') -> 'Core':
-        from UnityEngine import Debug
-
-        Debug.Log("core.warpgate: Initializing logging")
-        utils.log.init_unity(logging.ERROR, settings.SENTRY_DSN, settings.VERSION)
-        utils.log.patch_gevent_hub_print_exception()
-
-        Debug.Log("core.warpgate: Before gevent")
-        from gevent import monkey
-        monkey.patch_socket()
-        monkey.patch_os()
-        monkey.patch_select()
-        Debug.Log("core.warpgate: After gevent")
 
         from game import autoenv
         autoenv.init('Client')
 
+        core.events.core_initialized += self.init_warpgate
+
+    def init_warpgate(self, core: 'Core') -> 'Core':
+        for name, hub in core.events.__dict__.items():
+            if name in ('core_initialized', 'server_command'):
+                continue
+
+            hub += self.forward_event(name)
+
         return core
+
+    def forward_event(self, evt: str) -> Callable:
+        def forwarder(arg: Any) -> Any:
+            self.feed_ev({'t': 's', 'evt': evt, 'arg': arg})
+            return arg
+        return forwarder
 
     @typing.overload
     def feed_ev(self, ev: GameEvent) -> None: ...

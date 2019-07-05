@@ -9,14 +9,14 @@ import logging
 import random
 
 # -- third party --
-from gevent import Timeout, getcurrent
+from gevent import Timeout
 from gevent.event import Event
 from mypy_extensions import TypedDict
 import gevent
 
 # -- own --
 from endpoint import EndpointDied
-from utils.misc import BatchList, exceptions, instantiate
+from utils.misc import BatchList, exceptions
 from utils.viral import ViralContext
 
 # -- typing --
@@ -269,35 +269,6 @@ class Game(GameObject, GameViralContext):
 
     def can_leave(self, p: Player) -> bool:
         raise GameError('Abstract')
-
-    '''
-    def get_playerid(self, p):
-        return self.players.index(p)
-        try:
-            return self.players.index(p)
-        except ValueError:
-            return None
-
-    def player_fromid(self, pid):
-        return self.players[pid]
-        try:
-            return self.players[pid]
-        except IndexError:
-            return None
-
-    def players_from(g: 'Game', p: Player):
-        if p is None:
-            id = 0
-        elif p in g.players:
-            id = g.get_playerid(p)
-        else:
-            id = p.index
-
-        n = len(g.players)
-
-        for i in list(range(id, n)) + list(range(id)):
-            yield g.players[i]
-    '''
 
 
 class ActionShootdown(BaseException, GameObject):
@@ -683,73 +654,57 @@ class InputTransaction(GameViralContext):
 
 
 class Packet(object):
-    __slots__ = ('serial', 'tag', 'data', 'consumed')
+    __slots__ = ('tag', 'data', 'consumed')
 
-    def __init__(self, serial: int, tag: str, data: object):
-        self.serial = serial
+    def __init__(self, tag: str, data: object):
         self.tag = tag
         self.data = data
         self.consumed = False
 
     def __repr__(self):
-        return 'Packet[%s, %s, %s, %s]' % (self.serial, self.tag, self.data, '_X'[self.consumed])
+        return 'Packet<%s, %s, %s>' % (self.tag, self.data, '_X'[self.consumed])
 
 
 class GameArchive(TypedDict):
-    send: List[Tuple[int, str, Any]]  # serial, tag, data
-    recv: List[Tuple[int, str, Any]]  # serial, tag, data
+    send: List[Tuple[str, Any]]  # tag, data
+    recv: List[Tuple[str, Any]]  # tag, data
 
 
 class GameData(object):
-    @instantiate
-    class NODATA(object):
-        def __repr__(self):
-            return 'NODATA'
-
-    def __init__(self):
+    def __init__(self, gid: int, live=True):
+        self.gid = gid
         self._send: List[Packet] = []
-        self._send_serial: int = 0
         self._recv: List[Packet] = []
-        self._recv_serial = 0
         self._seen: Set[str] = set()
         self._pending_recv: List[Packet] = []
         self._has_data = Event()
-        self._live_serial = 0
         self._dead = False
+        self._live = live
 
         self._in_gexpect = False
 
-    def feed_recv(self, serial: int, tag: str, data: object):
-        d = self._recv
-        if not d or d[-1].serial < serial:
-            if tag in self._seen:
-                return
+    def feed_recv(self, tag: str, data: object):
+        if tag in self._seen:
+            return
 
-            self._seen.add(tag)
-            p = Packet(serial, tag, data)
-            self._recv.append(p)
-            self._pending_recv.append(p)
-            self._has_data.set()
-        else:
-            log.error('Dropping game data with decreasing serial: %s, tag: %s', serial, tag)
+        self._seen.add(tag)
+        p = Packet(tag, data)
+        self._recv.append(p)
+        self._pending_recv.append(p)
+        self._has_data.set()
 
     def feed_send(self, tag: str, data: object):
-        serial = self._send_serial
-        self._send_serial += 1
-        p = Packet(serial, tag, data)
+        p = Packet(tag, data)
         self._send.append(p)
         return p
 
     def get_sent(self) -> List[Packet]:
         return self._send
 
-    def set_live_serial(self, serial: int):
-        self._live_serial = serial
-
     def is_live(self) -> bool:
-        return self._recv_serial > self._live_serial
+        return self._live
 
-    def gexpect(self, tag: str, blocking: bool = True):
+    def gexpect(self, tag: str):
         if self._dead:
             raise EndpointDied
 
@@ -757,8 +712,7 @@ class GameData(object):
             assert not self._in_gexpect, 'NOT REENTRANT'
             self._in_gexpect = True
 
-            if blocking:
-                log.debug('GAME_EXPECT: %s', repr(tag))
+            log.debug('GAME_EXPECT: %s', repr(tag))
 
             recv = self._pending_recv
             e = self._has_data
@@ -770,30 +724,31 @@ class GameData(object):
                 glob = True
 
             while True:
+                livepkt = None
                 for i, packet in enumerate(recv):
                     if isinstance(packet, EndpointDied):
                         del recv[i]
                         raise packet
 
+                    if packet.tag == '__game_live':
+                        livepkt = packet
+                        continue
+
                     if packet.tag == tag or (glob and packet.tag.startswith(tag)):
                         log.debug('GAME_READ: %s', repr(packet))
                         del recv[i]
-                        self._recv_serial = packet.serial
                         packet.consumed = True
+                        if livepkt:
+                            self._live = True
                         return [packet.tag, packet.data]
 
                     else:
-                        log.debug('GAME_DATA_MISS: %s', repr(packet))
-                        log.debug('EXPECTS: %s, GAME: %s', tag, getcurrent())
+                        log.debug('GAME_MISS: %s, EXPECTS: %s, GID: %s', repr(packet), tag, self.gid)
 
-                if blocking:
-                    e.wait(timeout=5)
-                    if self._dead:
-                        raise EndpointDied
-                    e.clear()
-                else:
-                    e.clear()
-                    return None, self.NODATA
+                e.wait(timeout=5)
+                if self._dead:
+                    raise EndpointDied
+                e.clear()
         finally:
             self._in_gexpect = False
 
@@ -810,12 +765,12 @@ class GameData(object):
 
     def archive(self) -> GameArchive:
         return {
-            'send': [(i.serial, i.tag, i.data) for i in self._send],
-            'recv': [(i.serial, i.tag, i.data) for i in self._recv],
+            'send': [(i.tag, i.data) for i in self._send],
+            'recv': [(i.tag, i.data) for i in self._recv],
         }
 
     def feed_archive(self, data: GameArchive) -> None:
-        recv = [Packet(s, t, d) for s, t, d in data['recv']]
+        recv = [Packet(t, d) for t, d in data['recv']]
         self._recv = recv
         self._pending_recv = list(recv)
         self._has_data.set()

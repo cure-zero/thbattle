@@ -53,6 +53,7 @@ class Game(object):
         D[wire.ObserveStarted] += self._observe_started
         D[wire.GameLeft]       += self._game_left
         D[wire.GameEnded]      += self._game_ended
+        D[wire.GameData]       += self._game_data
 
     def _room_users(self, ev: wire.RoomUsers) -> wire.RoomUsers:
         core = self.core
@@ -134,6 +135,13 @@ class Game(object):
         core = self.core
         core.events.game_ended.emit(g)
 
+        return ev
+
+    def _game_data(self, ev: wire.GameData) -> wire.GameData:
+        g = self.games.get(ev.gid)
+        if not g:
+            return ev
+        A(self, g)['data'].feed_recv(ev.serial, ev.tag, ev.data)
         return ev
 
     # ----- Public Methods -----
