@@ -47,7 +47,7 @@ def Ag(self: 'Observe', g: Game) -> ObserveAssocOnGame:
 
 
 class Observe(object):
-    def __init__(self, core: Core):
+    def __init__(self, core: 'Core'):
         self.core = core
 
         core.events.user_state_transition += self.handle_ust_observee
@@ -113,7 +113,7 @@ class Observe(object):
         gid = core.room.gid_of(g)
 
         d = Endpoint.encode(wire.GameData(
-            gid=gid, serial=pkt.serial, tag=pkt.tag, data=pkt.data
+            gid=gid, tag=pkt.tag, data=pkt.data
         ))
 
         for u in Au(self, u)['obs']:

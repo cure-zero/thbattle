@@ -79,7 +79,7 @@ class Archive(object):
             'class': g.__class__.__name__,
             'params': core.game.params_of(g),
             'items': core.item.item_skus_of(g),
-            'rndseed': core.game.rngseed_of(g),
+            'rngseed': core.game.rngseed_of(g),
             'players': [core.auth.uid_of(u) for u in core.room.users_of(g)],
             'data': core.game.get_gamedata_archive(g),
         }

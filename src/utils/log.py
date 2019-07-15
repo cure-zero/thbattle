@@ -22,7 +22,7 @@ class UnityLogHandler(logging.Handler):
         msg = self.format(rec)
 
         try:
-            from UnityEngine import Debug  # type: ignore
+            from UnityEngine import Debug
             if rec.levelno <= logging.DEBUG:
                 Debug.LogDebug(msg)
             elif rec.levelno <= logging.INFO:

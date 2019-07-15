@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 
 # -- stdlib --
-from typing import List, Any
+from typing import Any, List, TYPE_CHECKING
 import logging
 
 # -- third party --
 # -- own --
 from game.base import EventHandler
 from server.base import Game
-from server.core import Core
+
+# -- typing --
+if TYPE_CHECKING:
+    from server.core import Core  # noqa: F401
 
 
 # -- code --
@@ -28,7 +31,7 @@ class ServerEventHooks(EventHandler):
 
 
 class Hooks(object):
-    def __init__(self, core: Core):
+    def __init__(self, core: 'Core'):
         self.core = core
         core.events.game_started += self.handle_game_started
 

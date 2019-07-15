@@ -47,8 +47,8 @@ class Message:
 def message(cls: Type[Message]) -> Type[Message]:
     assert issubclass(cls, ServerToClient) or issubclass(cls, ClientToServer)
     cls.op = cls.__name__
-    Message.types[cls.op] = cls
     assert cls.op not in Message.types, cls.op
+    Message.types[cls.op] = cls
 
     if not hasattr(cls, 'encode'):
         env = {}
@@ -161,7 +161,6 @@ class SetGameParam(Message, BiDirectional):
 @dataclass
 class GameData(Message, BiDirectional):
     gid: int
-    serial: int
     tag: str
     data: Any
 

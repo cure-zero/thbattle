@@ -17,7 +17,7 @@ from endpoint import Endpoint, EndpointDied
 from server.base import Player
 from server.core import Core
 from server.endpoint import Client
-from utils import hook
+from utils.misc import hook
 
 
 # -- code --

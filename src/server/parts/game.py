@@ -191,16 +191,17 @@ class Game(object):
         if ev.gid != core.room.gid_of(g):
             return
 
-        pkt = Ag(self, g)['data'][u].feed_recv(ev.serial, ev.tag, ev.data)
+        pkt = Ag(self, g)['data'][u].feed_recv(ev.tag, ev.data)
         core.events.game_data_recv.emit((g, u, pkt))
 
     # ----- Private Methods -----
     def _setup_game(self, g: ServerGame) -> None:
         core = self.core
         users = core.room.users_of(g)
+        gid = core.room.gid_of(g)
 
         Ag(self, g)['data'] = {
-            u: GameData() for u in users
+            u: GameData(gid) for u in users
         }
         Ag(self, g)['players'] = self._build_players(g, users)
 
@@ -243,10 +244,10 @@ class Game(object):
         gid = core.room.gid_of(g)
 
         to.write_bulk([
-            wire.GameData(gid, p.serial, p.tag, p.data)
+            wire.GameData(gid, p.tag, p.data)
             for p in pkts
         ])
-        to.write(wire.GameData(gid, -1, "__game_live", None))
+        to.write(wire.GameData(gid, "__game_live", None))
 
     def mark_crashed(self, g: ServerGame) -> None:
         Ag(self, g)['crashed'] = True
@@ -277,7 +278,7 @@ class Game(object):
         assert Au(self, u)['game'] is g
         pkt = Ag(self, g)['data'][u].feed_send(tag, data)
         gid = core.room.gid_of(g)
-        u.write(wire.GameData(gid=gid, serial=pkt.serial, tag=pkt.tag, data=pkt.data))
+        u.write(wire.GameData(gid=gid, tag=tag, data=data))
         core.events.game_data_send.emit((g, u, pkt))
 
     def current(self, u: Client) -> ServerGame:

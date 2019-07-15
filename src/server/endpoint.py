@@ -29,7 +29,7 @@ class Pivot(Exception):
 class Client(object):
     __slots__ = ('_ep', '_gr', '_core', '_')
 
-    def __init__(self, core: Core, ep: Optional[Endpoint]):
+    def __init__(self, core: 'Core', ep: Optional[Endpoint]):
         self._ep: Optional[Endpoint] = ep
         self._gr: Optional[Greenlet] = None
         self._core = core

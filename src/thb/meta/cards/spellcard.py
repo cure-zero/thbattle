@@ -73,7 +73,7 @@ class RejectCard:
         return 'thb-cv-card_reject'
 
     def has_reject_card(self, p):
-        from thb.cards.classes import RejectCard as RC
+        from thb.cards.definition import RejectCard as RC
         if any([c.is_card(RC) for c in itertools.chain(p.cards, p.showncards)]):
             return True
 
@@ -407,7 +407,7 @@ class DollControlCard:
             return (False, '请选择被控者的攻击目标')
         elif n == 2:
             from thb.actions import LaunchCard
-            from thb.cards.classes import AttackCard
+            from thb.cards.definition import AttackCard
             c = AttackCard()
             lc = LaunchCard(tl[0], [tl[1]], c)
             if not lc.can_fire():

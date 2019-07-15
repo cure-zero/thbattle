@@ -69,7 +69,7 @@ def pasv_handle_card_selection(g, ilet, cards):
     if cards:
         walk_wrapped(g, cards, True)
 
-        from thb.cards.classes import Skill
+        from thb.cards.base import Skill
 
         if cards[0].is_card(Skill) and not actions.skill_check(cards[0]):
             raise ActionDisplayResult(False, '您不能这样出牌', False, [], [])

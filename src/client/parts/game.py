@@ -141,7 +141,7 @@ class Game(object):
         g = self.games.get(ev.gid)
         if not g:
             return ev
-        A(self, g)['data'].feed_recv(ev.serial, ev.tag, ev.data)
+        A(self, g)['data'].feed_recv(ev.tag, ev.data)
         return ev
 
     # ----- Public Methods -----
@@ -174,7 +174,6 @@ class Game(object):
         gid = A(self, g)['gid']
         core.server.write(wire.GameData(
             gid=gid,
-            serial=pkt.serial,
             tag=pkt.tag,
             data=pkt.data,
         ))

@@ -202,9 +202,9 @@ class Game(game.base.Game):
     CLIENT = False
     SERVER = True
 
-    core: Core
+    core: 'Core'
 
-    def __init__(self, core: Core):
+    def __init__(self, core: 'Core'):
         game.base.Game.__init__(self)
         self.core = core
 
