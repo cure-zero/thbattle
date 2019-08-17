@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import OrderedDict
@@ -143,7 +144,7 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout: int = 25, ty
 
 class Theone(game.base.Player):
 
-    def __init__(self, game: 'Game', uid: int):
+    def __init__(self, game: Game, uid: int):
         Player.__init__(self)
         self.game = game
         self.uid = uid
@@ -163,7 +164,7 @@ class Theone(game.base.Player):
 
 class Someone(Player):
 
-    def __init__(self, game: 'Game', uid: int):
+    def __init__(self, game: Game, uid: int):
         Player.__init__(self)
         self.game = game
         self.uid = uid
@@ -180,7 +181,7 @@ class Game(game.base.Game):
 
     random = Random()
 
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         game.base.Game.__init__(self)
         self.core = core
 

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
-from typing import Optional, TYPE_CHECKING, cast
+from typing import Optional, TYPE_CHECKING, cast, List
 from urllib.parse import urlparse
 import logging
 import socket
@@ -26,7 +27,7 @@ STOP = EventHub.STOP_PROPAGATION
 
 
 class Server(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         self.server_name = 'Unknown'
@@ -121,3 +122,44 @@ class Server(object):
         while self._ep:
             self._ep.write(['heartbeat', ()])
             gevent.sleep(10)
+
+
+class MockServer(object):
+    def __init__(self, core: Core, error: str = ''):
+        self.core = core
+
+        self.server_name = 'Mock'
+        self.state = 'initial'
+        self.error = error
+
+        self.written_messages: List[wire.ClientToServer] = []
+
+    # ----- Public Methods -----
+    def connect(self, uri: str) -> None:
+        core = self.core
+        e = self.error
+        if e == 'refused':
+            core.events.server_refused.emit(None)
+        elif e == 'version_mismatch':
+            core.events.version_mismatch.emit(None)
+        else:
+            self.state = 'connected'
+            core.events.server_connected.emit(None)
+
+    def disconnect(self) -> None:
+        self.state = 'initial'
+
+    def write(self, v: wire.ClientToServer) -> None:
+        self.written_messages.append(v)
+
+    def raw_write(self, v: bytes) -> None:
+        self.written_messages.extend(cast(List[wire.ClientToServer], Endpoint.decode_bytes(v)))
+
+    def recv(self, v: wire.ServerToClient) -> None:
+        core = self.core
+        D = core.events.server_command
+        D[v.__class__].emit(v)
+
+    def dropped(self) -> None:
+        core = self.core
+        core.events.server_dropped.emit(None)

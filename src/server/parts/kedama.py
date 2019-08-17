@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import TYPE_CHECKING, Optional
@@ -21,12 +22,15 @@ log = logging.getLogger('server.parts.kedama')
 
 
 class Kedama(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
         D = core.events.client_command
         D[wire.CreateRoom].subscribe(self._room_create_limit, -5)
         D[wire.JoinRoom].subscribe(self._room_join_limit, -5)
         D[wire.Invite].subscribe(self._invite_limit, -5)
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     # ----- Commands -----
     @command()

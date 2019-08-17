@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from enum import Enum
@@ -122,7 +123,7 @@ class THBattleFaithBootstrap(BootstrapAction):
             rl = [H, M, H, M, H, M]
 
         for p, role in zip(pl, rl):
-            g.roles[p] = PlayerRole[THBFaithRole]()
+            g.roles[p] = PlayerRole(THBFaithRole)
             g.roles[p].set(role)
             g.process_action(RevealRole(p, pl))
 
@@ -201,7 +202,7 @@ class THBattleFaith(THBattle):
     forces: Dict[THBFaithRole, BatchList[Player]]
     pool: Dict[THBFaithRole, List[CharChoice]]
 
-    def can_leave(g: 'THBattleFaith', p: Any):
+    def can_leave(g: THBattleFaith, p: Any):
         return False
 
     def switch_character(g, p: Player, choice: CharChoice) -> Character:

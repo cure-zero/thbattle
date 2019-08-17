@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import TYPE_CHECKING, Any
@@ -22,7 +23,7 @@ log = logging.getLogger('Interconnect')
 
 
 class Connect(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.game_created += self.refresh_status
@@ -35,6 +36,9 @@ class Connect(object):
 
         self._wshandler = gevent.spawn(self._websocket_handler)
         self._wshb = gevent.spawn(self._websocket_heartbeat)
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     @throttle(1.5)
     def refresh_status(self, ev: Any) -> Any:

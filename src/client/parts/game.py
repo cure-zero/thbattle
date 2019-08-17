@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import Any, Dict, List, Sequence
@@ -36,7 +37,7 @@ class GameAssocOnGame(TypedDict):
     greenlet: Greenlet
 
 
-def A(self: 'Game', v: ClientGame) -> GameAssocOnGame:
+def A(self: Game, v: ClientGame) -> GameAssocOnGame:
     return v._[self]
 
 

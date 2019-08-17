@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import OrderedDict
 from copy import copy
-from typing import Any, Callable, Dict, Optional, Sequence, TYPE_CHECKING, Tuple, cast
+from typing import Any, Callable, Dict, List, Optional, Sequence, TYPE_CHECKING, Tuple, cast
 import logging
 
 # -- third party --
@@ -14,11 +15,13 @@ import gevent
 # -- own --
 from .endpoint import Client
 from endpoint import EndpointDied
-from game.base import GameEnded, InputTransaction, Inputlet, Player, TimeLimitExceeded
-from utils.misc import log_failure
+from game.base import BootstrapAction, GameEnded, GameItem, InputTransaction, Inputlet, Player
+from game.base import TimeLimitExceeded
+from utils.misc import BatchList, log_failure
 import game.base
 
-# -- typing --
+
+# -- code --
 if TYPE_CHECKING:
     from server.core import Core  # noqa: F401
 
@@ -28,7 +31,7 @@ log = logging.getLogger('Game_Server')
 
 
 class InputWaiter(Greenlet):
-    def __init__(self, game: 'Game', player: 'HumanPlayer', tag: str):
+    def __init__(self, game: Game, player: HumanPlayer, tag: str):
         Greenlet.__init__(self)
         self.game = game
         self.player = player
@@ -187,6 +190,23 @@ def user_input(players: Sequence[Any], inputlet: Inputlet, timeout: int = 25, ty
     assert False, 'WTF?!'
 
 
+class HaltOnStart(BootstrapAction):
+    def __init__(self, params: Dict[str, Any],
+                       items: Dict[Player, List[GameItem]],
+                       players: BatchList[Player]):
+        self.params  = params
+        self.items   = items
+        self.players = players
+
+    def apply_action(self) -> bool:
+        g = self.game
+        assert isinstance(g, Game)
+        core = g.core
+        core.game.set_bootstrap_action(g, self)
+        g.pause(99999999)
+        return True
+
+
 class Game(game.base.Game):
     '''
     The Game class, all game mode derives from this.
@@ -202,11 +222,11 @@ class Game(game.base.Game):
     CLIENT = False
     SERVER = True
 
-    core: 'Core'
+    core: Core
 
-    def __init__(self, core: 'Core'):
-        game.base.Game.__init__(self)
+    def __init__(self, core: Core):
         self.core = core
+        super().__init__()
 
     @log_failure(log)
     def run(g) -> None:
@@ -227,7 +247,10 @@ class Game(game.base.Game):
         items = {m[k]: v for k, v in core.item.items_of(g).items()}
 
         try:
-            g.process_action(g.bootstrap(params, items, players))
+            cls = g.bootstrap
+            if core.game.should_halt(g):
+                cls = HaltOnStart
+            g.process_action(cls(params, items, players))
         except GameEnded as e:
             core.game.set_winners(g, list(e.winners))
         except Exception:
@@ -248,7 +271,7 @@ class Game(game.base.Game):
 
     def get_synctag(g) -> int:
         core = g.core
-        assert gevent.getcurrent() is core.room.greenlet_of(g)
+        # assert gevent.getcurrent() is core.room.greenlet_of(g)
         if core.game.is_aborted(g):
             raise GreenletExit
 

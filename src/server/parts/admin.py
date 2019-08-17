@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import Any, Callable, List, TYPE_CHECKING, Tuple, TypeVar
@@ -23,8 +24,8 @@ T = TypeVar('T', bound=msg.Message)
 STOP = EventHub.STOP_PROPAGATION
 
 
-def _need_admin(f: Callable[['Admin', Client, T], Any]) -> Callable[['Admin', Tuple[Client, T]], EventHub.StopPropagation]:
-    def wrapper(self: 'Admin', ev: Tuple[Client, T]) -> EventHub.StopPropagation:
+def _need_admin(f: Callable[[Admin, Client, T], Any]) -> Callable[[Admin, Tuple[Client, T]], EventHub.StopPropagation]:
+    def wrapper(self: Admin, ev: Tuple[Client, T]) -> EventHub.StopPropagation:
         core = self.core
         u, m = ev
         if core.auth.uid_of(u) not in self.admins:
@@ -38,7 +39,7 @@ def _need_admin(f: Callable[['Admin', Client, T], Any]) -> Callable[['Admin', Tu
 
 
 class Admin(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         D = core.events.client_command
@@ -53,6 +54,9 @@ class Admin(object):
         D[msg.AdminRemoveBigbrother] += self._remove_bigbrother
 
         self.admins: List[int] = [2, 109, 351, 3044, 6573, 6584, 9783]
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     @_need_admin
     def _kick(self, c: Client, m: msg.AdminKick) -> None:

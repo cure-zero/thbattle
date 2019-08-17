@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import TYPE_CHECKING
@@ -18,10 +19,13 @@ log = logging.getLogger('Reward')
 
 
 class Reward(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.game_ended += self.handle_game_ended
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     def handle_game_ended(self, g: Game) -> Game:
         core = self.core

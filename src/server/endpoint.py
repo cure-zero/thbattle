@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
-from typing import TYPE_CHECKING, cast, Optional, Sequence
+from typing import TYPE_CHECKING, cast, Optional, Sequence, List, Any
 import logging
 
 # -- third party --
@@ -10,7 +11,7 @@ import gevent
 
 # -- own --
 from endpoint import Endpoint, EndpointDied
-from utils.misc import log_failure
+from utils.misc import log_failure, MockMeta
 import wire
 
 # -- typing --
@@ -27,23 +28,23 @@ class Pivot(Exception):
 
 
 class Client(object):
-    __slots__ = ('_ep', '_gr', '_core', '_')
+    __slots__ = ('_ep', '_gr', 'core', '_')
 
-    def __init__(self, core: 'Core', ep: Optional[Endpoint]):
+    def __init__(self, core: Core, ep: Optional[Endpoint]):
         self._ep: Optional[Endpoint] = ep
         self._gr: Optional[Greenlet] = None
-        self._core = core
+        self.core = core
 
         self._: dict = {}
 
     def _before_serve(self) -> None:
-        core = self._core
+        core = self.core
         self._gr = getcurrent()
         core.events.client_connected.emit(self)
 
     @log_failure(log)
     def _serve(self) -> None:
-        core = self._core
+        core = self.core
         tbl = core.events.client_command
 
         while True:
@@ -78,7 +79,7 @@ class Client(object):
     def is_dead(self) -> bool:
         return not self._gr or self._gr.ready()
 
-    def pivot_to(self, other: 'Client') -> None:
+    def pivot_to(self, other: Client) -> None:
         if not self._ep:
             raise Exception("self._ep is not valid!")
 
@@ -111,3 +112,48 @@ class Client(object):
     def raw_write(self, v: bytes) -> None:
         ep = self._ep
         if ep: ep.raw_write(v)
+
+
+class MockClient(Client, metaclass=MockMeta):
+
+    def __init__(self, core: Core):
+        self.core = core
+        self.dead = False
+        self.written_messages: List[wire.ServerToClient] = []
+
+        self._: dict = {}
+
+    def dropped(self) -> None:
+        core = self.core
+        core.events.client_dropped.emit(self)
+
+    def connected(self) -> None:
+        core = self.core
+        core.events.client_connected.emit(self)
+
+    def recv(self, v: wire.ServerToClient) -> None:
+        self.written_messages.append(v)
+
+    def close(self) -> None:
+        pass
+
+    def is_dead(self) -> bool:
+        return self.dead
+
+    def pivot_to(self, other: Client) -> None:
+        pass
+
+    def __repr__(self) -> str:
+        return '%s:%s:%s' % (
+            self.__class__.__name__,
+            'FIXME', 'FIXME'
+        )
+
+    def write(self, v: wire.ServerToClient) -> None:
+        self.written_messages.append(v)
+
+    def write_bulk(self, vl: Sequence[wire.ServerToClient]) -> None:
+        self.written_messages.extend(vl)
+
+    def raw_write(self, v: bytes) -> None:
+        self.written_messages.extend(cast(List[wire.ServerToClient], Endpoint.decode_bytes(v)))

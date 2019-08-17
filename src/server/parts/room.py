@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import defaultdict
@@ -40,13 +41,13 @@ class RoomAssocOnGame(TypedDict):
     _notifier: Optional[Greenlet]
 
 
-def Ag(self: 'Room', g: Game) -> RoomAssocOnGame:
+def Ag(self: Room, g: Game) -> RoomAssocOnGame:
     return g._[self]
 
 
 class Room(object):
 
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.user_state_transition += self.handle_user_state_transition
@@ -67,9 +68,11 @@ class Room(object):
 
         self.games: Dict[int, Game] = {}
 
-    def handle_core_initialized(self, core: 'Core') -> 'Core':
-        self.PLACEHOLDER = u = Client(core, None)
-        core.auth.set_auth(u, uid=0, name='空位置')
+    def __repr__(self) -> str:
+        return self.__class__.__name__
+
+    def handle_core_initialized(self, core: Core) -> Core:
+        self._init_freeslot()
         return core
 
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
@@ -131,6 +134,9 @@ class Room(object):
             Ag(self, old)['flags'],
         )
 
+        for u in online_users:
+            core.lobby.state_of(u).transit('lobby')
+
         core.events.game_successive_create.emit((old, g))
 
         for u in Ag(self, old)['users']:
@@ -163,9 +169,7 @@ class Room(object):
 
     @command('room', 'ready', 'game')
     def _leave(self, u: Client, ev: wire.LeaveRoom) -> None:
-        core = self.core
         self.exit_game(u)
-        core.lobby.state_of(u).transit('lobby')
 
     @command('lobby')
     def _users(self, u: Client, ev: wire.GetRoomUsers) -> None:
@@ -177,20 +181,7 @@ class Room(object):
 
     @command('room')
     def _get_ready(self, u: Client, ev: wire.GetReady) -> None:
-        core = self.core
-        g = core.game.current(u)
-
-        users = Ag(self, g)['users']
-        if u not in users:
-            return
-
-        core.lobby.state_of(u).transit('ready')
-
-        if all(core.lobby.state_of(u) == 'ready' for u in users):
-            # prevent double starting
-            if not Ag(self, g)['greenlet']:
-                log.info("game starting")
-                Ag(self, g)['greenlet'] = gevent.spawn(g.run)
+        self.get_ready(u)
 
     @command('ready')
     def _cancel_ready(self, u: Client, ev: wire.CancelReady) -> None:
@@ -206,9 +197,13 @@ class Room(object):
         core = self.core
 
         g = core.game.current(u)
+
+        if not g:
+            raise Exception('change_location called when not in game')
+
         users = Ag(self, g)['users']
 
-        if (not 0 <= ev.loc < len(users)) or (users[ev.loc] is not self.PLACEHOLDER):
+        if (not 0 <= ev.loc < len(users)) or (users[ev.loc] is not self.FREESLOT):
             return
 
         i = users.index(u)
@@ -217,8 +212,27 @@ class Room(object):
         # core.events.game_change_location.emit(g)
 
     # ----- Public Methods -----
+    def get_ready(self, u: Client) -> None:
+        core = self.core
+        g = core.game.current(u)
+        if not g:
+            log.error('Client attempted to get ready when has no game attached: %s[%s]', u, u._)
+            return
+
+        users = Ag(self, g)['users']
+        if u not in users:
+            raise Exception('WTF')
+
+        core.lobby.state_of(u).transit('ready')
+
+        if all(core.lobby.state_of(u) == 'ready' for u in users):
+            # prevent double starting
+            if not Ag(self, g)['greenlet']:
+                log.info("game starting")
+                Ag(self, g)['greenlet'] = gevent.spawn(g.run)
+
     def is_online(self, g: Game, c: Client) -> bool:
-        rst = c is not self.PLACEHOLDER
+        rst = c is not self.FREESLOT
         rst = rst and c in Ag(self, g)['users']
         rst = rst and not Ag(self, g)['left'][c]
         return bool(rst)
@@ -258,7 +272,7 @@ class Room(object):
 
         assoc: RoomAssocOnGame = {
             'gid': gid,
-            'users': BatchList([self.PLACEHOLDER] * g.n_persons),
+            'users': BatchList([self.FREESLOT] * g.n_persons),
             'left': defaultdict(bool),
             'name': name,
             'flags': flags,  # {'match': 1, 'invite': 1}
@@ -276,14 +290,14 @@ class Room(object):
     def join_game(self, g: Game, u: Client, slot: Optional[int] = None) -> None:
         core = self.core
 
-        assert core.lobby.state_of(u) == 'lobby'
+        assert core.lobby.state_of(u) == 'lobby', core.lobby.state_of(u)
 
         slot = slot if slot is not None else self._next_slot(g)
 
         if slot is None:
             return
 
-        if not (0 <= slot < g.n_persons and Ag(self, g)['users'][slot] is self.PLACEHOLDER):
+        if not (0 <= slot < g.n_persons and Ag(self, g)['users'][slot] is self.FREESLOT):
             return
 
         Ag(self, g)['users'][slot] = u
@@ -297,8 +311,11 @@ class Room(object):
         core = self.core
 
         g = core.game.current(u)
+        if not g:
+            return
+
         if not self.is_started(g):
-            rst = Ag(self, g)['users'].replace(u, self.PLACEHOLDER)
+            rst = Ag(self, g)['users'].replace(u, self.FREESLOT)
             assert rst
 
         gid = Ag(self, g)['gid']
@@ -311,6 +328,7 @@ class Room(object):
             gid,
         )
 
+        core.lobby.state_of(u).transit('lobby')
         core.events.game_left.emit((g, u))
 
         if gid not in self.games:
@@ -353,6 +371,13 @@ class Room(object):
         return self.games.get(gid)
 
     # ----- Methods -----
+    def _init_freeslot(self) -> None:
+        core = self.core
+        self.FREESLOT = u = Client(core, None)
+        core.auth.set_auth(u, uid=0, name='空位置')
+        core.lobby.init_freeslot(u)
+        core.lobby.state_of(u).transit('freeslot')
+
     def _notify(self, g: Game) -> None:
         notifier = Ag(self, g)['_notifier']
 
@@ -381,7 +406,7 @@ class Room(object):
 
     def _next_slot(self, g: Game) -> Optional[int]:
         try:
-            return Ag(self, g)['users'].index(self.PLACEHOLDER)
+            return Ag(self, g)['users'].index(self.FREESLOT)
         except ValueError:
             return None
 

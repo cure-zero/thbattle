@@ -29,7 +29,7 @@ class EventHub(Generic[T]):
 
     def subscribe(self, cb: Callable[[T], Union[T, StopPropagation]], prio: float):
         self._subscribers.append((prio, cb))
-        self._subscribers.sort()
+        self._subscribers.sort(key=lambda v: v[0])
         return self
 
     def __iadd__(self, cb: Callable[[T], Union[T, StopPropagation]]):
@@ -83,6 +83,13 @@ class FSM(object):
 
     def __eq__(self, other):
         return self._state == other
+
+    def __repr__(self):
+        return f'FSM:<{self._state}>'
+
+    @property
+    def state(self) -> str:
+        return self._state
 
     @staticmethod
     def to_evhub(evhub):

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import Any, Dict, List, TYPE_CHECKING
@@ -31,7 +32,7 @@ class ReplayFile(TypedDict):
 
 
 class Replay(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
     def dumps(self, g: Game) -> bytes:

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import deque
-from typing import Any, ClassVar, Dict, Iterable, List, Optional, Sequence, TYPE_CHECKING, Tuple
-from typing import Type
+from typing import Any, ClassVar, Dict, Iterable, List, Mapping, Optional, Sequence, TYPE_CHECKING
+from typing import Tuple, Type
 from weakref import WeakValueDictionary
 import itertools
 import logging
@@ -50,9 +51,9 @@ class Card(GameObject):
     _color: Optional[int] = None
     usage = 'launch'
 
-    ui_meta: ClassVar['CardMeta']
+    ui_meta: ClassVar[CardMeta]
 
-    associated_action: Optional[Type['UserAction']]
+    associated_action: Optional[Type[UserAction]]
     category: Sequence[str]
 
     # True means this card's associated cards have already been taken.
@@ -154,14 +155,14 @@ class Card(GameObject):
     def color(self, val):
         self._color = val
 
-    def target(self: Any, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+    def target(self: Any, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
         raise Exception('Override this')
 
 
 class PhysicalCard(Card):
-    classes: ClassVar[Dict[str, Type['PhysicalCard']]] = {}
+    classes: ClassVar[Dict[str, Type[PhysicalCard]]] = {}
 
-    exinwan_target: Optional['Character']  # HACK, for ExinwanCard
+    exinwan_target: Optional[Character]  # HACK, for ExinwanCard
 
     def __eq__(self, other):
         if not isinstance(other, Card): return False
@@ -183,7 +184,7 @@ class VirtualCard(Card, GameViralContext):
     _number: Optional[int]
     _color: Optional[int]
 
-    def __init__(self, player: 'Character'):
+    def __init__(self, player: Character):
         self.player           = player
         self.associated_cards = []
         self.resides_in       = player.cards
@@ -222,7 +223,7 @@ class VirtualCard(Card, GameViralContext):
         return lst
 
     @classmethod
-    def wrap(cls, cl: List[Card], player: 'Character', params: Dict[str, Any] = None):
+    def wrap(cls, cl: List[Card], player: Character, params: Dict[str, Any] = None):
         vc = cls(player)
         vc.action_params = params or {}
         vc.associated_cards = cl[:]
@@ -318,7 +319,7 @@ class Deck(GameObject):
         card_definition = card_definition or definition.card_definition
 
         self.cards_record: Dict[int, PhysicalCard] = {}
-        self.vcards_record = WeakValueDictionary[int, VirtualCard]()
+        self.vcards_record: Dict[int, VirtualCard] = WeakValueDictionary()
         self.droppedcards = CardList(None, 'droppedcard')
         cards = CardList(None, 'deckcard')
         self.cards = cards
@@ -392,7 +393,7 @@ class Skill(VirtualCard):
     category: Sequence[str] = ['skill']
     skill_category: Sequence[str] = []
 
-    ui_meta: ClassVar['SkillMeta']
+    ui_meta: ClassVar[SkillMeta]
 
     def __init__(self, player):
         assert player is not None
@@ -430,15 +431,15 @@ class TreatAs(object):
 
 
 # card targets:
-def t_None(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+def t_None(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
     return ([], False)
 
 
-def t_Self(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+def t_Self(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
     return ([src], True)
 
 
-def t_OtherOne(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+def t_OtherOne(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
     tl = [t for t in tl if not t.dead]
     try:
         tl.remove(src)
@@ -447,22 +448,22 @@ def t_OtherOne(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -
     return (tl[-1:], bool(len(tl)))
 
 
-def t_One(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+def t_One(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
     tl = [t for t in tl if not t.dead]
     return (tl[-1:], bool(len(tl)))
 
 
-def t_All(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+def t_All(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
     return ([t for t in g.players.rotate_to(src)[1:] if not t.dead], True)
 
 
-def t_AllInclusive(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+def t_AllInclusive(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
     pl = g.players.rotate_to(src)
     return ([t for t in pl if not t.dead], True)
 
 
 def t_OtherLessEqThanN(n):
-    def _t_OtherLessEqThanN(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+    def _t_OtherLessEqThanN(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
         tl = [t for t in tl if not t.dead]
         try:
             tl.remove(src)
@@ -472,13 +473,13 @@ def t_OtherLessEqThanN(n):
     return _t_OtherLessEqThanN
 
 
-def t_OneOrNone(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+def t_OneOrNone(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
     tl = [t for t in tl if not t.dead]
     return (tl[-1:], True)
 
 
 def t_OtherN(n):
-    def _t_OtherN(self, g: THBattle, src: 'Character', tl: Sequence['Character']) -> Tuple[List['Character'], bool]:
+    def _t_OtherN(self, g: THBattle, src: Character, tl: Sequence[Character]) -> Tuple[List[Character], bool]:
         tl = [t for t in tl if not t.dead]
         try:
             tl.remove(src)

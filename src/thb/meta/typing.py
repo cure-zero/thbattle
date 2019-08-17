@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from enum import Enum
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, TYPE_CHECKING, Tuple
 
 # -- third party --
 from mypy_extensions import TypedDict
 from typing_extensions import Protocol
 
 # -- own --
-from thb.cards.base import Card, Skill
-from thb.characters.base import Character
-from thb.mode import THBAction, THBattle
+# -- typing --
+if TYPE_CHECKING:
+    from thb.cards.base import Card, Skill  # noqa: F401
+    from thb.characters.base import Character  # noqa: F401
+    from thb.mode import THBAction, THBattle  # noqa: F401
 
 
 # -- code --

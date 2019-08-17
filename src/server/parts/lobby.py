@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import Dict, Optional, Sequence, TYPE_CHECKING, Tuple
@@ -25,7 +26,7 @@ log = logging.getLogger('Lobby')
 
 
 class Lobby(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.client_connected += self.handle_client_connected
@@ -34,6 +35,9 @@ class Lobby(object):
 
         self.users: Dict[int, Client] = {}          # all users
         self.dropped_users: Dict[int, Client] = {}  # passively dropped users
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         c, f, t = ev
@@ -92,6 +96,15 @@ class Lobby(object):
 
     def get(self, uid: int) -> Optional[Client]:
         return self.users.get(uid)
+
+    def init_freeslot(self, c: Client) -> None:
+        core = self.core
+        c._[self] = {
+            'state': FSM(
+                c, ['uninitialized', 'freeslot'], 'uninitialized',
+                FSM.to_evhub(core.events.user_state_transition),
+            )
+        }
 
     # ----- Methods -----
     def _user_join(self, u: Client) -> None:

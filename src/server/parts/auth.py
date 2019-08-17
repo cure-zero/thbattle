@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import Sequence, Set, TYPE_CHECKING, Tuple
@@ -28,18 +29,21 @@ class AuthAssocOnClient(TypedDict):
     permissions: Set[str]
 
 
-def A(self: 'Auth', v: Client) -> AuthAssocOnClient:
+def A(self: Auth, v: Client) -> AuthAssocOnClient:
     return v._[self]
 
 
 class Auth(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
         self._kedama_uid = -10032
 
         core.events.user_state_transition += self.handle_user_state_transition
         D = core.events.client_command
         D[wire.Auth] += self._auth
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         u, f, t = ev

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import List, Optional, Set, TYPE_CHECKING, Tuple
@@ -34,7 +35,7 @@ class ObserveAssocOnClient(TypedDict):
     ob: Optional[Client]  # observing
 
 
-def Au(self: 'Observe', u: Client) -> ObserveAssocOnClient:
+def Au(self: Observe, u: Client) -> ObserveAssocOnClient:
     return u._[self]
 
 
@@ -42,12 +43,12 @@ class ObserveAssocOnGame(TypedDict):
     _notifier: Optional[Greenlet]
 
 
-def Ag(self: 'Observe', g: Game) -> ObserveAssocOnGame:
+def Ag(self: Observe, g: Game) -> ObserveAssocOnGame:
     return g._[self]
 
 
 class Observe(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.user_state_transition += self.handle_ust_observee
@@ -63,6 +64,9 @@ class Observe(object):
 
         self._bigbrothers: List[int] = []
 
+    def __repr__(self) -> str:
+        return self.__class__.__name__
+
     def handle_ust_observee(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         c, f, t = ev
 
@@ -74,7 +78,8 @@ class Observe(object):
             for u in Au(self, c)['obs']:
                 self._observe_detach(u)
 
-        if t == 'lobby':
+        if t == 'lobby' or \
+           (f, t) == ('uninitialized', 'freeslot'):
             assoc: ObserveAssocOnClient = {
                 'obs': set(),
                 'reqs': set(),
@@ -181,6 +186,8 @@ class Observe(object):
             return
 
         g = core.game.current(c)
+        if not g: return
+
         for u in core.room.online_users_of(g):
             if ob in Au(self, u)['obs']:
                 break
@@ -234,6 +241,7 @@ class Observe(object):
     def _observe_end(self, ob: Client, observee: Client) -> None:
         core = self.core
         g = core.game.current(observee)
+        if not g: return
         gid = core.room.gid_of(g)
         ob.write(wire.GameEnded(gid))
         core.lobby.state_of(ob).transit('ob')
@@ -242,6 +250,9 @@ class Observe(object):
         core = self.core
 
         g = core.game.current(observee)
+        if not g:
+            return
+
         users = core.room.online_users_of(g)
 
         assert observee in users
@@ -291,6 +302,10 @@ class Observe(object):
 
         core.lobby.state_of(ob).transit('lobby')
         g = core.game.current(observee)
+
+        if not g:
+            return
+
         gid = core.room.gid_of(g)
         ob.write(wire.GameLeft(gid))
 
@@ -298,6 +313,9 @@ class Observe(object):
         def notify_observer_leave() -> None:
             assert observee
             g = core.game.current(observee)
+            if not g:
+                return
+
             ul = core.room.online_users_of(g)
 
             d = Endpoint.encode(wire.ObserverLeave(

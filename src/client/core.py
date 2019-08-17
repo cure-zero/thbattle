@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import defaultdict
@@ -83,7 +84,7 @@ class Events(object):
 
 
 class Core(object):
-    def __init__(self: 'Core', **options: Dict[str, Any]):
+    def __init__(self: Core, **options: Dict[str, Any]):
         self.options = Options(options)
 
         self.events = Events()

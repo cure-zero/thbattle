@@ -395,7 +395,7 @@ class THBattleRoleBootstrap(BootstrapAction):
         g.roles = {}
 
         for p, i in imperial_roles + list(zip(pl, roles)):
-            g.roles[p] = PlayerRole[THBRoleRole]()
+            g.roles[p] = PlayerRole(THBRoleRole)
             g.roles[p].set(i)
             g.process_action(RevealRole(p, p))
 

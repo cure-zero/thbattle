@@ -2,9 +2,6 @@
 from __future__ import absolute_import
 
 # -- stdlib --
-from collections import defaultdict
-from weakref import WeakSet
-import random
 
 # -- third party --
 
@@ -19,9 +16,9 @@ class TestInputletServer(object):
         autoenv.init('Server')
 
     def getInputletInstances(self):
-        from thb.thb3v3 import THBattle
+        from thb.thb2v2 import THBattle2v2
 
-        from thb.cards import AttackCard
+        from thb.cards.definition import AttackCard
         from thb.characters.youmu import Youmu
         from thb.common import CharChoice
         from thb.inputlets import ActionInputlet
@@ -33,23 +30,34 @@ class TestInputletServer(object):
 
         from .mock import ServerWorld
         w = ServerWorld()
-        g = w.fullgame(THBattle)
-        self.game = g
-        p = g.players[0]
+        g = w.fullgame(THBattle2v2)
+        core = w.core
+        boot = core.game.get_bootstrap_action(g)
+        players = boot.players
 
-        ilets = [
-            ActionInputlet(self, ['cards', 'showncards'], []),
+        self.game = g
+        p = players[0]
+        ch = Youmu(p)
+
+        ilets1 = [
             ChooseGirlInputlet(self, {p: [CharChoice(Youmu)]}),
+        ]
+
+        for i in ilets1:
+            i.actor = p
+
+        ilets2 = [
+            ActionInputlet(self, ['cards', 'showncards'], []),
             ChooseIndividualCardInputlet(self, [AttackCard()]),
             ChooseOptionInputlet(self, (False, True)),
-            ChoosePeerCardInputlet(self, p, ['cards']),
+            ChoosePeerCardInputlet(self, ch, ['cards']),
             ProphetInputlet(self, [AttackCard()]),
         ]
 
-        for i in ilets:
-            i.actor = p
+        for i in ilets2:
+            i.actor = ch
 
-        return g, p, ilets
+        return g, p, ilets1 + ilets2
 
     def testParseNone(self):
         g, p, ilets = self.getInputletInstances()
@@ -68,7 +76,7 @@ class TestInputletServer(object):
         clsnames = set([cls.tag() for cls in classes])
         assert len(clsnames) == len(classes)
 
-    def testChooseOptionInputlet(self):
+    def teztChooseOptionInputlet(self):
         from game.autoenv import user_input
 
         from thb.inputlets import ChooseOptionInputlet
@@ -77,8 +85,10 @@ class TestInputletServer(object):
         from .mock import ServerWorld
         w = ServerWorld()
         g = w.fullgame()
+        core = w.core
+        boot = core.game.get_bootstrap_action(g)
+        pl = boot.players
 
-        pl = g.players
         p = pl[0]
         g.me = p
         p.client._ep.recv.put(['game:data', ['I:ChooseOption:1', True]])

@@ -105,7 +105,7 @@ class ExtraCardHandler(THBEventHandler):
             return act
 
         g = self.game
-        if g._[g]['draw_extra_card']:
+        if g.draw_extra:
             act.amount += 1
 
         return act
@@ -142,17 +142,15 @@ class THBattle2v2Bootstrap(BootstrapAction):
             seed = get_seed_for(g, pl)
             random.Random(seed).shuffle(pl)
 
-        g._[g]['draw_extra_card'] = params['draw_extra_card']
+        g.draw_extra = params['draw_extra_card']
 
         H, M = THB2v2Role.HAKUREI, THB2v2Role.MORIYA
         g.forces = {H: BatchList(), M: BatchList()}
 
         for p, id in zip(pl, [H, H, M, M]):
-            g.roles[p] = PlayerRole[THB2v2Role]()
+            g.roles[p] = r = PlayerRole(THB2v2Role)
             g.roles[p].set(id)
-
-        for p in pl:
-            g.process_action(RevealRole(p, pl))
+            g.process_action(RevealRole(r, pl))
 
         roll_rst = roll(g, pl, items)
         '''
@@ -282,6 +280,8 @@ class THBattle2v2(THBattle):
     }
 
     forces: Dict[THB2v2Role, BatchList[Character]]
+
+    draw_extra: bool
 
     def can_leave(g, p: Player):
         for ch in g.players:

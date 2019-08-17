@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import defaultdict
@@ -29,12 +30,12 @@ class InviteAssocOnGame(TypedDict):
     banned: Dict[int, Set[int]]
 
 
-def A(self: 'Invite', g: Game) -> InviteAssocOnGame:
+def A(self: Invite, g: Game) -> InviteAssocOnGame:
     return g._[self]
 
 
 class Invite(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.game_created += self.handle_game_created
@@ -46,6 +47,9 @@ class Invite(object):
         D[wire.Kick] += self._kick
 
         D[wire.JoinRoom].subscribe(self._room_join_invite_limit, -3)
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     def handle_game_created(self, g: Game) -> Game:
         assoc: InviteAssocOnGame = {

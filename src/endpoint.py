@@ -2,7 +2,7 @@
 
 # -- stdlib --
 from enum import IntEnum
-from typing import Any, Iterator, Sequence, Tuple
+from typing import Any, Iterator, Sequence, Tuple, List
 import logging
 import zlib
 
@@ -57,11 +57,11 @@ class Endpoint(object):
 
     @staticmethod
     def encode(p: wire.Message) -> bytes:
-        return msgpack.packb([Format.Packed, p], use_bin_type=True)
+        return msgpack.packb([Format.Packed, p.encode()], use_bin_type=True)
 
     @staticmethod
     def encode_bulk(pl: Sequence[wire.Message]) -> bytes:
-        data = msgpack.packb(pl, use_bin_type=True)
+        data = msgpack.packb([i.encode() for i in pl], use_bin_type=True)
         return msgpack.packb([Format.BulkCompressed, zlib.compress(data)], use_bin_type=True)
 
     def write(self, p) -> None:
@@ -109,6 +109,20 @@ class Endpoint(object):
                 raise DecodeError
         except (ValueError, msgpack.UnpackValueError):
             raise DecodeError
+
+    @staticmethod
+    def decode_bytes(s: bytes) -> List[wire.Message]:
+        p = msgpack.unpackb(s, raw=False)
+        fmt, data = Endpoint._decode_packet(p)
+        if fmt == Format.Packed:
+            msg = wire.Message.decode(data)
+            if not msg:
+                raise DecodeError
+            return [msg]
+        elif fmt == Format.BulkCompressed:
+            return data
+
+        assert False, 'WTF'
 
     def messages(self, timeout=90) -> Iterator[wire.Message]:
         if self.link_state != 'connected':

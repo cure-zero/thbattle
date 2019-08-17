@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import OrderedDict, defaultdict
 from copy import copy
-from typing import Any, Dict, List, Optional, Sequence, Set, Tuple, Type, Union, cast
+from typing import Any, Dict, List, Optional, Sequence, Set, TYPE_CHECKING, Tuple, Type, Union, cast
 import logging
 
 # -- third party --
@@ -14,12 +15,16 @@ from game.autoenv import user_input
 from game.base import Action, ActionShootdown, EventArbiter, GameViralContext, InputTransaction
 from game.base import Player, sync_primitive
 from thb.cards.base import Card, CardList, PhysicalCard, Skill, VirtualCard
-from thb.characters.base import Character
 from thb.inputlets import ActionInputlet, ChoosePeerCardInputlet
 from thb.mode import THBAction, THBEventHandler, THBPlayerAction, THBattle
+from thb.common import PlayerRole
 from utils.check import CheckFailed, check, check_type
 from utils.misc import BatchList, group_by
 
+
+# -- typing --
+if TYPE_CHECKING:
+    from thb.characters.base import Character  # noqa: F401
 
 # -- code --
 log = logging.getLogger('THBattle_Actions')
@@ -418,7 +423,7 @@ class PlayerRevive(GenericAction):
 
 
 class TryRevive(GenericAction):
-    def __init__(self, target: Character, dmgact: 'BaseDamage'):
+    def __init__(self, target: Character, dmgact: BaseDamage):
         self.source = self.target = target
         self.dmgact = dmgact
         self.revived_by: Optional[Character] = None
@@ -1156,13 +1161,12 @@ class DummyAction(GenericAction):
 
 class RevealRole(THBPlayerAction):
 
-    def __init__(self, target: Player, to: Union[Player, BatchList[Player]]):
-        self.target = target
+    def __init__(self, role: PlayerRole, to: Union[Player, BatchList[Player]]):
+        self.role = role
         self.to = to
 
     def apply_action(self) -> bool:
-        tgt = self.target
-        self.to.reveal(tgt.identity)
+        self.to.reveal(self.role)
         return True
 
     def can_be_seen_by(self, ch: Character) -> bool:
@@ -1170,9 +1174,6 @@ class RevealRole(THBPlayerAction):
             return ch in self.to
         else:
             return ch is self.to
-
-    def __repr__(self):
-        return 'Reveal(%s, %s)' % (self.target, self.to)
 
 
 class Pindian(UserAction):

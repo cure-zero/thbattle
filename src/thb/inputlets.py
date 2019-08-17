@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import Any, Dict, Iterable, List, TYPE_CHECKING, Type, Union
@@ -6,15 +7,16 @@ import logging
 
 # -- third party --
 # -- own --
-from game.base import Inputlet, Player
-from thb.cards.base import Card, Skill
-from thb.characters.base import Character
-from thb.common import CharChoice
-from utils.check import CheckFailed, check, check_type
-
 # -- typing --
 if TYPE_CHECKING:
     from thb.actions import CardChooser, CharacterChooser  # noqa: F401
+    from thb.characters.base import Character  # noqa: F401
+
+# -- errord --
+from game.base import Inputlet, Player
+from thb.cards.base import Card, Skill
+from thb.common import CharChoice
+from utils.check import CheckFailed, check, check_type
 
 
 # -- code --
@@ -42,9 +44,10 @@ class ChooseOptionInputlet(Inputlet):
 
 
 class ActionInputlet(Inputlet):
-    initiator: Union['CardChooser', 'CharacterChooser']
+    initiator: Union[CardChooser, CharacterChooser]
+    actor: Character
 
-    def __init__(self, initiator: Union['CardChooser', 'CharacterChooser'], categories: Iterable[str], candidates: Iterable[object]):
+    def __init__(self, initiator: Union[CardChooser, CharacterChooser], categories: Iterable[str], candidates: Iterable[object]):
         self.initiator = initiator
 
         self.categories = categories

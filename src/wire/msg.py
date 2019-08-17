@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import Any, ClassVar, Dict, List, Optional, Type, TypeVar
@@ -25,7 +26,7 @@ class BiDirectional(ServerToClient, ClientToServer):
 
 
 class Message:
-    types: ClassVar[Dict[str, Type['Message']]] = {}
+    types: ClassVar[Dict[str, Type[Message]]] = {}
     op: str
 
     def __init__(self, *args, **kwargs):
@@ -35,7 +36,7 @@ class Message:
         ...
 
     @classmethod
-    def decode(cls, data: dict) -> Optional['Message']:
+    def decode(cls, data: dict) -> Optional[Message]:
         data = dict(data)
         op = data.pop('op', '')
         if op not in cls.types:
@@ -50,7 +51,7 @@ def message(cls: Type[Message]) -> Type[Message]:
     assert cls.op not in Message.types, cls.op
     Message.types[cls.op] = cls
 
-    if not hasattr(cls, 'encode'):
+    if cls.encode is Message.encode:
         env = {}
         fields = [f"    '{i.name}': self.{i.name}," for i in dataclasses.fields(cls)]
         code = (

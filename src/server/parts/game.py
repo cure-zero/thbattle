@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import defaultdict
@@ -7,10 +8,11 @@ import logging
 import random
 
 # -- third party --
+from gevent.event import AsyncResult
 from mypy_extensions import TypedDict
 
 # -- own --
-from game.base import GameArchive, GameData, Player
+from game.base import GameArchive, GameData, Player, BootstrapAction, GameItem
 from server.base import Game as ServerGame, HumanPlayer, NPCPlayer
 from server.endpoint import Client
 from server.utils import command
@@ -31,7 +33,7 @@ class GameAssocOnClient(TypedDict):
     params: Dict[str, Any]
 
 
-def Au(self: 'Game', u: Client) -> GameAssocOnClient:
+def Au(self: Game, u: Client) -> GameAssocOnClient:
     return u._[self]
 
 
@@ -44,14 +46,15 @@ class GameAssocOnGame(TypedDict):
     rngseed: int
     data: Dict[Client, GameData]
     winners: List[Player]
+    halt: Optional[AsyncResult]
 
 
-def Ag(self: 'Game', g: ServerGame) -> GameAssocOnGame:
-    return Ag(self, g)
+def Ag(self: Game, g: ServerGame) -> GameAssocOnGame:
+    return g._[self]
 
 
 class Game(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.game_started += self.handle_game_started
@@ -65,6 +68,9 @@ class Game(object):
         D = core.events.client_command
         D[wire.SetGameParam] += self._set_param
         D[wire.GameData] += self._gamedata
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         u, f, t = ev
@@ -229,9 +235,34 @@ class Game(object):
             'rngseed': seed,
             'data': {},
             'winners': [],
+            'halt': None,
         })
 
         return g
+
+    def halt_on_start(self, g: ServerGame) -> None:
+        "For testing"
+        g._[self]['halt'] = AsyncResult()
+
+    def should_halt(self, g: ServerGame) -> bool:
+        "For testing"
+        return bool(g._[self]['halt'])
+
+    def get_bootstrap_action(self, g: ServerGame) -> BootstrapAction:
+        "For testing"
+        rst = g._[self]['halt']
+        if not rst:
+            raise Exception('Game will not halt')
+
+        return rst.get()
+
+    def set_bootstrap_action(self, g: ServerGame, act: BootstrapAction) -> None:
+        "For testing"
+        rst = g._[self]['halt']
+        if not rst:
+            raise Exception('Game will not halt')
+
+        rst.set(act)
 
     def replay(self, u: Client, to: Client) -> None:
         core = self.core
@@ -281,11 +312,8 @@ class Game(object):
         u.write(wire.GameData(gid=gid, tag=tag, data=data))
         core.events.game_data_send.emit((g, u, pkt))
 
-    def current(self, u: Client) -> ServerGame:
+    def current(self, u: Client) -> Optional[ServerGame]:
         g = Au(self, u)['game']
-        if not g:
-            raise Exception('Client %s not in game!' % u)
-
         return g
 
     def set_winners(self, g: ServerGame, winners: List[Player]) -> None:

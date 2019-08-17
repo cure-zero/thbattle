@@ -482,3 +482,11 @@ class BusinessExceptionGenerator(object):
 
 
 exceptions = BusinessExceptionGenerator()
+
+
+# Helper to make mypy happy
+class MockMeta(type):
+    def mro(cls):
+        bases = cls.__bases__
+        assert len(bases) == 1
+        return [cls, object]

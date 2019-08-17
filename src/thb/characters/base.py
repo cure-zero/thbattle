@@ -1,50 +1,48 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import defaultdict
-from typing import Any, ClassVar, Dict, Iterable, List, Set, TYPE_CHECKING, Type
+from typing import Any, ClassVar, Dict, Iterable, List, Set, Type
 
 # -- third party --
 # -- own --
 from game.base import GameObject, Player
+from thb.cards.base import CardList, Skill
 from thb.meta.typing import CharacterMeta
 from thb.mode import THBEventHandler
 from utils.misc import partition
-
-# -- typing --
-if TYPE_CHECKING:
-    from thb.cards.base import CardList, Skill  # noqa: F401
 
 
 # -- code --
 # common, id8, faith, kof, 3v3, testing
 # -id8, ...
-characters_by_category: Dict[str, Set[Type['Character']]] = defaultdict(set)
+characters_by_category: Dict[str, Set[Type[Character]]] = defaultdict(set)
 
 
 class Character(GameObject):
-    classes: ClassVar[Dict[str, Type['Character']]] = {}
+    classes: ClassVar[Dict[str, Type[Character]]] = {}
 
     # ----- Class Variables -----
     ui_meta: ClassVar[CharacterMeta]
     eventhandlers: ClassVar[List[Type[THBEventHandler]]] = []
     categories: ClassVar[Iterable[str]]
-    boss_skills: ClassVar[List[Type['Skill']]]
+    boss_skills: ClassVar[List[Type[Skill]]]
 
-    skills: List[Type['Skill']]
+    skills: List[Type[Skill]]
     maxlife: int
 
     # ----- Instance Variables -----
     dead: bool
     life: int
-    disabled_skills: Dict[str, Set[Type['Skill']]]
+    disabled_skills: Dict[str, Set[Type[Skill]]]
     tags: Dict[str, Any]
-    cards: 'CardList'
-    showncards: 'CardList'
-    equips: 'CardList'
-    fatetell: 'CardList'
-    special: 'CardList'
-    showncardlists: List['CardList']
+    cards: CardList
+    showncards: CardList
+    equips: CardList
+    fatetell: CardList
+    special: CardList
+    showncardlists: List[CardList]
     player: Player
 
     def __init__(self, player: Player):

@@ -173,8 +173,8 @@ class THBattleNewbieBootstrap(BootstrapAction):
         cirno_p, meirin_p = g.players
 
         g.roles = {
-            cirno_p: PlayerRole[THBNewbieRole](),
-            meirin_p: PlayerRole[THBNewbieRole](),
+            cirno_p: PlayerRole(THBNewbieRole),
+            meirin_p: PlayerRole(THBNewbieRole),
         }
         cirno_p.set(THBNewbieRole.BAKA)
         meirin_p.set(THBNewbieRole.NEWBIE)

@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
-from typing import Dict, List, Sequence, TYPE_CHECKING, Type, Tuple, Optional
+from typing import Dict, List, Optional, Sequence, TYPE_CHECKING, Tuple, Type
 
 # -- third party --
 # -- own --
-from game.base import GameItem, Player, Game
+from game.base import Game, GameItem, Player
 from server.base import Client, Game as ServerGame
-from thb.characters.base import Character
 from utils.misc import BatchList, exceptions
+
 
 # -- typing --
 if TYPE_CHECKING:
+    from thb.characters.base import Character  # noqa: F401
     from thb.thbrole import THBRoleRole  # noqa: F401
-
 
 # -- code --
 @GameItem.register
@@ -129,7 +130,7 @@ class ImperialRole(GameItem):
             raise exceptions.ChooseIdentityConflict
 
     @classmethod
-    def get_chosen(cls, items: Dict[Player, List[GameItem]], pl: Sequence[Player]) -> List[Tuple[Player, 'THBRoleRole']]:
+    def get_chosen(cls, items: Dict[Player, List[GameItem]], pl: Sequence[Player]) -> List[Tuple[Player, THBRoleRole]]:
         from thb.thbrole import THBRoleRole as T
 
         mapping = {

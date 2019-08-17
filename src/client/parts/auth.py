@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import TYPE_CHECKING
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
 # -- code --
 class Auth(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
         self.uid = 0
 

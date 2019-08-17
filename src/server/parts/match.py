@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import List, Optional, Sequence, TYPE_CHECKING, Tuple
@@ -28,12 +29,12 @@ class MatchAssocOnGame(TypedDict):
     uids: List[int]
 
 
-def A(self: 'Match', g: Game) -> MatchAssocOnGame:
+def A(self: Match, g: Game) -> MatchAssocOnGame:
     return g._[self]
 
 
 class Match(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
 
         core.events.user_state_transition += self.handle_user_state_transition
@@ -45,6 +46,9 @@ class Match(object):
         D = core.events.client_command
         D[wire.SetupMatch] += self._match
         D[wire.JoinRoom].subscribe(self._room_join_match_limit, -3)
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     def handle_user_state_transition(self, ev: Tuple[Client, str, str]) -> Tuple[Client, str, str]:
         c, f, t = ev
@@ -100,10 +104,13 @@ class Match(object):
         return g
 
     def handle_game_successive_create(self, ev: Tuple[Game, Game]) -> Tuple[Game, Game]:
+        core = self.core
         old, g = ev
-        fields = old._[self]
-        g._[self] = fields
-        self._start_poll(g, fields['uids'])
+        flags = core.room.flags_of(g)
+        if flags.get('match'):
+            fields = old._[self]
+            g._[self] = fields
+            self._start_poll(g, fields['uids'])
         return ev
 
     # ----- Client Commands -----

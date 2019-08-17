@@ -1,25 +1,23 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
-import typing
-from typing import TYPE_CHECKING, Any, Callable, Tuple, List
-from typing_extensions import Literal
-import logging
-from mypy_extensions import TypedDict
-import utils.log
-
+from typing import Any, Callable, List, TYPE_CHECKING, Tuple
 import random
 import sys
+import typing
 
 # -- third party --
 from gevent.event import Event
+from mypy_extensions import TypedDict
+from typing_extensions import Literal
 import gevent
 import gevent.hub
 
 # -- own --
-from game.base import EventHandler
 from client.base import Game
-import settings
+from game.base import EventHandler
+
 
 # -- typing --
 if TYPE_CHECKING:
@@ -124,7 +122,7 @@ class ExecutiveWrapper(object):
 
 
 class Warpgate(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
         self.events: List[Any] = []
 
@@ -133,7 +131,7 @@ class Warpgate(object):
 
         core.events.core_initialized += self.init_warpgate
 
-    def init_warpgate(self, core: 'Core') -> 'Core':
+    def init_warpgate(self, core: Core) -> Core:
         for name, hub in core.events.__dict__.items():
             if name in ('core_initialized', 'server_command'):
                 continue

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import defaultdict
@@ -29,17 +30,20 @@ class ItemAssocOnGame(TypedDict):
     items: Dict[int, List[GameItem]]
 
 
-def A(self: 'Item', g: Game) -> ItemAssocOnGame:
+def A(self: Item, g: Game) -> ItemAssocOnGame:
     return g._[self]
 
 
 class Item(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
         core.events.game_created += self.handle_game_created
         core.events.game_started += self.handle_game_started
         _ = core.events.client_command
         _['item:use'] += self._use_item
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     def handle_game_started(self, g: Game) -> Game:
         core = self.core

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from typing import TYPE_CHECKING
@@ -20,15 +21,18 @@ log = logging.getLogger('server.parts.view')
 
 
 class View(object):
-    def __init__(self, core: 'Core'):
+    def __init__(self, core: Core):
         self.core = core
+
+    def __repr__(self) -> str:
+        return self.__class__.__name__
 
     def User(self, u: Client) -> wire.model.User:
         core = self.core
 
         return {
             'uid': core.auth.uid_of(u),
-            'state': str(core.lobby.state_of(u)),
+            'state': core.lobby.state_of(u).state,
         }
 
     def Game(self, g: ServerGame) -> wire.model.Game:

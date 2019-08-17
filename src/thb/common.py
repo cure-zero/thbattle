@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from enum import Enum
 from itertools import cycle
-from typing import Any, Dict, Generic, Iterable, List, Optional, Tuple, Type, TypeVar
+from typing import Any, Dict, Generic, Iterable, List, Optional, TYPE_CHECKING, Tuple, Type, TypeVar
 import logging
 import random
 
@@ -11,9 +12,13 @@ import random
 from mypy_extensions import TypedDict
 
 # -- own --
+# -- typing --
+if TYPE_CHECKING:
+    from thb.characters.base import Character  # noqa: F401
+
+# -- errord --
 from game.autoenv import Game
 from game.base import GameViralContext, Player, get_seed_for, sync_primitive
-from thb.characters.base import Character
 from thb.item import GameItem
 from thb.mode import THBattle
 from utils.misc import BatchList, partition
@@ -66,9 +71,9 @@ T = TypeVar('T', bound=Enum)
 class PlayerRole(Generic[T]):
     _role: T
 
-    def __init__(self):
-        self._typ = self.__class__.__args__[0]
-        self._role = self._typ(0)
+    def __init__(self, typ: Type[T]):
+        self._typ = typ
+        self._role = typ(0)
 
     def __data__(self) -> Any:
         return self._role.value
@@ -176,7 +181,7 @@ def build_choices(g: THBattle,
 
     # ----- normal -----
     for p, s in spec.items():
-        for _ in range(len(result[e]), s['num']):
+        for _ in range(len(result[p]), s['num']):
             result[p].append(CharChoice(candidates.pop()))
 
     # ----- akaris -----
@@ -189,7 +194,7 @@ def build_choices(g: THBattle,
 
     for p, s in spec.items():
         for i in range(-s['akaris'], 0):
-            result[e][i].set(rest.pop(), True)
+            result[p][i].set(rest.pop(), True)
 
     # ----- compose final result, reveal, and return -----
     for p, l in result.items():

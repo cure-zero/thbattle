@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from collections import defaultdict
@@ -103,8 +104,6 @@ class AssociatedDataViralContext(ViralContext):
 
 class Player(GameObject, AssociatedDataViralContext):
     uid: int
-    # index = None
-    # game: 'Game'
 
     def reveal(self, obj_list: Any) -> None:
         raise GameError('Abstract')
@@ -149,15 +148,15 @@ class Game(GameObject, GameViralContext):
     n_persons: ClassVar[int]
     npc_players: ClassVar[List[NPC]] = []
     params_def: ClassVar[Dict[str, Any]] = {}
-    bootstrap: ClassVar[Type['BootstrapAction']]
-    dispatcher_cls: ClassVar[Type['EventDispatcher']]
+    bootstrap: ClassVar[Type[BootstrapAction]]
+    dispatcher_cls: ClassVar[Type[EventDispatcher]]
 
     # ----- Instance Variables -----
-    game: 'Game'
-    dispatcher: 'EventDispatcher'
-    event_observer: Optional['EventHandler']
-    action_stack: List['Action']
-    hybrid_stack: List[Union['Action', 'EventHandler']]
+    game: Game
+    dispatcher: EventDispatcher
+    event_observer: Optional[EventHandler]
+    action_stack: List[Action]
+    hybrid_stack: List[Union[Action, EventHandler]]
     ended: bool
     winners: Sequence[Player]
     random: Random
@@ -187,7 +186,7 @@ class Game(GameObject, GameViralContext):
 
         return self.dispatcher.emit(evt_type, data)
 
-    def process_action(self, action: 'Action') -> bool:
+    def process_action(self, action: Action) -> bool:
         if self.ended:
             return False
 
@@ -281,7 +280,7 @@ class EventHandler(GameObject):
     execute_before: List[str] = []
     execute_after: List[str]  = []
 
-    arbiter: Type['EventArbiter']
+    arbiter: Optional[Type[EventArbiter]] = None
 
     def __init__(self, g: Game):
         self.game = g
@@ -566,8 +565,7 @@ def list_shuffle(g, lst, plain_to):
             i.conceal()
 
 
-class Inputlet(GameObject):
-    RETRY = object()
+class Inputlet(GameObject, GameViralContext):
     '''
     NOTICE: Inputlet instance variable should
             not be used as a side channel to pass infomation
@@ -618,7 +616,7 @@ class Inputlet(GameObject):
         return None
 
     def __repr__(self):
-        return '<I:{}>'.format(self.tag())
+        return f'<I:{self.tag()}>'
 
 
 class InputTransaction(GameViralContext):
@@ -777,7 +775,7 @@ class GameData(object):
 
 
 class GameItem(object):
-    inventory: Dict[str, Type['GameItem']] = {}
+    inventory: Dict[str, Type[GameItem]] = {}
 
     # --- class ---
     key: str  = ''
@@ -796,7 +794,7 @@ class GameItem(object):
     def __init__(self, *args):
         raise Exception('Should not instantiate plain GameItem!')
 
-    def should_usable(self, g: 'ServerGame', u: 'Client') -> None:
+    def should_usable(self, g: ServerGame, u: Client) -> None:
         ...
 
     @classmethod

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from __future__ import annotations
 
 # -- stdlib --
 from enum import Enum
@@ -110,8 +111,8 @@ class THBattleKOFBootstrap(BootstrapAction):
         pl = self.players
         A, B = pl
         g.roles = {
-            A: PlayerRole[THBKOFRole](),
-            B: PlayerRole[THBKOFRole](),
+            A: PlayerRole(THBKOFRole),
+            B: PlayerRole(THBKOFRole),
         }
         g.roles[A].set(THBKOFRole.HAKUREI)
         g.roles[B].set(THBKOFRole.MORIYA)
@@ -218,7 +219,7 @@ class THBattleKOF(THBattle):
 
     chosen: Dict[Player, List[CharChoice]]
 
-    def get_opponent(g: 'THBattleKOF', ch: Character):
+    def get_opponent(g: THBattleKOF, ch: Character):
         a, b = g.players
         return {a: b, b: a}[ch]
 
